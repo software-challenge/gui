@@ -4,7 +4,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import tornadofx.*
 
-class MyStyle: Stylesheet() {
+class AppStyle : Stylesheet() {
 
     companion object {
         val tackyButton by cssclass()

@@ -1,6 +1,9 @@
 package sc.gui
 
 import javafx.beans.property.SimpleStringProperty
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
+import javafx.geometry.Point2D
 import javafx.scene.control.Button
 import javafx.stage.StageStyle
 import tornadofx.*
@@ -14,6 +17,7 @@ class MasterView: View() {
 
 class TopView: View() {
     val controller: MyController by inject()
+    val model: TopViewModel by inject()
     val input = SimpleStringProperty()
     override val root = vbox {
         form {
@@ -34,7 +38,7 @@ class TopView: View() {
         label("My items")
         listview(controller.values)
         button("Press me") {
-            addClass(MyStyle.tackyButton)
+            addClass(AppStyle.tackyButton)
             action {
                 find<MyFragment>().openModal(stageStyle = StageStyle.UTILITY)
             }
@@ -44,11 +48,41 @@ class TopView: View() {
                 replaceWith(MyView::class, ViewTransition.Slide(0.3.seconds, ViewTransition.Direction.RIGHT))
             }
         }
-        children.filter { it is Button }.addClass(MyStyle.tackyButton)
+        children.filter { it is Button }.addClass(AppStyle.tackyButton)
+        stackpane {
+            group {
+                bindChildren(model.segments) { segment ->
+                    line(segment.first.x, segment.first.y, segment.second.x, segment.second.y)
+                }
+            }
+        }
     }
 }
 
-class BottomView: View() {
+class TopViewModel : ItemViewModel<TopView>() {
+    val input = bind(TopView::input)
+    val root = bind(TopView::root)
+    val segments: ObservableList<Segment> = FXCollections.observableArrayList<Segment>()
+
+    val fieldSize: Double = 20.0
+    val boardSize: Int = 20
+
+    init {
+        for (x in 0..boardSize) {
+            for (y in 0..boardSize) {
+                // vertical
+                segments.add(Segment(Point2D(x * fieldSize, 0.0), Point2D(x * fieldSize, fieldSize * boardSize)))
+                // horizontal
+                segments.add(Segment(Point2D(0.0, y * fieldSize), Point2D(fieldSize * boardSize, y * fieldSize)))
+            }
+        }
+    }
+}
+
+class Segment(val first: Point2D, val second: Point2D)
+
+
+class BottomView : View() {
     override val root = label("Bottom View")
 }
 
