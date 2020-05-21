@@ -16,6 +16,11 @@ class AppStyle : Stylesheet() {
 
         private val gotuRegular = Font.loadFont("file:resources/fonts/NotoSans-Regular.ttf", 16.0)
 
+        val fullWidth by cssclass()
+        val area by cssclass()
+        val area2 by cssclass()
+        val dragTarget by cssclass()
+
 
     }
 
@@ -31,6 +36,18 @@ class AppStyle : Stylesheet() {
         }
         label {
             fontSize = 20.px
+        }
+        fullWidth {
+            prefWidth = 100.percent
+        }
+        area {
+            backgroundColor += Color.GREENYELLOW
+        }
+        area2 {
+            backgroundColor += Color.DARKGREEN
+        }
+        dragTarget {
+            backgroundColor += Color.DARKGRAY
         }
     }
 }

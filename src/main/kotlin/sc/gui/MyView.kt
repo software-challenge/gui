@@ -5,7 +5,12 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Point2D
 import javafx.scene.control.Button
+import javafx.scene.input.ClipboardContent
+import javafx.scene.input.Dragboard
+import javafx.scene.input.TransferMode
+import javafx.scene.paint.Color
 import javafx.stage.StageStyle
+import sc.gui.view.BoardView
 import tornadofx.*
 
 class MasterView: View() {
@@ -19,6 +24,7 @@ class TopView: View() {
     val controller: MyController by inject()
     val model: TopViewModel by inject()
     val input = SimpleStringProperty()
+    private val boardView: BoardView by inject()
     override val root = vbox {
         form {
             label("Top View")
@@ -48,13 +54,28 @@ class TopView: View() {
                 replaceWith(MyView::class, ViewTransition.Slide(0.3.seconds, ViewTransition.Direction.RIGHT))
             }
         }
-        children.filter { it is Button }.addClass(AppStyle.tackyButton)
-        stackpane {
-            group {
-                bindChildren(model.segments) { segment ->
-                    line(segment.first.x, segment.first.y, segment.second.x, segment.second.y)
-                }
+        rectangle {
+            width = 100.0
+            height = 100.0
+            fill = Color.BLUE
+            setOnDragDetected {
+                val db = this.startDragAndDrop(TransferMode.MOVE)
+                val content = ClipboardContent()
+                content.putString("content")
+                db.setContent(content)
+                println("Dragging started!")
+                it.consume()
             }
+            setOnDragDone {
+                println("Dragging ended!")
+                it.consume()
+            }
+        }
+        children.filterIsInstance<Button>().addClass(AppStyle.tackyButton)
+        vbox {
+            addClass(AppStyle.area2)
+            add(boardView)
+            textfield(input)
         }
     }
 }
@@ -62,24 +83,8 @@ class TopView: View() {
 class TopViewModel : ItemViewModel<TopView>() {
     val input = bind(TopView::input)
     val root = bind(TopView::root)
-    val segments: ObservableList<Segment> = FXCollections.observableArrayList<Segment>()
-
-    val fieldSize: Double = 20.0
-    val boardSize: Int = 20
-
-    init {
-        for (x in 0..boardSize) {
-            for (y in 0..boardSize) {
-                // vertical
-                segments.add(Segment(Point2D(x * fieldSize, 0.0), Point2D(x * fieldSize, fieldSize * boardSize)))
-                // horizontal
-                segments.add(Segment(Point2D(0.0, y * fieldSize), Point2D(fieldSize * boardSize, y * fieldSize)))
-            }
-        }
-    }
 }
 
-class Segment(val first: Point2D, val second: Point2D)
 
 
 class BottomView : View() {
