@@ -20,6 +20,11 @@ class AppStyle : Stylesheet() {
         val area by cssclass()
         val area2 by cssclass()
         val dragTarget by cssclass()
+        val colorRED by cssclass()
+        val colorBLUE by cssclass()
+        val colorGREEN by cssclass()
+        val colorYELLOW by cssclass()
+        val colorGRAY by cssclass()
 
 
     }
@@ -48,6 +53,21 @@ class AppStyle : Stylesheet() {
         }
         dragTarget {
             backgroundColor += Color.DARKGRAY
+        }
+        colorRED {
+            backgroundColor += Color.RED
+        }
+        colorBLUE {
+            backgroundColor += Color.BLUE
+        }
+        colorGREEN {
+            backgroundColor += Color.GREEN
+        }
+        colorYELLOW {
+            backgroundColor += Color.YELLOW
+        }
+        colorGRAY {
+            backgroundColor += Color.GRAY
         }
     }
 }

@@ -20,16 +20,17 @@ class BoardModel: ItemViewModel<BoardView>() {
     val boardSize: Int = 20
 
     init {
-        for (x in 0..boardSize) {
-            fields[x] = FXCollections.observableArrayList<Field>()
-            for (y in 0..boardSize) {
+        for (x in 0 until boardSize) {
+            fields.add(x, FXCollections.observableArrayList<Field>())
+            for (y in 0 until boardSize) {
                 fields[x].add(
+                        y,
                         Field(
                                 Point2D(
                                         x.toDouble(),
                                         y.toDouble()
                                 ),
-                                FieldContent.EMPTY
+                                FieldContent.values().random()
                         ))
             }
         }

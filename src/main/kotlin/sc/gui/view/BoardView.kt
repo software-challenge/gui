@@ -9,6 +9,7 @@ import javafx.scene.layout.Region
 import sc.gui.AppStyle
 import sc.gui.controller.BoardController
 import sc.gui.model.BoardModel
+import sc.gui.model.FieldContent
 import tornadofx.*
 import java.awt.Color
 
@@ -18,13 +19,13 @@ class BoardView: View() {
     override val root = gridpane {
         isGridLinesVisible = true
 
-        addClass(AppStyle.area)
+        //addClass(AppStyle.area)
         prefHeightProperty().bind(widthProperty())
 
 
-        (0..19).forEach{ y ->
+        (0 until model.boardSize).forEach{ y ->
             row {
-                (0..19).forEach { x ->
+                (0 until model.boardSize).forEach { x ->
                     pane {
                         setOnDragEntered {
                             addClass(AppStyle.dragTarget)
@@ -44,7 +45,17 @@ class BoardView: View() {
                             it.isDropCompleted = true
                             it.consume()
                         }
-                        label("$x,$y")
+                        val content = model.fields[x][y].content
+                        val label = label("$x,$y")
+                        var cssClass: CssRule
+                        when (content) {
+                            FieldContent.EMPTY -> cssClass = AppStyle.colorGRAY
+                            FieldContent.RED -> cssClass = AppStyle.colorRED
+                            FieldContent.BLUE -> cssClass = AppStyle.colorBLUE
+                            FieldContent.GREEN -> cssClass = AppStyle.colorGREEN
+                            FieldContent.YELLOW -> cssClass = AppStyle.colorYELLOW
+                        }
+                        addClass(cssClass)
                     }
                 }
                 constraintsForRow(y).percentHeight = 5.0
