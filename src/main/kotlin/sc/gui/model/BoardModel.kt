@@ -6,7 +6,10 @@ import javafx.geometry.Point2D
 import sc.gui.view.BoardView
 import tornadofx.ItemViewModel
 
-class Field(val coordinates: Point2D)
+enum class FieldContent {
+    EMPTY, RED, GREEN, BLUE, YELLOW
+}
+class Field(val coordinates: Point2D, val content: FieldContent)
 
 class BoardModel: ItemViewModel<BoardView>() {
     val root = bind(BoardView::root)
@@ -18,8 +21,16 @@ class BoardModel: ItemViewModel<BoardView>() {
 
     init {
         for (x in 0..boardSize) {
-            fields[x]
+            fields[x] = FXCollections.observableArrayList<Field>()
             for (y in 0..boardSize) {
+                fields[x].add(
+                        Field(
+                                Point2D(
+                                        x.toDouble(),
+                                        y.toDouble()
+                                ),
+                                FieldContent.EMPTY
+                        ))
             }
         }
     }
