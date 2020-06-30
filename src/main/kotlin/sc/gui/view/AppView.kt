@@ -2,6 +2,8 @@ package sc.gui.view
 
 import sc.gui.MasterView
 import tornadofx.*
+import java.awt.Desktop
+import java.net.URI
 
 class AppView : View() {
 
@@ -36,7 +38,7 @@ class AppView : View() {
         }
         bottom = hbox {
             hyperlink("Software-Challenge Germany 2020/21").action {
-
+                Desktop.getDesktop().browse(URI("https://www.software-challenge.de"))
             }
         }
     }
