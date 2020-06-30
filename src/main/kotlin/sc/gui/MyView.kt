@@ -1,26 +1,22 @@
 package sc.gui
 
 import javafx.beans.property.SimpleStringProperty
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
-import javafx.geometry.Point2D
 import javafx.scene.control.Button
 import javafx.scene.input.ClipboardContent
-import javafx.scene.input.Dragboard
 import javafx.scene.input.TransferMode
 import javafx.scene.paint.Color
 import javafx.stage.StageStyle
 import sc.gui.view.BoardView
 import tornadofx.*
 
-class MasterView: View() {
+class MasterView : View() {
     override val root = borderpane {
         top<TopView>()
         bottom<BottomView>()
     }
 }
 
-class TopView: View() {
+class TopView : View() {
     val controller: MyController by inject()
     val model: TopViewModel by inject()
     val input = SimpleStringProperty()
@@ -86,7 +82,6 @@ class TopViewModel : ItemViewModel<TopView>() {
 }
 
 
-
 class BottomView : View() {
     override val root = label("Bottom View")
 }
@@ -102,6 +97,6 @@ class MyView : View("My View") {
     }
 }
 
-class MyFragment: Fragment() {
+class MyFragment : Fragment() {
     override val root = label("This is a popup")
 }

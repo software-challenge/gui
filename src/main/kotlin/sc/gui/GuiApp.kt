@@ -1,8 +1,9 @@
 package sc.gui
 
+import sc.gui.view.AppView
 import tornadofx.*
 
-class GuiApp : App(MasterView::class, AppStyle::class) {
+class GuiApp : App(AppView::class, AppStyle::class) {
     init {
         reloadStylesheetsOnFocus()
     }
