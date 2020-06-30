@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://travis-ci.com/CAU-Kiel-Tech-Inf/socha-gui" rel="nofollow"><img src="https://travis-ci.com/CAU-Kiel-Tech-Inf/socha-gui.svg?branch=master" alt="Build Status"></a>
+  <a href="https://travis-ci.com/CAU-Kiel-Tech-Inf/tornado-gui" rel="nofollow"><img src="https://travis-ci.com/CAU-Kiel-Tech-Inf/tornado-gui.svg?branch=master" alt="Build Status"></a>
 </p>
 
 <h1 align="center">GUI für die Software-Challenge Germany</h1>
@@ -12,5 +12,5 @@
 Klone das Repository und führe den Befehl `gradlew run` aus.
 
 ## Vorraussetzungen
-Für die kompilierte Version wird eine JRE mindestens Java 1.8 vorrausgesetzt.
+Für die kompilierte Version wird eine JRE mindestens Java 8 vorrausgesetzt.
 Zur Entwicklung wird ein JDK von Version 11 oder höher benötigt.
