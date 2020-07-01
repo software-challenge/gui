@@ -12,7 +12,7 @@ group = "sc.gui"
 version = "1.0-SNAPSHOT"
 
 application {
-    mainClassName = "sc.gui.GuiApp"
+    mainClassName = "sc.gui.GuiAppKt"
 }
 
 repositories {
