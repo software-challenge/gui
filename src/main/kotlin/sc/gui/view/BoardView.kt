@@ -1,11 +1,9 @@
 package sc.gui.view
 
 import javafx.beans.property.ReadOnlyDoubleProperty
+import javafx.collections.ListChangeListener
 import javafx.scene.input.TransferMode
-import javafx.scene.layout.BackgroundFill
-import javafx.scene.layout.ColumnConstraints
-import javafx.scene.layout.Priority
-import javafx.scene.layout.Region
+import javafx.scene.layout.*
 import sc.gui.AppStyle
 import sc.gui.controller.BoardController
 import sc.gui.model.BoardModel
@@ -15,55 +13,76 @@ import java.awt.Color
 
 class BoardView: View() {
     val controller: BoardController by inject()
-    val model: BoardModel by inject()
-    override val root = gridpane {
-        isGridLinesVisible = true
+    private val model: BoardModel by inject()
+    override val root = GridPane()
+
+    init {
+        root.isGridLinesVisible = true
 
         //addClass(AppStyle.area)
-        prefHeightProperty().bind(widthProperty())
+        root.prefHeightProperty().bind(root.widthProperty())
 
-
-        (0 until model.boardSize).forEach{ y ->
-            row {
-                (0 until model.boardSize).forEach { x ->
-                    pane {
-                        setOnDragEntered {
-                            addClass(AppStyle.dragTarget)
-                            println("Dragging entered!")
-                            it.consume()
-                        }
-                        setOnDragExited {
-                            removeClass(AppStyle.dragTarget)
-                            println("Dragging exited!")
-                            it.consume()
-                        }
-                        setOnDragOver {
-                            it.acceptTransferModes(TransferMode.MOVE)
-                            it.consume()
-                        }
-                        setOnDragDropped {
-                            it.isDropCompleted = true
-                            it.consume()
-                        }
-                        val content = model.fields[x][y].content
-                        val label = label("$x,$y")
-                        var cssClass: CssRule
-                        when (content) {
-                            FieldContent.EMPTY -> cssClass = AppStyle.colorGRAY
-                            FieldContent.RED -> cssClass = AppStyle.colorRED
-                            FieldContent.BLUE -> cssClass = AppStyle.colorBLUE
-                            FieldContent.GREEN -> cssClass = AppStyle.colorGREEN
-                            FieldContent.YELLOW -> cssClass = AppStyle.colorYELLOW
-                        }
-                        addClass(cssClass)
+        model.fields.forEach { field ->
+            root.add(paneFromField(field), field.coordinates.x.toInt(), field.coordinates.y.toInt())
+        }
+        for (i in 0 until sc.gui.model.boardSize) {
+            root.constraintsForRow(i).percentHeight = 5.0
+            root.constraintsForColumn(i).percentWidth = 5.0
+            root.constraintsForColumn(i).hgrow = Priority.ALWAYS
+        }
+        model.fields.addListener(ListChangeListener { change ->
+            while (change.next()) {
+                println("change detected " + change.toString())
+                if (change.wasAdded()) {
+                    change.addedSubList.forEach { addedField ->
+                        val x = addedField.coordinates.x.toInt()
+                        val y = addedField.coordinates.y.toInt()
+                        root.add(paneFromField(addedField), x, y)
                     }
                 }
-                constraintsForRow(y).percentHeight = 5.0
-                hgrow = Priority.ALWAYS
             }
-            constraintsForColumn(y).percentWidth = 5.0
-            constraintsForColumn(y).hgrow = Priority.ALWAYS
+        })
+    }
+
+    fun paneFromField(field: sc.gui.model.Field): Pane {
+        val x = field.coordinates.x.toInt()
+        val y = field.coordinates.y.toInt()
+        val pane = Pane()
+        pane.setOnDragEntered {
+            pane.addClass(AppStyle.dragTarget)
+            println("Dragging entered!")
+            it.consume()
         }
+        pane.setOnDragExited {
+            pane.removeClass(AppStyle.dragTarget)
+            println("Dragging exited!")
+            it.consume()
+        }
+        pane.setOnDragOver {
+            it.acceptTransferModes(TransferMode.MOVE)
+            it.consume()
+        }
+        pane.setOnDragDropped {
+            it.isDropCompleted = true
+            it.consume()
+        }
+        pane.setOnMouseClicked {
+            println("Click event")
+            controller.handleClick(x, y)
+            it.consume()
+        }
+        val content = field.content
+        pane.label("$x,$y")
+        var cssClass: CssRule
+        when (content) {
+            FieldContent.EMPTY -> cssClass = AppStyle.colorGRAY
+            FieldContent.RED -> cssClass = AppStyle.colorRED
+            FieldContent.BLUE -> cssClass = AppStyle.colorBLUE
+            FieldContent.GREEN -> cssClass = AppStyle.colorGREEN
+            FieldContent.YELLOW -> cssClass = AppStyle.colorYELLOW
+        }
+        pane.addClass(cssClass)
+        return pane
     }
 }
 

@@ -9,22 +9,19 @@ import tornadofx.ItemViewModel
 enum class FieldContent {
     EMPTY, RED, GREEN, BLUE, YELLOW
 }
+
+const val boardSize: Int = 20
 class Field(val coordinates: Point2D, val content: FieldContent)
 
 class BoardModel: ItemViewModel<BoardView>() {
-    val root = bind(BoardView::root)
-    val fields: ObservableList<ObservableList<Field>> = FXCollections.observableArrayList<ObservableList<Field>>()
+    val fields: ObservableList<Field> = FXCollections.observableArrayList()
 
     val fieldSize: Double = 20.0
 
-    val boardSize: Int = 20
-
     init {
-        for (x in 0 until boardSize) {
-            fields.add(x, FXCollections.observableArrayList<Field>())
-            for (y in 0 until boardSize) {
-                fields[x].add(
-                        y,
+        for (y in 0 until boardSize) {
+            for (x in 0 until boardSize) {
+                fields.add(
                         Field(
                                 Point2D(
                                         x.toDouble(),
@@ -34,5 +31,17 @@ class BoardModel: ItemViewModel<BoardView>() {
                         ))
             }
         }
+    }
+
+    private fun indexOf(x: Int, y: Int): Int {
+        return y*boardSize+x
+    }
+
+    fun setField(x: Int, y: Int, field: Field) {
+        fields.set(indexOf(x, y), field)
+    }
+
+    fun getField(x: Int, y: Int): Field {
+        return fields.get(indexOf(x, y))
     }
 }
