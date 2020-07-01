@@ -1,30 +1,41 @@
 package sc.gui.view
 
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.Property
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.geometry.Pos
 import javafx.stage.FileChooser
 import sc.gui.MasterView
 import sc.gui.controller.GameCreationController
 import sc.gui.model.GameCreationModel
+import sc.gui.model.PlayerType
 import tornadofx.*
 
 class GameCreationView : View("Neues Spiel") {
     val controller: GameCreationController by inject()
     val model: GameCreationModel by inject()
 
-    override val root = form {
-        fieldset("Neues Spiel erstellen") {
-            field("Name") {
-                textfield(model.name).required(message = "Gib eine Bezeichnung für das Spiel ein")
-            }
-            hbox {
-                PlayerFragment(1)
-                PlayerFragment(2)
-            }
-            // TODO
+    private val playerTypes: ObservableList<PlayerType> = FXCollections.observableArrayList(PlayerType.PLAYER, PlayerType.MANUELL, PlayerType.COMPUTER)
+
+    override val root = borderpane {
+        style {
+            padding = box(20.px)
         }
-        hbox {
+        center = form {
+            fieldset("Neues Spiel erstellen") {
+                field("Name") {
+                    textfield(model.name).required()
+                }
+                hbox {
+                    add(PlayerFragment(model, 1))
+                    add(PlayerFragment(model, 2))
+                }
+            }
+        }
+        bottom = hbox {
+            style {
+                alignment = Pos.TOP_RIGHT
+            }
             button("Erstellen") {
                 action {
                     // TODO
@@ -43,14 +54,35 @@ class GameCreationView : View("Neues Spiel") {
     }
 }
 
-class PlayerFragment(number: Int) : Fragment() {
-    private val selected = SimpleStringProperty()
-    private val playerTypes: ObservableList<String> = FXCollections.observableArrayList("Player", "Manuell", "Computer")
+class PlayerFragment(model: GameCreationModel, player: Int) : Fragment() {
+    private val player: Int = player
+    private val model: GameCreationModel = model
+    private val playerTypes: ObservableList<PlayerType> = FXCollections.observableArrayList(PlayerType.PLAYER, PlayerType.MANUELL, PlayerType.COMPUTER)
 
-    override val root = field("Player $number") {
-        combobox(selected, playerTypes)
-        if (selected == SimpleStringProperty("Computer")) {
-            button("Client wählen") {
+    override val root = borderpane {
+        style {
+            minWidth = 120.px
+            padding = CssBox(0.px, 20.px, 0.px, 0.px)
+        }
+        top = vbox {
+            label("Player $player")
+            combobox(getPlayerType(), playerTypes) {
+                selectionModel.selectFirst()
+            }
+        }
+    }
+
+    private fun getPlayerType(): Property<PlayerType> {
+        if (player == 1) {
+            return model.selectedPlayerType1
+        }
+        return model.selectedPlayerType2
+    }
+
+    fun updatePlayerType() {
+        println("Updated Playertype for player $player ->" + getPlayerType())
+        if (getPlayerType().value == PlayerType.COMPUTER) {
+            root.center = button("Client wählen") {
                 action {
                     val fileChooser = FileChooser()
                     fileChooser.title = "Wähle den Client"
@@ -60,15 +92,21 @@ class PlayerFragment(number: Int) : Fragment() {
                     }
                 }
             }
-        } else if (selected == SimpleStringProperty("Manuell")) {
-            label("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
+        } else if (getPlayerType().value == PlayerType.MANUELL) {
+            root.center = label("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
         }
     }
 
+
     init {
-        selected.onChange {
-            println("Player $number changed to: $it")
+        if (player == 1) {
+            model.selectedPlayerType1.onChange {
+                updatePlayerType()
+            }
+        } else {
+            model.selectedPlayerType2.onChange {
+                updatePlayerType()
+            }
         }
-        println("player $number has been initilized")
     }
 }
