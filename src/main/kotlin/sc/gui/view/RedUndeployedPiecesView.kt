@@ -1,7 +1,6 @@
 package sc.gui.view
 
-import sc.gui.model.Piece
-import sc.gui.model.PlayerColor
+import sc.data.Piece
 import tornadofx.View
 import tornadofx.pane
 

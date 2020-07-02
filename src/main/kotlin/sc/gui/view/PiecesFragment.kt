@@ -1,9 +1,10 @@
 package sc.gui.view
 
-import javafx.scene.Parent
-import sc.gui.model.Piece
+import sc.data.Piece
 import sc.gui.model.UndeployedPiecesModel
-import tornadofx.*
+import tornadofx.Fragment
+import tornadofx.listview
+import tornadofx.selectedItem
 
 class PiecesFragment: Fragment() {
     val model: UndeployedPiecesModel by inject()
