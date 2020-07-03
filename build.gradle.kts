@@ -22,6 +22,8 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("no.tornado:tornadofx:1.7.17")
+    implementation(files("libs/sdk.jar"))
+    implementation(files("libs/hive_2020.jar"))
 }
 
 

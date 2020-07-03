@@ -1,6 +1,6 @@
 package sc.gui.view
 
-import sc.data.Piece
+import sc.plugin2021.Piece
 import sc.gui.model.UndeployedPiecesModel
 import tornadofx.Fragment
 import tornadofx.listview

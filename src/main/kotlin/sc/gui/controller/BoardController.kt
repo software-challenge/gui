@@ -1,11 +1,11 @@
 package sc.gui.controller
 
-import javafx.geometry.Point2D
-import sc.data.PlayerColor
-import sc.data.pieceShapes
+import sc.plugin2021.Coordinates
+import sc.plugin2021.PlayerColor
+import sc.plugin2021.pieceShapes
 import sc.gui.model.BoardModel
-import sc.gui.model.Field
-import sc.gui.model.FieldContent
+import sc.plugin2021.Field
+import sc.plugin2021.FieldContent
 import sc.gui.view.BoardView
 import sc.gui.view.RedUndeployedPiecesView
 import tornadofx.Controller
@@ -32,7 +32,7 @@ class BoardController: Controller() {
             for (c in shape.coordinates) {
                 val cx = x + c.x
                 val cy = y + c.y
-                model.setField(cx, cy, Field(Point2D(cx.toDouble(), cy.toDouble()), color))
+                model.setField(cx, cy, Field(Coordinates(cx, cy), color))
             }
         }
     }

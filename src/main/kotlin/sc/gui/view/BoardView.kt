@@ -1,15 +1,14 @@
 package sc.gui.view
 
-import javafx.beans.property.ReadOnlyDoubleProperty
 import javafx.collections.ListChangeListener
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.*
 import sc.gui.AppStyle
 import sc.gui.controller.BoardController
 import sc.gui.model.BoardModel
-import sc.gui.model.FieldContent
+import sc.plugin2021.Field
+import sc.plugin2021.FieldContent
 import tornadofx.*
-import java.awt.Color
 
 class BoardView: View() {
     val controller: BoardController by inject()
@@ -44,7 +43,7 @@ class BoardView: View() {
         })
     }
 
-    fun paneFromField(field: sc.gui.model.Field): Pane {
+    fun paneFromField(field: Field): Pane {
         val x = field.coordinates.x.toInt()
         val y = field.coordinates.y.toInt()
         val pane = Pane()

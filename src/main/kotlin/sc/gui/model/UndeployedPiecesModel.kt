@@ -2,9 +2,9 @@ package sc.gui.model
 
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import sc.data.Piece
-import sc.data.PlayerColor
-import sc.data.pieceShapes
+import sc.plugin2021.Piece
+import sc.plugin2021.PlayerColor
+import sc.plugin2021.pieceShapes
 import sc.gui.view.PiecesFragment
 import tornadofx.ItemViewModel
 
