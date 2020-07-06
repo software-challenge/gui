@@ -25,6 +25,7 @@ class AppStyle : Stylesheet() {
         val colorGREEN by cssclass()
         val colorYELLOW by cssclass()
         val colorGRAY by cssclass()
+        val pieceSelect by cssclass()
 
 
     }
@@ -68,6 +69,9 @@ class AppStyle : Stylesheet() {
         }
         colorGRAY {
             backgroundColor += Color.GRAY
+        }
+        pieceSelect {
+            backgroundColor += Color.RED
         }
     }
 }
