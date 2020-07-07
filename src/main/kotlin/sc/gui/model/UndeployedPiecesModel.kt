@@ -13,7 +13,7 @@ class UndeployedPiecesModel: ItemViewModel<PiecesFragment>() {
 
     init {
         for (shape in pieceShapes) {
-            undeployedPieces.add(Piece(shape.id, PlayerColor.values().random()))
+            undeployedPieces.add(Piece(shape.id, PlayerColor.BLUE)
         }
     }
 }

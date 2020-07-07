@@ -34,7 +34,10 @@ class BoardController: Controller() {
                 val cy = y + c.y
                 model.setField(cx, cy, Field(Coordinates(cx, cy), color))
             }
+        } else {
+            println("Click, but no item selected")
         }
+
     }
 
 }
