@@ -3,27 +3,40 @@ package sc.gui.model
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import sc.gui.view.BoardView
-import sc.plugin2021.Board
-import sc.plugin2021.Field
+import sc.plugin2021.*
+import sc.plugin2021.util.Constants
 import tornadofx.ItemViewModel
 
-const val boardSize: Int = 20
-
 class BoardModel: ItemViewModel<BoardView>() {
-    private val board: Board = Board()
-    val fields: ObservableList<Field> = FXCollections.observableArrayList(board.fields)
+    val fields: ObservableList<Field> = FXCollections.observableArrayList()
 
-    val fieldSize: Double = 20.0
+    init {
+        // create all elements, so that we can use the index in the updateFields method
+        for (x in 0 until Constants.BOARD_SIZE) {
+            for (y in 0 until Constants.BOARD_SIZE) {
+                fields.add(Field(Coordinates(x, y), FieldContent.EMPTY))
+            }
+        }
+        updateFields(Board())
+    }
+
+    fun updateFields(board: Board) {
+        for (x in 0 until Constants.BOARD_SIZE) {
+            for (y in 0 until Constants.BOARD_SIZE) {
+                setField(x, y, board.getField(x, y))
+            }
+        }
+    }
 
     private fun indexOf(x: Int, y: Int): Int {
-        return y*boardSize+x
+        return y*Constants.BOARD_SIZE+x
     }
 
     fun setField(x: Int, y: Int, field: Field) {
         fields.set(indexOf(x, y), field)
     }
 
-    fun getField(x: Int, y: Int): Field {
+    fun getField(x: Int, y: Int): Field{
         return fields.get(indexOf(x, y))
     }
 }

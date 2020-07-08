@@ -1,24 +1,19 @@
 package sc.gui.controller
 
-import sc.plugin2021.Coordinates
-import sc.plugin2021.PlayerColor
-import sc.plugin2021.pieceShapes
+import sc.gui.GameView
 import sc.gui.model.BoardModel
-import sc.plugin2021.Field
-import sc.plugin2021.FieldContent
 import sc.gui.view.BoardView
-import sc.gui.view.RedUndeployedPiecesView
+import sc.plugin2021.*
 import tornadofx.Controller
 
 class BoardController: Controller() {
 
     val model: BoardModel by inject()
     val view: BoardView by inject()
-    val redPieces: RedUndeployedPiecesView by inject()
+    val gameView: GameView by inject()
 
     fun handleClick(x: Int, y: Int) {
-
-        val selected = redPieces.selectedItem()
+        val selected = gameView.redUndeployedPieces.selectedItem()
         if (selected != null) {
             val color: FieldContent
 
@@ -28,7 +23,7 @@ class BoardController: Controller() {
                 PlayerColor.YELLOW -> color = FieldContent.YELLOW
                 PlayerColor.GREEN -> color = FieldContent.GREEN
             }
-            val shape = pieceShapes[selected.kind]
+            val shape = PieceShape.shapes[selected.kind].second
             for (c in shape.coordinates) {
                 val cx = x + c.x
                 val cy = y + c.y

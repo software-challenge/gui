@@ -8,12 +8,10 @@ import sc.plugin2021.Piece
 import sc.gui.model.UndeployedPiecesModel
 import sc.plugin2021.PieceShape
 import sc.plugin2021.PlayerColor
-import sc.plugin2021.pieceShapes
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.datagridCell
 
-class PiecesFragment: Fragment() {
-    val model: UndeployedPiecesModel by inject()
+class PiecesFragment(model: UndeployedPiecesModel): Fragment() {
     override val root = listview(model.undeployedPieces) {
         selectionModel.selectionMode = SelectionMode.SINGLE
         cellFormat {

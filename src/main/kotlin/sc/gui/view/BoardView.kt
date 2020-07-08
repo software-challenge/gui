@@ -8,6 +8,7 @@ import sc.gui.controller.BoardController
 import sc.gui.model.BoardModel
 import sc.plugin2021.Field
 import sc.plugin2021.FieldContent
+import sc.plugin2021.util.Constants
 import tornadofx.*
 
 class BoardView: View() {
@@ -24,7 +25,7 @@ class BoardView: View() {
         model.fields.forEach { field ->
             root.add(paneFromField(field), field.coordinates.x.toInt(), field.coordinates.y.toInt())
         }
-        for (i in 0 until sc.gui.model.boardSize) {
+        for (i in 0 until Constants.BOARD_SIZE) {
             root.constraintsForRow(i).percentHeight = 5.0
             root.constraintsForColumn(i).percentWidth = 5.0
             root.constraintsForColumn(i).hgrow = Priority.ALWAYS
