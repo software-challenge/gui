@@ -15,21 +15,19 @@ class PiecesFragment(model: UndeployedPiecesModel): Fragment() {
     override val root = listview(model.undeployedPieces) {
         selectionModel.selectionMode = SelectionMode.SINGLE
         cellFormat {
-            graphic = cache {
-                val number = "%02d".format(it.kind)
-                val color = when (it.color) {
-                    PlayerColor.RED -> "red"
-                    PlayerColor.GREEN -> "green"
-                    PlayerColor.YELLOW -> "pink"
-                    PlayerColor.BLUE -> "blue"
+            val number = "%02d".format(it.kind)
+            val color = when (it.color) {
+                PlayerColor.RED -> "red"
+                PlayerColor.GREEN -> "green"
+                PlayerColor.YELLOW -> "pink"
+                PlayerColor.BLUE -> "blue"
+            }
+            val filename = "tiles_${color}_$number.png"
+            graphic = stackpane {
+                imageview("file:resources/graphics/blokus/$color/$filename") {
+                    isSmooth = false
                 }
-                val filename = "tiles_${color}_$number.png"
-                stackpane {
-                    imageview("file:resources/graphics/blokus/$color/$filename") {
-                        isSmooth = false
-                    }
-                    label(filename)
-                }
+                label(filename)
             }
         }
         onUserSelect {
