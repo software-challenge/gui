@@ -1,4 +1,3 @@
-import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -37,6 +36,8 @@ dependencies {
     implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
     implementation(files("../server/socha-sdk/build/libs/sdk.jar"))
     implementation(files("../server/plugin/build/libs/blokus_2021.jar"))
+    implementation(files("../server/server/build/runnable/server.jar"))
+    implementation(fileTree("../server/server/build/runnable/lib") { include("*.jar") })
 }
 
 

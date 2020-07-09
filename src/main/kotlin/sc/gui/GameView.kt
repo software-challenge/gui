@@ -14,6 +14,7 @@ import tornadofx.vbox
 class GameView: View() {
     val input = SimpleStringProperty()
     private val boardView: BoardView by inject()
+    private val clientController: ClientController by inject()
     val redUndeployedPieces = PiecesFragment(UndeployedPiecesModel(PlayerColor.RED))
     val blueUndeployedPieces = PiecesFragment(UndeployedPiecesModel(PlayerColor.BLUE))
     val yellowUndeployedPieces = PiecesFragment(UndeployedPiecesModel(PlayerColor.YELLOW))

@@ -1,23 +1,25 @@
 package sc.gui
 
+import sc.gui.controller.ServerController
 import sc.gui.view.AppView
-import tornadofx.*
+import tornadofx.App
+import tornadofx.launch
+import tornadofx.reloadStylesheetsOnFocus
 
 class GuiApp : App(AppView::class, AppStyle::class) {
+    val server: ServerController by inject()
     override fun stop() {
         super.stop()
         println("Stopping")
-        // TODO: kill backend-server
     }
 
     init {
         reloadStylesheetsOnFocus()
-
-        // TODO: start backend-server
+        server.startServer()
     }
 }
 
 fun main(args: Array<String>) {
-    // TODO: Argumente wie beispielsweise --kiosk oder --dev erkennen
+    // TODO: handle arguments like --kiosk or --dev
     launch<GuiApp>(args)
 }
