@@ -6,12 +6,12 @@ import sc.gui.view.PiecesFragment
 import sc.plugin2021.*
 import tornadofx.ItemViewModel
 
-class UndeployedPiecesModel(color: PlayerColor): ItemViewModel<PiecesFragment>() {
+class UndeployedPiecesModel(color: Color): ItemViewModel<PiecesFragment>() {
     val undeployedPieces: ObservableList<Piece> = FXCollections.observableArrayList()
 
     init {
-        for (shape in PieceShape.shapes) {
-            undeployedPieces.add(Piece(shape.first, Rotation.NONE, color))
+        for (shape in PieceShape.shapes.keys) {
+            undeployedPieces.add(Piece(color, shape, Rotation.NONE))
         }
     }
 }
