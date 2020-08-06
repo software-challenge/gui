@@ -1,10 +1,7 @@
 package sc.gui.view
 
-import javafx.scene.paint.Color
-import sc.gui.MasterView
 import sc.gui.controller.AppController
 import tornadofx.*
-import tornadofx.Stylesheet.Companion.datagridCell
 import java.awt.Desktop
 import java.net.URI
 

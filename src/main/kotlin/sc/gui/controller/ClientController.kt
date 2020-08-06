@@ -1,61 +1,202 @@
 package sc.gui.controller
 
+import org.slf4j.LoggerFactory
 import sc.framework.plugins.Player
-import sc.plugin2020.AbstractClient
-import sc.plugin2020.PlayerType
+import sc.framework.plugins.protocol.MoveRequest
+import sc.networking.clients.IControllableGame
+import sc.networking.clients.ILobbyClientListener
+import sc.networking.clients.LobbyClient
+import sc.plugin2021.*
+import sc.plugin2021.util.Configuration.classesToRegister
 import sc.protocol.responses.PrepareGameProtocolMessage
 import sc.protocol.responses.ProtocolErrorMessage
+import sc.server.Configuration
 import sc.shared.GameResult
-import tornadofx.Controller
+import sc.shared.WelcomeMessage
+import tornadofx.*
+import java.net.ConnectException
+import kotlin.system.exitProcess
 
-// XXX: this is the client class for the game hive (NOT blokus), just for testing until the blokus client is implemented
-class UIClient : AbstractClient("localhost", 13050, PlayerType.PLAYER_ONE) {
+class UITestClient(playerType: PlayerType): AbstractClient("localhost", 13050, playerType) {
+    var control: IControllableGame? = null
 
     fun join() {
         joinAnyGame()
     }
 
-    override fun onError(p0: String?, p1: ProtocolErrorMessage?) {
-        TODO("Not yet implemented")
+    fun createAndObserve(): List<String> {
+        val roomId = "1234"
+        val reservations = listOf("a", "b")
+        val msg: PrepareGameProtocolMessage = PrepareGameProtocolMessage(roomId, reservations)
+        control = observeGame(msg)
+        control?.goToLast()
+        return reservations
     }
 
-    override fun onGameJoined(p0: String?) {
-        TODO("Not yet implemented")
+    override fun onError(roomId: String, error: ProtocolErrorMessage) {
+        println("onError ")
     }
 
-    override fun onGameLeft(p0: String?) {
-        TODO("Not yet implemented")
+    override fun onGameJoined(roomId: String) {
+        println("onGameJoined ")
     }
 
-    override fun onGameObserved(p0: String?) {
-        TODO("Not yet implemented")
+    override fun onGameLeft(roomId: String) {
+        println("onGameLeft ")
     }
 
-    override fun onGameOver(p0: String?, p1: GameResult?) {
-        TODO("Not yet implemented")
+    override fun onGameObserved(roomId: String) {
+        println("onGameObserved ")
     }
 
-    override fun onGamePaused(p0: String?, p1: Player?) {
-        TODO("Not yet implemented")
+    override fun onGameOver(roomId: String, data: GameResult) {
+        println("onGameOver ")
     }
 
-    override fun onGamePrepared(p0: PrepareGameProtocolMessage?) {
-        TODO("Not yet implemented")
+    override fun onGamePaused(roomId: String, nextPlayer: Player) {
+        println("onGamePaused ")
     }
 
-    override fun onNewState(p0: String?, p1: Any?) {
-        TODO("Not yet implemented")
+    override fun onGamePrepared(response: PrepareGameProtocolMessage) {
+        println("onGamePrepared ")
     }
 
-    override fun onRoomMessage(p0: String?, p1: Any?) {
-        TODO("Not yet implemented")
+    override fun onNewState(roomId: String, state: Any) {
+        println("onNewState ")
     }
 
+    override fun onRoomMessage(roomId: String, data: Any) {
+        println("onRoomMessage ")
+    }
 }
 
+class UIObserverClient constructor(
+            host: String,
+            port: Int,
+            private val id: PlayerType = PlayerType.PLAYER_ONE
+    ): ILobbyClientListener {
+
+    var reservations: List<String> = emptyList()
+    var clientOne: AbstractClient? = null
+    var clientTwo: AbstractClient? = null
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(UIObserverClient::class.java);
+        private val gameType = GamePlugin.PLUGIN_UUID
+    }
+
+    fun createAndObserve(clientOne: AbstractClient, clientTwo: AbstractClient) {
+        this.clientOne = clientOne
+        this.clientTwo = clientTwo
+        start()
+        client.authenticate(Configuration.get(Configuration.PASSWORD_KEY))
+        client.prepareGame(GamePlugin.PLUGIN_UUID)
+    }
+
+    /** The handler reacts to messages from the server received by the lobby client.
+     *  It *must* be initialised before start.
+     */
+    protected lateinit var handler: IGameHandler
+
+    /** Initialise game handler. */
+    fun setGameHandler(handler: IGameHandler) {
+        this.handler = handler
+    }
+
+    /** The lobby client that connects to the room. Stops on connection failure. */
+    private val client = try {
+        LobbyClient(Configuration.getXStream(), classesToRegister, host, port)
+    } catch(e: ConnectException) {
+        logger.error("Could not connect to Server: " + e.message)
+        exitProcess(1)
+    }
+
+    /** Storage for the reason of a rule violation, if any occurs. */
+    private lateinit var error: String
+    fun getError() = error
+
+    private lateinit var roomID: String
+
+    /** Tell this client to observe the game given by the preparation handler.
+     *
+     * @return controllable game
+     */
+    fun observeGame(handle: PrepareGameProtocolMessage): IControllableGame =
+            client.observe(handle)
+
+    /** Called for any new message sent to the game room, e.g., move requests. */
+    override fun onRoomMessage(roomId: String, data: Any) {
+        if(data is MoveRequest) {
+            handler.onRequestAction()
+        }
+        roomID = roomId
+    }
+
+    /** Sends the selected move to the server. */
+    fun sendMove(move: Move) =
+            client.sendMessageToRoom(roomID, move)
+
+    /** Called when an erroneous message is sent to the room. */
+    override fun onError(roomId: String, error: ProtocolErrorMessage) {
+        logger.debug("onError: Client {} received error {}", this, error.message)
+        this.error = error.message
+    }
+
+    override fun onNewState(roomId: String, state: Any) {
+        val gameState = state as GameState
+        logger.debug("{} got a new state {}", this, gameState)
+
+        if(id == PlayerType.OBSERVER) return
+
+        handler.onUpdate(gameState)
+        handler.onUpdate(gameState.currentPlayer, gameState.otherPlayer)
+    }
+
+    private fun start() {
+        client.start()
+        client.addListener(this)
+    }
+
+    fun joinAnyGame() {
+        start()
+        client.joinRoomRequest(gameType)
+    }
+
+    override fun onGameJoined(roomId: String) {}
+    override fun onGamePrepared(response: PrepareGameProtocolMessage) {
+        logger.info("{} observing game {}", this, response.roomId)
+        reservations = response.reservations
+        client.observeAndControl(response)
+    }
+    override fun onGamePaused(roomId: String, nextPlayer: Player) {}
+    override fun onGameObserved(roomId: String) {
+        clientOne?.joinPreparedGame(reservations[0])
+        clientTwo?.joinPreparedGame(reservations[1])
+    }
+
+    override fun onGameLeft(roomId: String) {
+        logger.info("{} got game left {}", this, roomId)
+        client.stop()
+    }
+
+    override fun onGameOver(roomId: String, data: GameResult) {
+        logger.info("{} on Game Over with game result {}", this, data)
+    }
+
+    fun joinPreparedGame(reservation: String) {
+        start()
+        client.joinPreparedGame(reservation)
+    }
+}
+
+
 class ClientController : Controller() {
-    val client = UIClient()
-    fun startClient() {
-        client.join()
+    val playerOne = UITestClient(PlayerType.PLAYER_ONE)
+    val playerTwo = UITestClient(PlayerType.PLAYER_TWO)
+    val observer = UIObserverClient("localhost", 13050)
+
+    fun startGame() {
+        println("creating and observing")
+        observer.createAndObserve(playerOne, playerTwo)
     }
 }

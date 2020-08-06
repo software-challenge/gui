@@ -5,7 +5,6 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.stage.FileChooser
-import sc.gui.MasterView
 import sc.gui.controller.GameCreationController
 import sc.gui.model.GameCreationModel
 import sc.gui.model.PlayerType

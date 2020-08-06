@@ -1,5 +1,6 @@
-package sc.gui
+package sc.gui.view
 
+import sc.gui.view.GameView
 import tornadofx.*
 
 class MasterView: View() {
