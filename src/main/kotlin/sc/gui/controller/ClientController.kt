@@ -3,6 +3,7 @@ package sc.gui.controller
 import org.slf4j.LoggerFactory
 import sc.framework.plugins.Player
 import sc.framework.plugins.protocol.MoveRequest
+import sc.networking.clients.ControllingClient
 import sc.networking.clients.IControllableGame
 import sc.networking.clients.ILobbyClientListener
 import sc.networking.clients.LobbyClient
@@ -12,26 +13,13 @@ import sc.protocol.responses.PrepareGameProtocolMessage
 import sc.protocol.responses.ProtocolErrorMessage
 import sc.server.Configuration
 import sc.shared.GameResult
+import sc.shared.SlotDescriptor
 import sc.shared.WelcomeMessage
 import tornadofx.*
 import java.net.ConnectException
 import kotlin.system.exitProcess
 
 class UITestClient(playerType: PlayerType): AbstractClient("localhost", 13050, playerType) {
-    var control: IControllableGame? = null
-
-    fun join() {
-        joinAnyGame()
-    }
-
-    fun createAndObserve(): List<String> {
-        val roomId = "1234"
-        val reservations = listOf("a", "b")
-        val msg: PrepareGameProtocolMessage = PrepareGameProtocolMessage(roomId, reservations)
-        control = observeGame(msg)
-        control?.goToLast()
-        return reservations
-    }
 
     override fun onError(roomId: String, error: ProtocolErrorMessage) {
         println("onError ")
@@ -74,11 +62,12 @@ class UIObserverClient constructor(
             host: String,
             port: Int,
             private val id: PlayerType = PlayerType.PLAYER_ONE
-    ): ILobbyClientListener {
+    ): ILobbyClientListener, IGameHandler {
 
     var reservations: List<String> = emptyList()
     var clientOne: AbstractClient? = null
     var clientTwo: AbstractClient? = null
+    var controller: IControllableGame? = null
 
     companion object {
         private val logger = LoggerFactory.getLogger(UIObserverClient::class.java);
@@ -90,18 +79,23 @@ class UIObserverClient constructor(
         this.clientTwo = clientTwo
         start()
         client.authenticate(Configuration.get(Configuration.PASSWORD_KEY))
-        client.prepareGame(GamePlugin.PLUGIN_UUID)
+        var requestResult = client.prepareGameAndWait(
+                GamePlugin.PLUGIN_UUID,
+                SlotDescriptor("One", false, false),
+                SlotDescriptor("Two", false, false)
+        )
+
+        var preparation = requestResult.result
+        if (preparation != null) {
+            clientOne.joinPreparedGame(preparation.reservations[0])
+            clientTwo.joinPreparedGame(preparation.reservations[1])
+        }
     }
 
     /** The handler reacts to messages from the server received by the lobby client.
      *  It *must* be initialised before start.
      */
-    protected lateinit var handler: IGameHandler
-
-    /** Initialise game handler. */
-    fun setGameHandler(handler: IGameHandler) {
-        this.handler = handler
-    }
+    protected var handler: IGameHandler = this
 
     /** The lobby client that connects to the room. Stops on connection failure. */
     private val client = try {
@@ -129,7 +123,7 @@ class UIObserverClient constructor(
         if(data is MoveRequest) {
             handler.onRequestAction()
         }
-        roomID = roomId
+        //roomID = roomId
     }
 
     /** Sends the selected move to the server. */
@@ -166,12 +160,10 @@ class UIObserverClient constructor(
     override fun onGamePrepared(response: PrepareGameProtocolMessage) {
         logger.info("{} observing game {}", this, response.roomId)
         reservations = response.reservations
-        client.observeAndControl(response)
+        controller = client.observeAndControl(response)
     }
     override fun onGamePaused(roomId: String, nextPlayer: Player) {}
     override fun onGameObserved(roomId: String) {
-        clientOne?.joinPreparedGame(reservations[0])
-        clientTwo?.joinPreparedGame(reservations[1])
     }
 
     override fun onGameLeft(roomId: String) {
@@ -186,6 +178,28 @@ class UIObserverClient constructor(
     fun joinPreparedGame(reservation: String) {
         start()
         client.joinPreparedGame(reservation)
+    }
+
+    // The following methods are from IGameHandler and are called to update the game state, once the game has begun
+
+    override fun gameEnded(data: GameResult, team: Team?, errorMessage: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onRequestAction() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onUpdate(player: Player, otherPlayer: Player) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onUpdate(gamestate: GameState) {
+        TODO("Not yet implemented")
+    }
+
+    override fun sendAction(move: Move) {
+        TODO("Not yet implemented")
     }
 }
 
