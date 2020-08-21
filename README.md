@@ -15,6 +15,12 @@ Klone das Repository und führe den Befehl `gradlew run` aus.
 Für die kompilierte Version wird eine JRE mindestens Java 8 vorrausgesetzt.
 Zur Entwicklung wird ein JDK von Version 11 oder höher benötigt.
 
+Zur Zeit muss sich das Server-Projekt "neben" diesem Projekt (also im selben Elternverzeichnis) in einem Verzeichnis mit dem Namen "server" befinden.
+
+Ausserdem muss das Server-Projekt einmal erfolgreich gebaut werden, damit die Jars vorhanden sind (auch Abhaengigkeiten wie XStream).
+
+Das aktuelle Spiel-Plugin als JAR muss im Unterverzeichnis `plugins` liegen.
+
 ## Collaboration
 
 Unsere Commit-Messages folgen dem Muster `type(scope): summary` (siehe [Karma Runner Konvention](http://karma-runner.github.io/latest/dev/git-commit-msg.html)), wobei die verfügbaren Scopes in [.dev/scopes.txt](.dev/scopes.txt) definiert werden. Bitte führe nach dem Klonen des Repository's einmal Folgendes im Terminal aus, damit die entsprechenden Git-Hooks aktiv werden:  

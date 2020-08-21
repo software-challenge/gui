@@ -3,6 +3,7 @@ package sc.gui.controller
 import org.slf4j.LoggerFactory
 import sc.framework.plugins.Player
 import sc.framework.plugins.protocol.MoveRequest
+import sc.gui.model.BoardModel
 import sc.networking.clients.ControllingClient
 import sc.networking.clients.IControllableGame
 import sc.networking.clients.ILobbyClientListener
@@ -61,16 +62,18 @@ class UITestClient(playerType: PlayerType): AbstractClient("localhost", 13050, p
 class UIObserverClient constructor(
             host: String,
             port: Int,
-            private val id: PlayerType = PlayerType.PLAYER_ONE
+            boardModel: BoardModel,
+            private val id: PlayerType = PlayerType.OBSERVER
     ): ILobbyClientListener, IGameHandler {
 
+    val bm = boardModel
     var reservations: List<String> = emptyList()
     var clientOne: AbstractClient? = null
     var clientTwo: AbstractClient? = null
     var controller: IControllableGame? = null
 
     companion object {
-        private val logger = LoggerFactory.getLogger(UIObserverClient::class.java);
+        private val logger = LoggerFactory.getLogger(UIObserverClient::class.java)
         private val gameType = GamePlugin.PLUGIN_UUID
     }
 
@@ -81,14 +84,16 @@ class UIObserverClient constructor(
         client.authenticate(Configuration.get(Configuration.PASSWORD_KEY))
         var requestResult = client.prepareGameAndWait(
                 GamePlugin.PLUGIN_UUID,
-                SlotDescriptor("One", false, false),
-                SlotDescriptor("Two", false, false)
+                SlotDescriptor("One", false, true),
+                SlotDescriptor("Two", false, true)
         )
 
         var preparation = requestResult.result
         if (preparation != null) {
+            var result = client.observeAndControl(preparation)
             clientOne.joinPreparedGame(preparation.reservations[0])
             clientTwo.joinPreparedGame(preparation.reservations[1])
+            result.next()
         }
     }
 
@@ -121,9 +126,8 @@ class UIObserverClient constructor(
     /** Called for any new message sent to the game room, e.g., move requests. */
     override fun onRoomMessage(roomId: String, data: Any) {
         if(data is MoveRequest) {
-            handler.onRequestAction()
+            //handler.onRequestAction()
         }
-        //roomID = roomId
     }
 
     /** Sends the selected move to the server. */
@@ -140,10 +144,11 @@ class UIObserverClient constructor(
         val gameState = state as GameState
         logger.debug("{} got a new state {}", this, gameState)
 
+        bm.updateFields(gameState.board)
         if(id == PlayerType.OBSERVER) return
 
-        handler.onUpdate(gameState)
-        handler.onUpdate(gameState.currentPlayer, gameState.otherPlayer)
+        //handler.onUpdate(gameState)
+        //handler.onUpdate(gameState.currentPlayer, gameState.otherPlayer)
     }
 
     private fun start() {
@@ -205,9 +210,11 @@ class UIObserverClient constructor(
 
 
 class ClientController : Controller() {
+
+    val boardModel: BoardModel by inject()
     val playerOne = UITestClient(PlayerType.PLAYER_ONE)
     val playerTwo = UITestClient(PlayerType.PLAYER_TWO)
-    val observer = UIObserverClient("localhost", 13050)
+    val observer = UIObserverClient("localhost", 13050, boardModel)
 
     fun startGame() {
         println("creating and observing")

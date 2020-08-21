@@ -48,6 +48,7 @@ class AppStyle : Stylesheet() {
         }
         area {
             backgroundColor += Color.GREENYELLOW
+            borderColor += box(topColor, rightColor, bottomColor, leftColor)
         }
         area2 {
             backgroundColor += Color.DARKGREEN

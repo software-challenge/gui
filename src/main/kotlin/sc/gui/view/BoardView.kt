@@ -19,7 +19,7 @@ class BoardView: View() {
     init {
         root.isGridLinesVisible = true
 
-        //addClass(AppStyle.area)
+        root.addClass(AppStyle.area)
         root.prefHeightProperty().bind(root.widthProperty())
 
         model.fields.forEach { field ->
