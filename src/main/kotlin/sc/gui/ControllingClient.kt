@@ -6,28 +6,28 @@ import sc.networking.clients.ILobbyClientListener
 import sc.networking.clients.LobbyClient
 import sc.plugin2021.AbstractClient
 import sc.plugin2021.GamePlugin
+import sc.plugin2021.IGameHandler
 import sc.server.Configuration
 import sc.shared.SlotDescriptor
 import java.net.ConnectException
 import kotlin.system.exitProcess
 
-class ControllingClient {
+class ControllingClient(host: String, port: Int, playerOne: AbstractClient, playerTwo: AbstractClient, listener: ILobbyClientListener) {
 
-    var control: IControllableGame? = null
+    var game: IControllableGame? = null
 
-    private val client: LobbyClient
+    private val control: LobbyClient = try {
+        LobbyClient(Configuration.getXStream(), sc.plugin2021.util.Configuration.classesToRegister, host, port)
+    } catch (e: ConnectException) {
+        logger.error("Could not connect to Server: " + e.message)
+        exitProcess(1)
+    }
 
-    constructor(host: String, port: Int, clientOne: AbstractClient, clientTwo: AbstractClient, listener: ILobbyClientListener) {
-        try {
-            client = LobbyClient(Configuration.getXStream(), sc.plugin2021.util.Configuration.classesToRegister, host, port)
-        } catch (e: ConnectException) {
-            logger.error("Could not connect to Server: " + e.message)
-            exitProcess(1)
-        }
-        client.start()
-        client.addListener(listener)
-        client.authenticate(Configuration.get(Configuration.PASSWORD_KEY))
-        val requestResult = client.prepareGameAndWait(
+    init {
+        control.start()
+        control.addListener(listener)
+        control.authenticate(Configuration.get(Configuration.PASSWORD_KEY))
+        val requestResult = control.prepareGameAndWait(
                 GamePlugin.PLUGIN_UUID,
                 SlotDescriptor("One", false, true),
                 SlotDescriptor("Two", false, true)
@@ -35,9 +35,9 @@ class ControllingClient {
 
         if (requestResult.isSuccessful) {
             val preparation = requestResult.result!!
-            control = client.observeAndControl(preparation)
-            clientOne.joinPreparedGame(preparation.reservations[0])
-            clientTwo.joinPreparedGame(preparation.reservations[1])
+            game = control.observeAndControl(preparation)
+            playerOne.joinPreparedGame(preparation.reservations[0])
+            playerTwo.joinPreparedGame(preparation.reservations[1])
         } else {
             logger.error("Could not prepare game!" + requestResult.error)
         }
@@ -48,6 +48,6 @@ class ControllingClient {
     }
 
     fun nextStep() {
-        control?.next()
+        game?.next()
     }
 }
