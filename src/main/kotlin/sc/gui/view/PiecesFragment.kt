@@ -17,10 +17,10 @@ class PiecesFragment(model: UndeployedPiecesModel): Fragment() {
             val color = when (it.color) {
                 Color.RED -> "red"
                 Color.GREEN -> "green"
-                Color.YELLOW -> "pink"
+                Color.YELLOW -> "yellow"
                 Color.BLUE -> "blue"
             }
-            val filename = "tiles_${color}_$number.png"
+            val filename = "${it.kind.name.toLowerCase()}.png"
             graphic = hbox {
                 imageview("file:resources/graphics/blokus/$color/$filename") {
                     isSmooth = false
