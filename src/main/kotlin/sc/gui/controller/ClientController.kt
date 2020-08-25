@@ -4,8 +4,10 @@ import org.slf4j.LoggerFactory
 import sc.framework.plugins.Player
 import sc.gui.ControllingClient
 import sc.gui.TestClient
+import sc.gui.TestGameHandler
 import sc.gui.model.BoardModel
 import sc.networking.clients.ILobbyClientListener
+import sc.networking.clients.IUpdateListener
 import sc.networking.clients.LobbyClient
 import sc.plugin2021.*
 import sc.plugin2021.util.GameRuleLogic
@@ -15,50 +17,72 @@ import sc.server.Configuration
 import sc.shared.GameResult
 import tornadofx.Controller
 
-// This is the listener to update the gamestate in the UI
-class UIGameListener(val gameStateListener: (g: GameState) -> Unit) : ILobbyClientListener {
+// This is the listener to update the global state of the server (lobby)
+class UILobbyListener() : ILobbyClientListener {
+    companion object {
+        val logger = LoggerFactory.getLogger(ClientController::class.java)
+    }
+
     override fun onNewState(roomId: String?, state: Any?) {
-        println("listener: onNewState")
+        logger.debug("listener: onNewState")
         val gameState = state as GameState
-        println("This is what I got: " + gameState.toString())
-        this.gameStateListener(gameState)
+        logger.debug("This is what I got: " + gameState.toString())
     }
 
     override fun onError(roomId: String?, error: ProtocolErrorMessage?) {
-        println("listener: onError")
+        logger.debug("listener: onError")
     }
 
     override fun onRoomMessage(roomId: String?, data: Any?) {
-        println("listener: onRoomMessage")
+        logger.debug("listener: onRoomMessage")
     }
 
     override fun onGamePrepared(response: PrepareGameProtocolMessage?) {
-        println("listener: onGamePrepared")
+        logger.debug("listener: onGamePrepared")
     }
 
     override fun onGameLeft(roomId: String?) {
-        println("listener: onGameLeft")
+        logger.debug("listener: onGameLeft")
     }
 
     override fun onGameJoined(roomId: String?) {
-        println("listener: onGameJoined")
+        logger.debug("listener: onGameJoined")
     }
 
     override fun onGameOver(roomId: String?, data: GameResult?) {
-        println("listener: onGameOver")
+        logger.debug("listener: onGameOver")
     }
 
     override fun onGamePaused(roomId: String?, nextPlayer: Player?) {
-        println("listener: onGamePaused")
+        logger.debug("listener: onGamePaused")
     }
 
     override fun onGameObserved(roomId: String?) {
-        println("listener: onGameObserved")
+        logger.debug("listener: onGameObserved")
+    }
+}
+
+class UIGameListener(val onUpdateHandler: () -> Unit): IUpdateListener {
+    companion object {
+        val logger = LoggerFactory.getLogger(ClientController::class.java)
+    }
+
+    override fun onUpdate(p0: Any?) {
+        logger.debug("game listener: onUpdate")
+        onUpdateHandler()
+    }
+
+    override fun onError(p0: String?) {
+        logger.debug("game listener: onError")
     }
 
 }
 
 class ClientController : Controller() {
+
+    companion object {
+        val logger = LoggerFactory.getLogger(ClientController::class.java)
+    }
 
     val boardModel: BoardModel by inject()
     var controllingClient: ControllingClient? = null
@@ -67,15 +91,26 @@ class ClientController : Controller() {
     fun startGame() {
         val host = "localhost"
         val port = 13050
-        println("creating and observing")
+        logger.debug("creating and observing")
         // NOTE that testClientOne and testClientTwo are currently *internal* clients to wire the logic of the GameHandlers to the server. When external clients should join the game, these are not needed.
         val testClientOne = TestClient(PlayerType.PLAYER_ONE, host, port)
         val testClientTwo = TestClient(PlayerType.PLAYER_TWO, host, port)
         controllingClient = ControllingClient(host, port, testClientOne, testClientTwo, listener)
     }
 
-    fun newGameState(gameState: GameState) {
-        println("got new board: "+gameState.board.toString())
-        //boardModel.updateFields(gameState.board)
+    fun newGameState() {
+        logger.debug("ClientController got new update")
+        val gameControl = controllingClient?.game
+        if (gameControl != null) {
+            val gameState = gameControl!!.currentState as GameState
+            if (gameState != null) {
+                logger.debug("gamestate is " + gameState)
+                boardModel.setField(0, 0, Field(Coordinates(0, 0), FieldContent.GREEN))
+            } else {
+                logger.debug("no gamestate, but " + gameControl.toString())
+            }
+        } else {
+            logger.debug("no controlling client yet")
+        }
     }
 }

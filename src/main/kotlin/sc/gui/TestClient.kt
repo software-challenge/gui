@@ -20,13 +20,17 @@ class TestClient(playerType: PlayerType, host: String, port: Int): AbstractClien
 
 class TestGameHandler(private val playerType: PlayerType, private val client: AbstractClient): IGameHandler {
 
+    companion object {
+        val logger = LoggerFactory.getLogger(TestGameHandler::class.java)
+    }
+
     var currentState: GameState? = null;
 
     override fun gameEnded(data: GameResult, team: Team?, errorMessage: String) {
     }
 
     override fun onRequestAction() {
-        println(this.playerType.toString() + " got new action request!")
+        logger.debug(this.playerType.toString(), "got new action request!")
         if (currentState != null) {
             val possibleMoves = GameRuleLogic.getPossibleMoves(currentState!!)
             sendAction(
@@ -46,7 +50,7 @@ class TestGameHandler(private val playerType: PlayerType, private val client: Ab
             sendAction(move)
              */
         } else {
-            println("ERROR: got move request before gamestate")
+            logger.error("got move request before gamestate")
         }
     }
 
@@ -55,7 +59,7 @@ class TestGameHandler(private val playerType: PlayerType, private val client: Ab
 
     override fun onUpdate(gamestate: GameState) {
         currentState = gamestate
-        println("Got new gamestate, board is now "+currentState?.board)
+        logger.debug("Got new gamestate, board is now\n" + currentState?.board)
     }
 
     override fun sendAction(move: Move) {

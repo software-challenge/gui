@@ -28,7 +28,8 @@
   </appender>
 
   <!-- Replace INFO with DEBUG to enable verbose logging -->
-  <logger name="sc" level="INFO" />
+  <logger name="sc" level="DEBUG" />
+  <logger name="sc.networking.clients.XStreamClient" level="INFO" />
 
   <root level="INFO">
     <appender-ref ref="FILE"/>
