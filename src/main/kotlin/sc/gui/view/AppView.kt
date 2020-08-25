@@ -1,6 +1,7 @@
 package sc.gui.view
 
 import javafx.application.Platform
+import javafx.stage.Stage
 import sc.gui.controller.AppController
 import tornadofx.*
 import java.awt.Desktop
@@ -58,5 +59,9 @@ class AppView : View() {
 
     init {
         this.root.center(MasterView::class)
+        with(root) {
+            prefWidth = 1550.0
+            prefHeight = 1150.0
+        }
     }
 }

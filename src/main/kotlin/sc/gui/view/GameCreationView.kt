@@ -84,7 +84,7 @@ class PlayerFileSelectFragment(model: GameCreationModel, player: Int) : Fragment
         }
     }
 
-    fun updatePlayerType() {
+    private fun updatePlayerType() {
         if (getPlayerType().value == PlayerType.COMPUTER) {
             root.center = hbox(20) {
                 button("Client wählen") {
