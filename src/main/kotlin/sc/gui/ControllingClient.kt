@@ -29,8 +29,8 @@ class ControllingClient(host: String, port: Int, playerOne: AbstractClient, play
         control.authenticate(Configuration.get(Configuration.PASSWORD_KEY))
         val requestResult = control.prepareGameAndWait(
                 GamePlugin.PLUGIN_UUID,
-                SlotDescriptor("One", false, true),
-                SlotDescriptor("Two", false, true)
+                SlotDescriptor("One", false, false),
+                SlotDescriptor("Two", false, false)
         )
 
         if (requestResult.isSuccessful) {
@@ -38,6 +38,7 @@ class ControllingClient(host: String, port: Int, playerOne: AbstractClient, play
             game = control.observeAndControl(preparation)
             playerOne.joinPreparedGame(preparation.reservations[0])
             playerTwo.joinPreparedGame(preparation.reservations[1])
+            game!!.unpause()
         } else {
             logger.error("Could not prepare game!" + requestResult.error)
         }
@@ -45,10 +46,5 @@ class ControllingClient(host: String, port: Int, playerOne: AbstractClient, play
 
     companion object {
         private val logger = LoggerFactory.getLogger(ControllingClient::class.java)
-    }
-
-    fun nextStep() {
-        logger.info("Stepping")
-        game?.next()
     }
 }
