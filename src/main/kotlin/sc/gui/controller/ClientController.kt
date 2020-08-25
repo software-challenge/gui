@@ -40,6 +40,18 @@ class ClientListener(private val playerType: PlayerType, private val client: Abs
             sendAction(
                     if (possibleMoves.isEmpty()) PassMove(currentState!!.currentColor)
                     else possibleMoves.random())
+            /*
+            val color = currentState!!.currentColor
+            val pieces = currentState!!.undeployedPieceShapes[color]
+            val move = SetMove(Piece(
+                    color,
+                    pieces!!.first(),
+                    Rotation.NONE,
+                    false,
+                    Coordinates(0, 0)
+            ))
+            sendAction(move)
+             */
         } else {
             println("ERROR: got move request before gamestate")
         }
