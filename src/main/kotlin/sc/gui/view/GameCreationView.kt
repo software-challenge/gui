@@ -85,7 +85,6 @@ class PlayerFileSelectFragment(model: GameCreationModel, player: Int) : Fragment
     }
 
     fun updatePlayerType() {
-        println("Updated Playertype for player $player ->" + getPlayerType().value)
         if (getPlayerType().value == PlayerType.COMPUTER) {
             root.center = hbox(20) {
                 button("Client wählen") {
@@ -93,8 +92,8 @@ class PlayerFileSelectFragment(model: GameCreationModel, player: Int) : Fragment
                         val fileChooser = FileChooser()
                         fileChooser.title = "Client suchen"
                         fileChooser.extensionFilters.addAll(
-                                FileChooser.ExtensionFilter("jar", "*.jar"),
-                                FileChooser.ExtensionFilter("Alle Dateien", "*.*")
+                                FileChooser.ExtensionFilter("Alle Dateien", "*.*"),
+                                FileChooser.ExtensionFilter("jar", "*.jar")
                         )
                         val selectedFile = fileChooser.showOpenDialog(find(AppView::class).currentWindow)
                         if (selectedFile != null) {
@@ -103,7 +102,7 @@ class PlayerFileSelectFragment(model: GameCreationModel, player: Int) : Fragment
                         }
                     }
                 }
-                text("Wähle deine kompilierte .jar-Datei aus")
+                text("Wähle eine ausführbare Datei aus")
             }
             root.bottom = textflow {
                 text("Ausgewählte Datei: ")
