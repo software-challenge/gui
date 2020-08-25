@@ -9,24 +9,22 @@ import sc.gui.controller.GameCreationController
 import sc.gui.model.GameCreationModel
 import sc.gui.model.PlayerType
 import tornadofx.*
+import java.io.File
 
 class GameCreationView : View("Neues Spiel") {
     val controller: GameCreationController by inject()
     val model: GameCreationModel by inject()
-
-    private val playerTypes: ObservableList<PlayerType> = FXCollections.observableArrayList(PlayerType.PLAYER, PlayerType.MANUELL, PlayerType.COMPUTER)
 
     override val root = borderpane {
         style {
             padding = box(20.px)
         }
         center = form {
-            fieldset("Neues Spiel erstellen") {
-                field("Name") {
-                    textfield(model.name).required()
-                }
-                hbox {
+            hbox {
+                vbox(20) {
                     add(PlayerFragment(model, 1))
+                }
+                vbox(20) {
                     add(PlayerFragment(model, 2))
                 }
             }
@@ -56,18 +54,67 @@ class GameCreationView : View("Neues Spiel") {
 class PlayerFragment(model: GameCreationModel, player: Int) : Fragment() {
     private val player: Int = player
     private val model: GameCreationModel = model
-    private val playerTypes: ObservableList<PlayerType> = FXCollections.observableArrayList(PlayerType.PLAYER, PlayerType.MANUELL, PlayerType.COMPUTER)
 
-    override val root = borderpane {
-        style {
-            minWidth = 120.px
-            padding = CssBox(0.px, 20.px, 0.px, 0.px)
+    override var root = vbox(20) {
+        fieldset("Spieler Nr. $player") {
+            textfield(getPlayerName()).required()
+            add(PlayerFileSelectFragment(model, player))
         }
-        top = vbox {
-            label("Player $player")
+    }
+
+
+    private fun getPlayerName(): Property<String> {
+        if (player == 1) {
+            return model.playerName1
+        }
+        return model.playerName2
+    }
+}
+
+class PlayerFileSelectFragment(model: GameCreationModel, player: Int) : Fragment() {
+    private val player: Int = player
+    private val model: GameCreationModel = model
+    private val playerTypes: ObservableList<PlayerType> = FXCollections.observableArrayList(PlayerType.HUMAN, PlayerType.MANUELL, PlayerType.COMPUTER)
+
+    override var root = borderpane {
+        top = hbox {
             combobox(getPlayerType(), playerTypes) {
-                selectionModel.selectFirst()
+                getPlayerType().value
             }
+        }
+    }
+
+    fun updatePlayerType() {
+        println("Updated Playertype for player $player ->" + getPlayerType().value)
+        if (getPlayerType().value == PlayerType.COMPUTER) {
+            root.center = hbox(20) {
+                button("Client wählen") {
+                    action {
+                        val fileChooser = FileChooser()
+                        fileChooser.title = "Client suchen"
+                        fileChooser.extensionFilters.addAll(
+                                FileChooser.ExtensionFilter("jar", "*.jar"),
+                                FileChooser.ExtensionFilter("Alle Dateien", "*.*")
+                        )
+                        val selectedFile = fileChooser.showOpenDialog(find(AppView::class).currentWindow)
+                        if (selectedFile != null) {
+                            println("Selected file $selectedFile")
+                            getPlayerJarFile().value = selectedFile
+                        }
+                    }
+                }
+                text("Wähle deine kompilierte .jar-Datei aus")
+            }
+            root.bottom = textflow {
+                text("Ausgewählte Datei: ")
+                text("")
+            }
+        } else if (getPlayerType().value == PlayerType.MANUELL) {
+            root.center = text("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
+            root.bottom = text()
+        } else {
+            root.center = text("Ein Mensch wird das Spiel hier spielen")
+            root.bottom = text()
         }
     }
 
@@ -78,22 +125,11 @@ class PlayerFragment(model: GameCreationModel, player: Int) : Fragment() {
         return model.selectedPlayerType2
     }
 
-    fun updatePlayerType() {
-        println("Updated Playertype for player $player ->" + getPlayerType())
-        if (getPlayerType().value == PlayerType.COMPUTER) {
-            root.center = button("Client wählen") {
-                action {
-                    val fileChooser = FileChooser()
-                    fileChooser.title = "Wähle den Client"
-                    val selectedFile = fileChooser.showOpenDialog(find(AppView::class).currentWindow)
-                    if (selectedFile != null) {
-                        println("Selected file $selectedFile")
-                    }
-                }
-            }
-        } else if (getPlayerType().value == PlayerType.MANUELL) {
-            root.center = label("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
+    private fun getPlayerJarFile(): Property<File> {
+        if (player == 1) {
+            return model.playerJarFile1
         }
+        return model.playerJarFile2
     }
 
 
@@ -102,10 +138,23 @@ class PlayerFragment(model: GameCreationModel, player: Int) : Fragment() {
             model.selectedPlayerType1.onChange {
                 updatePlayerType()
             }
+            model.playerJarFile1.onChange {
+                root.bottom = textflow {
+                    text("Ausgewählte Datei: ")
+                    text(model.playerJarFile1.value.absolutePath)
+                }
+            }
         } else {
             model.selectedPlayerType2.onChange {
                 updatePlayerType()
             }
+            model.playerJarFile2.onChange {
+                root.bottom = textflow {
+                    text("Ausgewählte Datei: ")
+                    text(model.playerJarFile2.value.absolutePath)
+                }
+            }
         }
+        updatePlayerType()
     }
 }
