@@ -27,8 +27,8 @@ class GameCreation : ItemViewModel<GameCreationView>() {
     val playerName2: String by property<String>()
     val selectedPlayerType1: PlayerType by property<PlayerType>()
     val selectedPlayerType2: PlayerType by property<PlayerType>()
-    val playerJarFile1: File by property<File>()
-    val playerJarFile2: File by property<File>()
+    val playerExecutable1: File by property<File>()
+    val playerExecutable2: File by property<File>()
 }
 
 class GameCreationModel : ItemViewModel<GameCreation>() {
@@ -36,8 +36,8 @@ class GameCreationModel : ItemViewModel<GameCreation>() {
     var playerName2 = bind(GameCreation::playerName2)
     var selectedPlayerType1 = bind(GameCreation::selectedPlayerType1)
     var selectedPlayerType2 = bind(GameCreation::selectedPlayerType2)
-    var playerJarFile1 = bind(GameCreation::playerJarFile1)
-    var playerJarFile2 = bind(GameCreation::playerJarFile2)
+    var playerExecutable1 = bind(GameCreation::playerExecutable1)
+    var playerExecutable2 = bind(GameCreation::playerExecutable2)
 
     init {
         playerName1.value = "Spieler 1"
@@ -45,4 +45,6 @@ class GameCreationModel : ItemViewModel<GameCreation>() {
         selectedPlayerType1.value = PlayerType.HUMAN
         selectedPlayerType2.value = PlayerType.HUMAN
     }
+
+
 }

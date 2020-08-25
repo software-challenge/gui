@@ -1,7 +1,6 @@
 package sc.gui.view
 
 import javafx.application.Platform
-import javafx.stage.Stage
 import sc.gui.controller.AppController
 import sc.gui.controller.ClientController
 import tornadofx.*
@@ -32,6 +31,7 @@ class AppView : View() {
                 }
                 item("Start", "Shortcut+R").action {
                     // TODO: remove
+                    center(GameView::class)
                     clientController.startGame()
                 }
                 separator()

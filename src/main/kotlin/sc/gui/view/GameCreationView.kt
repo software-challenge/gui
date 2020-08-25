@@ -6,14 +6,12 @@ import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.stage.FileChooser
 import sc.gui.controller.GameCreationController
-import sc.gui.model.GameCreationModel
 import sc.gui.model.PlayerType
 import tornadofx.*
 import java.io.File
 
 class GameCreationView : View("Neues Spiel") {
     val controller: GameCreationController by inject()
-    val model: GameCreationModel by inject()
 
     override val root = borderpane {
         style {
@@ -22,10 +20,10 @@ class GameCreationView : View("Neues Spiel") {
         center = form {
             hbox {
                 vbox(20) {
-                    add(PlayerFragment(model, 1))
+                    add(PlayerFragment(1))
                 }
                 vbox(20) {
-                    add(PlayerFragment(model, 2))
+                    add(PlayerFragment(2))
                 }
             }
         }
@@ -35,11 +33,11 @@ class GameCreationView : View("Neues Spiel") {
             }
             button("Erstellen") {
                 action {
-                    // TODO
+                    controller.createGame()
                 }
 
                 // TODO
-                enableWhen(model.valid)
+                enableWhen(controller.model.valid)
             }
 
             button("Zurück") {
@@ -51,29 +49,29 @@ class GameCreationView : View("Neues Spiel") {
     }
 }
 
-class PlayerFragment(model: GameCreationModel, player: Int) : Fragment() {
+class PlayerFragment(player: Int) : Fragment() {
+    val controller: GameCreationController by inject()
     private val player: Int = player
-    private val model: GameCreationModel = model
 
     override var root = vbox(20) {
         fieldset("Spieler Nr. $player") {
             textfield(getPlayerName()).required()
-            add(PlayerFileSelectFragment(model, player))
+            add(PlayerFileSelectFragment(player))
         }
     }
 
 
     private fun getPlayerName(): Property<String> {
         if (player == 1) {
-            return model.playerName1
+            return controller.model.playerName1
         }
-        return model.playerName2
+        return controller.model.playerName2
     }
 }
 
-class PlayerFileSelectFragment(model: GameCreationModel, player: Int) : Fragment() {
+class PlayerFileSelectFragment(player: Int) : Fragment() {
     private val player: Int = player
-    private val model: GameCreationModel = model
+    val controller: GameCreationController by inject()
     private val playerTypes: ObservableList<PlayerType> = FXCollections.observableArrayList(PlayerType.HUMAN, PlayerType.MANUELL, PlayerType.COMPUTER)
 
     override var root = borderpane {
@@ -98,7 +96,7 @@ class PlayerFileSelectFragment(model: GameCreationModel, player: Int) : Fragment
                         val selectedFile = fileChooser.showOpenDialog(find(AppView::class).currentWindow)
                         if (selectedFile != null) {
                             println("Selected file $selectedFile")
-                            getPlayerJarFile().value = selectedFile
+                            getPlayerExecutable().value = selectedFile
                         }
                     }
                 }
@@ -119,38 +117,38 @@ class PlayerFileSelectFragment(model: GameCreationModel, player: Int) : Fragment
 
     private fun getPlayerType(): Property<PlayerType> {
         if (player == 1) {
-            return model.selectedPlayerType1
+            return controller.model.selectedPlayerType1
         }
-        return model.selectedPlayerType2
+        return controller.model.selectedPlayerType2
     }
 
-    private fun getPlayerJarFile(): Property<File> {
+    private fun getPlayerExecutable(): Property<File> {
         if (player == 1) {
-            return model.playerJarFile1
+            return controller.model.playerExecutable1
         }
-        return model.playerJarFile2
+        return controller.model.playerExecutable2
     }
 
 
     init {
         if (player == 1) {
-            model.selectedPlayerType1.onChange {
+            controller.model.selectedPlayerType1.onChange {
                 updatePlayerType()
             }
-            model.playerJarFile1.onChange {
+            controller.model.playerExecutable1.onChange {
                 root.bottom = textflow {
                     text("Ausgewählte Datei: ")
-                    text(model.playerJarFile1.value.absolutePath)
+                    text(controller.model.playerExecutable1.value.absolutePath)
                 }
             }
         } else {
-            model.selectedPlayerType2.onChange {
+            controller.model.selectedPlayerType2.onChange {
                 updatePlayerType()
             }
-            model.playerJarFile2.onChange {
+            controller.model.playerExecutable2.onChange {
                 root.bottom = textflow {
                     text("Ausgewählte Datei: ")
-                    text(model.playerJarFile2.value.absolutePath)
+                    text(controller.model.playerExecutable2.value.absolutePath)
                 }
             }
         }
