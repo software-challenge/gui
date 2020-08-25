@@ -3,6 +3,7 @@ package sc.gui.controller
 import org.slf4j.LoggerFactory
 import sc.framework.plugins.Player
 import sc.gui.ControllingClient
+import sc.gui.TestClient
 import sc.gui.model.BoardModel
 import sc.networking.clients.ILobbyClientListener
 import sc.networking.clients.LobbyClient
@@ -14,68 +15,13 @@ import sc.server.Configuration
 import sc.shared.GameResult
 import tornadofx.Controller
 
-// connects our game handler (ClientListener) to the server
-class TestClient(playerType: PlayerType, host: String, port: Int): AbstractClient(host, port) {
-    companion object {
-        val logger = LoggerFactory.getLogger(TestClient::class.java)
-    }
-
-    init {
-        val logic = ClientListener(playerType, this)
-        handler = logic
-    }
-}
-
-class ClientListener(private val playerType: PlayerType, private val client: AbstractClient): IGameHandler {
-
-    var currentState: GameState? = null;
-
-    override fun gameEnded(data: GameResult, team: Team?, errorMessage: String) {
-    }
-
-    override fun onRequestAction() {
-        println(this.playerType.toString() + " got new action request!")
-        if (currentState != null) {
-            val possibleMoves = GameRuleLogic.getPossibleMoves(currentState!!)
-            sendAction(
-                    if (possibleMoves.isEmpty()) PassMove(currentState!!.currentColor)
-                    else possibleMoves.random())
-            /*
-            val color = currentState!!.currentColor
-            val pieces = currentState!!.undeployedPieceShapes[color]
-            val pieceShape = currentState!!.startPiece
-            val move = SetMove(Piece(
-                    color,
-                    pieceShape,
-                    Rotation.NONE,
-                    false,
-                    Coordinates(0, 0)
-            ))
-            sendAction(move)
-             */
-        } else {
-            println("ERROR: got move request before gamestate")
-        }
-    }
-
-    override fun onUpdate(player: Player, otherPlayer: Player) {
-    }
-
-    override fun onUpdate(gamestate: GameState) {
-        currentState = gamestate
-    }
-
-    override fun sendAction(move: Move) {
-        client.sendMove(move)
-    }
-
-}
-
-class UIGameListener : ILobbyClientListener {
+// This is the listener to update the gamestate in the UI
+class UIGameListener(val gameStateListener: (g: GameState) -> Unit) : ILobbyClientListener {
     override fun onNewState(roomId: String?, state: Any?) {
         println("listener: onNewState")
         val gameState = state as GameState
         println("This is what I got: " + gameState.toString())
+        this.gameStateListener(gameState)
     }
 
     override fun onError(roomId: String?, error: ProtocolErrorMessage?) {
@@ -116,7 +62,7 @@ class ClientController : Controller() {
 
     val boardModel: BoardModel by inject()
     var controllingClient: ControllingClient? = null
-    val listener: UIGameListener = UIGameListener()
+    val listener: UIGameListener = UIGameListener(::newGameState)
 
     fun startGame() {
         val host = "localhost"
@@ -126,5 +72,10 @@ class ClientController : Controller() {
         val testClientOne = TestClient(PlayerType.PLAYER_ONE, host, port)
         val testClientTwo = TestClient(PlayerType.PLAYER_TWO, host, port)
         controllingClient = ControllingClient(host, port, testClientOne, testClientTwo, listener)
+    }
+
+    fun newGameState(gameState: GameState) {
+        println("got new board: "+gameState.board.toString())
+        //boardModel.updateFields(gameState.board)
     }
 }
