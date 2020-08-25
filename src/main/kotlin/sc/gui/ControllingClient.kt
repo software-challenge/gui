@@ -48,6 +48,7 @@ class ControllingClient(host: String, port: Int, playerOne: AbstractClient, play
     }
 
     fun nextStep() {
+        logger.info("Stepping")
         game?.next()
     }
 }
