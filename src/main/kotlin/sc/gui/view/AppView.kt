@@ -1,5 +1,6 @@
 package sc.gui.view
 
+import javafx.application.Platform
 import sc.gui.controller.AppController
 import tornadofx.*
 import java.awt.Desktop
@@ -18,6 +19,7 @@ class AppView : View() {
                 }
                 item("Quit", "Shortcut+Q").action {
                     println("Quitting!")
+                    Platform.exit()
                 }
             }
             menu("Game") {

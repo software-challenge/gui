@@ -20,4 +20,8 @@ class ServerController : Controller() {
             return
         }
     }
+
+    fun stopServer() {
+        // TODO
+    }
 }

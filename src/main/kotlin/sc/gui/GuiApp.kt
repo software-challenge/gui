@@ -5,12 +5,15 @@ import sc.gui.view.AppView
 import tornadofx.App
 import tornadofx.launch
 import tornadofx.reloadStylesheetsOnFocus
+import kotlin.system.exitProcess
 
 class GuiApp : App(AppView::class, AppStyle::class) {
     val server: ServerController by inject()
     override fun stop() {
         super.stop()
-        println("Stopping")
+        server.stopServer()
+        println("GuiApp stopped, ending program")
+        exitProcess(0)
     }
 
     init {
