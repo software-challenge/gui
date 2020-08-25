@@ -3,12 +3,14 @@ package sc.gui.view
 import javafx.application.Platform
 import javafx.stage.Stage
 import sc.gui.controller.AppController
+import sc.gui.controller.ClientController
 import tornadofx.*
 import java.awt.Desktop
 import java.net.URI
 
 class AppView : View() {
     val controller: AppController by inject()
+    private val clientController: ClientController by inject()
 
     override val root = borderpane {
         top = menubar {
@@ -28,8 +30,12 @@ class AppView : View() {
                     println("New!")
                     center(GameCreationView::class)
                 }
+                item("Start", "Shortcut+R").action {
+                    // TODO: remove
+                    clientController.startGame()
+                }
                 separator()
-                item("Replay laden", "Shortcut+R").action {
+                item("Replay laden").action {
                     // TODO
                     println("Replay wird geladen")
                 }
