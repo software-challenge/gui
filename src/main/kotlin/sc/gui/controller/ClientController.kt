@@ -1,5 +1,6 @@
 package sc.gui.controller
 
+import javafx.application.Platform
 import org.slf4j.LoggerFactory
 import sc.framework.plugins.Player
 import sc.gui.ControllingClient
@@ -105,7 +106,12 @@ class ClientController : Controller() {
             val gameState = gameControl!!.currentState as GameState
             if (gameState != null) {
                 logger.debug("gamestate is " + gameState)
-                boardModel.setField(0, 0, Field(Coordinates(0, 0), FieldContent.GREEN))
+                Platform.runLater {
+                    // works:
+                    boardModel.setField(0, 0, Field(Coordinates(0, 0), FieldContent.GREEN))
+                    // does nothing, but also doesn't crash:
+                    //boardModel.updateFields(gameState.board)
+                }
             } else {
                 logger.debug("no gamestate, but " + gameControl.toString())
             }
