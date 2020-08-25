@@ -36,12 +36,11 @@ class ClientListener(private val playerType: PlayerType, private val client: Abs
     override fun onRequestAction() {
         println(this.playerType.toString() + " got new action request!")
         if (currentState != null) {
-            /*
             val possibleMoves = GameRuleLogic.getPossibleMoves(currentState!!)
             sendAction(
                     if (possibleMoves.isEmpty()) PassMove(currentState!!.currentColor)
                     else possibleMoves.random())
-             */
+            /*
             val color = currentState!!.currentColor
             val pieces = currentState!!.undeployedPieceShapes[color]
             val pieceShape = currentState!!.startPiece
@@ -53,6 +52,7 @@ class ClientListener(private val playerType: PlayerType, private val client: Abs
                     Coordinates(0, 0)
             ))
             sendAction(move)
+             */
         } else {
             println("ERROR: got move request before gamestate")
         }
@@ -126,6 +126,5 @@ class ClientController : Controller() {
         val testClientOne = TestClient(PlayerType.PLAYER_ONE, host, port)
         val testClientTwo = TestClient(PlayerType.PLAYER_TWO, host, port)
         controllingClient = ControllingClient(host, port, testClientOne, testClientTwo, listener)
-        controllingClient?.nextStep()
     }
 }
