@@ -5,16 +5,13 @@ import org.slf4j.LoggerFactory
 import sc.framework.plugins.Player
 import sc.gui.ControllingClient
 import sc.gui.TestClient
-import sc.gui.TestGameHandler
 import sc.gui.model.BoardModel
+import sc.gui.model.GameCreationModel
 import sc.networking.clients.ILobbyClientListener
 import sc.networking.clients.IUpdateListener
-import sc.networking.clients.LobbyClient
 import sc.plugin2021.*
-import sc.plugin2021.util.GameRuleLogic
 import sc.protocol.responses.PrepareGameProtocolMessage
 import sc.protocol.responses.ProtocolErrorMessage
-import sc.server.Configuration
 import sc.shared.GameResult
 import tornadofx.Controller
 
@@ -27,7 +24,7 @@ class UILobbyListener() : ILobbyClientListener {
     override fun onNewState(roomId: String?, state: Any?) {
         logger.debug("listener: onNewState")
         val gameState = state as GameState
-        logger.debug("This is what I got: " + gameState.toString())
+        logger.debug("This is what I got: $gameState")
     }
 
     override fun onError(roomId: String?, error: ProtocolErrorMessage?) {
@@ -89,23 +86,34 @@ class ClientController : Controller() {
     var controllingClient: ControllingClient? = null
     val listener: UIGameListener = UIGameListener(::newGameState)
 
-    fun startGame() {
-        val host = "localhost"
-        val port = 13050
+    fun startGame(host: String = "localhost", port: Int = 13050, gameCreationModel: GameCreationModel = GameCreationModel()) {
         logger.debug("creating and observing")
+
         // NOTE that testClientOne and testClientTwo are currently *internal* clients to wire the logic of the GameHandlers to the server. When external clients should join the game, these are not needed.
-        val testClientOne = TestClient(PlayerType.PLAYER_ONE, host, port)
-        val testClientTwo = TestClient(PlayerType.PLAYER_TWO, host, port)
-        controllingClient = ControllingClient(host, port, testClientOne, testClientTwo, listener)
+        // TODO: implement client for HUMAN, MANUELL and COMPUTER
+        val player1 = when(gameCreationModel.selectedPlayerType1.value) {
+            sc.gui.model.PlayerType.HUMAN -> TestClient(PlayerType.PLAYER_ONE, host, port)
+            sc.gui.model.PlayerType.MANUELL -> TestClient(PlayerType.PLAYER_ONE, host, port)
+            sc.gui.model.PlayerType.COMPUTER -> TestClient(PlayerType.PLAYER_ONE, host, port)
+            else -> throw Exception("invalid playerType for player 1, cannot create game")
+        }
+        val player2 = when(gameCreationModel.selectedPlayerType2.value) {
+            sc.gui.model.PlayerType.HUMAN -> TestClient(PlayerType.PLAYER_TWO, host, port)
+            sc.gui.model.PlayerType.MANUELL -> TestClient(PlayerType.PLAYER_TWO, host, port)
+            sc.gui.model.PlayerType.COMPUTER -> TestClient(PlayerType.PLAYER_TWO, host, port)
+            else -> throw Exception("invalid playerType for player 2, cannot create game")
+        }
+
+        controllingClient = ControllingClient(host, port, player1, player2, listener)
     }
 
     fun newGameState() {
         logger.debug("ClientController got new update")
         val gameControl = controllingClient?.game
         if (gameControl != null) {
-            val gameState = gameControl!!.currentState as GameState
+            val gameState = gameControl.currentState as GameState
             if (gameState != null) {
-                logger.debug("gamestate is " + gameState)
+                logger.debug("gamestate is $gameState")
                 Platform.runLater {
                     // works:
                     boardModel.setField(0, 0, Field(Coordinates(0, 0), FieldContent.GREEN))
@@ -113,7 +121,7 @@ class ClientController : Controller() {
                     //boardModel.updateFields(gameState.board)
                 }
             } else {
-                logger.debug("no gamestate, but " + gameControl.toString())
+                logger.debug("no gamestate, but $gameControl")
             }
         } else {
             logger.debug("no controlling client yet")

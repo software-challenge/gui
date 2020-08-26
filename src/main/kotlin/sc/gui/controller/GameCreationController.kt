@@ -18,6 +18,6 @@ class GameCreationController : Controller() {
         println("Selected executable: ${model.playerExecutable2.value}")
         find(GameCreationView::class).replaceWith(GameView::class)
 
-        clientController.startGame()
+        clientController.startGame(gameCreationModel = model)
     }
 }
