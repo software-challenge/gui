@@ -45,6 +45,4 @@ class GameCreationModel : ItemViewModel<GameCreation>() {
         selectedPlayerType1.value = PlayerType.HUMAN
         selectedPlayerType2.value = PlayerType.HUMAN
     }
-
-
 }

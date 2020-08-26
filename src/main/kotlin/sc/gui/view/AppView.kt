@@ -1,8 +1,14 @@
 package sc.gui.view
 
 import javafx.application.Platform
+import javafx.scene.control.Alert
+import javafx.scene.control.ButtonBar
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import sc.gui.controller.AppController
 import sc.gui.controller.ClientController
+import sc.gui.controller.ServerController
+import sc.gui.model.ViewTypes
 import tornadofx.*
 import java.awt.Desktop
 import java.net.URI
@@ -10,28 +16,44 @@ import java.net.URI
 class AppView : View() {
     val controller: AppController by inject()
     private val clientController: ClientController by inject()
+    private val serverController: ServerController by inject()
+    val sochaIcon = ImageView("https://raw.githubusercontent.com/CAU-Kiel-Tech-Inf/socha-gui/master/assets/build-resources/icon.png")
 
     override val root = borderpane {
         top = menubar {
-            menu("File") {
+            menu(graphic = sochaIcon) {
                 // TODO: will be removed
                 menu("Connect") {
                     item("Facebook").action { println("Connecting Facebook!") }
                     item("Twitter").action { println("Connecting Twitter!") }
                 }
-                item("Quit", "Shortcut+Q").action {
+                item("Beenden", "Shortcut+Q").action {
                     println("Quitting!")
                     Platform.exit()
                 }
             }
-            menu("Game") {
-                item("New", "Shortcut+N").action {
-                    println("New!")
-                    center(GameCreationView::class)
+            menu("Spiel") {
+                item("Neues Spiel", "Shortcut+N").action {
+                    println("New Game!")
+                    if (controller.model.currentView == ViewTypes.GAME) {
+                        alert(
+                                type = Alert.AlertType.CONFIRMATION,
+                                header = "Neues Spiel anfangen",
+                                content = "Willst du wirklich dein aktuelles Spiel verwerfen und ein neues anfangen?",
+                                actionFn = { btnType ->
+                                    if (btnType.buttonData == ButtonBar.ButtonData.OK_DONE) {
+                                        serverController.endGame()
+                                        controller.changeViewTo(GameCreationView::class)
+                                    }
+                                }
+                        )
+                    } else if (controller.model.currentView != ViewTypes.GAME_CREATION) {
+                        controller.changeViewTo(GameCreationView::class)
+                    }
                 }
                 item("Start", "Shortcut+R").action {
                     // TODO: remove
-                    center(GameView::class)
+                    controller.changeViewTo(GameView::class)
                     clientController.startGame()
                 }
                 separator()
@@ -64,10 +86,12 @@ class AppView : View() {
     }
 
     init {
-        this.root.center(MasterView::class)
+        sochaIcon.fitHeight = 32.0
+        sochaIcon.fitWidth = 32.0
         with(root) {
             prefWidth = 1550.0
             prefHeight = 1150.0
+            center(MasterView::class)
         }
     }
 }

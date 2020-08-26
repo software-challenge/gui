@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://travis-ci.com/CAU-Kiel-Tech-Inf/tornado-gui" rel="nofollow"><img src="https://travis-ci.com/CAU-Kiel-Tech-Inf/tornado-gui.svg?branch=master" alt="Build Status"></a>
+  <a href="https://travis-ci.com/CAU-Kiel-Tech-Inf/tornado-gui" rel="nofollow"><img src="https://travis-ci.com/CAU-Kiel-Tech-Inf/gui.svg?branch=master" alt="Build Status"></a>
 </p>
 
 <h1 align="center">GUI für die Software-Challenge Germany</h1>

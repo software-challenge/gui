@@ -1,13 +1,13 @@
 package sc.gui.controller
 
 import sc.gui.model.GameCreationModel
-import sc.gui.view.GameCreationView
 import sc.gui.view.GameView
 import tornadofx.*
 
 class GameCreationController : Controller() {
     var model = GameCreationModel()
     private val clientController: ClientController by inject()
+    private val appController: AppController by inject()
 
     fun createGame() {
         println("Creating new game")
@@ -16,7 +16,7 @@ class GameCreationController : Controller() {
         println("Selected executable: ${model.playerExecutable1.value}")
         println("Player 2: ${model.playerName2.value}, ${model.selectedPlayerType2.value}")
         println("Selected executable: ${model.playerExecutable2.value}")
-        find(GameCreationView::class).replaceWith(GameView::class)
+        appController.changeViewTo(GameView::class)
 
         clientController.startGame(gameCreationModel = model)
     }
