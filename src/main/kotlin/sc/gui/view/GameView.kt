@@ -2,18 +2,14 @@ package sc.gui.view
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.util.StringConverter
-import javafx.util.converter.NumberStringConverter
 import sc.gui.controller.ClientController
 import sc.gui.controller.GameController
 import sc.gui.model.UndeployedPiecesModel
-import sc.gui.view.BoardView
-import sc.gui.view.PiecesFragment
 import sc.plugin2021.Color
 import sc.plugin2021.PieceShape
 import tornadofx.*
-import java.text.Format
 
-class ColorConverter: StringConverter<Color>() {
+class ColorConverter : StringConverter<Color>() {
     override fun toString(color: Color?): String {
         return "Color: " + color.toString()
     }
@@ -23,7 +19,7 @@ class ColorConverter: StringConverter<Color>() {
     }
 }
 
-class ShapeConverter: StringConverter<PieceShape>() {
+class ShapeConverter : StringConverter<PieceShape>() {
     override fun toString(shape: PieceShape?): String {
         return "Shape: " + shape.toString()
     }
@@ -33,39 +29,50 @@ class ShapeConverter: StringConverter<PieceShape>() {
     }
 
 }
-class GameView: View() {
+
+class GameView : View() {
     val input = SimpleStringProperty()
     private val boardView: BoardView by inject()
     private val clientController: ClientController by inject()
     private val gameController: GameController by inject()
-    val redUndeployedPieces = PiecesFragment(UndeployedPiecesModel(Color.RED))
-    val blueUndeployedPieces = PiecesFragment(UndeployedPiecesModel(Color.BLUE))
-    val yellowUndeployedPieces = PiecesFragment(UndeployedPiecesModel(Color.YELLOW))
-    val greenUndeployedPieces = PiecesFragment(UndeployedPiecesModel(Color.GREEN))
-    override val root = vbox {
-        hbox {
-            vbox {
+    private val redUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.RED))
+    private val blueUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.BLUE))
+    private val yellowUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.YELLOW))
+    private val greenUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.GREEN))
+
+    override val root = borderpane {
+        left = borderpane {
+            top {
                 add(redUndeployedPieces)
+            }
+            bottom {
                 add(blueUndeployedPieces)
             }
-            add(boardView)
-            vbox {
-                add(yellowUndeployedPieces)
-                add(greenUndeployedPieces)
-            }
         }
-        hbox {
-            button {
-                text = "Start Client"
-                setOnMouseClicked {
-                    clientController.startGame()
+        center = borderpane {
+            center(boardView::class)
+
+            bottom = hbox {
+                button {
+                    text = "Start Client"
+                    setOnMouseClicked {
+                        clientController.startGame()
+                    }
+                }
+                label {
+                    textProperty().bindBidirectional(gameController.currentColorProperty(), ColorConverter())
+                }
+                label {
+                    textProperty().bindBidirectional(gameController.currentPieceShapeProperty(), ShapeConverter())
                 }
             }
-            label {
-                textProperty().bindBidirectional(gameController.currentColorProperty(), ColorConverter())
+        }
+        right = borderpane {
+            top {
+                add(yellowUndeployedPieces)
             }
-            label {
-                textProperty().bindBidirectional(gameController.currentPieceShapeProperty(), ShapeConverter())
+            bottom {
+                add(greenUndeployedPieces)
             }
         }
     }

@@ -3,7 +3,6 @@ package sc.gui.view
 import javafx.application.Platform
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
-import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import sc.gui.controller.AppController
 import sc.gui.controller.ClientController
@@ -22,11 +21,6 @@ class AppView : View() {
     override val root = borderpane {
         top = menubar {
             menu(graphic = sochaIcon) {
-                // TODO: will be removed
-                menu("Connect") {
-                    item("Facebook").action { println("Connecting Facebook!") }
-                    item("Twitter").action { println("Connecting Twitter!") }
-                }
                 item("Beenden", "Shortcut+Q").action {
                     println("Quitting!")
                     Platform.exit()
@@ -89,8 +83,8 @@ class AppView : View() {
         sochaIcon.fitHeight = 32.0
         sochaIcon.fitWidth = 32.0
         with(root) {
-            prefWidth = 1550.0
-            prefHeight = 1150.0
+            prefWidth = 1300.0
+            prefHeight = 800.0
             center(MasterView::class)
         }
     }

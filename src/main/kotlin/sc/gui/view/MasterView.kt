@@ -4,8 +4,8 @@ import tornadofx.*
 
 class MasterView: View() {
     private val gameView: GameView by inject()
-    override val root = pane {
-        add(gameView)
+    override val root = borderpane {
+        center(gameView::class)
     }
 }
 
