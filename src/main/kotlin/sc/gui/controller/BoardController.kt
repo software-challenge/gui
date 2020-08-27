@@ -15,13 +15,14 @@ class BoardController: Controller() {
     val game: GameController by inject()
 
     fun handleClick(x: Int, y: Int) {
-        val shape = game.currentPieceShapeProperty().get()
         val color = game.currentColorProperty().get()
+        val shape = game.currentPieceShapeProperty().get()
+        val rotation = game.currentRotationProperty().get() ?: Rotation.NONE
+        val flip = game.currentFlipProperty().get() ?: false
+
         if (shape != null && color != null) {
-            for (c in shape.coordinates) {
-                val cx = x + c.x
-                val cy = y + c.y
-                board.setField(cx, cy, Field(Coordinates(cx, cy), +color))
+            for (c in Piece(color, shape, rotation, flip, Coordinates(x, y)).coordinates) {
+                board.setField(c.x, c.y, Field(c, +color))
             }
         } else {
             println("Click, but no item selected")
