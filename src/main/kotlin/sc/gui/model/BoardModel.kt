@@ -10,6 +10,7 @@ import tornadofx.ItemViewModel
 class BoardModel: ItemViewModel<BoardView>() {
     // NOTE that this is not how the ItemViewModel should be used, see https://edvin.gitbooks.io/tornadofx-guide/content/part1/11_Editing_Models_and_Validation.html
 
+    lateinit var board: Board
     val fields: ObservableList<Field> = FXCollections.observableArrayList()
 
     init {
@@ -23,9 +24,10 @@ class BoardModel: ItemViewModel<BoardView>() {
     }
 
     fun updateFields(board: Board) {
+        this.board = board
         for (x in 0 until Constants.BOARD_SIZE) {
             for (y in 0 until Constants.BOARD_SIZE) {
-                setField(x, y, board.getField(x, y))
+                setField(x, y, board.getField(x, y).content)
             }
         }
     }
@@ -34,11 +36,12 @@ class BoardModel: ItemViewModel<BoardView>() {
         return y*Constants.BOARD_SIZE+x
     }
 
-    fun setField(x: Int, y: Int, field: Field) {
-        fields.set(indexOf(x, y), field)
+    fun setField(x: Int, y: Int, field: FieldContent) {
+        fields[indexOf(x, y)] = Field(Coordinates(x, y), field)
+        board[x, y] = field
     }
 
     fun getField(x: Int, y: Int): Field{
-        return fields.get(indexOf(x, y))
+        return fields[indexOf(x, y)]
     }
 }

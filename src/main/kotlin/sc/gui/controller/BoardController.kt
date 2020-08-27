@@ -5,6 +5,7 @@ import sc.gui.model.BoardModel
 import sc.gui.model.GameModel
 import sc.gui.view.BoardView
 import sc.plugin2021.*
+import sc.plugin2021.util.GameRuleLogic
 import tornadofx.Controller
 
 class BoardController: Controller() {
@@ -21,8 +22,11 @@ class BoardController: Controller() {
         val flip = game.currentFlipProperty().get() ?: false
 
         if (shape != null && color != null) {
-            for (c in Piece(color, shape, rotation, flip, Coordinates(x, y)).coordinates) {
-                board.setField(c.x, c.y, Field(c, +color))
+            val piece = Piece(color, shape, rotation, flip, Coordinates(x, y))
+            GameRuleLogic.validateSetMove(board.board, SetMove(piece))
+            for (c in piece.coordinates) {
+                board.setField(c.x, c.y, +color)
+                board.board[c.x, c.y] = +color
             }
         } else {
             println("Click, but no item selected")
