@@ -1,6 +1,7 @@
 package sc.gui
 
 import org.slf4j.LoggerFactory
+import sc.api.plugins.exceptions.GameLogicException
 import sc.framework.plugins.Player
 import sc.plugin2021.*
 import sc.plugin2021.util.GameRuleLogic
@@ -33,9 +34,10 @@ class TestGameHandler(private val playerType: PlayerType, private val client: Ab
         logger.debug(this.playerType.toString(), "got new action request!")
         if (currentState != null) {
             val possibleMoves = GameRuleLogic.getPossibleMoves(currentState!!)
-            sendAction(
-                    if (possibleMoves.isEmpty()) PassMove(currentState!!.currentColor)
-                    else possibleMoves.random())
+            if (possibleMoves.isEmpty())
+                throw GameLogicException("No possible Moves found!?")
+
+            sendAction(possibleMoves.random())
         } else {
             logger.error("got move request before gamestate")
         }
