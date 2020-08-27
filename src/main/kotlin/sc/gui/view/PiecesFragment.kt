@@ -5,10 +5,11 @@ import org.slf4j.LoggerFactory
 import sc.gui.controller.GameController
 import sc.plugin2021.Color
 import sc.plugin2021.Piece
+import sc.plugin2021.PieceShape
 import sc.plugin2021.Rotation
 import tornadofx.*
 
-class PiecesFragment(piece: Piece) : Fragment() {
+class PiecesFragment(color: Color, pieceShape: PieceShape) : Fragment() {
     val controller: GameController by inject()
 
 
@@ -31,9 +32,9 @@ class PiecesFragment(piece: Piece) : Fragment() {
         }
 
         setOnMouseClicked {
-            logger.debug("Clicked on ${piece.color} ${piece.kind.name}")
-            controller.selectColor(piece.color)
-            controller.selectPieceShape(piece.kind)
+            logger.debug("Clicked on ${color} ${pieceShape.name}")
+            controller.selectColor(color)
+            controller.selectPieceShape(pieceShape)
 
             if (it.button == MouseButton.MIDDLE) {
                 logger.debug("Flipped the current piece")
@@ -54,21 +55,21 @@ class PiecesFragment(piece: Piece) : Fragment() {
             controller.selectRotation(rotation)
         }
 
-        val color = when (piece.color) {
+        val colorName = when (color) {
             Color.RED -> "red"
             Color.GREEN -> "green"
             Color.YELLOW -> "yellow"
             Color.BLUE -> "blue"
         }
-        val filename = "${piece.kind.name.toLowerCase()}.png"
-        center = imageview("file:resources/graphics/blokus/$color/$filename") {
+        val filename = "${pieceShape.name.toLowerCase()}.png"
+        center = imageview("file:resources/graphics/blokus/$colorName/$filename") {
             style {
                 backgroundColor += c("#000000")
             }
             isSmooth = false
         }
 
-        tooltip(piece.kind.name)
+        tooltip(pieceShape.name)
     }
 
     companion object {

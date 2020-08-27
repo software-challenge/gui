@@ -7,16 +7,20 @@ import sc.plugin2021.*
 import tornadofx.ItemViewModel
 
 class UndeployedPiecesModel(val color: Color) : ItemViewModel<PiecesListFragment>() {
-    var undeployedPieces: ObservableList<Piece> = FXCollections.observableArrayList()
+    var undeployedPieces: ObservableList<PieceShape> = FXCollections.observableArrayList()
 
     init {
-        for (shape in PieceShape.shapes.keys) {
-            undeployedPieces.add(Piece(color, shape, Rotation.NONE))
+        for (shape in PieceShape.shapes.values) {
+            undeployedPieces.add(shape)
         }
     }
 
     fun update(shapes: Set<PieceShape> ) {
-        undeployedPieces.clear()
-        undeployedPieces.addAll(shapes.map { Piece(color, it, Rotation.NONE) })
+        val remove = HashSet(undeployedPieces)
+        remove.removeAll(shapes)
+        val add = HashSet<PieceShape>(shapes)
+        add.removeAll(undeployedPieces)
+        undeployedPieces.removeAll(remove)
+        undeployedPieces.addAll(add)
     }
 }

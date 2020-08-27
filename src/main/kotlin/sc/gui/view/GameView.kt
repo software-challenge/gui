@@ -36,20 +36,6 @@ class ShapeConverter : StringConverter<PieceShape>() {
 
 }
 
-class TestFragment() : Fragment() {
-    override val root = label {
-        text = "Test"
-    }
-    override fun onDock() {
-        super.onDock()
-        logger.debug("test fragment docked")
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(TestFragment::class.java)
-    }
-}
-
 class PiecesScope(val pieces: ObservableList<Piece>): Scope()
 
 class GameView : View() {
@@ -58,6 +44,9 @@ class GameView : View() {
     private val clientController: ClientController by inject()
     private val gameController: GameController by inject()
     private val redUndeployedPieces = UndeployedPiecesModel(Color.RED)
+    private val blueUndeployedPieces = UndeployedPiecesModel(Color.BLUE)
+    private val yellowUndeployedPieces = UndeployedPiecesModel(Color.YELLOW)
+    private val greenUndeployedPieces = UndeployedPiecesModel(Color.GREEN)
 
     init {
         subscribe<StartGameRequest> { event ->
@@ -68,12 +57,12 @@ class GameView : View() {
     override val root = borderpane {
         left = borderpane {
             top {
-                this += find<TestFragment>()
-                val pieces = "pieces" to redUndeployedPieces.undeployedPieces
+                val pieces = "undeployedPiecesModel" to redUndeployedPieces
                 this += find<PiecesListFragment>(pieces)
             }
             bottom {
-                //add(blueUndeployedPieces)
+                val pieces = "undeployedPiecesModel" to blueUndeployedPieces
+                this += find<PiecesListFragment>(pieces)
             }
         }
         center = borderpane {
@@ -114,10 +103,12 @@ class GameView : View() {
         }
         right = borderpane {
             top {
-                //add(yellowUndeployedPieces)
+                val pieces = "undeployedPiecesModel" to yellowUndeployedPieces
+                this += find<PiecesListFragment>(pieces)
             }
             bottom {
-                //add(greenUndeployedPieces)
+                val pieces = "undeployedPiecesModel" to greenUndeployedPieces
+                this += find<PiecesListFragment>(pieces)
             }
         }
     }

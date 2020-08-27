@@ -11,22 +11,20 @@ import sc.plugin2021.Piece
 import tornadofx.*
 
 class PiecesListFragment() : Fragment() {
-    val pieces: ObservableList<Piece> by param()
+    val undeployedPiecesModel: UndeployedPiecesModel by param()
 
     val controller: GameController by inject()
 
     init {
-        //logger.debug("pieces fragment list for ${model.color}")
+        logger.debug("pieces fragment list for ${undeployedPiecesModel.color}")
         subscribe<NewGameState> { event ->
             logger.debug("new event $event")
-            /*
-            val shapes = event.gameState.undeployedPieceShapes[model.color]
+            val shapes = event.gameState.undeployedPieceShapes[undeployedPiecesModel.color]
             if (shapes != null) {
-                //model.update(shapes.toSet())
+                undeployedPiecesModel.update(shapes.toSet())
             } else {
                 logger.error("got NewGameState event but gameState was null!")
             }
-             */
         }
     }
 
@@ -37,9 +35,9 @@ class PiecesListFragment() : Fragment() {
         // fill column by column and not row by row
         orientation = Orientation.VERTICAL
 
-        children.bind(pieces) {
+        children.bind(undeployedPiecesModel.undeployedPieces) {
             hbox {
-                add(PiecesFragment(it))
+                add(PiecesFragment(undeployedPiecesModel.color, it))
             }
         }
     }
