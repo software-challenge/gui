@@ -2,6 +2,9 @@ package sc.gui.view
 
 import javafx.collections.ObservableList
 import javafx.geometry.Orientation
+import javafx.geometry.Point2D
+import javafx.geometry.Pos
+import javafx.scene.Node
 import org.slf4j.LoggerFactory
 import sc.gui.ControllingClient
 import sc.gui.controller.GameController
@@ -29,14 +32,19 @@ class PiecesListFragment() : Fragment() {
     }
 
     override val root = flowpane {
-        hgap = 4.0
-        vgap = 4.0
+        hgap = 1.0
+        vgap = 1.0
+        alignment = Pos.TOP_LEFT
 
         // fill column by column and not row by row
         orientation = Orientation.VERTICAL
 
         children.bind(undeployedPiecesModel.undeployedPieces) {
             hbox {
+                style = """
+                    -fx-border-color: blue;
+                    -fx-border-width: 2;
+                    """
                 add(PiecesFragment(undeployedPiecesModel.color, it))
             }
         }

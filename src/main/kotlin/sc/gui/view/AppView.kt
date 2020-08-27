@@ -89,5 +89,6 @@ class AppView : View() {
             prefHeight = 800.0
             center(MasterView::class)
         }
+        title = "Software-Challenge Germany"
     }
 }

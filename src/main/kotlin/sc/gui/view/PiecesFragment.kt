@@ -2,37 +2,30 @@ package sc.gui.view
 
 import javafx.scene.input.MouseButton
 import org.slf4j.LoggerFactory
+import sc.gui.AppStyle
 import sc.gui.controller.GameController
 import sc.plugin2021.Color
-import sc.plugin2021.Piece
 import sc.plugin2021.PieceShape
-import sc.plugin2021.Rotation
 import tornadofx.*
 
 class PiecesFragment(color: Color, pieceShape: PieceShape) : Fragment() {
     val controller: GameController by inject()
 
-
-    override val root = borderpane {
-        style {
-            backgroundColor += c("#cecece")
-        }
+    override val root = hbox {
+        // setPrefSize(80.0, 80.0)
 
         setOnMouseEntered {
-            style {
-                backgroundColor += c("#444444")
-            }
-
+            addClass(AppStyle.colorGRAY)
+            it.consume()
         }
 
         setOnMouseExited {
-            style {
-                backgroundColor += c("#cecece")
-            }
+            removeClass(AppStyle.colorGRAY)
+            it.consume()
         }
 
         setOnMouseClicked {
-            logger.debug("Clicked on ${color} ${pieceShape.name}")
+            logger.debug("Clicked on $color $pieceShape")
             controller.selectColor(color)
             controller.selectPieceShape(pieceShape)
 
@@ -40,20 +33,18 @@ class PiecesFragment(color: Color, pieceShape: PieceShape) : Fragment() {
                 logger.debug("Flipped the current piece")
                 controller.selectFlip(!controller.currentFlipProperty().get())
             }
+            it.consume()
         }
 
-        setOnScroll {
-            val rotation = controller.currentRotationProperty().get().rotate(
-                    when {
-                        it.deltaY >  0.0 -> Rotation.LEFT
-                        it.deltaY == 0.0 -> Rotation.NONE
-                        it.deltaY <  0.0 -> Rotation.RIGHT
-                        else             -> Rotation.MIRROR
-                    }
-            )
-            logger.debug("Set rotation to $rotation")
-            controller.selectRotation(rotation)
+        setOnDragDetected {
+            logger.debug("Drag detected of $color, $pieceShape")
+            controller.selectColor(color)
+            controller.selectPieceShape(pieceShape)
+
+            startFullDrag()
+            it.consume()
         }
+
 
         val colorName = when (color) {
             Color.RED -> "red"
@@ -62,10 +53,7 @@ class PiecesFragment(color: Color, pieceShape: PieceShape) : Fragment() {
             Color.BLUE -> "blue"
         }
         val filename = "${pieceShape.name.toLowerCase()}.png"
-        center = imageview("file:resources/graphics/blokus/$colorName/$filename") {
-            style {
-                backgroundColor += c("#000000")
-            }
+        imageview("file:resources/graphics/blokus/$colorName/$filename") {
             isSmooth = false
         }
 

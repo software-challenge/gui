@@ -18,9 +18,10 @@ import sc.gui.model.UndeployedPiecesModel
 import sc.plugin2021.Color
 import sc.plugin2021.Piece
 import sc.plugin2021.PieceShape
+import sc.plugin2021.Rotation
 import tornadofx.*
 
-class ColorConverter : StringConverter<Color>() {
+class ColorConverter: StringConverter<Color>() {
     override fun toString(color: Color?): String {
         return color!!.name.toLowerCase()
     }
@@ -48,12 +49,13 @@ class PathBinding(val color: Property<Color>, val pieceShape: Property<PieceShap
         bind(color)
         bind(pieceShape)
     }
+
     override fun computeValue(): String {
         return String.format("file:resources/graphics/blokus/%s/%s.png", color.getValue().toString().toLowerCase(), pieceShape.getValue().toString().toLowerCase())
     }
 }
 
-class GameView : View() {
+class GameView: View() {
     val input = SimpleStringProperty()
     private val boardView: BoardView by inject()
     private val clientController: ClientController by inject()
@@ -135,6 +137,21 @@ class GameView : View() {
                 val pieces = "undeployedPiecesModel" to greenUndeployedPieces
                 this += find<PiecesListFragment>(pieces)
             }
+        }
+
+
+        setOnScroll {
+            gameController.currentRotationProperty().set(
+                    gameController.currentRotationProperty().get().rotate(
+                            when {
+                                it.deltaY > 0.0 -> Rotation.LEFT
+                                it.deltaY == 0.0 -> Rotation.NONE
+                                it.deltaY < 0.0 -> Rotation.RIGHT
+                                else -> Rotation.MIRROR
+                            }
+                    )
+            )
+            it.consume()
         }
     }
 

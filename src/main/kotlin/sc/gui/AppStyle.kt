@@ -54,7 +54,7 @@ class AppStyle : Stylesheet() {
             backgroundColor += Color.DARKGREEN
         }
         dragTarget {
-            backgroundColor += Color.DARKGRAY
+            backgroundColor += Color.DEEPPINK
         }
         colorRED {
             backgroundColor += Color.RED

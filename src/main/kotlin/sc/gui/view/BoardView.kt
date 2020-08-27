@@ -5,6 +5,7 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
+import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
 import sc.gui.controller.BoardController
 import sc.gui.controller.NewGameState
@@ -60,44 +61,51 @@ class BoardView : View() {
     fun paneFromField(field: Field): Pane {
         val x = field.coordinates.x
         val y = field.coordinates.y
+
         val pane = Pane()
-        pane.setOnDragEntered {
-            pane.addClass(AppStyle.dragTarget)
-            println("Dragging entered!")
-            it.consume()
+        with(pane) {
+            label("$x,$y").style {
+                fontSize = 13.px
+            }
+            setOnDragEntered {
+                pane.addClass(AppStyle.dragTarget)
+                logger.debug("Dragging entered on pane $x,$y")
+                it.consume()
+            }
+            setOnDragExited {
+                pane.removeClass(AppStyle.dragTarget)
+                logger.debug("Dragging exited on pane $x,$y")
+                it.consume()
+            }
+            setOnDragOver {
+                it.acceptTransferModes(TransferMode.MOVE)
+                it.consume()
+            }
+            setOnDragDropped {
+                logger.debug("Drag ended on pane $x,$y")
+                controller.handleClick(x, y)
+                it.isDropCompleted = true
+                it.consume()
+            }
+            setOnMouseClicked {
+                println("Click event")
+                controller.handleClick(x, y)
+                it.consume()
+            }
+
+            addClass(when (field.content) {
+                FieldContent.EMPTY -> AppStyle.colorGRAY
+                FieldContent.RED -> AppStyle.colorRED
+                FieldContent.BLUE -> AppStyle.colorBLUE
+                FieldContent.GREEN -> AppStyle.colorGREEN
+                FieldContent.YELLOW -> AppStyle.colorYELLOW
+            })
         }
-        pane.setOnDragExited {
-            pane.removeClass(AppStyle.dragTarget)
-            println("Dragging exited!")
-            it.consume()
-        }
-        pane.setOnDragOver {
-            it.acceptTransferModes(TransferMode.MOVE)
-            it.consume()
-        }
-        pane.setOnDragDropped {
-            it.isDropCompleted = true
-            it.consume()
-        }
-        pane.setOnMouseClicked {
-            println("Click event")
-            controller.handleClick(x, y)
-            it.consume()
-        }
-        val content = field.content
-        pane.label("$x,$y").style {
-            fontSize = 13.px
-        }
-        var cssClass: CssRule
-        when (content) {
-            FieldContent.EMPTY -> cssClass = AppStyle.colorGRAY
-            FieldContent.RED -> cssClass = AppStyle.colorRED
-            FieldContent.BLUE -> cssClass = AppStyle.colorBLUE
-            FieldContent.GREEN -> cssClass = AppStyle.colorGREEN
-            FieldContent.YELLOW -> cssClass = AppStyle.colorYELLOW
-        }
-        pane.addClass(cssClass)
         return pane
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(BoardView::class.java)
     }
 }
 
@@ -105,13 +113,15 @@ class BoardView : View() {
 class BoardCanvas : Canvas() {
     init {
         widthProperty().addListener { _, old, new ->
-            println("Width changed from $old -> $new")
+            println("canvas width changed from $old -> $new")
             draw()
         }
         heightProperty().addListener { _, old, new ->
-            println("Height changed from $old -> $new")
+            println("canvas height changed from $old -> $new")
             draw()
         }
+
+        println("canvas current H: $height W: $width")
         draw()
     }
 
