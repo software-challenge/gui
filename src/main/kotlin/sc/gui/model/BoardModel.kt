@@ -8,6 +8,8 @@ import sc.plugin2021.util.Constants
 import tornadofx.ItemViewModel
 
 class BoardModel: ItemViewModel<BoardView>() {
+    // NOTE that this is not how the ItemViewModel should be used, see https://edvin.gitbooks.io/tornadofx-guide/content/part1/11_Editing_Models_and_Validation.html
+
     val fields: ObservableList<Field> = FXCollections.observableArrayList()
 
     init {

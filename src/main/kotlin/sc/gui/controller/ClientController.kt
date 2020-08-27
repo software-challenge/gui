@@ -78,7 +78,7 @@ class UIGameListener(val onUpdateHandler: () -> Unit): IUpdateListener {
 }
 
 class StartGameRequest(val gameCreationModel: GameCreationModel): FXEvent(EventBus.RunOn.BackgroundThread)
-class UpdateGameState(val gameState: GameState): FXEvent()
+class NewGameState(val gameState: GameState): FXEvent()
 
 class ClientController : Controller() {
 
@@ -91,6 +91,7 @@ class ClientController : Controller() {
     val listener: UIGameListener = UIGameListener(::newGameState)
 
     // Do NOT call this directly in the UI thread, use fire(StartGameRequest(gameCreationModel)). This way, the game starting is done in the background
+    // TODO put everything which is activated by events in a different class and call these from the controller by events
     fun startGame(host: String = "localhost", port: Int = 13050, gameCreationModel: GameCreationModel = GameCreationModel()) {
         // starting the game in the UI thread blocks the UI
 
@@ -122,7 +123,7 @@ class ClientController : Controller() {
             val gameState = gameControl.currentState as? GameState
             if (gameState != null) {
                 logger.debug("gamestate is $gameState")
-                fire(UpdateGameState(gameState))
+                fire(NewGameState(gameState))
             } else {
                 logger.debug("no gamestate, but $gameControl")
             }
@@ -135,7 +136,7 @@ class ClientController : Controller() {
         val gameState = controllingClient?.game?.currentState as? GameState
         if (gameState != null) {
             logger.debug("gamestate is $gameState")
-            fire(UpdateGameState(gameState))
+            fire(NewGameState(gameState))
         }
     }
 
@@ -147,5 +148,16 @@ class ClientController : Controller() {
     fun next() {
         controllingClient?.game?.next()
         updateGameState()
+    }
+
+    fun togglePause() {
+        val game = controllingClient?.game
+        if (game != null) {
+            if (game.isPaused) {
+                game.unpause()
+            } else {
+                game.pause()
+            }
+        }
     }
 }

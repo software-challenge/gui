@@ -7,7 +7,7 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import sc.gui.AppStyle
 import sc.gui.controller.BoardController
-import sc.gui.controller.UpdateGameState
+import sc.gui.controller.NewGameState
 import sc.gui.model.BoardModel
 import sc.plugin2021.Field
 import sc.plugin2021.FieldContent
@@ -21,11 +21,8 @@ class BoardView : View() {
 
     init {
 
-        subscribe<UpdateGameState> { event ->
+        subscribe<NewGameState> { event ->
             model.updateFields(event.gameState.board)
-            model.fields.forEach { field ->
-                root.add(paneFromField(field), field.coordinates.x, field.coordinates.y)
-            }
         }
 
         root.isGridLinesVisible = true
@@ -41,7 +38,9 @@ class BoardView : View() {
             root.constraintsForColumn(i).percentWidth = 5.0
             root.constraintsForColumn(i).hgrow = Priority.ALWAYS
         }
-        /*
+
+        // TODO seems that the listener binding is quite slow, update here directly
+        // is that the right way to do that?
         model.fields.addListener(ListChangeListener { change ->
             while (change.next()) {
                 if (change.wasAdded()) {
@@ -53,7 +52,6 @@ class BoardView : View() {
                 }
             }
         })
-         */
 
 
         //root.center = BoardCanvas()

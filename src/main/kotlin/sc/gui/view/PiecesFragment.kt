@@ -1,5 +1,6 @@
 package sc.gui.view
 
+import org.slf4j.LoggerFactory
 import sc.gui.controller.GameController
 import sc.plugin2021.Color
 import sc.plugin2021.Piece
@@ -28,7 +29,7 @@ class PiecesFragment(piece: Piece) : Fragment() {
         }
 
         setOnMouseClicked {
-            println("Clicked on " + piece.color + " " + piece.kind.name)
+            logger.debug("Clicked on " + piece.color + " " + piece.kind.name)
             controller.selectColor(piece.color)
             controller.selectPieceShape(piece.kind)
         }
@@ -48,5 +49,9 @@ class PiecesFragment(piece: Piece) : Fragment() {
         }
 
         tooltip(piece.kind.name)
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(PiecesFragment::class.java)
     }
 }

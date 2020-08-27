@@ -108,9 +108,12 @@ class ControllingClient(host: String, port: Int) {
             playerOne.joinPreparedGame(preparation.reservations[0])
             playerTwo.joinPreparedGame(preparation.reservations[1])
             // TODO: instead of waiting, we should listen for a game ready event (both players joined) or there should be a way to tell the server "start game if both players joined". But I found neither, yet.
+            // Idea: leave game paused and let user unpause it
+            /*
             Timer("Start game", false).schedule(2000) {
                 game!!.unpause()
             }
+             */
         } else {
             logger.error("Could not prepare game!" + requestResult.error)
         }

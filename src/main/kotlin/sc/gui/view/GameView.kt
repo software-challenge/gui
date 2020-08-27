@@ -1,14 +1,17 @@
 package sc.gui.view
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleStringProperty
+import javafx.collections.ObservableList
+import javafx.scene.Parent
 import javafx.util.StringConverter
-import sc.gui.controller.ClientController
-import sc.gui.controller.GameController
-import sc.gui.controller.StartGameRequest
-import sc.gui.controller.UpdateGameState
+import javafx.util.converter.IntegerStringConverter
+import org.slf4j.LoggerFactory
+import sc.gui.controller.*
 import sc.gui.model.GameCreationModel
 import sc.gui.model.UndeployedPiecesModel
 import sc.plugin2021.Color
+import sc.plugin2021.Piece
 import sc.plugin2021.PieceShape
 import tornadofx.*
 
@@ -33,15 +36,28 @@ class ShapeConverter : StringConverter<PieceShape>() {
 
 }
 
+class TestFragment() : Fragment() {
+    override val root = label {
+        text = "Test"
+    }
+    override fun onDock() {
+        super.onDock()
+        logger.debug("test fragment docked")
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(TestFragment::class.java)
+    }
+}
+
+class PiecesScope(val pieces: ObservableList<Piece>): Scope()
+
 class GameView : View() {
     val input = SimpleStringProperty()
     private val boardView: BoardView by inject()
     private val clientController: ClientController by inject()
     private val gameController: GameController by inject()
-    private val redUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.RED))
-    private val blueUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.BLUE))
-    private val yellowUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.YELLOW))
-    private val greenUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.GREEN))
+    private val redUndeployedPieces = UndeployedPiecesModel(Color.RED)
 
     init {
         subscribe<StartGameRequest> { event ->
@@ -52,10 +68,12 @@ class GameView : View() {
     override val root = borderpane {
         left = borderpane {
             top {
-                add(redUndeployedPieces)
+                this += find<TestFragment>()
+                val pieces = "pieces" to redUndeployedPieces.undeployedPieces
+                this += find<PiecesListFragment>(pieces)
             }
             bottom {
-                add(blueUndeployedPieces)
+                //add(blueUndeployedPieces)
             }
         }
         center = borderpane {
@@ -69,16 +87,22 @@ class GameView : View() {
                     }
                 }
                 label {
-                    textProperty().bindBidirectional(gameController.currentColorProperty(), ColorConverter())
+                    textProperty().bind(Bindings.concat("Selected: ", gameController.currentColorProperty(), " ", gameController.currentPieceShapeProperty()))
                 }
-                label {
-                    textProperty().bindBidirectional(gameController.currentPieceShapeProperty(), ShapeConverter())
+                button {
+                    text = "Pause / Play"
+                    setOnMouseClicked {
+                        clientController.togglePause()
+                    }
                 }
                 button {
                     text = "Previous"
                     setOnMouseClicked {
                         clientController.previous()
                     }
+                }
+                label {
+                    textProperty().bind(Bindings.concat(gameController.currentTurnProperty(), " / ", gameController.availableTurnsProperty()))
                 }
                 button {
                     text = "Next"
@@ -90,11 +114,15 @@ class GameView : View() {
         }
         right = borderpane {
             top {
-                add(yellowUndeployedPieces)
+                //add(yellowUndeployedPieces)
             }
             bottom {
-                add(greenUndeployedPieces)
+                //add(greenUndeployedPieces)
             }
         }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(GameView::class.java)
     }
 }
