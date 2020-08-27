@@ -1,9 +1,14 @@
 package sc.gui.view
 
 import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringBinding
+import javafx.beans.property.Property
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
 import javafx.collections.ObservableList
 import javafx.scene.Parent
+import javafx.scene.image.ImageView
+import javafx.util.Duration
 import javafx.util.StringConverter
 import javafx.util.converter.IntegerStringConverter
 import org.slf4j.LoggerFactory
@@ -17,7 +22,7 @@ import tornadofx.*
 
 class ColorConverter : StringConverter<Color>() {
     override fun toString(color: Color?): String {
-        return "Color: " + color.toString()
+        return color!!.name.toLowerCase()
     }
 
     override fun fromString(string: String?): Color {
@@ -25,9 +30,11 @@ class ColorConverter : StringConverter<Color>() {
     }
 }
 
-class ShapeConverter : StringConverter<PieceShape>() {
-    override fun toString(shape: PieceShape?): String {
-        return "Shape: " + shape.toString()
+class PiecesScope(val pieces: ObservableList<Piece>): Scope()
+
+class ShapeConverter(): StringConverter<PieceShape>() {
+    override fun toString(piece: PieceShape?): String {
+        return piece!!.name.toLowerCase()
     }
 
     override fun fromString(string: String?): PieceShape {
@@ -36,7 +43,15 @@ class ShapeConverter : StringConverter<PieceShape>() {
 
 }
 
-class PiecesScope(val pieces: ObservableList<Piece>): Scope()
+class PathBinding(val color: Property<Color>, val pieceShape: Property<PieceShape>): StringBinding() {
+    init {
+        bind(color)
+        bind(pieceShape)
+    }
+    override fun computeValue(): String {
+        return String.format("file:resources/graphics/blokus/%s/%s.png", color.getValue().toString().toLowerCase(), pieceShape.getValue().toString().toLowerCase())
+    }
+}
 
 class GameView : View() {
     val input = SimpleStringProperty()
@@ -48,6 +63,8 @@ class GameView : View() {
     private val yellowUndeployedPieces = UndeployedPiecesModel(Color.YELLOW)
     private val greenUndeployedPieces = UndeployedPiecesModel(Color.GREEN)
 
+    lateinit var imageView: ImageView
+
     init {
         subscribe<StartGameRequest> { event ->
             clientController.startGame("localhost", 13050, event.gameCreationModel)
@@ -57,11 +74,11 @@ class GameView : View() {
     override val root = borderpane {
         left = borderpane {
             top {
-                val pieces = "undeployedPiecesModel" to redUndeployedPieces
+                val pieces = "undeployedPiecesModel" to blueUndeployedPieces
                 this += find<PiecesListFragment>(pieces)
             }
             bottom {
-                val pieces = "undeployedPiecesModel" to blueUndeployedPieces
+                val pieces = "undeployedPiecesModel" to redUndeployedPieces
                 this += find<PiecesListFragment>(pieces)
             }
         }
@@ -77,6 +94,14 @@ class GameView : View() {
                 }
                 label {
                     textProperty().bind(Bindings.concat("Selected: ", gameController.currentColorProperty(), " ", gameController.currentPieceShapeProperty()))
+                }
+                val path = PathBinding(gameController.currentColorProperty(), gameController.currentPieceShapeProperty())
+                imageview(path) {
+                    style {
+                        backgroundColor += c("#000000")
+                    }
+                    isSmooth = false
+                    rotate(Duration.seconds(3.0), 90)
                 }
                 button {
                     text = "Pause / Play"
