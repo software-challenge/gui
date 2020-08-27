@@ -41,6 +41,19 @@ class PiecesFragment(piece: Piece) : Fragment() {
             }
         }
 
+        setOnScroll {
+            val rotation = controller.currentRotationProperty().get().rotate(
+                    when {
+                        it.deltaY >  0.0 -> Rotation.LEFT
+                        it.deltaY == 0.0 -> Rotation.NONE
+                        it.deltaY <  0.0 -> Rotation.RIGHT
+                        else             -> Rotation.MIRROR
+                    }
+            )
+            logger.debug("Set rotation to $rotation")
+            controller.selectRotation(rotation)
+        }
+
         val color = when (piece.color) {
             Color.RED -> "red"
             Color.GREEN -> "green"
