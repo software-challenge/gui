@@ -31,13 +31,13 @@ class PiecesFragment(piece: Piece) : Fragment() {
         }
 
         setOnMouseClicked {
+            logger.debug("Clicked on ${piece.color} ${piece.kind.name}")
+            controller.selectColor(piece.color)
+            controller.selectPieceShape(piece.kind)
+
             if (it.button == MouseButton.MIDDLE) {
                 logger.debug("Flipped the current piece")
                 controller.selectFlip(!controller.currentFlipProperty().get())
-            } else {
-                logger.debug("Clicked on ${piece.color} ${piece.kind.name}")
-                controller.selectColor(piece.color)
-                controller.selectPieceShape(piece.kind)
             }
         }
 
