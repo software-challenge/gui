@@ -4,6 +4,9 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.util.StringConverter
 import sc.gui.controller.ClientController
 import sc.gui.controller.GameController
+import sc.gui.controller.StartGameRequest
+import sc.gui.controller.UpdateGameState
+import sc.gui.model.GameCreationModel
 import sc.gui.model.UndeployedPiecesModel
 import sc.plugin2021.Color
 import sc.plugin2021.PieceShape
@@ -40,6 +43,12 @@ class GameView : View() {
     private val yellowUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.YELLOW))
     private val greenUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.GREEN))
 
+    init {
+        subscribe<StartGameRequest> { event ->
+            clientController.startGame("localhost", 13050, event.gameCreationModel)
+        }
+    }
+
     override val root = borderpane {
         left = borderpane {
             top {
@@ -56,7 +65,7 @@ class GameView : View() {
                 button {
                     text = "Start Client"
                     setOnMouseClicked {
-                        clientController.startGame()
+                        fire(StartGameRequest(GameCreationModel()))
                     }
                 }
                 label {
@@ -64,6 +73,18 @@ class GameView : View() {
                 }
                 label {
                     textProperty().bindBidirectional(gameController.currentPieceShapeProperty(), ShapeConverter())
+                }
+                button {
+                    text = "Previous"
+                    setOnMouseClicked {
+                        clientController.previous()
+                    }
+                }
+                button {
+                    text = "Next"
+                    setOnMouseClicked {
+                        clientController.next()
+                    }
                 }
             }
         }

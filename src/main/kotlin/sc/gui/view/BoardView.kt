@@ -7,6 +7,7 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import sc.gui.AppStyle
 import sc.gui.controller.BoardController
+import sc.gui.controller.UpdateGameState
 import sc.gui.model.BoardModel
 import sc.plugin2021.Field
 import sc.plugin2021.FieldContent
@@ -19,6 +20,14 @@ class BoardView : View() {
     override val root = GridPane()
 
     init {
+
+        subscribe<UpdateGameState> { event ->
+            model.updateFields(event.gameState.board)
+            model.fields.forEach { field ->
+                root.add(paneFromField(field), field.coordinates.x, field.coordinates.y)
+            }
+        }
+
         root.isGridLinesVisible = true
 
         root.addClass(AppStyle.area)
@@ -32,9 +41,9 @@ class BoardView : View() {
             root.constraintsForColumn(i).percentWidth = 5.0
             root.constraintsForColumn(i).hgrow = Priority.ALWAYS
         }
+        /*
         model.fields.addListener(ListChangeListener { change ->
             while (change.next()) {
-                println("change detected $change")
                 if (change.wasAdded()) {
                     change.addedSubList.forEach { addedField ->
                         val x = addedField.coordinates.x
@@ -44,6 +53,7 @@ class BoardView : View() {
                 }
             }
         })
+         */
 
 
         //root.center = BoardCanvas()

@@ -7,6 +7,8 @@ import javafx.scene.image.ImageView
 import sc.gui.controller.AppController
 import sc.gui.controller.ClientController
 import sc.gui.controller.ServerController
+import sc.gui.controller.StartGameRequest
+import sc.gui.model.GameCreationModel
 import sc.gui.model.ViewTypes
 import tornadofx.*
 import java.awt.Desktop
@@ -48,7 +50,7 @@ class AppView : View() {
                 item("Start", "Shortcut+R").action {
                     // TODO: remove
                     controller.changeViewTo(GameView::class)
-                    clientController.startGame()
+                    fire(StartGameRequest(GameCreationModel()))
                 }
                 separator()
                 item("Replay laden").action {

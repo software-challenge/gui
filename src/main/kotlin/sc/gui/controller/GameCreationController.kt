@@ -18,6 +18,6 @@ class GameCreationController : Controller() {
         println("Selected executable: ${model.playerExecutable2.value}")
         appController.changeViewTo(GameView::class)
 
-        clientController.startGame(gameCreationModel = model)
+        fire(StartGameRequest(model))
     }
 }
