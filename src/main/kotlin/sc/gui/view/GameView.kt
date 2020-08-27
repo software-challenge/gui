@@ -141,6 +141,7 @@ class GameView: View() {
 
 
         setOnScroll {
+            logger.debug("Scrolling detected: rotating selected piece")
             gameController.currentRotationProperty().set(
                     gameController.currentRotationProperty().get().rotate(
                             when {

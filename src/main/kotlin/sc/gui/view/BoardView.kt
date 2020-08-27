@@ -2,6 +2,7 @@ package sc.gui.view
 
 import javafx.collections.ListChangeListener
 import javafx.scene.canvas.Canvas
+import javafx.scene.image.ImageView
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
