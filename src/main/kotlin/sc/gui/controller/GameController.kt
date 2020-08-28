@@ -38,6 +38,8 @@ class GameController : Controller() {
         subscribe<HumanMoveRequest> { event ->
             isHumanTurnProperty().set(true)
         }
+
+        // manually add listener
         currentPieceShapeProperty().addListener { _, _, newValue ->
             selectedShape = newValue.transform(currentRotationProperty().get(), currentFlipProperty().get())
         }
@@ -55,16 +57,13 @@ class GameController : Controller() {
 
     fun selectPieceShape(shape: PieceShape) {
         currentPieceShapeProperty().set(shape)
-        selectedShape = shape.transform(currentRotationProperty().get(), currentFlipProperty().get())
     }
 
     fun selectRotation(rotation: Rotation) {
         currentRotationProperty().set(rotation)
-        selectedShape = currentPieceShapeProperty().get().transform(rotation, currentFlipProperty().get())
     }
 
     fun selectFlip(flip: Boolean) {
         currentFlipProperty().set(flip)
-        selectedShape = currentPieceShapeProperty().get().transform(currentRotationProperty().get(), flip)
     }
 }

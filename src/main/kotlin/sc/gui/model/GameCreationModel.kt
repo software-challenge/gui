@@ -1,6 +1,5 @@
 package sc.gui.model
 
-import sc.gui.view.GameCreationView
 import tornadofx.*
 import java.io.File
 

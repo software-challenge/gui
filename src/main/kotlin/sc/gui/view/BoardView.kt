@@ -22,7 +22,8 @@ import sc.plugin2021.FieldContent
 import sc.plugin2021.util.Constants
 import tornadofx.*
 
-
+// this custom class is requiredto be able to shrink upsized images back to smaller sizes
+// see: https://stackoverflow.com/a/35202191/9127322
 class BlockImage(url: String) : ImageView(url) {
     init {
         preserveRatioProperty().set(false)
@@ -110,21 +111,23 @@ class BoardView : View() {
             logger.debug("Height changed from $old -> $new")
             resize()
         }
+        root += grid
+
+        // TODO: remove or move to a Stylesheet, this is just for debugging purposes
         grid.style {
             backgroundColor += javafx.scene.paint.Color.DARKGRAY
         }
-        root += grid
         root.style {
             backgroundColor += javafx.scene.paint.Color.LIGHTGRAY
         }
     }
 
     private fun resize() {
-
         val bounds = grid.layoutBoundsProperty().get()
         val size = minOf(root.widthProperty().get(), root.heightProperty().get())
         logger.debug("Root width: ${root.widthProperty().get()}, height: ${root.heightProperty().get()} and board bounds width: ${bounds.width}, height: ${bounds.height} -> size: $size (${size / bounds.width}, ${size / bounds.height})")
 
+        // force the grid to scale smaller (or bigger) to keep being quadratic
         grid.scaleXProperty().set(size / bounds.width)
         grid.scaleYProperty().set(size / bounds.height)
     }
@@ -139,6 +142,7 @@ class BoardView : View() {
         throw Exception("Pane of ($x, $y) is not part of the BoardView")
     }
 
+    // remove all applied Stylesheets during the hover-effect
     private fun cleanupHover() {
         for (place in grid.children) {
             if (place.hasClass(AppStyle.colorRED)) {
@@ -172,8 +176,9 @@ class BoardView : View() {
                         Color.YELLOW -> AppStyle.colorYELLOW
                         else -> throw Exception("Unknown player color for hover effect")
                     })
+                } else {
+                    getPane(x + place.x, y + place.y).addClass(AppStyle.fieldUnplaceable)
                 }
-                getPane(x + place.x, y + place.y).addClass(AppStyle.fieldUnplaceable)
             }
         }
     }
@@ -197,6 +202,7 @@ class BoardView : View() {
         }
 
         for (place in shape) {
+            // check every adjacent field if it is the same color
             if (!hoverInBound(x + place.x, y + place.y) || model.getField(x + place.x, y + place.y).content != FieldContent.EMPTY ||
                     hoverInBound(x + place.x + 1, y + place.y) && model.getField(x + place.x + 1, y + place.y).content == field ||
                     hoverInBound(x + place.x - 1, y + place.y) && model.getField(x + place.x - 1, y + place.y).content == field ||
@@ -210,7 +216,7 @@ class BoardView : View() {
         return true
     }
 
-    fun paneFromField(field: Field): HBox {
+    private fun paneFromField(field: Field): HBox {
         val x = field.coordinates.x
         val y = field.coordinates.y
 
