@@ -1,5 +1,6 @@
 package sc.gui.view
 
+import javafx.animation.FadeTransition
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.Property
@@ -7,6 +8,9 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
 import javafx.collections.ObservableList
 import javafx.scene.Parent
+import javafx.scene.control.Alert
+import javafx.scene.control.ButtonType
+import javafx.scene.control.Label
 import javafx.scene.image.ImageView
 import javafx.util.Duration
 import javafx.util.StringConverter
@@ -67,9 +71,22 @@ class GameView: View() {
 
     lateinit var imageView: ImageView
 
+    val statusLabel = Label("whooohooo")
+
     init {
         subscribe<StartGameRequest> { event ->
             clientController.startGame("localhost", 13050, event.gameCreationModel)
+        }
+        subscribe<HumanMoveRequest> { event ->
+            val player = event.gameState.currentPlayer.displayName
+            val color = event.gameState.currentColor.name
+            statusLabel.text = "Spieler ${player} mit ${color} ist am Zug!"
+            statusLabel.isVisible = true
+            val ft = FadeTransition(7.seconds, statusLabel)
+            ft.setFromValue(1.0)
+            ft.setToValue(0.0)
+            ft.play()
+            ft.setOnFinished { statusLabel.isVisible = false }
         }
     }
 
@@ -85,15 +102,14 @@ class GameView: View() {
             }
         }
         center = borderpane {
-            center(boardView::class)
+            center = stackpane {
+                this += find<BoardView>()
+                statusLabel.style = "-fx-text-fill: white; -fx-font-size: 32pt;"
+                statusLabel.isVisible = false
+                this += statusLabel
+            }
 
             bottom = hbox {
-                button {
-                    text = "Start Client"
-                    setOnMouseClicked {
-                        fire(StartGameRequest(GameCreationModel()))
-                    }
-                }
                 label {
                     textProperty().bind(Bindings.concat("Selected: ", gameController.currentColorProperty(), " ", gameController.currentPieceShapeProperty()))
                 }

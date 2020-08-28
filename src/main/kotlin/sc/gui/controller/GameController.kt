@@ -19,19 +19,24 @@ class GameController : Controller() {
     private var currentTurn by property<Int>(0)
     private var selectedShape: Set<Coordinates> by property(currentPieceShape.transform(currentRotation, currentFlip))
     var selectedDragBoard by property<Dragboard>()
+    private var isHumanTurn by property<Boolean>(false)
 
     fun currentColorProperty() = getProperty(GameController::currentColor)
     fun currentPieceShapeProperty() = getProperty(GameController::currentPieceShape)
     fun currentRotationProperty() = getProperty(GameController::currentRotation)
     fun currentFlipProperty() = getProperty(GameController::currentFlip)
-    fun selectedShapeProperty() = getProperty(GameController::selectedShape)
     fun availableTurnsProperty() = getProperty(GameController::availableTurns)
     fun currentTurnProperty() = getProperty(GameController::currentTurn)
+    fun selectedShapeProperty() = getProperty(GameController::selectedShape)
+    fun isHumanTurnProperty() = getProperty(GameController::isHumanTurn)
 
     init {
         subscribe<NewGameState> { event ->
             availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
             currentTurnProperty().set(event.gameState.turn)
+        }
+        subscribe<HumanMoveRequest> { event ->
+            isHumanTurnProperty().set(true)
         }
         currentPieceShapeProperty().addListener { _, _, newValue ->
             selectedShape = newValue.transform(currentRotationProperty().get(), currentFlipProperty().get())
@@ -62,6 +67,4 @@ class GameController : Controller() {
         currentFlipProperty().set(flip)
         selectedShape = currentPieceShapeProperty().get().transform(currentRotationProperty().get(), flip)
     }
-
-
 }

@@ -3,6 +3,7 @@ package sc.gui.controller
 import org.slf4j.LoggerFactory
 import sc.framework.plugins.Player
 import sc.gui.ControllingClient
+import sc.gui.HumanClient
 import sc.gui.TestClient
 import sc.gui.model.BoardModel
 import sc.gui.model.GameCreationModel
@@ -61,7 +62,7 @@ class UILobbyListener() : ILobbyClientListener {
     }
 }
 
-class UIGameListener(val onUpdateHandler: () -> Unit) : IUpdateListener {
+class UIGameListener(val onUpdateHandler: () -> Unit): IUpdateListener {
     companion object {
         val logger = LoggerFactory.getLogger(ClientController::class.java)
     }
@@ -77,8 +78,10 @@ class UIGameListener(val onUpdateHandler: () -> Unit) : IUpdateListener {
 
 }
 
-class StartGameRequest(val gameCreationModel: GameCreationModel) : FXEvent(EventBus.RunOn.BackgroundThread)
-class NewGameState(val gameState: GameState) : FXEvent()
+class StartGameRequest(val gameCreationModel: GameCreationModel): FXEvent(EventBus.RunOn.BackgroundThread)
+class NewGameState(val gameState: GameState): FXEvent()
+class HumanMoveRequest(val gameState: GameState): FXEvent()
+
 
 class ClientController : Controller() {
 
@@ -97,23 +100,23 @@ class ClientController : Controller() {
 
         logger.debug("creating and observing")
 
-        // NOTE that testClientOne and testClientTwo are currently *internal* clients to wire the logic of the GameHandlers to the server. When external clients should join the game, these are not needed.
-        // TODO: implement client for HUMAN, MANUELL and COMPUTER
-        val player1 = when (gameCreationModel.selectedPlayerType1.value) {
-            sc.gui.model.PlayerType.HUMAN -> TestClient(PlayerType.PLAYER_ONE, host, port)
-            sc.gui.model.PlayerType.MANUELL -> TestClient(PlayerType.PLAYER_ONE, host, port)
-            sc.gui.model.PlayerType.COMPUTER -> TestClient(PlayerType.PLAYER_ONE, host, port)
-            else -> throw Exception("invalid playerType for player 1, cannot create game")
-        }
-        val player2 = when (gameCreationModel.selectedPlayerType2.value) {
-            sc.gui.model.PlayerType.HUMAN -> TestClient(PlayerType.PLAYER_TWO, host, port)
-            sc.gui.model.PlayerType.MANUELL -> TestClient(PlayerType.PLAYER_TWO, host, port)
-            sc.gui.model.PlayerType.COMPUTER -> TestClient(PlayerType.PLAYER_TWO, host, port)
-            else -> throw Exception("invalid playerType for player 2, cannot create game")
-        }
+            // NOTE that testClientOne and testClientTwo are currently *internal* clients to wire the logic of the GameHandlers to the server. When external clients should join the game, these are not needed.
+            // TODO: implement client for HUMAN, MANUELL and COMPUTER
+            val player1 = when(gameCreationModel.selectedPlayerType1.value) {
+                sc.gui.model.PlayerType.HUMAN -> HumanClient(PlayerType.PLAYER_ONE, host, port, ::humanMoveRequest)
+                sc.gui.model.PlayerType.MANUELL -> TestClient(PlayerType.PLAYER_ONE, host, port)
+                sc.gui.model.PlayerType.COMPUTER -> TestClient(PlayerType.PLAYER_ONE, host, port)
+                else -> throw Exception("invalid playerType for player 1, cannot create game")
+            }
+            val player2 = when(gameCreationModel.selectedPlayerType2.value) {
+                sc.gui.model.PlayerType.HUMAN -> HumanClient(PlayerType.PLAYER_TWO, host, port, ::humanMoveRequest)
+                sc.gui.model.PlayerType.MANUELL -> TestClient(PlayerType.PLAYER_TWO, host, port)
+                sc.gui.model.PlayerType.COMPUTER -> TestClient(PlayerType.PLAYER_TWO, host, port)
+                else -> throw Exception("invalid playerType for player 2, cannot create game")
+            }
 
-        controllingClient = ControllingClient(host, port)
-        controllingClient!!.startNewGame(player1, player2, listener)
+            controllingClient = ControllingClient(host, port)
+            controllingClient!!.startNewGame(player1, player2, listener)
     }
 
     fun newGameState() {
@@ -130,6 +133,10 @@ class ClientController : Controller() {
         } else {
             logger.debug("no controlling client yet")
         }
+    }
+
+    fun humanMoveRequest(gameState: GameState) {
+        fire(HumanMoveRequest(gameState))
     }
 
     fun updateGameState() {

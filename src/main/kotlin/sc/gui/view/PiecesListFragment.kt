@@ -45,7 +45,7 @@ class PiecesListFragment() : Fragment() {
                     -fx-border-color: blue;
                     -fx-border-width: 2;
                     """
-                add(PiecesFragment(undeployedPiecesModel.color, it))
+                this += PiecesFragment(undeployedPiecesModel.color, it)
             }
         }
     }
