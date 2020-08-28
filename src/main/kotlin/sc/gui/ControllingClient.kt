@@ -16,7 +16,7 @@ import java.util.*
 import kotlin.system.exitProcess
 import kotlin.concurrent.schedule
 
-class LobbyListener(val logger: Logger): ILobbyClientListener {
+class LobbyListener(val logger: Logger) : ILobbyClientListener {
 
     var numberJoined = 0
 
@@ -59,12 +59,13 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
 
 }
 
-class AdminListener(val logger: Logger): IAdministrativeListener {
+class AdminListener(val logger: Logger) : IAdministrativeListener {
     override fun onGamePaused(roomId: String?, nextPlayer: Player?) {
         logger.debug("admin: game paused")
     }
 
 }
+
 class ControllingClient(host: String, port: Int) {
 
     var game: IControllableGame? = null
