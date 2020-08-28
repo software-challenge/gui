@@ -3,6 +3,7 @@ package sc.gui.view
 import javafx.collections.ListChangeListener
 import javafx.geometry.Pos
 import javafx.scene.Node
+import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseButton
 import javafx.scene.input.TransferMode
@@ -24,12 +25,7 @@ import tornadofx.*
 
 // this custom class is requiredto be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
-class BlockImage(url: String) : ImageView(url) {
-    init {
-        preserveRatioProperty().set(false)
-        smoothProperty().set(false)
-    }
-
+class BlockImage(url: String) : ImageView(Image(url, 16.0, 16.0, true, false)) {
     override fun minHeight(width: Double): Double {
         return 16.0
     }
