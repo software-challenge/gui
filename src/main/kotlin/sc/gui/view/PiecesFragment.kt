@@ -46,14 +46,15 @@ class PiecesFragment(color: Color, pieceShape: PieceShape) : Fragment() {
         }
 
         setOnMouseClicked {
-            logger.debug("Clicked on $color $pieceShape")
-            controller.selectColor(color)
-            controller.selectPieceShape(pieceShape)
-
-            if (it.button == MouseButton.MIDDLE) {
-                logger.debug("Flipped the current piece")
+            if (it.button == MouseButton.PRIMARY) {
+                logger.debug("Clicked on $color $pieceShape")
+                controller.selectColor(color)
+                controller.selectPieceShape(pieceShape)
+            } else if (it.button == MouseButton.SECONDARY) {
+                logger.debug("Right-click, flipping piece")
                 controller.selectFlip(!controller.currentFlipProperty().get())
             }
+
             it.consume()
         }
 

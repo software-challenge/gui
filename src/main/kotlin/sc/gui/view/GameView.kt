@@ -12,6 +12,7 @@ import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Label
 import javafx.scene.image.ImageView
+import javafx.scene.input.MouseButton
 import javafx.util.Duration
 import javafx.util.StringConverter
 import javafx.util.converter.IntegerStringConverter
@@ -88,6 +89,7 @@ class GameView: View() {
             ft.play()
             ft.setOnFinished { statusLabel.isVisible = false }
         }
+
     }
 
     override val root = borderpane {
@@ -156,6 +158,18 @@ class GameView: View() {
         }
 
 
+        setOnKeyPressed {
+            when(it.code) {
+
+            }
+        }
+        setOnMouseClicked {
+            if (it.button == MouseButton.SECONDARY) {
+                logger.debug("Right-click, flipping piece")
+                gameController.selectFlip(!gameController.currentFlipProperty().get())
+            }
+            it.consume()
+        }
         setOnScroll {
             logger.debug("Scrolling detected: rotating selected piece")
             gameController.currentRotationProperty().set(

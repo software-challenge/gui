@@ -4,6 +4,7 @@ import javafx.collections.ListChangeListener
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.ImageView
+import javafx.scene.input.MouseButton
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.HBox
@@ -246,9 +247,14 @@ class BoardView : View() {
                 it.consume()
             }
             setOnMouseClicked {
-                println("Clicked on pane $x, $y")
-                cleanupHover()
-                controller.handleClick(x, y)
+                if (it.button == MouseButton.PRIMARY) {
+                    println("Clicked on pane $x, $y")
+                    cleanupHover()
+                    controller.handleClick(x, y)
+                } else if (it.button == MouseButton.SECONDARY) {
+                    logger.debug("Right-click, flipping piece")
+                    controller.game.selectFlip(!controller.game.currentFlipProperty().get())
+                }
                 it.consume()
             }
 
