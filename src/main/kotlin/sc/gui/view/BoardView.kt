@@ -118,7 +118,7 @@ class BoardView : View() {
         controller.currentHover = Coordinates(x, y)
         var placeable: Boolean = isPlaceable(x, y, controller.game.selectedShapeProperty().get())
         for (place in controller.game.selectedShapeProperty().get()) {
-            if (hoverInBound(x + place.x, y + place.y) && model.getField(x, y).content == FieldContent.EMPTY) {
+            if (hoverInBound(x + place.x, y + place.y)) {
                 if (placeable) {
                     getPane(x + place.x, y + place.y).addClass(when (controller.game.currentColorProperty().get()) {
                         Color.RED -> AppStyle.colorRED
@@ -153,10 +153,10 @@ class BoardView : View() {
 
         for (place in shape) {
             if (!hoverInBound(x + place.x, y + place.y) || model.getField(x + place.x, y + place.y).content != FieldContent.EMPTY ||
-                    model.getField(x + place.x + 1, y + place.y).content != FieldContent.EMPTY && model.getField(x + place.x + 1, y + place.y).content == field ||
-                    model.getField(x + place.x - 1, y + place.y).content != FieldContent.EMPTY && model.getField(x + place.x, y + place.y).content == field ||
-                    model.getField(x + place.x, y + place.y + 1).content != FieldContent.EMPTY && model.getField(x + place.x, y + place.y + 1).content == field ||
-                    model.getField(x + place.x, y + place.y - 1).content != FieldContent.EMPTY && model.getField(x + place.x, y + place.y - 1).content == field
+                    hoverInBound(x + place.x + 1, y + place.y) && model.getField(x + place.x + 1, y + place.y).content == field ||
+                    hoverInBound(x + place.x - 1, y + place.y) && model.getField(x + place.x - 1, y + place.y).content == field ||
+                    hoverInBound(x + place.x, y + place.y + 1) && model.getField(x + place.x, y + place.y + 1).content == field ||
+                    hoverInBound(x + place.x, y + place.y - 1) && model.getField(x + place.x, y + place.y - 1).content == field
             ) {
                 return false
             }
@@ -220,12 +220,9 @@ class BoardView : View() {
             }
 
             if (image != null) {
-                image.scaleXProperty().bind(root.widthProperty() / (16.0 * Constants.BOARD_SIZE))
-                image.scaleYProperty().bind(root.heightProperty() / (16.0 * Constants.BOARD_SIZE))
                 image.isSmooth = false
-                image.translateX = 10.0
-                image.translateY = 10.0
-
+                image.fitWidthProperty().bind(root.widthProperty() / Constants.BOARD_SIZE)
+                image.fitHeightProperty().bind(root.heightProperty() / Constants.BOARD_SIZE)
                 this += image
             }
         }

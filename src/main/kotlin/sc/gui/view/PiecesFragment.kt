@@ -67,7 +67,7 @@ class PiecesFragment(color: Color, pieceShape: PieceShape) : Fragment() {
 
             // Rotating Image
             val image: ImageView = ImageView(imagePath)
-            image.rotate = when(controller.currentRotationProperty().get()) {
+            image.rotate = when (controller.currentRotationProperty().get()) {
                 Rotation.LEFT -> -90.0
                 Rotation.MIRROR -> 180.0
                 Rotation.NONE -> 0.0
@@ -75,11 +75,10 @@ class PiecesFragment(color: Color, pieceShape: PieceShape) : Fragment() {
                 else -> throw Exception("Impossible Rotation...")
             }
 
-            image.scaleX = board.root.width / (16.0 * Constants.BOARD_SIZE)
-            image.scaleY = board.root.height / (16.0 * Constants.BOARD_SIZE)
-
             // prevent smoothing
             image.isSmooth = false
+            image.fitWidth = board.root.width / Constants.BOARD_SIZE
+            image.fitHeight = board.root.height / Constants.BOARD_SIZE
             val rotated = image.snapshot(SnapshotParameters(), null)
 
             content.putImage(rotated)
