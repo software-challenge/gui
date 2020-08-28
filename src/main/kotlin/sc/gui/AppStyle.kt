@@ -61,10 +61,12 @@ class AppStyle : Stylesheet() {
             backgroundColor += Color.LIGHTGRAY
         }
         field {
+            /*
             borderRadius = rounding
             backgroundRadius = rounding
             borderWidth = multi(box(1.px))
             borderColor += box(Color.GRAY)
+            */
         }
 
         colorRED {

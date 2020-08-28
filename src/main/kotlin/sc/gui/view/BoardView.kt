@@ -35,6 +35,8 @@ class BoardView : View() {
             }
         }
 
+        root.isGridLinesVisible = true
+
         root.prefHeightProperty().bind(root.widthProperty())
 
         model.fields.forEach { field ->
@@ -161,7 +163,8 @@ class BoardView : View() {
                 FieldContent.BLUE -> ImageView("file:resources/graphics/blokus/single/blue.png")
                 FieldContent.GREEN -> ImageView("file:resources/graphics/blokus/single/green.png")
                 FieldContent.YELLOW -> ImageView("file:resources/graphics/blokus/single/yellow.png")
-                else -> null
+                FieldContent.EMPTY -> null
+                else -> throw Exception("Unknown Colorvalue for placed piece")
             }
 
             if (image != null) {
