@@ -15,17 +15,23 @@ class AppStyle : Stylesheet() {
         private val bottomColor = Color.PURPLE
 
         private val gotuRegular = Font.loadFont("file:resources/fonts/NotoSans-Regular.ttf", 16.0)
+        private val rounding = multi(box(10.percent))
 
         val fullWidth by cssclass()
-        val area by cssclass()
-        val area2 by cssclass()
-        val dragTarget by cssclass()
+
+        val undeployedPiece by cssclass()
+        val field by cssclass()
+        val hoverColor by cssclass()
+
         val colorRED by cssclass()
+        val borderRED by cssclass()
         val colorBLUE by cssclass()
+        val borderBLUE by cssclass()
         val colorGREEN by cssclass()
+        val borderGREEN by cssclass()
         val colorYELLOW by cssclass()
-        val colorGRAY by cssclass()
-        val pieceSelect by cssclass()
+        val borderYELLOW by cssclass()
+
 
 
     }
@@ -33,7 +39,6 @@ class AppStyle : Stylesheet() {
     init {
         root {
             font = gotuRegular
-            backgroundColor += Color.WHITESMOKE
         }
         tackyButton {
             rotate = 5.deg
@@ -46,33 +51,48 @@ class AppStyle : Stylesheet() {
         fullWidth {
             prefWidth = 100.percent
         }
-        area {
-            backgroundColor += Color.GREENYELLOW
-            borderColor += box(topColor, rightColor, bottomColor, leftColor)
+
+        undeployedPiece {
+            borderRadius = rounding
+            backgroundRadius = rounding
+            borderWidth = multi(box(2.px))
         }
-        area2 {
-            backgroundColor += Color.DARKGREEN
+        hoverColor {
+            backgroundColor += Color.LIGHTGRAY
         }
-        dragTarget {
-            backgroundColor += Color.DEEPPINK
+        field {
+            borderRadius = rounding
+            backgroundRadius = rounding
+            borderWidth = multi(box(1.px))
+            borderColor += box(Color.GRAY)
         }
+
         colorRED {
             backgroundColor += Color.RED
         }
+        borderRED {
+            borderColor += box(Color.RED)
+        }
+
         colorBLUE {
             backgroundColor += Color.BLUE
         }
+        borderBLUE {
+            borderColor += box(Color.BLUE)
+        }
+
         colorGREEN {
             backgroundColor += Color.GREEN
         }
+        borderGREEN {
+            borderColor += box(Color.GREEN)
+        }
+
         colorYELLOW {
             backgroundColor += Color.YELLOW
         }
-        colorGRAY {
-            backgroundColor += Color.GRAY
-        }
-        pieceSelect {
-            backgroundColor += Color.RED
+        borderYELLOW {
+            borderColor += box(Color.YELLOW)
         }
     }
 }

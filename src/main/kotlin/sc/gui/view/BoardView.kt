@@ -35,9 +35,6 @@ class BoardView : View() {
             }
         }
 
-        root.isGridLinesVisible = true
-
-        root.addClass(AppStyle.area)
         root.prefHeightProperty().bind(root.widthProperty())
 
         model.fields.forEach { field ->
@@ -76,16 +73,16 @@ class BoardView : View() {
     private fun cleanupHover() {
         for (place in root.children) {
             if (place.hasClass(AppStyle.colorRED)) {
-                place.removeClass(AppStyle.colorRED).addClass(AppStyle.colorGRAY)
+                place.removeClass(AppStyle.colorRED)
             }
             if (place.hasClass(AppStyle.colorBLUE)) {
-                place.removeClass(AppStyle.colorBLUE).addClass(AppStyle.colorGRAY)
+                place.removeClass(AppStyle.colorBLUE)
             }
             if (place.hasClass(AppStyle.colorGREEN)) {
-                place.removeClass(AppStyle.colorGREEN).addClass(AppStyle.colorGRAY)
+                place.removeClass(AppStyle.colorGREEN)
             }
             if (place.hasClass(AppStyle.colorYELLOW)) {
-                place.removeClass(AppStyle.colorYELLOW).addClass(AppStyle.colorGRAY)
+                place.removeClass(AppStyle.colorYELLOW)
             }
         }
     }
@@ -94,7 +91,7 @@ class BoardView : View() {
         controller.currentHover = Coordinates(x, y)
         for (place in controller.game.selectedShapeProperty().get()) {
             if (hoverInBound(x + place.x, y + place.y)) {
-                getPane(x + place.x, y + place.y).removeClass(AppStyle.colorGRAY).addClass(when(controller.game.currentColorProperty().get()) {
+                getPane(x + place.x, y + place.y).addClass(when(controller.game.currentColorProperty().get()) {
                     Color.RED -> AppStyle.colorRED
                     Color.BLUE -> AppStyle.colorBLUE
                     Color.GREEN -> AppStyle.colorGREEN
@@ -120,9 +117,7 @@ class BoardView : View() {
 
         val pane = HBox()
         with(pane) {
-            label("$x,$y").style {
-                fontSize = 13.px
-            }
+            addClass(AppStyle.field)
             setOnDragEntered {
                 logger.debug("Dragging entered on pane $x,$y")
                 paneHoverEnter(x, y)
@@ -173,8 +168,6 @@ class BoardView : View() {
                 image.scaleX = root.width / (16.0 * 20)
                 image.scaleY = root.height / (16.0 * 20)
                 add(image)
-            } else {
-                addClass(AppStyle.colorGRAY)
             }
         }
         return pane

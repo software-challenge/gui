@@ -1,16 +1,11 @@
 package sc.gui.view
 
-import javafx.collections.ObservableList
 import javafx.geometry.Orientation
-import javafx.geometry.Point2D
 import javafx.geometry.Pos
-import javafx.scene.Node
 import org.slf4j.LoggerFactory
-import sc.gui.ControllingClient
 import sc.gui.controller.GameController
 import sc.gui.controller.NewGameState
 import sc.gui.model.UndeployedPiecesModel
-import sc.plugin2021.Piece
 import tornadofx.*
 
 class PiecesListFragment() : Fragment() {
@@ -41,10 +36,6 @@ class PiecesListFragment() : Fragment() {
 
         children.bind(undeployedPiecesModel.undeployedPieces) {
             hbox {
-                style = """
-                    -fx-border-color: blue;
-                    -fx-border-width: 2;
-                    """
                 this += PiecesFragment(undeployedPiecesModel.color, it)
             }
         }

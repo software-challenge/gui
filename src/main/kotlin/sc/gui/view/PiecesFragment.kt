@@ -1,8 +1,6 @@
 package sc.gui.view
 
 import javafx.scene.SnapshotParameters
-import javafx.scene.canvas.Canvas
-import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.ClipboardContent
 import javafx.scene.input.Dragboard
@@ -27,15 +25,20 @@ class PiecesFragment(color: Color, pieceShape: PieceShape) : Fragment() {
     private val imagePath: String = "file:resources/graphics/blokus/$colorName/${pieceShape.name.toLowerCase()}.png"
 
     override val root = hbox {
-        // setPrefSize(80.0, 80.0)
+        addClass(AppStyle.undeployedPiece, when (color) {
+            Color.RED -> AppStyle.borderRED
+            Color.GREEN -> AppStyle.borderGREEN
+            Color.YELLOW -> AppStyle.borderYELLOW
+            Color.BLUE -> AppStyle.borderBLUE
+        })
 
         setOnMouseEntered {
-            addClass(AppStyle.colorGRAY)
+            addClass(AppStyle.hoverColor)
             it.consume()
         }
 
         setOnMouseExited {
-            removeClass(AppStyle.colorGRAY)
+            removeClass(AppStyle.hoverColor)
             it.consume()
         }
 
