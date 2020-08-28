@@ -26,7 +26,7 @@ import sc.plugin2021.PieceShape
 import sc.plugin2021.Rotation
 import tornadofx.*
 
-class ColorConverter: StringConverter<Color>() {
+class ColorConverter : StringConverter<Color>() {
     override fun toString(color: Color?): String {
         return color!!.name.toLowerCase()
     }
@@ -36,7 +36,7 @@ class ColorConverter: StringConverter<Color>() {
     }
 }
 
-class PiecesScope(val pieces: ObservableList<Piece>): Scope()
+class PiecesScope(val pieces: ObservableList<Piece>) : Scope()
 
 class ShapeConverter : StringConverter<PieceShape>() {
     override fun toString(piece: PieceShape?): String {
@@ -49,7 +49,7 @@ class ShapeConverter : StringConverter<PieceShape>() {
 
 }
 
-class PathBinding(val color: Property<Color>, val pieceShape: Property<PieceShape>): StringBinding() {
+class PathBinding(val color: Property<Color>, val pieceShape: Property<PieceShape>) : StringBinding() {
     init {
         bind(color)
         bind(pieceShape)
@@ -60,7 +60,7 @@ class PathBinding(val color: Property<Color>, val pieceShape: Property<PieceShap
     }
 }
 
-class GameView: View() {
+class GameView : View() {
     val input = SimpleStringProperty()
     private val boardView: BoardView by inject()
     private val clientController: ClientController by inject()
@@ -157,12 +157,6 @@ class GameView: View() {
             }
         }
 
-
-        setOnKeyPressed {
-            when(it.code) {
-
-            }
-        }
         setOnMouseClicked {
             if (it.button == MouseButton.SECONDARY) {
                 logger.debug("Right-click, flipping piece")

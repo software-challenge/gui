@@ -264,7 +264,7 @@ class BoardView : View() {
                 FieldContent.GREEN -> BlockImage("file:resources/graphics/blokus/single/green.png")
                 FieldContent.YELLOW -> BlockImage("file:resources/graphics/blokus/single/yellow.png")
                 FieldContent.EMPTY -> null
-                else -> throw Exception("Unknown Colorvalue for placed piece")
+                else -> throw Exception("Unknown Color-value for placed piece")
             }
 
             if (image != null) {

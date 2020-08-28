@@ -22,7 +22,7 @@ enum class PlayerType {
     };
 }
 
-class GameCreation : ItemViewModel<GameCreationView>() {
+class GameCreation {
     val playerName1: String by property<String>()
     val playerName2: String by property<String>()
     val selectedPlayerType1: PlayerType by property<PlayerType>()
