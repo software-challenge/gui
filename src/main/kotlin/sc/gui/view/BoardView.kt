@@ -1,52 +1,67 @@
 package sc.gui.view
 
-import javafx.beans.binding.DoubleBinding
-import javafx.beans.property.ReadOnlyDoubleProperty
 import javafx.collections.ListChangeListener
+import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.ImageView
 import javafx.scene.input.TransferMode
-import javafx.scene.layout.*
+import javafx.scene.layout.GridPane
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
+import javafx.scene.layout.StackPane
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
 import sc.gui.controller.BoardController
 import sc.gui.controller.NewGameState
 import sc.gui.model.BoardModel
-import sc.plugin2021.*
+import sc.plugin2021.Color
+import sc.plugin2021.Coordinates
 import sc.plugin2021.Field
+import sc.plugin2021.FieldContent
 import sc.plugin2021.util.Constants
 import tornadofx.*
-import java.lang.Exception
 
-class BoardSize(private val width: ReadOnlyDoubleProperty, private val heigth: ReadOnlyDoubleProperty, calcWidth: Boolean = true) : DoubleBinding() {
+
+class BlockImage(url: String) : ImageView(url) {
     init {
-        bind(width)
-        bind(heigth)
+        preserveRatioProperty().set(false)
+        smoothProperty().set(false)
     }
 
-    override fun computeValue(): Double {
-        logger.debug("Computing width is: ${width.get()} and height is: ${heigth.get()}")
-        if (width.get() > heigth.get()) {
-            logger.debug("Returning height")
-            return heigth.doubleValue()
-        }
-        return width.doubleValue()
+    override fun minHeight(width: Double): Double {
+        return 16.0
     }
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(BoardView::class.java)
+    override fun prefHeight(width: Double): Double {
+        image?: return minHeight(width)
+        return image.height
+    }
+
+    override fun minWidth(height: Double): Double {
+        return 16.0
+    }
+
+    override fun prefWidth(height: Double): Double {
+        image?: return minWidth(height)
+        return image.width
+    }
+
+    override fun isResizable(): Boolean {
+        return true
     }
 }
 
 class BoardView : View() {
     val controller: BoardController by inject()
     private val model: BoardModel by inject()
-    override val root = GridPane()
+    private val grid: GridPane = GridPane()
+    override val root = StackPane()
 
     init {
         subscribe<NewGameState> { event ->
             model.updateFields(event.gameState.board)
         }
+
 
         controller.game.selectedShapeProperty().addListener { _, _, _ ->
             cleanupHover()
@@ -55,19 +70,21 @@ class BoardView : View() {
             }
         }
 
-        root.isGridLinesVisible = true
-
-        root.prefWidthProperty().bind(BoardSize(root.widthProperty(), root.heightProperty(), true))
-        root.prefHeightProperty().bind(BoardSize(root.widthProperty(), root.heightProperty(), false))
+        grid.isGridLinesVisible = true
 
 
         model.fields.forEach { field ->
-            root.add(paneFromField(field), field.coordinates.x, field.coordinates.y)
+            grid.add(paneFromField(field), field.coordinates.x, field.coordinates.y)
         }
+
+        grid.alignment = Pos.CENTER
+        grid.hgrow = Priority.ALWAYS
+        grid.vgrow = Priority.ALWAYS
+        grid.minHeight = 16.0
+        grid.minWidth = 16.0
         for (i in 0 until Constants.BOARD_SIZE) {
-            root.constraintsForRow(i).percentHeight = 100.0 / Constants.BOARD_SIZE
-            root.constraintsForColumn(i).percentWidth = 100.0 / Constants.BOARD_SIZE
-            root.constraintsForColumn(i).hgrow = Priority.ALWAYS
+            grid.constraintsForRow(i).percentHeight = 100.0 / Constants.BOARD_SIZE
+            grid.constraintsForColumn(i).percentWidth = 100.0 / Constants.BOARD_SIZE
         }
 
         // TODO seems that the listener binding is quite slow, update here directly
@@ -78,15 +95,42 @@ class BoardView : View() {
                     change.addedSubList.forEach { addedField ->
                         val x = addedField.coordinates.x
                         val y = addedField.coordinates.y
-                        root.add(paneFromField(addedField), x, y)
+                        grid.add(paneFromField(addedField), x, y)
                     }
                 }
             }
         })
+
+        root.widthProperty().addListener { _, old, new ->
+            logger.debug("Width changed from $old -> $new")
+            resize()
+        }
+        root.heightProperty().addListener { _, old, new ->
+            logger.debug("Height changed from $old -> $new")
+            resize()
+        }
+        grid.style {
+            backgroundColor += javafx.scene.paint.Color.DARKGRAY
+        }
+        root += grid
+        root.style {
+            backgroundColor += javafx.scene.paint.Color.LIGHTGRAY
+        }
     }
 
+    private fun resize() {
+
+        val bounds = grid.layoutBoundsProperty().get()
+        val size = minOf(root.widthProperty().get(), root.heightProperty().get())
+        logger.debug("Root width: ${root.widthProperty().get()}, height: ${root.heightProperty().get()} and board bounds width: ${bounds.width}, height: ${bounds.height} -> size: $size (${size / bounds.width}, ${size / bounds.height})")
+
+        grid.scaleXProperty().set(size / bounds.width);
+        grid.scaleYProperty().set(size / bounds.height);
+    }
+
+
     private fun getPane(x: Int, y: Int): Node {
-        for (node in root.children) {
+        for (node in grid.children) {
             if (GridPane.getColumnIndex(node) == x && GridPane.getRowIndex(node) == y) {
                 return node
             }
@@ -95,7 +139,7 @@ class BoardView : View() {
     }
 
     private fun cleanupHover() {
-        for (place in root.children) {
+        for (place in grid.children) {
             if (place.hasClass(AppStyle.colorRED)) {
                 place.removeClass(AppStyle.colorRED)
             }
@@ -116,7 +160,7 @@ class BoardView : View() {
 
     private fun paneHoverEnter(x: Int, y: Int) {
         controller.currentHover = Coordinates(x, y)
-        var placeable: Boolean = isPlaceable(x, y, controller.game.selectedShapeProperty().get())
+        val placeable: Boolean = isPlaceable(x, y, controller.game.selectedShapeProperty().get())
         for (place in controller.game.selectedShapeProperty().get()) {
             if (hoverInBound(x + place.x, y + place.y)) {
                 if (placeable) {
@@ -194,33 +238,30 @@ class BoardView : View() {
                 it.consume()
             }
             setOnMouseEntered {
-                logger.debug("Hover entered on pane $x,$y")
                 paneHoverEnter(x, y)
                 it.consume()
             }
             setOnMouseExited {
-                logger.debug("Hover exited on pane $x,$y")
                 paneHoverExit()
                 it.consume()
             }
             setOnMouseClicked {
-                println("Click event")
+                println("Clicked on pane $x, $y")
                 cleanupHover()
                 controller.handleClick(x, y)
                 it.consume()
             }
 
-            val image: ImageView? = when (field.content) {
-                FieldContent.RED -> ImageView("file:resources/graphics/blokus/single/red.png")
-                FieldContent.BLUE -> ImageView("file:resources/graphics/blokus/single/blue.png")
-                FieldContent.GREEN -> ImageView("file:resources/graphics/blokus/single/green.png")
-                FieldContent.YELLOW -> ImageView("file:resources/graphics/blokus/single/yellow.png")
+            val image: BlockImage? = when (field.content) {
+                FieldContent.RED -> BlockImage("file:resources/graphics/blokus/single/red.png")
+                FieldContent.BLUE -> BlockImage("file:resources/graphics/blokus/single/blue.png")
+                FieldContent.GREEN -> BlockImage("file:resources/graphics/blokus/single/green.png")
+                FieldContent.YELLOW -> BlockImage("file:resources/graphics/blokus/single/yellow.png")
                 FieldContent.EMPTY -> null
                 else -> throw Exception("Unknown Colorvalue for placed piece")
             }
 
             if (image != null) {
-                image.isSmooth = false
                 image.fitWidthProperty().bind(root.widthProperty() / Constants.BOARD_SIZE)
                 image.fitHeightProperty().bind(root.heightProperty() / Constants.BOARD_SIZE)
                 this += image
@@ -233,3 +274,46 @@ class BoardView : View() {
         private val logger = LoggerFactory.getLogger(BoardView::class.java)
     }
 }
+
+/*
+class Test : View() {
+    private val numCells: Int = 15
+    private val cellSize: Double = 50.0
+    private val margin: Int = 20
+
+    // create background square grid
+    val gridgroup = Group()
+
+    // add grid board
+    val board: Group = Group(gridgroup);
+    val gamebounds: Bounds = board.layoutBounds
+
+    override val root = StackPane(board)
+
+    init {
+        for (i in 0..numCells) {
+            for (j in 0..numCells) {
+                val cell: Rectangle = Rectangle(i * cellSize, j * cellSize, cellSize, cellSize)
+                cell.fill = javafx.scene.paint.Color.WHEAT
+                cell.stroke = javafx.scene.paint.Color.GREY
+                gridgroup.children.add(cell)
+            }
+        }
+
+        root.widthProperty().addListener { _, _, _ ->
+            val scale: Double = minOf((root.width - margin) / gamebounds.width, (root.height - margin) / gamebounds.height);
+            board.scaleXProperty().set(scale);
+            board.scaleYProperty().set(scale);
+            board.layoutX = (root.width - gamebounds.width) / 2
+            board.layoutY = (root.height - gamebounds.height) / 2
+        }
+        root.heightProperty().addListener { observable, oldValue, newValue ->
+            val scale: Double = minOf((root.width - margin) / gamebounds.width, (root.height - margin) / gamebounds.height);
+            board.scaleXProperty().set(scale);
+            board.scaleYProperty().set(scale);
+            board.layoutX = (root.width - gamebounds.width) / 2
+            board.layoutY = (root.height - gamebounds.height) / 2
+        }
+    }
+}
+*/
