@@ -33,7 +33,7 @@ class BlockImage(url: String) : ImageView(url) {
     }
 
     override fun prefHeight(width: Double): Double {
-        image?: return minHeight(width)
+        image ?: return minHeight(width)
         return image.height
     }
 
@@ -42,7 +42,7 @@ class BlockImage(url: String) : ImageView(url) {
     }
 
     override fun prefWidth(height: Double): Double {
-        image?: return minWidth(height)
+        image ?: return minWidth(height)
         return image.width
     }
 
@@ -124,8 +124,8 @@ class BoardView : View() {
         val size = minOf(root.widthProperty().get(), root.heightProperty().get())
         logger.debug("Root width: ${root.widthProperty().get()}, height: ${root.heightProperty().get()} and board bounds width: ${bounds.width}, height: ${bounds.height} -> size: $size (${size / bounds.width}, ${size / bounds.height})")
 
-        grid.scaleXProperty().set(size / bounds.width);
-        grid.scaleYProperty().set(size / bounds.height);
+        grid.scaleXProperty().set(size / bounds.width)
+        grid.scaleYProperty().set(size / bounds.height)
     }
 
 
@@ -274,46 +274,3 @@ class BoardView : View() {
         private val logger = LoggerFactory.getLogger(BoardView::class.java)
     }
 }
-
-/*
-class Test : View() {
-    private val numCells: Int = 15
-    private val cellSize: Double = 50.0
-    private val margin: Int = 20
-
-    // create background square grid
-    val gridgroup = Group()
-
-    // add grid board
-    val board: Group = Group(gridgroup);
-    val gamebounds: Bounds = board.layoutBounds
-
-    override val root = StackPane(board)
-
-    init {
-        for (i in 0..numCells) {
-            for (j in 0..numCells) {
-                val cell: Rectangle = Rectangle(i * cellSize, j * cellSize, cellSize, cellSize)
-                cell.fill = javafx.scene.paint.Color.WHEAT
-                cell.stroke = javafx.scene.paint.Color.GREY
-                gridgroup.children.add(cell)
-            }
-        }
-
-        root.widthProperty().addListener { _, _, _ ->
-            val scale: Double = minOf((root.width - margin) / gamebounds.width, (root.height - margin) / gamebounds.height);
-            board.scaleXProperty().set(scale);
-            board.scaleYProperty().set(scale);
-            board.layoutX = (root.width - gamebounds.width) / 2
-            board.layoutY = (root.height - gamebounds.height) / 2
-        }
-        root.heightProperty().addListener { observable, oldValue, newValue ->
-            val scale: Double = minOf((root.width - margin) / gamebounds.width, (root.height - margin) / gamebounds.height);
-            board.scaleXProperty().set(scale);
-            board.scaleYProperty().set(scale);
-            board.layoutX = (root.width - gamebounds.width) / 2
-            board.layoutY = (root.height - gamebounds.height) / 2
-        }
-    }
-}
-*/

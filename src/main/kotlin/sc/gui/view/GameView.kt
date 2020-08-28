@@ -37,7 +37,7 @@ class ColorConverter: StringConverter<Color>() {
 
 class PiecesScope(val pieces: ObservableList<Piece>): Scope()
 
-class ShapeConverter(): StringConverter<PieceShape>() {
+class ShapeConverter : StringConverter<PieceShape>() {
     override fun toString(piece: PieceShape?): String {
         return piece!!.name.toLowerCase()
     }
@@ -55,7 +55,7 @@ class PathBinding(val color: Property<Color>, val pieceShape: Property<PieceShap
     }
 
     override fun computeValue(): String {
-        return String.format("file:resources/graphics/blokus/%s/%s.png", color.getValue().toString().toLowerCase(), pieceShape.getValue().toString().toLowerCase())
+        return String.format("file:resources/graphics/blokus/%s/%s.png", color.value.toString().toLowerCase(), pieceShape.value.toString().toLowerCase())
     }
 }
 
@@ -83,8 +83,8 @@ class GameView: View() {
             statusLabel.text = "Spieler ${player} mit ${color} ist am Zug!"
             statusLabel.isVisible = true
             val ft = FadeTransition(7.seconds, statusLabel)
-            ft.setFromValue(1.0)
-            ft.setToValue(0.0)
+            ft.fromValue = 1.0
+            ft.toValue = 0.0
             ft.play()
             ft.setOnFinished { statusLabel.isVisible = false }
         }

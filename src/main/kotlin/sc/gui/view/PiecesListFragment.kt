@@ -8,7 +8,7 @@ import sc.gui.controller.NewGameState
 import sc.gui.model.UndeployedPiecesModel
 import tornadofx.*
 
-class PiecesListFragment() : Fragment() {
+class PiecesListFragment : Fragment() {
     val undeployedPiecesModel: UndeployedPiecesModel by param()
 
     val controller: GameController by inject()

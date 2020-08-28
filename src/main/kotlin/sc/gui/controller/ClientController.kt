@@ -18,7 +18,7 @@ import tornadofx.EventBus
 import tornadofx.FXEvent
 
 // This is the listener to update the global state of the server (lobby)
-class UILobbyListener() : ILobbyClientListener {
+class UILobbyListener : ILobbyClientListener {
     companion object {
         val logger = LoggerFactory.getLogger(ClientController::class.java)
     }

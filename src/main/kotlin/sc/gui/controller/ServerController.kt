@@ -18,8 +18,8 @@ class ServerController : Controller() {
     fun startServer() {
 
         // output logback diagnostics to see if a logback.xml config was found
-        val  lc = LoggerFactory.getILoggerFactory() as LoggerContext;
-        StatusPrinter.print(lc);
+        val  lc = LoggerFactory.getILoggerFactory() as LoggerContext
+        StatusPrinter.print(lc)
 
         Configuration.loadServerProperties()
         try {

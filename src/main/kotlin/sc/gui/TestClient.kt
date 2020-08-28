@@ -25,7 +25,7 @@ class TestGameHandler(private val playerType: PlayerType, private val client: Ab
         val logger = LoggerFactory.getLogger(TestGameHandler::class.java)
     }
 
-    var currentState: GameState? = null;
+    var currentState: GameState? = null
 
     override fun gameEnded(data: GameResult, team: Team?, errorMessage: String?) {
     }
