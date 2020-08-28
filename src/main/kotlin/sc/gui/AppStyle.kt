@@ -20,7 +20,7 @@ class AppStyle : Stylesheet() {
         val fullWidth by cssclass()
 
         val undeployedPiece by cssclass()
-        val field by cssclass()
+        val fieldUnplaceable by cssclass()
         val hoverColor by cssclass()
 
         val colorRED by cssclass()
@@ -60,13 +60,8 @@ class AppStyle : Stylesheet() {
         hoverColor {
             backgroundColor += Color.LIGHTGRAY
         }
-        field {
-            /*
-            borderRadius = rounding
-            backgroundRadius = rounding
-            borderWidth = multi(box(1.px))
-            borderColor += box(Color.GRAY)
-            */
+        fieldUnplaceable {
+            backgroundColor += Color.BLACK
         }
 
         colorRED {

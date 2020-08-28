@@ -108,20 +108,27 @@ class BoardView : View() {
             if (place.hasClass(AppStyle.colorYELLOW)) {
                 place.removeClass(AppStyle.colorYELLOW)
             }
+            if (place.hasClass(AppStyle.fieldUnplaceable)) {
+                place.removeClass(AppStyle.fieldUnplaceable)
+            }
         }
     }
 
     private fun paneHoverEnter(x: Int, y: Int) {
         controller.currentHover = Coordinates(x, y)
+        var placeable: Boolean = isPlaceable(x, y, controller.game.selectedShapeProperty().get())
         for (place in controller.game.selectedShapeProperty().get()) {
-            if (hoverInBound(x + place.x, y + place.y)) {
-                getPane(x + place.x, y + place.y).addClass(when (controller.game.currentColorProperty().get()) {
-                    Color.RED -> AppStyle.colorRED
-                    Color.BLUE -> AppStyle.colorBLUE
-                    Color.GREEN -> AppStyle.colorGREEN
-                    Color.YELLOW -> AppStyle.colorYELLOW
-                    else -> throw Exception("Unknown player color for hover effect")
-                })
+            if (hoverInBound(x + place.x, y + place.y) && model.getField(x, y).content == FieldContent.EMPTY) {
+                if (placeable) {
+                    getPane(x + place.x, y + place.y).addClass(when (controller.game.currentColorProperty().get()) {
+                        Color.RED -> AppStyle.colorRED
+                        Color.BLUE -> AppStyle.colorBLUE
+                        Color.GREEN -> AppStyle.colorGREEN
+                        Color.YELLOW -> AppStyle.colorYELLOW
+                        else -> throw Exception("Unknown player color for hover effect")
+                    })
+                }
+                getPane(x + place.x, y + place.y).addClass(AppStyle.fieldUnplaceable)
             }
         }
     }
@@ -132,7 +139,30 @@ class BoardView : View() {
     }
 
     private fun hoverInBound(x: Int, y: Int): Boolean {
-        return x >= 0 && y >= 0 && x < Constants.BOARD_SIZE && y < Constants.BOARD_SIZE && model.getField(x, y).content == FieldContent.EMPTY
+        return x >= 0 && y >= 0 && x < Constants.BOARD_SIZE && y < Constants.BOARD_SIZE
+    }
+
+    private fun isPlaceable(x: Int, y: Int, shape: Set<Coordinates>): Boolean {
+        val field: FieldContent = when (controller.game.currentColorProperty().get()) {
+            Color.RED -> FieldContent.RED
+            Color.YELLOW -> FieldContent.YELLOW
+            Color.GREEN -> FieldContent.GREEN
+            Color.BLUE -> FieldContent.BLUE
+            else -> FieldContent.EMPTY
+        }
+
+        for (place in shape) {
+            if (!hoverInBound(x + place.x, y + place.y) || model.getField(x + place.x, y + place.y).content != FieldContent.EMPTY ||
+                    model.getField(x + place.x + 1, y + place.y).content != FieldContent.EMPTY && model.getField(x + place.x + 1, y + place.y).content == field ||
+                    model.getField(x + place.x - 1, y + place.y).content != FieldContent.EMPTY && model.getField(x + place.x, y + place.y).content == field ||
+                    model.getField(x + place.x, y + place.y + 1).content != FieldContent.EMPTY && model.getField(x + place.x, y + place.y + 1).content == field ||
+                    model.getField(x + place.x, y + place.y - 1).content != FieldContent.EMPTY && model.getField(x + place.x, y + place.y - 1).content == field
+            ) {
+                return false
+            }
+        }
+
+        return true
     }
 
     fun paneFromField(field: Field): HBox {
@@ -141,7 +171,6 @@ class BoardView : View() {
 
         val pane = HBox()
         with(pane) {
-            addClass(AppStyle.field)
 
             setOnDragEntered {
                 logger.debug("Dragging entered on pane $x,$y")
