@@ -1,5 +1,7 @@
 package sc.gui.view
 
+import javafx.beans.binding.DoubleBinding
+import javafx.beans.property.ReadOnlyDoubleProperty
 import javafx.collections.ListChangeListener
 import javafx.scene.Node
 import javafx.scene.image.ImageView
@@ -10,13 +12,31 @@ import sc.gui.AppStyle
 import sc.gui.controller.BoardController
 import sc.gui.controller.NewGameState
 import sc.gui.model.BoardModel
-import sc.plugin2021.Color
-import sc.plugin2021.Coordinates
+import sc.plugin2021.*
 import sc.plugin2021.Field
-import sc.plugin2021.FieldContent
 import sc.plugin2021.util.Constants
 import tornadofx.*
 import java.lang.Exception
+
+class BoardSize(private val width: ReadOnlyDoubleProperty, private val heigth: ReadOnlyDoubleProperty, calcWidth: Boolean = true) : DoubleBinding() {
+    init {
+        bind(width)
+        bind(heigth)
+    }
+
+    override fun computeValue(): Double {
+        logger.debug("Computing width is: ${width.get()} and height is: ${heigth.get()}")
+        if (width.get() > heigth.get()) {
+            logger.debug("Returning height")
+            return heigth.doubleValue()
+        }
+        return width.doubleValue()
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(BoardView::class.java)
+    }
+}
 
 class BoardView : View() {
     val controller: BoardController by inject()
@@ -37,7 +57,9 @@ class BoardView : View() {
 
         root.isGridLinesVisible = true
 
-        root.prefHeightProperty().bind(root.widthProperty())
+        root.prefWidthProperty().bind(BoardSize(root.widthProperty(), root.heightProperty(), true))
+        root.prefHeightProperty().bind(BoardSize(root.widthProperty(), root.heightProperty(), false))
+
 
         model.fields.forEach { field ->
             root.add(paneFromField(field), field.coordinates.x, field.coordinates.y)
@@ -93,7 +115,7 @@ class BoardView : View() {
         controller.currentHover = Coordinates(x, y)
         for (place in controller.game.selectedShapeProperty().get()) {
             if (hoverInBound(x + place.x, y + place.y)) {
-                getPane(x + place.x, y + place.y).addClass(when(controller.game.currentColorProperty().get()) {
+                getPane(x + place.x, y + place.y).addClass(when (controller.game.currentColorProperty().get()) {
                     Color.RED -> AppStyle.colorRED
                     Color.BLUE -> AppStyle.colorBLUE
                     Color.GREEN -> AppStyle.colorGREEN
@@ -120,6 +142,7 @@ class BoardView : View() {
         val pane = HBox()
         with(pane) {
             addClass(AppStyle.field)
+
             setOnDragEntered {
                 logger.debug("Dragging entered on pane $x,$y")
                 paneHoverEnter(x, y)
@@ -168,9 +191,13 @@ class BoardView : View() {
             }
 
             if (image != null) {
-                image.scaleX = root.width / (16.0 * 20)
-                image.scaleY = root.height / (16.0 * 20)
-                add(image)
+                image.scaleXProperty().bind(root.widthProperty() / (16.0 * Constants.BOARD_SIZE))
+                image.scaleYProperty().bind(root.heightProperty() / (16.0 * Constants.BOARD_SIZE))
+                image.isSmooth = false
+                image.translateX = 10.0
+                image.translateY = 10.0
+
+                this += image
             }
         }
         return pane

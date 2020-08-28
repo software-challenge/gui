@@ -12,10 +12,13 @@ import sc.gui.controller.GameController
 import sc.plugin2021.Color
 import sc.plugin2021.PieceShape
 import sc.plugin2021.Rotation
+import sc.plugin2021.util.Constants
 import tornadofx.*
 
 class PiecesFragment(color: Color, pieceShape: PieceShape) : Fragment() {
     val controller: GameController by inject()
+    val board: BoardView by inject()
+
     val colorName = when (color) {
         Color.RED -> "red"
         Color.GREEN -> "green"
@@ -71,6 +74,12 @@ class PiecesFragment(color: Color, pieceShape: PieceShape) : Fragment() {
                 Rotation.RIGHT -> 90.0
                 else -> throw Exception("Impossible Rotation...")
             }
+
+            image.scaleX = board.root.width / (16.0 * Constants.BOARD_SIZE)
+            image.scaleY = board.root.height / (16.0 * Constants.BOARD_SIZE)
+
+            // prevent smoothing
+            image.isSmooth = false
             val rotated = image.snapshot(SnapshotParameters(), null)
 
             content.putImage(rotated)
