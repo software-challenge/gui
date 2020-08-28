@@ -89,10 +89,10 @@ class AppStyle : Stylesheet() {
         }
 
         colorYELLOW {
-            backgroundColor += Color.YELLOW
+            backgroundColor += Color.GOLD
         }
         borderYELLOW {
-            borderColor += box(Color.YELLOW)
+            borderColor += box(Color.GOLD)
         }
     }
 }
