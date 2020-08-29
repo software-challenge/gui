@@ -61,7 +61,7 @@ class BoardView : View() {
         }
 
 
-        controller.game.selectedShapeProperty().addListener { _, _, _ ->
+        controller.game.selectedCalulatedShape.addListener { _, _, _ ->
             cleanupHover()
             if (controller.currentHover != null) {
                 paneHoverEnter(controller.currentHover!!.x, controller.currentHover!!.y)
@@ -119,13 +119,16 @@ class BoardView : View() {
     }
 
     private fun resize() {
-        val bounds = grid.layoutBoundsProperty().get()
         val size = minOf(root.widthProperty().get(), root.heightProperty().get())
-        logger.debug("Root width: ${root.widthProperty().get()}, height: ${root.heightProperty().get()} and board bounds width: ${bounds.width}, height: ${bounds.height} -> size: $size (${size / bounds.width}, ${size / bounds.height})")
+        logger.debug("Root width: ${root.widthProperty().get()}, height: ${root.heightProperty().get()} -> size: $size")
 
-        // force the grid to scale smaller (or bigger) to keep being quadratic
-        grid.scaleXProperty().set(size / bounds.width)
-        grid.scaleYProperty().set(size / bounds.height)
+        grid.layoutX = size
+        grid.layoutY = size
+        if (size != 0.0) {
+            // force the grid to scale smaller (or bigger) to keep being quadratic
+            grid.scaleXProperty().set(size / root.widthProperty().get())
+            grid.scaleYProperty().set(size / root.heightProperty().get())
+        }
     }
 
 
@@ -161,11 +164,11 @@ class BoardView : View() {
 
     private fun paneHoverEnter(x: Int, y: Int) {
         controller.currentHover = Coordinates(x, y)
-        val placeable: Boolean = isPlaceable(x, y, controller.game.selectedShapeProperty().get())
-        for (place in controller.game.selectedShapeProperty().get()) {
-            if (hoverInBound(x + place.x, y + place.y)) {
+        val placeable: Boolean = controller.isPlaceable(x, y, controller.game.selectedCalulatedShape.get())
+        for (place in controller.game.selectedCalulatedShape.get()) {
+            if (controller.hoverInBound(x + place.x, y + place.y)) {
                 if (placeable) {
-                    getPane(x + place.x, y + place.y).addClass(when (controller.game.currentColorProperty().get()) {
+                    getPane(x + place.x, y + place.y).addClass(when (controller.game.selectedColor.get()) {
                         Color.RED -> AppStyle.colorRED
                         Color.BLUE -> AppStyle.colorBLUE
                         Color.GREEN -> AppStyle.colorGREEN
@@ -182,34 +185,6 @@ class BoardView : View() {
     private fun paneHoverExit() {
         controller.currentHover = null
         cleanupHover()
-    }
-
-    private fun hoverInBound(x: Int, y: Int): Boolean {
-        return x >= 0 && y >= 0 && x < Constants.BOARD_SIZE && y < Constants.BOARD_SIZE
-    }
-
-    private fun isPlaceable(x: Int, y: Int, shape: Set<Coordinates>): Boolean {
-        val field: FieldContent = when (controller.game.currentColorProperty().get()) {
-            Color.RED -> FieldContent.RED
-            Color.YELLOW -> FieldContent.YELLOW
-            Color.GREEN -> FieldContent.GREEN
-            Color.BLUE -> FieldContent.BLUE
-            else -> FieldContent.EMPTY
-        }
-
-        for (place in shape) {
-            // check every adjacent field if it is the same color
-            if (!hoverInBound(x + place.x, y + place.y) || model.getField(x + place.x, y + place.y).content != FieldContent.EMPTY ||
-                    hoverInBound(x + place.x + 1, y + place.y) && model.getField(x + place.x + 1, y + place.y).content == field ||
-                    hoverInBound(x + place.x - 1, y + place.y) && model.getField(x + place.x - 1, y + place.y).content == field ||
-                    hoverInBound(x + place.x, y + place.y + 1) && model.getField(x + place.x, y + place.y + 1).content == field ||
-                    hoverInBound(x + place.x, y + place.y - 1) && model.getField(x + place.x, y + place.y - 1).content == field
-            ) {
-                return false
-            }
-        }
-
-        return true
     }
 
     private fun paneFromField(field: Field): HBox {
@@ -255,7 +230,7 @@ class BoardView : View() {
                     controller.handleClick(x, y)
                 } else if (it.button == MouseButton.SECONDARY) {
                     logger.debug("Right-click, flipping piece")
-                    controller.game.selectFlip(!controller.game.currentFlipProperty().get())
+                    controller.game.flipPiece()
                 }
                 it.consume()
             }

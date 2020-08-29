@@ -49,14 +49,14 @@ class ShapeConverter : StringConverter<PieceShape>() {
 
 }
 
-class PathBinding(val color: Property<Color>, val pieceShape: Property<PieceShape>) : StringBinding() {
+class PathBinding(val color: ColorBinding, val pieceShape: ShapeBinding) : StringBinding() {
     init {
         bind(color)
         bind(pieceShape)
     }
 
     override fun computeValue(): String {
-        return String.format("file:resources/graphics/blokus/%s/%s.png", color.value.toString().toLowerCase(), pieceShape.value.toString().toLowerCase())
+        return String.format("file:resources/graphics/blokus/%s/%s.png", color.get().toString().toLowerCase(), pieceShape.get().toString().toLowerCase())
     }
 }
 
@@ -89,7 +89,6 @@ class GameView : View() {
             ft.play()
             ft.setOnFinished { statusLabel.isVisible = false }
         }
-
     }
 
     override val root = borderpane {
@@ -112,17 +111,8 @@ class GameView : View() {
             }
 
             bottom = hbox {
-                label {
-                    textProperty().bind(Bindings.concat("Selected: ", gameController.currentColorProperty(), " ", gameController.currentPieceShapeProperty()))
-                }
-                val path = PathBinding(gameController.currentColorProperty(), gameController.currentPieceShapeProperty())
-                imageview(path) {
-                    style {
-                        backgroundColor += c("#000000")
-                    }
-                    isSmooth = false
-                    rotate(Duration.seconds(3.0), 90)
-                }
+                label("Selected:")
+                this += PiecesFragment(gameController.selectedColor, gameController.selectedShape, gameController.selectedRotation, gameController.selectedFlip)
                 button {
                     text = "Pause / Play"
                     setOnMouseClicked {
@@ -160,22 +150,13 @@ class GameView : View() {
         setOnMouseClicked {
             if (it.button == MouseButton.SECONDARY) {
                 logger.debug("Right-click, flipping piece")
-                gameController.selectFlip(!gameController.currentFlipProperty().get())
+                gameController.flipPiece()
             }
             it.consume()
         }
         setOnScroll {
             logger.debug("Scrolling detected: rotating selected piece")
-            gameController.selectRotation(
-                    gameController.currentRotationProperty().get().rotate(
-                            when {
-                                it.deltaY > 0.0 -> Rotation.LEFT
-                                it.deltaY == 0.0 -> Rotation.NONE
-                                it.deltaY < 0.0 -> Rotation.RIGHT
-                                else -> Rotation.MIRROR
-                            }
-                    )
-            )
+            gameController.scroll(it)
             it.consume()
         }
     }
