@@ -184,6 +184,7 @@ class GameController : Controller() {
         subscribe<NewGameState> { event ->
             availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
             currentTurnProperty().set(event.gameState.turn)
+            turnColorProperty().set(event.gameState.currentColor)
         }
         subscribe<HumanMoveRequest> {
             isHumanTurnProperty().set(true)

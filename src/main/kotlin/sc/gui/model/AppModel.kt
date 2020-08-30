@@ -12,9 +12,11 @@ enum class ViewTypes {
 class AppModel : ItemViewModel<AppView>() {
     private var currentView: ViewTypes by property(ViewTypes.GAME_CREATION)
     private var isGame: Boolean by property(false)
+    private var isDarkMode: Boolean by property(false)
 
     fun currentViewProperty() = getProperty(AppModel::currentView)
     fun isGameProperty() = getProperty(AppModel::isGame)
+    fun isDarkModeProperty() = getProperty(AppModel::isDarkMode)
 
     init {
         currentViewProperty().addListener { _, _, newValue ->

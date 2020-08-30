@@ -5,6 +5,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.stage.FileChooser
+import sc.gui.AppStyle
 import sc.gui.controller.GameCreationController
 import sc.gui.model.PlayerType
 import tornadofx.*
@@ -100,20 +101,20 @@ class PlayerFileSelectFragment(private val player: Int) : Fragment() {
                             }
                         }
                     }
-                    text("Wähle eine ausführbare Datei aus")
+                    label("Wähle eine ausführbare Datei aus")
                 }
                 root.bottom = textflow {
-                    text("Ausgewählte Datei: ")
-                    text("")
+                    label("Ausgewählte Datei: ")
+                    label("")
                 }
             }
             PlayerType.MANUELL -> {
-                root.center = text("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
-                root.bottom = text()
+                root.center = label("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
+                root.bottom = label()
             }
             else -> {
-                root.center = text("Ein Mensch wird das Spiel hier spielen")
-                root.bottom = text()
+                root.center = label("Ein Mensch wird das Spiel hier spielen")
+                root.bottom = label()
             }
         }
     }
@@ -140,8 +141,8 @@ class PlayerFileSelectFragment(private val player: Int) : Fragment() {
             }
             controller.model.playerExecutable1.onChange {
                 root.bottom = textflow {
-                    text("Ausgewählte Datei: ")
-                    text(controller.model.playerExecutable1.value.absolutePath)
+                    label("Ausgewählte Datei: ")
+                    label(controller.model.playerExecutable1.value.absolutePath)
                 }
             }
         } else {
@@ -150,8 +151,8 @@ class PlayerFileSelectFragment(private val player: Int) : Fragment() {
             }
             controller.model.playerExecutable2.onChange {
                 root.bottom = textflow {
-                    text("Ausgewählte Datei: ")
-                    text(controller.model.playerExecutable2.value.absolutePath)
+                    label("Ausgewählte Datei: ")
+                    label(controller.model.playerExecutable2.value.absolutePath)
                 }
             }
         }

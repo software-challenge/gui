@@ -1,5 +1,6 @@
 package sc.gui.controller
 
+import sc.gui.AppStyle
 import sc.gui.model.AppModel
 import sc.gui.model.ViewTypes
 import sc.gui.view.AppView
@@ -30,5 +31,24 @@ class AppController : Controller() {
             else ->
                 throw Exception("Unknown instance of View")
         })
+    }
+
+    fun toggleDarkmode() {
+        if (model.isDarkModeProperty().get()) {
+            if (view.root.hasClass(AppStyle.darkColorSchema)) {
+                view.root.removeClass(AppStyle.darkColorSchema)
+            }
+            if (!view.root.hasClass(AppStyle.lightColorSchema)) {
+                view.root.addClass(AppStyle.lightColorSchema)
+            }
+        } else {
+            if (view.root.hasClass(AppStyle.lightColorSchema)) {
+                view.root.removeClass(AppStyle.lightColorSchema)
+            }
+            if (!view.root.hasClass(AppStyle.darkColorSchema)) {
+                view.root.addClass(AppStyle.darkColorSchema)
+            }
+        }
+        model.isDarkModeProperty().set(!model.isDarkModeProperty().get())
     }
 }

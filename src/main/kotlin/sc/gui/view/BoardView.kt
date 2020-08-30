@@ -14,6 +14,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
+import sc.gui.controller.AppController
 import sc.gui.controller.BoardController
 import sc.gui.controller.NewGameState
 import sc.gui.model.BoardModel
@@ -50,7 +51,7 @@ class BlockImage(private val url: String, private val size: Property<Double>) : 
     }
 
     init {
-        size.addListener {_, _, _ ->
+        size.addListener { _, _, _ ->
             this.image = Image(url, size.value, size.value, true, false)
         }
     }
@@ -59,8 +60,11 @@ class BlockImage(private val url: String, private val size: Property<Double>) : 
 class BoardView : View() {
     val controller: BoardController by inject()
     private val model: BoardModel by inject()
+    private val appController: AppController by inject()
     private val grid: GridPane = GridPane()
-    override val root = StackPane()
+    override val root = vbox {
+
+    }
 
     init {
         subscribe<NewGameState> { event ->
@@ -114,12 +118,27 @@ class BoardView : View() {
         }
         root += grid
 
-        // TODO: remove or move to a Stylesheet, this is just for debugging purposes
-        grid.style {
-            backgroundColor += javafx.scene.paint.Color.DARKGRAY
+        if (appController.model.isDarkModeProperty().get()) {
+            grid.addClass(AppStyle.darkBoard)
+        } else {
+            grid.addClass(AppStyle.lightBoard)
         }
-        root.style {
-            backgroundColor += javafx.scene.paint.Color.LIGHTGRAY
+        appController.model.isDarkModeProperty().addListener { _, _, _ ->
+            if (appController.model.isDarkModeProperty().get()) {
+                if (grid.hasClass(AppStyle.lightBoard)) {
+                    grid.removeClass(AppStyle.lightBoard)
+                }
+                if (!grid.hasClass(AppStyle.darkBoard)) {
+                    grid.addClass(AppStyle.darkBoard)
+                }
+            } else {
+                if (grid.hasClass(AppStyle.darkBoard)) {
+                    grid.removeClass(AppStyle.darkBoard)
+                }
+                if (!grid.hasClass(AppStyle.lightBoard)) {
+                    grid.addClass(AppStyle.lightBoard)
+                }
+            }
         }
     }
 

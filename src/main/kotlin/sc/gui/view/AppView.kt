@@ -4,6 +4,7 @@ import javafx.application.Platform
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
 import javafx.scene.image.ImageView
+import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.GameController
 import sc.gui.controller.ServerController
@@ -22,6 +23,7 @@ class AppView : View() {
     private val sochaIcon = ImageView("file:resources/icon.png")
 
     override val root = borderpane {
+        addClass(AppStyle.lightColorSchema)
         top = menubar {
             menu(graphic = sochaIcon) {
                 item("Beenden", "Shortcut+Q").action {
@@ -50,6 +52,9 @@ class AppView : View() {
                     // TODO: remove
                     controller.changeViewTo(GameView::class)
                     fire(StartGameRequest(GameCreationModel()))
+                }
+                item("Toggle Darkmode").action {
+                    controller.toggleDarkmode()
                 }
                 separator()
                 item("Replay laden").action {
@@ -102,8 +107,8 @@ class AppView : View() {
         sochaIcon.fitHeight = 32.0
         sochaIcon.fitWidth = 32.0
         with(root) {
-            prefWidth = 1390.0
-            prefHeight = 730.0
+            prefWidth = 1200.0
+            prefHeight = 800.0
             center(MasterView::class)
         }
         title = "Software-Challenge Germany"

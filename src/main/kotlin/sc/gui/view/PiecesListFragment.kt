@@ -30,7 +30,7 @@ class PiecesListFragment(private val undeployedPiecesModel: UndeployedPiecesMode
 
         children.bind(undeployedPiecesModel.undeployedPieces) {
             val piece = PiecesFragment(undeployedPiecesModel.color, it)
-            boardController.board.calculatedBlockSizeProperty().addListener {_,_,_ ->
+            boardController.board.calculatedBlockSizeProperty().addListener { _, _, _ ->
                 piece.updateImage()
             }
             hbox {
@@ -44,51 +44,69 @@ class PiecesListFragment(private val undeployedPiecesModel: UndeployedPiecesMode
 
 
                 setOnScroll { event ->
-                    piece.model.scroll(event.deltaY)
+                    if (controller.turnColorProperty().get() == piece.model.colorProperty().get()) {
+                        piece.model.scroll(event.deltaY)
+                    }
+                    event.consume()
                 }
 
                 setOnMouseClicked { event ->
-                    if (event.button == MouseButton.SECONDARY) {
-                        logger.debug("Right-click, flipping piece")
-                        piece.model.flipPiece()
+                    if (controller.turnColorProperty().get() == piece.model.colorProperty().get()) {
+                        if (event.button == MouseButton.SECONDARY) {
+                            logger.debug("Right-click, flipping piece")
+                            piece.model.flipPiece()
+                        }
                     }
+                    event.consume()
                 }
                 setOnMousePressed { event ->
-                    if (event.button == MouseButton.PRIMARY) {
-                        if (dragging) {
-                            logger.debug("Dragging to ${event.sceneX}, ${event.sceneY} from initial $dragStartX, $dragStartY")
-                            translateXProperty().set(event.sceneX - dragStartX)
-                            translateYProperty().set(event.sceneY - dragStartY)
-                        } else {
-                            logger.debug("Clicked on ${undeployedPiecesModel.color} $shape")
-                            controller.selectPiece(piece.model)
-                            mouseTransparentProperty().set(true)
-                            dragging = true
-                            dragStartX = event.sceneX
-                            dragStartY = event.sceneY
+                    if (controller.turnColorProperty().get() == piece.model.colorProperty().get()) {
+                        if (event.button == MouseButton.PRIMARY) {
+                            if (dragging) {
+                                logger.debug("Dragging to ${event.sceneX}, ${event.sceneY} from initial $dragStartX, $dragStartY")
+                                translateXProperty().set(event.sceneX - dragStartX)
+                                translateYProperty().set(event.sceneY - dragStartY)
+                            } else {
+                                logger.debug("Clicked on ${undeployedPiecesModel.color} $shape")
+                                controller.selectPiece(piece.model)
+                                mouseTransparentProperty().set(true)
+                                dragging = true
+                                dragStartX = event.sceneX
+                                dragStartY = event.sceneY
+                            }
                         }
                     }
+                    event.consume()
                 }
                 setOnMouseMoved { event ->
-                    if (event.button == MouseButton.PRIMARY) {
-                        if (dragging) {
-                            logger.debug("Dragging to ${event.sceneX}, ${event.sceneY} from initial $dragStartX, $dragStartY")
-                            translateXProperty().set(event.sceneX - dragStartX)
-                            translateYProperty().set(event.sceneY - dragStartY)
+                    if (controller.turnColorProperty().get() == piece.model.colorProperty().get()) {
+                        if (event.button == MouseButton.PRIMARY) {
+                            if (dragging) {
+                                logger.debug("Dragging to ${event.sceneX}, ${event.sceneY} from initial $dragStartX, $dragStartY")
+                                translateXProperty().set(event.sceneX - dragStartX)
+                                translateYProperty().set(event.sceneY - dragStartY)
+                            }
                         }
                     }
+                    event.consume()
                 }
                 setOnMouseReleased { event ->
-                    if (event.button == MouseButton.PRIMARY) {
-                        dragging = false
-                        mouseTransparentProperty().set(false)
+                    if (controller.turnColorProperty().get() == piece.model.colorProperty().get()) {
+                        if (event.button == MouseButton.PRIMARY) {
+                            dragging = false
+                            mouseTransparentProperty().set(false)
+                        }
                     }
+                    event.consume()
                 }
 
-                setOnDragDetected {
-                    logger.debug("Drag detected of ${undeployedPiecesModel.color}, $shape")
-                    controller.selectPiece(piece.model)
-                    startFullDrag()
+                setOnDragDetected { event ->
+                    if (controller.turnColorProperty().get() == piece.model.colorProperty().get()) {
+                        logger.debug("Drag detected of ${undeployedPiecesModel.color}, $shape")
+                        controller.selectPiece(piece.model)
+                        startFullDrag()
+                    }
+                    event.consume()
                 }
 
                 setOnMouseEntered {

@@ -26,13 +26,15 @@ class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
 
     override val root = hbox {
         this += image
-
         tooltip(model.shapeProperty().get().name)
     }
 
     init {
         model.colorProperty().addListener { _, _, _ -> updateImage() }
-        model.shapeProperty().addListener { _, _, _ -> updateImage() }
+        model.shapeProperty().addListener { _, _, _ ->
+            updateImage()
+            root.tooltip(model.shapeProperty().get().name)
+        }
         model.rotationProperty().addListener { _, _, _ -> updateImage() }
         model.flipProperty().addListener { _, _, _ -> updateImage() }
         updateImage()

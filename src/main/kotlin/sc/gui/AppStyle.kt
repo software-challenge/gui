@@ -9,16 +9,20 @@ class AppStyle : Stylesheet() {
     companion object {
         val tackyButton by cssclass()
 
-        private val topColor = Color.RED
-        private val rightColor = Color.DARKGREEN
-        private val leftColor = c("#FFA500")
-        private val bottomColor = Color.PURPLE
+        private val red = c("#AA0100")
+        private val blue = c("#005784")
+        private val yellow = c("#9E8900")
+        private val green = c("#2B7200")
 
         private val gotuRegular = Font.loadFont("file:resources/fonts/NotoSans-Regular.ttf", 16.0)
-        private val rounding = multi(box(10.percent))
+        private val rounding = multi(box(8.percent))
 
         val fullWidth by cssclass()
+        val lightColorSchema by cssclass()
+        val darkColorSchema by cssclass()
 
+        val lightBoard by cssclass()
+        val darkBoard by cssclass()
         val undeployedPiece by cssclass()
         val fieldUnplaceable by cssclass()
         val hoverColor by cssclass()
@@ -40,9 +44,28 @@ class AppStyle : Stylesheet() {
         root {
             font = gotuRegular
         }
+
+        lightColorSchema {
+            baseColor = c("#d1d1d1")
+            backgroundColor += c("#ebdada")
+        }
+        darkColorSchema {
+            baseColor = c("#424242")
+            backgroundColor += c("#333333")
+            accentColor = Color.GRAY
+            faintFocusColor = Color.BLACK
+            focusColor = Color.BLUE
+        }
+        lightBoard {
+            backgroundColor += Color.LIGHTGRAY
+        }
+        darkBoard {
+            backgroundColor += Color.DARKGRAY
+        }
+
         tackyButton {
             rotate = 5.deg
-            borderColor += box(topColor, rightColor, bottomColor, leftColor)
+            borderColor += box(red, blue, green, yellow)
             fontSize = 20.px
         }
         label {
@@ -56,40 +79,40 @@ class AppStyle : Stylesheet() {
             borderRadius = rounding
             backgroundRadius = rounding
             borderWidth = multi(box(2.px))
-        }
-        hoverColor {
-            backgroundColor += Color.LIGHTGRAY
+            and(hover) {
+                Color.DARKGRAY
+            }
         }
         fieldUnplaceable {
             backgroundColor += Color.BLACK
         }
 
         colorRED {
-            backgroundColor += Color.RED
+            backgroundColor += red
         }
         borderRED {
-            borderColor += box(Color.RED)
+            borderColor += box(red)
         }
 
         colorBLUE {
-            backgroundColor += Color.BLUE
+            backgroundColor += blue
         }
         borderBLUE {
-            borderColor += box(Color.BLUE)
+            borderColor += box(blue)
         }
 
         colorGREEN {
-            backgroundColor += Color.GREEN
+            backgroundColor += green
         }
         borderGREEN {
-            borderColor += box(Color.GREEN)
+            borderColor += box(green)
         }
 
         colorYELLOW {
-            backgroundColor += Color.GOLD
+            backgroundColor += yellow
         }
         borderYELLOW {
-            borderColor += box(Color.GOLD)
+            borderColor += box(yellow)
         }
     }
 }

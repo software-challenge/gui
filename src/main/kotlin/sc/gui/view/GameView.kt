@@ -2,8 +2,10 @@ package sc.gui.view
 
 import javafx.animation.FadeTransition
 import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringBinding
 import javafx.collections.ObservableList
 import javafx.geometry.Insets
+import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.input.KeyCode
 import javafx.scene.input.MouseButton
@@ -49,7 +51,6 @@ class GameView : View() {
     private val yellowUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.YELLOW))
     private val greenUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.GREEN))
 
-    private val statusLabel = Label("whooohooo")
     private val leftPane = vbox {
         this += blueUndeployedPieces
         this += redUndeployedPieces
@@ -59,19 +60,18 @@ class GameView : View() {
         this += greenUndeployedPieces
     }
     private val game = borderpane {
-        style {
-            backgroundColor += javafx.scene.paint.Color.DARKCYAN
-        }
-        center = stackpane {
-            this += find<BoardView>()
-            statusLabel.style = "-fx-text-fill: white; -fx-font-size: 32pt;"
-            statusLabel.isVisible = false
-            this += statusLabel
-        }
+        top(StatusView::class)
+        center(BoardView::class)
 
         bottom = hbox {
-            label("Selected:")
+            label("Selected: ")
             hbox {
+                addClass(AppStyle.undeployedPiece, when (gameController.selectedColor.value) {
+                    Color.BLUE -> AppStyle.borderBLUE
+                    Color.GREEN -> AppStyle.borderGREEN
+                    Color.YELLOW -> AppStyle.borderYELLOW
+                    else -> AppStyle.borderRED
+                })
                 gameController.selectedColor.addListener { _, _, newValue ->
                     if (hasClass(AppStyle.borderRED)) {
                         removeClass(AppStyle.borderRED)
@@ -96,10 +96,13 @@ class GameView : View() {
                 }
                 this += PiecesFragment(gameController.selectedColor, gameController.selectedShape, gameController.selectedRotation, gameController.selectedFlip)
             }
-            button {
-                text = "Pause / Play"
-                setOnMouseClicked {
-                    clientController.togglePause()
+            hbox {
+                padding = Insets(0.0, 10.0, 0.0, 10.0)
+                button {
+                    text = "Pause / Play"
+                    setOnMouseClicked {
+                        clientController.togglePause()
+                    }
                 }
             }
             button {
@@ -109,6 +112,7 @@ class GameView : View() {
                 }
             }
             label {
+                padding = Insets(0.0, 10.0, 0.0, 10.0)
                 textProperty().bind(Bindings.concat(gameController.currentTurnProperty(), " / ", gameController.availableTurnsProperty()))
             }
             button {
@@ -120,7 +124,7 @@ class GameView : View() {
         }
     }
     override val root = hbox {
-        paddingProperty().set(Insets(0.0, 10.0, 10.0, 10.0))
+        paddingProperty().set(Insets(6.0))
         this += leftPane
         this += game
         this += rightPane
@@ -171,7 +175,6 @@ class GameView : View() {
     private fun resize() {
         val width = root.widthProperty().get()
         val height = root.heightProperty().get()
-        val size = minOf(width, height)
         game.prefWidthProperty().set(width * 0.5)
         leftPane.prefWidthProperty().set(width * 0.25)
         rightPane.prefWidthProperty().set(width * 0.25)
@@ -201,17 +204,6 @@ class GameView : View() {
     init {
         subscribe<StartGameRequest> { event ->
             clientController.startGame("localhost", 13050, event.gameCreationModel)
-        }
-        subscribe<HumanMoveRequest> { event ->
-            val player = event.gameState.currentPlayer.displayName
-            val color = event.gameState.currentColor.name
-            statusLabel.text = "Spieler $player mit $color ist am Zug!"
-            statusLabel.isVisible = true
-            val ft = FadeTransition(7.seconds, statusLabel)
-            ft.fromValue = 1.0
-            ft.toValue = 0.0
-            ft.play()
-            ft.setOnFinished { statusLabel.isVisible = false }
         }
 
         // responsive scaling
