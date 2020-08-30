@@ -28,7 +28,7 @@ class StatusView() : View() {
 
     override val root = hbox {
         alignment = Pos.CENTER
-        statusLabel.style = "-fx-text-fill: white; -fx-font-size: 32pt;"
+        statusLabel.style = "-fx-text-fill: white; -fx-font-size: 24pt;"
         this += statusLabel
     }
 
