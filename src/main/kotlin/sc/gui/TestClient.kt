@@ -1,5 +1,6 @@
 package sc.gui
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import sc.api.plugins.exceptions.GameLogicException
 import sc.framework.plugins.Player
@@ -10,7 +11,7 @@ import sc.shared.GameResult
 // connects our game handler (ClientListener) to the server
 class TestClient(playerType: PlayerType, host: String, port: Int): AbstractClient(host, port) {
     companion object {
-        val logger = LoggerFactory.getLogger(HumanClient::class.java)
+        val logger: Logger = LoggerFactory.getLogger(HumanClient::class.java)
     }
 
     init {
@@ -22,7 +23,7 @@ class TestClient(playerType: PlayerType, host: String, port: Int): AbstractClien
 class TestGameHandler(private val playerType: PlayerType, private val client: AbstractClient): IGameHandler {
 
     companion object {
-        val logger = LoggerFactory.getLogger(TestGameHandler::class.java)
+        val logger: Logger = LoggerFactory.getLogger(TestGameHandler::class.java)
     }
 
     var currentState: GameState? = null

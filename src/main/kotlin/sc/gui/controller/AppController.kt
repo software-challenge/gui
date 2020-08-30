@@ -13,11 +13,11 @@ class AppController : Controller() {
     val model = AppModel()
     private val view: AppView by inject()
 
-    fun <T: UIComponent> changeViewTo(nodeType: KClass<T>) {
+    fun <T : UIComponent> changeViewTo(nodeType: KClass<T>) {
         with(view) {
             this.root.center(nodeType)
         }
-        model.currentView = when(nodeType) {
+        model.currentViewProperty().set(when (nodeType) {
             GameView::class -> {
                 ViewTypes.GAME
             }
@@ -29,6 +29,6 @@ class AppController : Controller() {
             }
             else ->
                 throw Exception("Unknown instance of View")
-        }
+        })
     }
 }

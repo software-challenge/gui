@@ -5,20 +5,21 @@ import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
 import javafx.scene.image.ImageView
 import sc.gui.controller.AppController
-import sc.gui.controller.ClientController
+import sc.gui.controller.GameController
 import sc.gui.controller.ServerController
 import sc.gui.controller.StartGameRequest
 import sc.gui.model.GameCreationModel
 import sc.gui.model.ViewTypes
+import sc.plugin2021.Rotation
 import tornadofx.*
 import java.awt.Desktop
 import java.net.URI
 
 class AppView : View() {
     val controller: AppController by inject()
-    private val clientController: ClientController by inject()
+    private val gameController: GameController by inject()
     private val serverController: ServerController by inject()
-    val sochaIcon = ImageView("https://raw.githubusercontent.com/CAU-Kiel-Tech-Inf/socha-gui/master/assets/build-resources/icon.png")
+    private val sochaIcon = ImageView("file:resources/icon.png")
 
     override val root = borderpane {
         top = menubar {
@@ -27,11 +28,9 @@ class AppView : View() {
                     println("Quitting!")
                     Platform.exit()
                 }
-            }
-            menu("Spiel") {
                 item("Neues Spiel", "Shortcut+N").action {
                     println("New Game!")
-                    if (controller.model.currentView == ViewTypes.GAME) {
+                    if (controller.model.currentViewProperty().get() == ViewTypes.GAME) {
                         alert(
                                 type = Alert.AlertType.CONFIRMATION,
                                 header = "Neues Spiel anfangen",
@@ -43,7 +42,7 @@ class AppView : View() {
                                     }
                                 }
                         )
-                    } else if (controller.model.currentView != ViewTypes.GAME_CREATION) {
+                    } else if (controller.model.currentViewProperty().get() != ViewTypes.GAME_CREATION) {
                         controller.changeViewTo(GameCreationView::class)
                     }
                 }
@@ -60,6 +59,24 @@ class AppView : View() {
                 item("Logs öffnen", "Shortcut+L").action {
                     // TODO
                     println("Logs werden geöffnet")
+                }
+            }
+            menu("Steuerung") {
+                enableWhen(controller.model.isGameProperty())
+                menu("Rotieren") {
+                    item("Scrollen", "Mausrad")
+                    item("Uhrzeigersinn", "D").action {
+                        gameController.rotatePiece(Rotation.RIGHT)
+                    }
+                    item("Gegen Uhrzeigersinn", "A").action {
+                        gameController.rotatePiece(Rotation.LEFT)
+                    }
+                    item("180", "W oder S").action {
+                        gameController.rotatePiece(Rotation.MIRROR)
+                    }
+                }
+                item("Flippen", "R-Click oder CTRL").action {
+                    gameController.flipPiece()
                 }
             }
             menu("Hilfe") {
@@ -85,8 +102,8 @@ class AppView : View() {
         sochaIcon.fitHeight = 32.0
         sochaIcon.fitWidth = 32.0
         with(root) {
-            prefWidth = 1300.0
-            prefHeight = 800.0
+            prefWidth = 1390.0
+            prefHeight = 730.0
             center(MasterView::class)
         }
         title = "Software-Challenge Germany"

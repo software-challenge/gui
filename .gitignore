@@ -7,3 +7,4 @@ build
 # Ignore IDE-Settings
 .idea
 *.log
+log

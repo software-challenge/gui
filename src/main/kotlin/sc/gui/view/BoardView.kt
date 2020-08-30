@@ -1,5 +1,6 @@
 package sc.gui.view
 
+import javafx.beans.property.Property
 import javafx.collections.ListChangeListener
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -25,9 +26,9 @@ import tornadofx.*
 
 // this custom class is requiredto be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
-class BlockImage(url: String) : ImageView(Image(url, 16.0, 16.0, true, false)) {
+class BlockImage(private val url: String, private val size: Property<Double>) : ImageView(Image(url, size.value, size.value, true, false)) {
     override fun minHeight(width: Double): Double {
-        return 16.0
+        return size.value
     }
 
     override fun prefHeight(width: Double): Double {
@@ -36,7 +37,7 @@ class BlockImage(url: String) : ImageView(Image(url, 16.0, 16.0, true, false)) {
     }
 
     override fun minWidth(height: Double): Double {
-        return 16.0
+        return size.value
     }
 
     override fun prefWidth(height: Double): Double {
@@ -46,6 +47,12 @@ class BlockImage(url: String) : ImageView(Image(url, 16.0, 16.0, true, false)) {
 
     override fun isResizable(): Boolean {
         return true
+    }
+
+    init {
+        size.addListener {_, _, _ ->
+            this.image = Image(url, size.value, size.value, true, false)
+        }
     }
 }
 
@@ -61,7 +68,7 @@ class BoardView : View() {
         }
 
 
-        controller.game.selectedCalulatedShape.addListener { _, _, _ ->
+        controller.game.selectedCalculatedShape.addListener { _, _, _ ->
             cleanupHover()
             if (controller.currentHover != null) {
                 paneHoverEnter(controller.currentHover!!.x, controller.currentHover!!.y)
@@ -99,12 +106,10 @@ class BoardView : View() {
             }
         })
 
-        root.widthProperty().addListener { _, old, new ->
-            logger.debug("Width changed from $old -> $new")
+        root.widthProperty().addListener { _, _, _ ->
             resize()
         }
-        root.heightProperty().addListener { _, old, new ->
-            logger.debug("Height changed from $old -> $new")
+        root.heightProperty().addListener { _, _, _ ->
             resize()
         }
         root += grid
@@ -120,7 +125,6 @@ class BoardView : View() {
 
     private fun resize() {
         val size = minOf(root.widthProperty().get(), root.heightProperty().get())
-        logger.debug("Root width: ${root.widthProperty().get()}, height: ${root.heightProperty().get()} -> size: $size")
 
         grid.layoutX = size
         grid.layoutY = size
@@ -129,6 +133,8 @@ class BoardView : View() {
             grid.scaleXProperty().set(size / root.widthProperty().get())
             grid.scaleYProperty().set(size / root.heightProperty().get())
         }
+
+        model.calculatedBlockSizeProperty().set(size / Constants.BOARD_SIZE)
     }
 
 
@@ -164,8 +170,8 @@ class BoardView : View() {
 
     private fun paneHoverEnter(x: Int, y: Int) {
         controller.currentHover = Coordinates(x, y)
-        val placeable: Boolean = controller.isPlaceable(x, y, controller.game.selectedCalulatedShape.get())
-        for (place in controller.game.selectedCalulatedShape.get()) {
+        val placeable: Boolean = controller.isPlaceable(x, y, controller.game.selectedCalculatedShape.get())
+        for (place in controller.game.selectedCalculatedShape.get()) {
             if (controller.hoverInBound(x + place.x, y + place.y)) {
                 if (placeable) {
                     getPane(x + place.x, y + place.y).addClass(when (controller.game.selectedColor.get()) {
@@ -190,10 +196,10 @@ class BoardView : View() {
     private fun paneFromField(field: Field): HBox {
         val x = field.coordinates.x
         val y = field.coordinates.y
+        val image: BlockImage?
 
         val pane = HBox()
         with(pane) {
-
             setOnDragEntered {
                 logger.debug("Dragging entered on pane $x,$y")
                 paneHoverEnter(x, y)
@@ -235,11 +241,11 @@ class BoardView : View() {
                 it.consume()
             }
 
-            val image: BlockImage? = when (field.content) {
-                FieldContent.RED -> BlockImage("file:resources/graphics/blokus/single/red.png")
-                FieldContent.BLUE -> BlockImage("file:resources/graphics/blokus/single/blue.png")
-                FieldContent.GREEN -> BlockImage("file:resources/graphics/blokus/single/green.png")
-                FieldContent.YELLOW -> BlockImage("file:resources/graphics/blokus/single/yellow.png")
+            image = when (field.content) {
+                FieldContent.RED -> BlockImage("file:resources/graphics/blokus/single/red.png", controller.board.calculatedBlockSizeProperty())
+                FieldContent.BLUE -> BlockImage("file:resources/graphics/blokus/single/blue.png", controller.board.calculatedBlockSizeProperty())
+                FieldContent.GREEN -> BlockImage("file:resources/graphics/blokus/single/green.png", controller.board.calculatedBlockSizeProperty())
+                FieldContent.YELLOW -> BlockImage("file:resources/graphics/blokus/single/yellow.png", controller.board.calculatedBlockSizeProperty())
                 FieldContent.EMPTY -> null
                 else -> throw Exception("Unknown Color-value for placed piece")
             }

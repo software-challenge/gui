@@ -1,6 +1,5 @@
 package sc.gui.model
 
-import javafx.scene.input.ScrollEvent
 import sc.gui.view.PiecesFragment
 import sc.plugin2021.Color
 import sc.plugin2021.Coordinates
@@ -10,11 +9,11 @@ import tornadofx.*
 
 
 class PiecesModel(color: Color, shape: PieceShape) : ItemViewModel<PiecesFragment>() {
-    var color: Color by property(color)
-    var shape: PieceShape by property(shape)
-    var rotation: Rotation by property(Rotation.NONE)
-    var flip: Boolean by property(false)
-    var calculatedShape: Set<Coordinates> by property(shape.transform(rotation, flip))
+    private var color: Color by property(color)
+    private var shape: PieceShape by property(shape)
+    private var rotation: Rotation by property(Rotation.NONE)
+    private var flip: Boolean by property(false)
+    private var calculatedShape: Set<Coordinates> by property(shape.transform(rotation, flip))
 
     fun colorProperty() = getProperty(PiecesModel::color)
     fun shapeProperty() = getProperty(PiecesModel::shape)
@@ -23,7 +22,7 @@ class PiecesModel(color: Color, shape: PieceShape) : ItemViewModel<PiecesFragmen
     fun calculatedShapeProperty() = getProperty(PiecesModel::calculatedShape)
 
     init {
-        // automatically update calulated shape
+        // automatically update calculated shape
         shapeProperty().addListener { _, _, newValue ->
             calculatedShapeProperty().set(newValue.transform(rotationProperty().get(), flipProperty().get()))
         }
@@ -35,15 +34,15 @@ class PiecesModel(color: Color, shape: PieceShape) : ItemViewModel<PiecesFragmen
         }
     }
 
-    fun rotate(rotation: Rotation) {
+    private fun rotate(rotation: Rotation) {
         rotationProperty().set(rotationProperty().get().rotate(rotation))
     }
 
-    fun scroll(event: ScrollEvent) {
+    fun scroll(deltaY: Double) {
         rotate(when {
-            event.deltaY > 0.0 -> Rotation.LEFT
-            event.deltaY == 0.0 -> Rotation.NONE
-            event.deltaY < 0.0 -> Rotation.RIGHT
+            deltaY > 0.0 -> Rotation.LEFT
+            deltaY == 0.0 -> Rotation.NONE
+            deltaY < 0.0 -> Rotation.RIGHT
             else -> Rotation.MIRROR
         })
     }

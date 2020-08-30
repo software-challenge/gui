@@ -4,12 +4,15 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import sc.gui.view.BoardView
 import sc.plugin2021.*
+import sc.plugin2021.Field
 import sc.plugin2021.util.Constants
-import tornadofx.ItemViewModel
+import tornadofx.*
 
-class BoardModel: ItemViewModel<BoardView>() {
+class BoardModel : ItemViewModel<BoardView>() {
+    private var calculatedBlockSize: Double by property<Double>(16.0)
+    fun calculatedBlockSizeProperty() = getProperty(BoardModel::calculatedBlockSize)
+
     // NOTE that this is not how the ItemViewModel should be used, see https://edvin.gitbooks.io/tornadofx-guide/content/part1/11_Editing_Models_and_Validation.html
-
     lateinit var board: Board
     val fields: ObservableList<Field> = FXCollections.observableArrayList()
 
@@ -33,7 +36,7 @@ class BoardModel: ItemViewModel<BoardView>() {
     }
 
     private fun indexOf(x: Int, y: Int): Int {
-        return y*Constants.BOARD_SIZE+x
+        return y * Constants.BOARD_SIZE + x
     }
 
     fun setField(x: Int, y: Int, field: FieldContent) {
@@ -41,7 +44,7 @@ class BoardModel: ItemViewModel<BoardView>() {
         board[x, y] = field
     }
 
-    fun getField(x: Int, y: Int): Field{
+    fun getField(x: Int, y: Int): Field {
         return fields[indexOf(x, y)]
     }
 }

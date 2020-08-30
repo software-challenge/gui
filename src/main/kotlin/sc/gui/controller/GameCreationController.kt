@@ -6,7 +6,6 @@ import tornadofx.*
 
 class GameCreationController : Controller() {
     var model = GameCreationModel()
-    private val clientController: ClientController by inject()
     private val appController: AppController by inject()
 
     fun createGame() {

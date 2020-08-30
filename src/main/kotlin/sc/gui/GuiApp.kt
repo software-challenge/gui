@@ -7,7 +7,7 @@ import tornadofx.*
 import kotlin.system.exitProcess
 
 class GuiApp : App(AppView::class, AppStyle::class) {
-    val server: ServerController by inject()
+    private val server: ServerController by inject()
 
     override fun stop() {
         super.stop()
@@ -19,8 +19,7 @@ class GuiApp : App(AppView::class, AppStyle::class) {
     init {
         reloadStylesheetsOnFocus()
         server.startServer()
-        // TODO: use local path to resources/icon.png
-        addStageIcon(Image("https://raw.githubusercontent.com/CAU-Kiel-Tech-Inf/socha-gui/master/assets/build-resources/icon.png"))
+        addStageIcon(Image("file:resources/icon.png"))
     }
 }
 

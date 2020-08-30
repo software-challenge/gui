@@ -3,9 +3,9 @@ package sc.gui.controller
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.Property
-import javafx.scene.input.ScrollEvent
 import org.slf4j.LoggerFactory
 import sc.gui.model.PiecesModel
+import sc.gui.view.GameView
 import sc.gui.view.PiecesFragment
 import sc.plugin2021.Color
 import sc.plugin2021.Coordinates
@@ -16,7 +16,7 @@ import kotlin.math.max
 
 // The following *Binding-classes are necessary to automatically unbind and rebind to a new piece (when switched)
 // in order to prevent this hassle in every other class, that uses the current selected PieceModel
-class ColorBinding(private val piece: Property<PiecesModel>) : ObjectBinding<Color>() {
+class ColorBinding(piece: Property<PiecesModel>) : ObjectBinding<Color>() {
     val model = piece
 
     init {
@@ -31,6 +31,10 @@ class ColorBinding(private val piece: Property<PiecesModel>) : ObjectBinding<Col
         }
     }
 
+    fun set(data: Color) {
+        model.value.colorProperty().set(data)
+    }
+
     override fun computeValue(): Color {
         logger.debug("Color: ${model.value.colorProperty().get()}")
         return model.value.colorProperty().get()
@@ -41,7 +45,7 @@ class ColorBinding(private val piece: Property<PiecesModel>) : ObjectBinding<Col
     }
 }
 
-class ShapeBinding(private val piece: Property<PiecesModel>) : ObjectBinding<PieceShape>() {
+class ShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<PieceShape>() {
     val model = piece
 
     init {
@@ -56,6 +60,10 @@ class ShapeBinding(private val piece: Property<PiecesModel>) : ObjectBinding<Pie
         }
     }
 
+    fun set(data: PieceShape) {
+        model.value.shapeProperty().set(data)
+    }
+
     override fun computeValue(): PieceShape {
         return model.value.shapeProperty().get()
     }
@@ -65,7 +73,7 @@ class ShapeBinding(private val piece: Property<PiecesModel>) : ObjectBinding<Pie
     }
 }
 
-class RotationBinding(private val piece: Property<PiecesModel>) : ObjectBinding<Rotation>() {
+class RotationBinding(piece: Property<PiecesModel>) : ObjectBinding<Rotation>() {
     val model = piece
 
     init {
@@ -80,6 +88,10 @@ class RotationBinding(private val piece: Property<PiecesModel>) : ObjectBinding<
         }
     }
 
+    fun set(data: Rotation) {
+        model.value.rotationProperty().set(data)
+    }
+
     override fun computeValue(): Rotation {
         return model.value.rotationProperty().get()
     }
@@ -89,7 +101,7 @@ class RotationBinding(private val piece: Property<PiecesModel>) : ObjectBinding<
     }
 }
 
-class FlipBinding(private val piece: Property<PiecesModel>) : BooleanBinding() {
+class FlipBinding(piece: Property<PiecesModel>) : BooleanBinding() {
     val model = piece
 
     init {
@@ -104,6 +116,10 @@ class FlipBinding(private val piece: Property<PiecesModel>) : BooleanBinding() {
         }
     }
 
+    fun set(data: Boolean) {
+        model.value.flipProperty().set(data)
+    }
+
     override fun computeValue(): Boolean {
         return model.value.flipProperty().get()
     }
@@ -113,7 +129,7 @@ class FlipBinding(private val piece: Property<PiecesModel>) : BooleanBinding() {
     }
 }
 
-class CalculatedShapeBinding(private val piece: Property<PiecesModel>) : ObjectBinding<Set<Coordinates>>() {
+class CalculatedShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<Set<Coordinates>>() {
     val model = piece
 
     init {
@@ -126,6 +142,10 @@ class CalculatedShapeBinding(private val piece: Property<PiecesModel>) : ObjectB
             model.value = newValue
             logger.debug("Now returning ${computeValue()}")
         }
+    }
+
+    fun set(data: Set<Coordinates>) {
+        model.value.calculatedShapeProperty().set(data)
     }
 
     override fun computeValue(): Set<Coordinates> {
@@ -158,20 +178,20 @@ class GameController : Controller() {
     var selectedShape: ShapeBinding = ShapeBinding(currentPieceProperty())
     var selectedRotation: RotationBinding = RotationBinding(currentPieceProperty())
     var selectedFlip: FlipBinding = FlipBinding(currentPieceProperty())
-    var selectedCalulatedShape: CalculatedShapeBinding = CalculatedShapeBinding(currentPieceProperty())
+    var selectedCalculatedShape: CalculatedShapeBinding = CalculatedShapeBinding(currentPieceProperty())
 
     init {
         subscribe<NewGameState> { event ->
             availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
             currentTurnProperty().set(event.gameState.turn)
         }
-        subscribe<HumanMoveRequest> { event ->
+        subscribe<HumanMoveRequest> {
             isHumanTurnProperty().set(true)
         }
     }
 
     fun selectPiece(piece: PiecesModel) {
-        logger.debug("Recieved new piece, updating")
+        logger.debug("Received new piece, updating")
         currentPieceProperty().set(piece)
     }
 
@@ -179,8 +199,12 @@ class GameController : Controller() {
         currentPieceProperty().get().flipPiece()
     }
 
-    fun scroll(event: ScrollEvent) {
-        currentPieceProperty().get().scroll(event)
+    fun rotatePiece(rotate: Rotation) {
+        selectedRotation.set(selectedRotation.get().rotate(rotate))
+    }
+
+    fun scroll(deltaY: Double) {
+        currentPieceProperty().get().scroll(deltaY)
     }
 
     companion object {

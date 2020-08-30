@@ -1,6 +1,5 @@
 package sc.gui.controller
 
-import sc.gui.view.GameView
 import sc.gui.model.BoardModel
 import sc.gui.view.BoardView
 import sc.plugin2021.*
@@ -12,11 +11,10 @@ class BoardController : Controller() {
     var currentHover: Coordinates? = null
     val board: BoardModel by inject()
     val view: BoardView by inject()
-    val gameView: GameView by inject()
     val game: GameController by inject()
 
     fun handleClick(x: Int, y: Int) {
-        if (isPlaceable(x, y, game.selectedCalulatedShape.get())) {
+        if (isPlaceable(x, y, game.selectedCalculatedShape.get())) {
             val color = game.selectedColor.get()
 
             val piece = Piece(color, game.selectedShape.get(), game.selectedRotation.get(), game.selectedFlip.get(), Coordinates(x, y))

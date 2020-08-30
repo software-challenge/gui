@@ -12,13 +12,11 @@ import sc.server.Configuration
 import sc.shared.GameResult
 import sc.shared.SlotDescriptor
 import java.net.ConnectException
-import java.util.*
 import kotlin.system.exitProcess
-import kotlin.concurrent.schedule
 
 class LobbyListener(val logger: Logger) : ILobbyClientListener {
 
-    var numberJoined = 0
+    private var numberJoined = 0
 
     override fun onNewState(roomId: String?, state: Any?) {
         logger.debug("lobby: new state for $roomId")

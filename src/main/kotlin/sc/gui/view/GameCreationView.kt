@@ -49,9 +49,8 @@ class GameCreationView : View("Neues Spiel") {
     }
 }
 
-class PlayerFragment(player: Int) : Fragment() {
+class PlayerFragment(private val player: Int) : Fragment() {
     val controller: GameCreationController by inject()
-    private val player: Int = player
 
     override var root = vbox(20) {
         fieldset("Spieler Nr. $player") {
@@ -69,8 +68,7 @@ class PlayerFragment(player: Int) : Fragment() {
     }
 }
 
-class PlayerFileSelectFragment(player: Int) : Fragment() {
-    private val player: Int = player
+class PlayerFileSelectFragment(private val player: Int) : Fragment() {
     val controller: GameCreationController by inject()
     private val playerTypes: ObservableList<PlayerType> = FXCollections.observableArrayList(PlayerType.HUMAN, PlayerType.MANUELL, PlayerType.COMPUTER)
 
@@ -83,35 +81,40 @@ class PlayerFileSelectFragment(player: Int) : Fragment() {
     }
 
     private fun updatePlayerType() {
-        if (getPlayerType().value == PlayerType.COMPUTER) {
-            root.center = hbox(20) {
-                button("Client wählen") {
-                    action {
-                        val fileChooser = FileChooser()
-                        fileChooser.title = "Client suchen"
-                        fileChooser.extensionFilters.addAll(
-                                FileChooser.ExtensionFilter("Alle Dateien", "*.*"),
-                                FileChooser.ExtensionFilter("jar", "*.jar")
-                        )
-                        val selectedFile = fileChooser.showOpenDialog(find(AppView::class).currentWindow)
-                        if (selectedFile != null) {
-                            println("Selected file $selectedFile")
-                            getPlayerExecutable().value = selectedFile
+        // TODO: work with proper binding of property
+        when (getPlayerType().value) {
+            PlayerType.COMPUTER -> {
+                root.center = hbox(20) {
+                    button("Client wählen") {
+                        action {
+                            val fileChooser = FileChooser()
+                            fileChooser.title = "Client suchen"
+                            fileChooser.extensionFilters.addAll(
+                                    FileChooser.ExtensionFilter("Alle Dateien", "*.*"),
+                                    FileChooser.ExtensionFilter("jar", "*.jar")
+                            )
+                            val selectedFile = fileChooser.showOpenDialog(find(AppView::class).currentWindow)
+                            if (selectedFile != null) {
+                                println("Selected file $selectedFile")
+                                getPlayerExecutable().value = selectedFile
+                            }
                         }
                     }
+                    text("Wähle eine ausführbare Datei aus")
                 }
-                text("Wähle eine ausführbare Datei aus")
+                root.bottom = textflow {
+                    text("Ausgewählte Datei: ")
+                    text("")
+                }
             }
-            root.bottom = textflow {
-                text("Ausgewählte Datei: ")
-                text("")
+            PlayerType.MANUELL -> {
+                root.center = text("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
+                root.bottom = text()
             }
-        } else if (getPlayerType().value == PlayerType.MANUELL) {
-            root.center = text("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
-            root.bottom = text()
-        } else {
-            root.center = text("Ein Mensch wird das Spiel hier spielen")
-            root.bottom = text()
+            else -> {
+                root.center = text("Ein Mensch wird das Spiel hier spielen")
+                root.bottom = text()
+            }
         }
     }
 
