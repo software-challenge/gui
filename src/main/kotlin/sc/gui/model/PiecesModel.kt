@@ -39,11 +39,11 @@ class PiecesModel(color: Color, shape: PieceShape) : ItemViewModel<PiecesFragmen
     }
 
     fun scroll(deltaY: Double) {
+        println("Applying scroll of deltaY: $deltaY")
         rotate(when {
-            deltaY > 0.0 -> Rotation.LEFT
-            deltaY == 0.0 -> Rotation.NONE
-            deltaY < 0.0 -> Rotation.RIGHT
-            else -> Rotation.MIRROR
+            deltaY > 1.0 -> Rotation.LEFT
+            deltaY < -1.0 -> Rotation.RIGHT
+            else -> Rotation.NONE
         })
     }
 
