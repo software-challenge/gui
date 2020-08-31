@@ -59,10 +59,6 @@ class ShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<PieceShape>() {
     override fun computeValue(): PieceShape {
         return model.value.shapeProperty().get()
     }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(PiecesFragment::class.java)
-    }
 }
 
 class RotationBinding(piece: Property<PiecesModel>) : ObjectBinding<Rotation>() {
@@ -84,10 +80,6 @@ class RotationBinding(piece: Property<PiecesModel>) : ObjectBinding<Rotation>() 
 
     override fun computeValue(): Rotation {
         return model.value.rotationProperty().get()
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(PiecesFragment::class.java)
     }
 }
 
@@ -111,10 +103,6 @@ class FlipBinding(piece: Property<PiecesModel>) : BooleanBinding() {
     override fun computeValue(): Boolean {
         return model.value.flipProperty().get()
     }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(PiecesFragment::class.java)
-    }
 }
 
 class CalculatedShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<Set<Coordinates>>() {
@@ -137,10 +125,6 @@ class CalculatedShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<Set<C
     override fun computeValue(): Set<Coordinates> {
         return model.value.calculatedShapeProperty().get()
     }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(PiecesFragment::class.java)
-    }
 }
 
 
@@ -151,15 +135,23 @@ class GameController : Controller() {
     private var currentTurn: Int by property(0)
     private var turnColor: Color by property(Color.RED)
     private var isHumanTurn: Boolean by property(false)
-
     fun turnColorProperty() = getProperty(GameController::turnColor)
     fun availableTurnsProperty() = getProperty(GameController::availableTurns)
     fun currentTurnProperty() = getProperty(GameController::currentTurn)
     fun isHumanTurnProperty() = getProperty(GameController::isHumanTurn)
 
+    // we need to have them split separately otherwise we cannot listen to a specific color alone
+    private var undeployedRedPieces: Collection<PieceShape> by property(PieceShape.shapes.values)
+    private var undeployedBluePieces: Collection<PieceShape> by property(PieceShape.shapes.values)
+    private var undeployedGreenPieces: Collection<PieceShape> by property(PieceShape.shapes.values)
+    private var undeployedYellowPieces: Collection<PieceShape> by property(PieceShape.shapes.values)
+    fun undeployedRedPiecesProperty() = getProperty(GameController::undeployedRedPieces)
+    fun undeployedBluePiecesProperty() = getProperty(GameController::undeployedBluePieces)
+    fun undeployedGreenPiecesProperty() = getProperty(GameController::undeployedGreenPieces)
+    fun undeployedYellowPiecesProperty() = getProperty(GameController::undeployedYellowPieces)
+
     // use selected* to access the property of currentPiece in order to always correctly be automatically rebind
     private fun currentPieceProperty() = getProperty(GameController::currentPiece)
-
     var selectedColor: ColorBinding = ColorBinding(currentPieceProperty())
     var selectedShape: ShapeBinding = ShapeBinding(currentPieceProperty())
     var selectedRotation: RotationBinding = RotationBinding(currentPieceProperty())
@@ -168,11 +160,17 @@ class GameController : Controller() {
 
     init {
         subscribe<NewGameState> { event ->
+            logger.debug("New game state")
             availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
             currentTurnProperty().set(event.gameState.turn)
             turnColorProperty().set(event.gameState.currentColor)
+            undeployedRedPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.RED])
+            undeployedBluePiecesProperty().set(event.gameState.undeployedPieceShapes[Color.BLUE])
+            undeployedGreenPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.GREEN])
+            undeployedYellowPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.YELLOW])
         }
         subscribe<HumanMoveRequest> {
+            logger.debug("Human move request")
             isHumanTurnProperty().set(true)
             boardController.calculateIsPlaceableBoard()
         }

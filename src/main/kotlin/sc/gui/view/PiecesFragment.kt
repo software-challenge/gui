@@ -4,7 +4,6 @@ import javafx.scene.SnapshotParameters
 import javafx.scene.canvas.Canvas
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import org.slf4j.LoggerFactory
 import sc.gui.controller.*
 import sc.gui.model.PiecesModel
 import sc.plugin2021.Color

@@ -6,10 +6,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.MouseButton
 import javafx.util.StringConverter
 import org.slf4j.LoggerFactory
-import sc.gui.AppStyle
 import sc.gui.controller.*
-import sc.gui.model.UndeployedPiecesModel
-import sc.gui.model.ViewTypes
 import sc.plugin2021.*
 import sc.plugin2021.util.Constants
 import tornadofx.*
@@ -40,10 +37,10 @@ class ShapeConverter : StringConverter<PieceShape>() {
 class GameView : View() {
     private val clientController: ClientController by inject()
     private val gameController: GameController by inject()
-    private val redUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.RED))
-    private val blueUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.BLUE))
-    private val yellowUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.YELLOW))
-    private val greenUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.GREEN))
+    private val redUndeployedPieces = PiecesListFragment(gameController.undeployedRedPiecesProperty(), Color.RED)
+    private val blueUndeployedPieces = PiecesListFragment(gameController.undeployedBluePiecesProperty(), Color.BLUE)
+    private val greenUndeployedPieces = PiecesListFragment(gameController.undeployedGreenPiecesProperty(), Color.GREEN)
+    private val yellowUndeployedPieces = PiecesListFragment(gameController.undeployedYellowPiecesProperty(), Color.YELLOW)
 
 
     private val leftPane = vbox {

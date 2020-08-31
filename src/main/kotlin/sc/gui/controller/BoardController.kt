@@ -1,7 +1,6 @@
 package sc.gui.controller
 
 import org.slf4j.LoggerFactory
-import sc.gui.AppStyle
 import sc.gui.model.BoardModel
 import sc.gui.view.BoardView
 import sc.gui.view.PiecesFragment
