@@ -11,6 +11,7 @@ import sc.plugin2021.Color
 import sc.plugin2021.PieceShape
 import sc.plugin2021.Rotation
 import tornadofx.*
+import java.io.File
 
 class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
     private val boardController: BoardController by inject()
@@ -41,9 +42,10 @@ class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
     }
 
     fun updateImage() {
-        val imagePath = "file:resources/graphics/blokus/${model.colorProperty().get()}/${model.shapeProperty().get().name.toLowerCase()}.png"
-        logger.debug("Updating image of piece ${model.colorProperty().get()}, ${model.shapeProperty().get()} with size: " + boardController.board.calculatedBlockSizeProperty().get() * 2)
-        image.image = Image(imagePath, boardController.board.calculatedBlockSizeProperty().get() * 2, boardController.board.calculatedBlockSizeProperty().get() * 2, true, false)
+        val imagePath = "resources/graphics/blokus/${model.colorProperty().get()}/${model.shapeProperty().get().name.toLowerCase()}.png"
+        val f = File(imagePath)
+        logger.debug("Updating image of piece ${model.colorProperty().get()}, ${model.shapeProperty().get()} with size: " + boardController.board.calculatedBlockSizeProperty().get() * 2 + " img-path: $imagePath, exists: ${f.exists()}")
+        image.image = Image(f.toURI().toString(), boardController.board.calculatedBlockSizeProperty().get() * 2, boardController.board.calculatedBlockSizeProperty().get() * 2, true, false)
 
         if (model.flipProperty().get()) {
             val canvas = Canvas(image.image.width, image.image.height)
