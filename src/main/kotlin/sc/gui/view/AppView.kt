@@ -107,22 +107,19 @@ class AppView : View() {
         sochaIcon.fitHeight = 32.0
         sochaIcon.fitWidth = 32.0
         with(root) {
-            prefWidth = 1200.0
-            prefHeight = 800.0
+            prefWidth = 1000.0
+            prefHeight = 660.0
             center(MasterView::class)
         }
         title = "Software-Challenge Germany"
 
         // responsive scaling
-        root.widthProperty().addListener { _, _, _ ->
+        val resizer = ChangeListener<Number> { _, _, _ ->
             if (controller.model.currentViewProperty().get() == ViewTypes.GAME) {
                 find(GameView::class).resize()
             }
         }
-        root.heightProperty().addListener { _, _, _ ->
-            if (controller.model.currentViewProperty().get() == ViewTypes.GAME) {
-                find(GameView::class).resize()
-            }
-        }
+        root.widthProperty().addListener(resizer)
+        root.heightProperty().addListener(resizer)
     }
 }

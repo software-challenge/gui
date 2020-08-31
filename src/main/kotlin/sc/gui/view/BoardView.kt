@@ -137,7 +137,7 @@ class BoardView : View() {
     }
 
     // remove all applied Stylesheets during the hover-effect
-    fun cleanupHover() {
+    private fun cleanupHover() {
         for (place in grid.children) {
             if (place.hasClass(AppStyle.colorRED)) {
                 place.removeClass(AppStyle.colorRED)
@@ -157,27 +157,31 @@ class BoardView : View() {
         }
     }
 
-    fun paneHoverEnter(x: Int, y: Int) {
+    private fun paneHoverEnter(x: Int, y: Int) {
         controller.currentHover = Coordinates(x, y)
         controller.currentPlaceable = controller.isPlaceable(x, y, controller.game.selectedCalculatedShape.get())
         for (place in controller.game.selectedCalculatedShape.get()) {
             if (controller.hoverInBound(x + place.x, y + place.y)) {
                 if (!controller.currentPlaceable) {
                     getPane(x + place.x, y + place.y).addClass(AppStyle.fieldUnplaceable)
+                } else {
+                    getPane(x + place.x, y + place.y).addClass(when (controller.game.selectedColor.get()) {
+                        Color.RED -> AppStyle.colorRED
+                        Color.BLUE -> AppStyle.colorBLUE
+                        Color.GREEN -> AppStyle.colorGREEN
+                        Color.YELLOW -> AppStyle.colorYELLOW
+                        else -> throw Exception("Unknown player color for hover effect")
+                    })
                 }
             }
         }
     }
 
-    fun paneHoverExit() {
-        if (controller.currentHover != null && !controller.currentPlaceable) {
+    private fun paneHoverExit() {
+        if (controller.currentHover != null) {
             val x = controller.currentHover!!.x
             val y = controller.currentHover!!.y
-            for (place in controller.game.selectedCalculatedShape.get()) {
-                if (controller.hoverInBound(x + place.x, y + place.y)) {
-                    getPane(x + place.x, y + place.y).removeClass(AppStyle.fieldUnplaceable)
-                }
-            }
+            cleanupHover()
         }
         controller.currentHover = null
     }

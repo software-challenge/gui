@@ -108,7 +108,6 @@ class GameView : View() {
     }
 
     fun resize() {
-        logger.debug("RESIZING!!!")
         val width = root.widthProperty().get()
         var height = root.heightProperty().get()
         val app = find(AppView::class).root
