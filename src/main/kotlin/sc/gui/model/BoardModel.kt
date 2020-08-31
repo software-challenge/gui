@@ -2,7 +2,9 @@ package sc.gui.model
 
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import org.slf4j.LoggerFactory
 import sc.gui.view.BoardView
+import sc.gui.view.PiecesListFragment
 import sc.plugin2021.*
 import sc.plugin2021.Field
 import sc.plugin2021.util.Constants
@@ -24,6 +26,10 @@ class BoardModel : ItemViewModel<BoardView>() {
             }
         }
         updateFields(Board())
+
+        calculatedBlockSizeProperty().addListener { _, old, new ->
+            logger.debug("Blocksize changed $old -> $new")
+        }
     }
 
     fun updateFields(board: Board) {
@@ -46,5 +52,9 @@ class BoardModel : ItemViewModel<BoardView>() {
 
     fun getField(x: Int, y: Int): Field {
         return fields[indexOf(x, y)]
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(PiecesListFragment::class.java)
     }
 }

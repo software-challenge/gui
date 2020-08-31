@@ -42,6 +42,7 @@ class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
 
     fun updateImage() {
         val imagePath = "file:resources/graphics/blokus/${model.colorProperty().get()}/${model.shapeProperty().get().name.toLowerCase()}.png"
+        logger.debug("Updating image of piece ${model.colorProperty().get()}, ${model.shapeProperty().get()} with size: " + boardController.board.calculatedBlockSizeProperty().get() * 2)
         image.image = Image(imagePath, boardController.board.calculatedBlockSizeProperty().get() * 2, boardController.board.calculatedBlockSizeProperty().get() * 2, true, false)
 
         if (model.flipProperty().get()) {
