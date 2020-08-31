@@ -37,7 +37,6 @@ class AppStyle : Stylesheet() {
         val borderYELLOW by cssclass()
 
 
-
     }
 
     init {
@@ -95,21 +94,27 @@ class AppStyle : Stylesheet() {
         }
 
         colorBLUE {
-            backgroundColor += blue
+            and(hover) {
+                backgroundColor += blue
+            }
         }
         borderBLUE {
             borderColor += box(blue)
         }
 
         colorGREEN {
-            backgroundColor += green
+            and(hover) {
+                backgroundColor += green
+            }
         }
         borderGREEN {
             borderColor += box(green)
         }
 
         colorYELLOW {
-            backgroundColor += yellow
+            and(hover) {
+                backgroundColor += yellow
+            }
         }
         borderYELLOW {
             borderColor += box(yellow)

@@ -5,12 +5,8 @@ import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.Property
 import org.slf4j.LoggerFactory
 import sc.gui.model.PiecesModel
-import sc.gui.view.GameView
 import sc.gui.view.PiecesFragment
-import sc.plugin2021.Color
-import sc.plugin2021.Coordinates
-import sc.plugin2021.PieceShape
-import sc.plugin2021.Rotation
+import sc.plugin2021.*
 import tornadofx.*
 import kotlin.math.max
 
@@ -23,11 +19,9 @@ class ColorBinding(piece: Property<PiecesModel>) : ObjectBinding<Color>() {
         bind(model)
         bind(model.value.colorProperty())
         model.addListener { _, oldValue, newValue ->
-            logger.debug("Piece changed, updating color " + oldValue.colorProperty().get() + " -> " + newValue.colorProperty().get())
             unbind(oldValue.colorProperty())
             bind(newValue.colorProperty())
             model.value = newValue
-            logger.debug("Now returning ${computeValue()}")
         }
     }
 
@@ -52,11 +46,9 @@ class ShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<PieceShape>() {
         bind(model)
         bind(model.value.shapeProperty())
         model.addListener { _, oldValue, newValue ->
-            logger.debug("Piece changed, updating shape " + oldValue.shapeProperty().get() + " -> " + newValue.shapeProperty().get())
             unbind(oldValue.shapeProperty())
             bind(newValue.shapeProperty())
             model.value = newValue
-            logger.debug("Now returning ${computeValue()}")
         }
     }
 
@@ -80,11 +72,9 @@ class RotationBinding(piece: Property<PiecesModel>) : ObjectBinding<Rotation>() 
         bind(model)
         bind(model.value.rotationProperty())
         model.addListener { _, oldValue, newValue ->
-            logger.debug("Piece changed, updating rotation " + oldValue.rotationProperty().get() + " -> " + newValue.rotationProperty().get())
             unbind(oldValue.rotationProperty())
             bind(newValue.rotationProperty())
             model.value = newValue
-            logger.debug("Now returning ${computeValue()}")
         }
     }
 
@@ -108,11 +98,9 @@ class FlipBinding(piece: Property<PiecesModel>) : BooleanBinding() {
         bind(model)
         bind(model.value.flipProperty())
         model.addListener { _, oldValue, newValue ->
-            logger.debug("Piece changed, updating flip " + oldValue.flipProperty().get() + " -> " + newValue.flipProperty().get())
             unbind(oldValue.flipProperty())
             bind(newValue.flipProperty())
             model.value = newValue
-            logger.debug("Now returning ${computeValue()}")
         }
     }
 
@@ -136,11 +124,9 @@ class CalculatedShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<Set<C
         bind(model)
         bind(model.value.shapeProperty())
         model.addListener { _, oldValue, newValue ->
-            logger.debug("Piece changed, updating calculatedShape " + oldValue.calculatedShapeProperty().get() + " -> " + newValue.calculatedShapeProperty().get())
             unbind(oldValue.calculatedShapeProperty())
             bind(newValue.calculatedShapeProperty())
             model.value = newValue
-            logger.debug("Now returning ${computeValue()}")
         }
     }
 
@@ -160,19 +146,19 @@ class CalculatedShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<Set<C
 
 class GameController : Controller() {
     private var currentPiece: PiecesModel by property(PiecesModel(Color.RED, PieceShape.MONO))
+    private val boardController: BoardController by inject()
     private var availableTurns: Int by property(0)
     private var currentTurn: Int by property(0)
     private var turnColor: Color by property(Color.RED)
-    private var isHumanTurn: Boolean by property(true)
+    private var isHumanTurn: Boolean by property(false)
 
     fun turnColorProperty() = getProperty(GameController::turnColor)
     fun availableTurnsProperty() = getProperty(GameController::availableTurns)
     fun currentTurnProperty() = getProperty(GameController::currentTurn)
     fun isHumanTurnProperty() = getProperty(GameController::isHumanTurn)
 
-    // use selected* functions to access the property of currentPiece in order to always correctly be automatically rebind
+    // use selected* to access the property of currentPiece in order to always correctly be automatically rebind
     private fun currentPieceProperty() = getProperty(GameController::currentPiece)
-
 
     var selectedColor: ColorBinding = ColorBinding(currentPieceProperty())
     var selectedShape: ShapeBinding = ShapeBinding(currentPieceProperty())
@@ -188,11 +174,11 @@ class GameController : Controller() {
         }
         subscribe<HumanMoveRequest> {
             isHumanTurnProperty().set(true)
+            boardController.calculateIsPlaceableBoard()
         }
     }
 
     fun selectPiece(piece: PiecesModel) {
-        logger.debug("Received new piece, updating")
         currentPieceProperty().set(piece)
     }
 

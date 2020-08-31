@@ -1,12 +1,7 @@
 package sc.gui.view
 
-import javafx.animation.FadeTransition
-import javafx.beans.binding.Bindings
-import javafx.beans.binding.StringBinding
 import javafx.collections.ObservableList
 import javafx.geometry.Insets
-import javafx.geometry.Pos
-import javafx.scene.control.Label
 import javafx.scene.input.KeyCode
 import javafx.scene.input.MouseButton
 import javafx.util.StringConverter
@@ -14,10 +9,9 @@ import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
 import sc.gui.controller.*
 import sc.gui.model.UndeployedPiecesModel
-import sc.plugin2021.Color
-import sc.plugin2021.Piece
-import sc.plugin2021.PieceShape
-import sc.plugin2021.Rotation
+import sc.gui.model.ViewTypes
+import sc.plugin2021.*
+import sc.plugin2021.util.Constants
 import tornadofx.*
 
 class ColorConverter : StringConverter<Color>() {
@@ -51,6 +45,7 @@ class GameView : View() {
     private val yellowUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.YELLOW))
     private val greenUndeployedPieces = PiecesListFragment(UndeployedPiecesModel(Color.GREEN))
 
+
     private val leftPane = vbox {
         this += blueUndeployedPieces
         this += redUndeployedPieces
@@ -62,66 +57,7 @@ class GameView : View() {
     private val game = borderpane {
         top(StatusView::class)
         center(BoardView::class)
-
-        bottom = hbox {
-            label("Selected: ")
-            hbox {
-                addClass(AppStyle.undeployedPiece, when (gameController.selectedColor.value) {
-                    Color.BLUE -> AppStyle.borderBLUE
-                    Color.GREEN -> AppStyle.borderGREEN
-                    Color.YELLOW -> AppStyle.borderYELLOW
-                    else -> AppStyle.borderRED
-                })
-                gameController.selectedColor.addListener { _, _, newValue ->
-                    if (hasClass(AppStyle.borderRED)) {
-                        removeClass(AppStyle.borderRED)
-                    }
-                    if (hasClass(AppStyle.borderBLUE)) {
-                        removeClass(AppStyle.borderBLUE)
-                    }
-                    if (hasClass(AppStyle.borderGREEN)) {
-                        removeClass(AppStyle.borderGREEN)
-                    }
-                    if (hasClass(AppStyle.borderYELLOW)) {
-                        removeClass(AppStyle.borderYELLOW)
-                    }
-                    if (newValue != null) {
-                        addClass(when (newValue) {
-                            Color.RED -> AppStyle.borderRED
-                            Color.BLUE -> AppStyle.borderBLUE
-                            Color.GREEN -> AppStyle.borderGREEN
-                            Color.YELLOW -> AppStyle.borderYELLOW
-                        })
-                    }
-                }
-                this += PiecesFragment(gameController.selectedColor, gameController.selectedShape, gameController.selectedRotation, gameController.selectedFlip)
-            }
-            hbox {
-                padding = Insets(0.0, 10.0, 0.0, 10.0)
-                button {
-                    text = "Pause / Play"
-                    setOnMouseClicked {
-                        clientController.togglePause()
-                    }
-                }
-            }
-            button {
-                text = "Previous"
-                setOnMouseClicked {
-                    clientController.previous()
-                }
-            }
-            label {
-                padding = Insets(0.0, 10.0, 0.0, 10.0)
-                textProperty().bind(Bindings.concat(gameController.currentTurnProperty(), " / ", gameController.availableTurnsProperty()))
-            }
-            button {
-                text = "Next"
-                setOnMouseClicked {
-                    clientController.next()
-                }
-            }
-        }
+        bottom(ControlView::class)
     }
     override val root = hbox {
         paddingProperty().set(Insets(6.0))
@@ -137,7 +73,6 @@ class GameView : View() {
             it.consume()
         }
         setOnScroll {
-            logger.debug("Scrolling detected: rotating selected piece")
             gameController.scroll(it.deltaY)
             it.consume()
         }
@@ -172,33 +107,26 @@ class GameView : View() {
         }
     }
 
-    private fun resize() {
+    fun resize() {
+        logger.debug("RESIZING!!!")
         val width = root.widthProperty().get()
-        val height = root.heightProperty().get()
+        var height = root.heightProperty().get()
+        val app = find(AppView::class).root
+        // 50px buffer for menubar etc.
+        if (app.height - 50 < root.height) {
+            height = app.height - 50
+        }
         game.prefWidthProperty().set(width * 0.5)
         leftPane.prefWidthProperty().set(width * 0.25)
         rightPane.prefWidthProperty().set(width * 0.25)
-        /*
-        if (size > 0.6 * width) {
-            game.prefWidthProperty().set(width * 0.6)
-            leftPane.prefWidthProperty().set(width * 0.2)
-            rightPane.prefWidthProperty().set(width * 0.2)
-        } else {
-            game.prefWidthProperty().set(size)
-            leftPane.prefWidthProperty().set((width - size) / 2)
-            rightPane.prefWidthProperty().set((width - size) / 2)
-        }
-        */
 
-        redUndeployedPieces.root.prefHeightProperty().set(height)
-        blueUndeployedPieces.root.prefHeightProperty().set(height)
-        yellowUndeployedPieces.root.prefHeightProperty().set(height)
-        greenUndeployedPieces.root.prefHeightProperty().set(height)
-    }
+        val size = minOf(width * 0.5, height - find(StatusView::class).root.height - find(ControlView::class).root.height)
 
-    override fun onDock() {
-        super.onDock()
-        resize()
+        val board = find(BoardView::class)
+        board.grid.setMaxSize(size, size)
+        board.grid.setMinSize(size, size)
+
+        find(BoardView::class).model.calculatedBlockSizeProperty().set(size / Constants.BOARD_SIZE)
     }
 
     init {
@@ -206,13 +134,19 @@ class GameView : View() {
             clientController.startGame("localhost", 13050, event.gameCreationModel)
         }
 
+
+        redUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
+        blueUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
+        yellowUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
+        greenUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
+
+
+        val resizer = ChangeListener<Number> { _, _, _ ->
+            resize()
+        }
         // responsive scaling
-        root.widthProperty().addListener { _, _, _ ->
-            resize()
-        }
-        root.heightProperty().addListener { _, _, _ ->
-            resize()
-        }
+        root.widthProperty().addListener(resizer)
+        root.heightProperty().addListener(resizer)
     }
 
     companion object {

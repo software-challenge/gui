@@ -112,5 +112,17 @@ class AppView : View() {
             center(MasterView::class)
         }
         title = "Software-Challenge Germany"
+
+        // responsive scaling
+        root.widthProperty().addListener { _, _, _ ->
+            if (controller.model.currentViewProperty().get() == ViewTypes.GAME) {
+                find(GameView::class).resize()
+            }
+        }
+        root.heightProperty().addListener { _, _, _ ->
+            if (controller.model.currentViewProperty().get() == ViewTypes.GAME) {
+                find(GameView::class).resize()
+            }
+        }
     }
 }

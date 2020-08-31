@@ -45,7 +45,6 @@ class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
         val imagePath = "resources/graphics/blokus/${model.colorProperty().get().toString().toLowerCase()}/${model.shapeProperty().get().name.toLowerCase()}.png"
         val f = File(imagePath)
         val size = boardController.board.calculatedBlockSizeProperty().get() * 2
-        logger.debug("Updating image of piece ${model.colorProperty().get()}, ${model.shapeProperty().get()} with size: " + size + " img-path: $imagePath, exists: ${f.exists()}")
         image.image = Image(f.toURI().toString(), size, size, true, false)
 
         if (model.flipProperty().get()) {
@@ -87,9 +86,5 @@ class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
             Rotation.MIRROR -> 180.0
             else -> 0.0
         }
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(PiecesFragment::class.java)
     }
 }
