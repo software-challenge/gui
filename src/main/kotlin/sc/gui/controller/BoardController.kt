@@ -53,18 +53,10 @@ class BoardController : Controller() {
                         Color.GREEN -> FieldContent.GREEN
                         Color.BLUE -> FieldContent.BLUE
                     }
-                    isPlaceableBoard[x][y] = hoverInBound(x + 1, y) && board[x + 1, y].content != field &&
-                            hoverInBound(x - 1, y) && board[x - 1, y].content != field &&
-                            hoverInBound(x, y + 1) && board[x, y + 1].content != field &&
-                            hoverInBound(x, y - 1) && board[x, y - 1].content != field
-                    if (isPlaceableBoard[x][y]) {
-                        view.getPane(x, y).addClass(when (color) {
-                            Color.RED -> AppStyle.colorRED
-                            Color.BLUE -> AppStyle.colorBLUE
-                            Color.GREEN -> AppStyle.colorGREEN
-                            Color.YELLOW -> AppStyle.colorYELLOW
-                        })
-                    }
+                    isPlaceableBoard[x][y] = (!hoverInBound(x + 1, y) || hoverInBound(x + 1, y) && board[x + 1, y].content != field) &&
+                            (!hoverInBound(x - 1, y) || hoverInBound(x - 1, y) && board[x - 1, y].content != field) &&
+                            (!hoverInBound(x, y + 1) || hoverInBound(x, y + 1) && board[x, y + 1].content != field) &&
+                            (!hoverInBound(x, y - 1) || hoverInBound(x, y - 1) && board[x, y - 1].content != field)
                 }
             }
         }
