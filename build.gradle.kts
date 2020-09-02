@@ -5,6 +5,7 @@ plugins {
     id("application")
     kotlin("jvm") version "1.3.41"
     id("org.openjfx.javafxplugin") version "0.0.9"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
 }
 
 group = "sc.gui"
