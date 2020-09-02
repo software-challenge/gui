@@ -2,9 +2,9 @@ package sc.gui.view
 
 import tornadofx.*
 
-class MasterView: View() {
+class StartView: View() {
     override val root = borderpane {
-        center(GameCreationView::class)
+        center = label("Ich bin ein Platzhalter :)")
     }
 }
 

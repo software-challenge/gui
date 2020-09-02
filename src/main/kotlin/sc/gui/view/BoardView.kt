@@ -47,7 +47,7 @@ class BlockImage(private val size: Property<Double>) : ImageView(Image("file:res
         return true
     }
 
-    fun contentToString(content: FieldContent): String {
+    private fun contentToString(content: FieldContent): String {
         return when (content) {
             FieldContent.EMPTY -> "empty"
             FieldContent.RED -> "red"
@@ -127,7 +127,7 @@ class BoardView : View() {
     }
 
 
-    fun getPane(x: Int, y: Int): Node {
+    private fun getPane(x: Int, y: Int): Node {
         for (node in grid.children) {
             if (GridPane.getColumnIndex(node) == x && GridPane.getRowIndex(node) == y) {
                 return node

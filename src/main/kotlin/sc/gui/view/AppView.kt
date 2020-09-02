@@ -16,7 +16,7 @@ import tornadofx.*
 import java.awt.Desktop
 import java.net.URI
 
-class AppView : View() {
+class AppView : View("Software-Challenge Germany") {
     val controller: AppController by inject()
     private val gameController: GameController by inject()
     private val serverController: ServerController by inject()
@@ -109,9 +109,8 @@ class AppView : View() {
         with(root) {
             prefWidth = 1000.0
             prefHeight = 660.0
-            center(MasterView::class)
+            center(StartView::class)
         }
-        title = "Software-Challenge Germany"
 
         // responsive scaling
         val resizer = ChangeListener<Number> { _, _, _ ->

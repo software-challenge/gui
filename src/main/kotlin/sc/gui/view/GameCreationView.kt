@@ -5,13 +5,15 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.stage.FileChooser
-import sc.gui.AppStyle
+import sc.gui.controller.AppController
 import sc.gui.controller.GameCreationController
 import sc.gui.model.PlayerType
+import sc.gui.model.ViewTypes
 import tornadofx.*
 import java.io.File
 
-class GameCreationView : View("Neues Spiel") {
+class GameCreationView : View() {
+    private val appController: AppController by inject()
     val controller: GameCreationController by inject()
 
     override val root = borderpane {
@@ -43,7 +45,12 @@ class GameCreationView : View("Neues Spiel") {
 
             button("Zurück") {
                 action {
-                    replaceWith(MasterView::class)
+                    appController.changeViewTo(when (appController.model.previousViewProperty().get()) {
+                        ViewTypes.GAME -> GameView::class
+                        ViewTypes.GAME_CREATION -> GameCreationView::class
+                        ViewTypes.START -> StartView::class
+                        else -> throw Exception("Unknown type of view")
+                    })
                 }
             }
         }

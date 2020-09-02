@@ -5,6 +5,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.input.MouseButton
+import javafx.scene.layout.HBox
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
 import sc.gui.controller.BoardController
@@ -17,23 +18,15 @@ class PiecesListFragment(undeployedPieces: Property<Collection<PieceShape>>, pri
     val controller: GameController by inject()
     private val boardController: BoardController by inject()
     private val shapes: ObservableList<PieceShape> = FXCollections.observableArrayList(undeployedPieces.value)
+    private val piecesList = HashMap<PieceShape, HBox>()
 
-    override val root = flowpane {
-        hgap = 1.0
-        vgap = 1.0
-        alignment = when (color) {
-            Color.RED -> Pos.BOTTOM_LEFT
-            Color.BLUE -> Pos.TOP_LEFT
-            Color.YELLOW -> Pos.TOP_RIGHT
-            Color.GREEN -> Pos.BOTTOM_RIGHT
-        }
-
-        children.bind(shapes) {
-            val piece = PiecesFragment(color, it)
+    init {
+        for (shape in undeployedPieces.value) {
+            val piece = PiecesFragment(color, shape)
             boardController.board.calculatedBlockSizeProperty().addListener { _, _, _ ->
                 piece.updateImage()
             }
-            hbox {
+            piecesList[shape] = hbox {
                 addClass(AppStyle.undeployedPiece, when (color) {
                     Color.RED -> AppStyle.borderRED
                     Color.BLUE -> AppStyle.borderBLUE
@@ -72,20 +65,42 @@ class PiecesListFragment(undeployedPieces: Property<Collection<PieceShape>>, pri
                 }
             }
         }
+
+        undeployedPieces.addListener { _, _, new ->
+            logger.debug("New undeployed pieces fo $color contains")
+
+            // we need to use an extra list to prevent an ConcurrentModificationException
+            val toRemove = ArrayList<PieceShape>()
+            for (shape in shapes) {
+                if (!new.contains(shape)) {
+                    logger.debug("Piece ${shape.name} has been removed")
+                    toRemove.add(shape)
+                }
+            }
+            shapes.removeAll(toRemove)
+
+            for (shape in new) {
+                if (!shapes.contains(shape)) {
+                    logger.debug("Piece ${shape.name} has been added")
+                    shapes.add(shape)
+                }
+            }
+        }
     }
 
-    init {
-        undeployedPieces.addListener { _, old, new ->
-            for (oldShape in old) {
-                if (!new.contains(oldShape)) {
-                    shapes.remove(oldShape)
-                }
-            }
-            for (newShape in new) {
-                if (!old.contains(newShape)) {
-                    shapes.add(newShape)
-                }
-            }
+    override val root = flowpane {
+        hgap = 1.0
+        vgap = 1.0
+        alignment = when (color) {
+            Color.RED -> Pos.BOTTOM_LEFT
+            Color.BLUE -> Pos.TOP_LEFT
+            Color.YELLOW -> Pos.TOP_RIGHT
+            Color.GREEN -> Pos.BOTTOM_RIGHT
+        }
+
+        children.bind(shapes) {
+            logger.debug("Adding child $color, ${it.name}")
+            piecesList[it]
         }
     }
 
