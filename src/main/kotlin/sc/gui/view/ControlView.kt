@@ -83,5 +83,11 @@ class ControlView() : View() {
             }
             clientController.togglePause()
         }
+
+        gameController.gameStartedProperty().addListener { _, _, started ->
+            if (!started) {
+                playPauseButton.text = "Start"
+            }
+        }
     }
 }

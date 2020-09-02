@@ -195,18 +195,14 @@ class GameController : Controller() {
             isHumanTurnProperty().set(true)
             boardController.calculateIsPlaceableBoard()
 
-            val validatedShapes = ArrayList<PieceShape>()
-            for (shape in event.gameState.undeployedPieceShapes[event.gameState.currentColor]!!) {
-                if (isSelectable(shape)) {
-                    validatedShapes.add(shape)
-                }
-            }
             when (event.gameState.currentColor) {
                 Color.RED -> validRedPiecesProperty()
                 Color.BLUE -> validBluePiecesProperty()
                 Color.GREEN -> validGreenPiecesProperty()
                 Color.YELLOW -> validYellowPiecesProperty()
-            }.set(validatedShapes)
+            }.set(event.gameState.undeployedPieceShapes[event.gameState.currentColor]?.filter {
+                isSelectable(it)
+            } as ArrayList<PieceShape>?)
         }
     }
 

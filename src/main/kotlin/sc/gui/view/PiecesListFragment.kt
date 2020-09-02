@@ -20,13 +20,12 @@ class PiecesListFragment(private val color: Color, undeployedPieces: Property<Co
     private val boardController: BoardController by inject()
     private val shapes: ObservableList<PieceShape> = FXCollections.observableArrayList(undeployedPieces.value)
     private val piecesList = HashMap<PieceShape, HBox>()
+    private val pieces = HashMap<PieceShape, PiecesFragment>()
 
     init {
         for (shape in undeployedPieces.value) {
             val piece = PiecesFragment(color, shape)
-            boardController.board.calculatedBlockSizeProperty().addListener { _, _, _ ->
-                piece.updateImage()
-            }
+            pieces[shape] = piece
             piecesList[shape] = hbox {
                 addClass(AppStyle.undeployedPiece, when (color) {
                     Color.RED -> AppStyle.borderRED
@@ -70,6 +69,11 @@ class PiecesListFragment(private val color: Color, undeployedPieces: Property<Co
                 }
             }
         }
+        boardController.board.calculatedBlockSizeProperty().addListener { _, _, _ ->
+            pieces.forEach {
+                it.value.updateImage()
+            }
+        }
 
         undeployedPieces.addListener { _, _, new ->
             // we need to use an extra list to prevent an ConcurrentModificationException
@@ -95,6 +99,12 @@ class PiecesListFragment(private val color: Color, undeployedPieces: Property<Co
                     }
                 } else if (!it.value.hasClass(AppStyle.pieceUnselectable)) {
                     it.value.addClass(AppStyle.pieceUnselectable)
+                }
+            }
+
+            if (controller.turnColorProperty().get() == color) {
+                if (new.isNotEmpty()) {
+                    pieces[new.last()]?.model?.let { controller.selectPiece(it) }
                 }
             }
         }
