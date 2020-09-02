@@ -179,8 +179,6 @@ class BoardView : View() {
 
     private fun paneHoverExit() {
         if (controller.currentHover != null) {
-            val x = controller.currentHover!!.x
-            val y = controller.currentHover!!.y
             cleanupHover()
         }
         controller.currentHover = null

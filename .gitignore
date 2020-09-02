@@ -6,5 +6,8 @@ build
 
 # Ignore IDE-Settings
 .idea
+
+# Ignore all outputs from gui and server
 *.log
 log
+out
