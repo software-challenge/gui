@@ -55,7 +55,9 @@ class GameView : View() {
     }
     private val game = borderpane {
         top(StatusView::class)
-        center(BoardView::class)
+        center {
+            this += find(BoardView::class)
+        }
         bottom(ControlView::class)
     }
     override val root = hbox {
@@ -129,11 +131,13 @@ class GameView : View() {
 
     init {
         subscribe<StartGameRequest> { event ->
+            gameController.gameEndedProperty().set(false)
             clientController.startGame("localhost", 13050, event.gameCreationModel)
         }
         subscribe<GameOverEvent> { event ->
-            gameEndedView.gameEnded(event.result)
-            appController.changeViewTo(GameEndedView::class)
+            // TODO: works not yet (board will be hidden on new game after game end screen)
+            //gameEndedView.gameEnded(event.result)
+            //appController.changeViewTo(GameEndedView::class)
         }
 
 

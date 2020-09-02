@@ -11,15 +11,20 @@ class StatusBinding(private val game: GameController) : StringBinding() {
         bind(game.currentTurnProperty())
         bind(game.isHumanTurnProperty())
         bind(game.turnColorProperty())
+        bind(game.gameEndedProperty())
     }
 
     override fun computeValue(): String {
         if (game.gameStartedProperty().get()) {
-            val type = when (game.isHumanTurnProperty().get()) {
-                true -> "Spieler"
-                false -> "Computer"
+            if (game.gameEndedProperty().get()) {
+                return "Spiel ist beendet"
+            } else {
+                val type = when (game.isHumanTurnProperty().get()) {
+                    true -> "Spieler"
+                    false -> "Computer"
+                }
+                return "$type " + game.turnColorProperty().get().name + " ist dran (Zug ${game.currentTurnProperty().get()})"
             }
-            return "$type " + game.turnColorProperty().get().name + " ist dran (Zug ${game.currentTurnProperty().get()})"
         }
         return "Drücke auf Start"
     }

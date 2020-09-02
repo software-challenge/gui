@@ -205,6 +205,9 @@ class GameController : Controller() {
                 isSelectable(it)
             } as ArrayList<PieceShape>?)
         }
+        subscribe<GameOverEvent> { event ->
+            gameEndedProperty().set(true)
+        }
     }
 
     fun clearGame() {
