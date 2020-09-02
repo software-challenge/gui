@@ -21,12 +21,9 @@ class BoardController : Controller() {
         if (isPlaceable(x, y, game.selectedCalculatedShape.get())) {
             val color = game.selectedColor.get()
 
-            val piece = Piece(color, game.selectedShape.get(), game.selectedRotation.get(), game.selectedFlip.get(), Coordinates(x, y))
-            GameRuleLogic.validateSetMove(board.boardProperty().get(), SetMove(piece))
-
-            for (c in piece.coordinates) {
-                board.boardProperty().get()[c.x, c.y] = +color
-            }
+            val move = SetMove(Piece(color, game.selectedShape.get(), game.selectedRotation.get(), game.selectedFlip.get(), Coordinates(x, y)))
+            GameRuleLogic.validateSetMove(board.boardProperty().get(), move)
+            fire(HumanMoveAction(move))
         } else {
             println("Click, but no item selected")
         }

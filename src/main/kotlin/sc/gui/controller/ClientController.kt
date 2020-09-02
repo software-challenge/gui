@@ -80,12 +80,20 @@ class UIGameListener(val onUpdateHandler: () -> Unit) : IUpdateListener {
 class StartGameRequest(val gameCreationModel: GameCreationModel) : FXEvent(EventBus.RunOn.BackgroundThread)
 class NewGameState(val gameState: GameState) : FXEvent()
 class HumanMoveRequest(val gameState: GameState) : FXEvent()
+class HumanMoveAction(val move: Move) : FXEvent()
 
 
 class ClientController : Controller() {
     var controllingClient: ControllingClient? = null
     private val listener: UIGameListener = UIGameListener(::newGameState)
     var gameCreationModel: GameCreationModel? = null
+
+    init {
+        subscribe<HumanMoveAction> {
+            logger.debug("Send '${it.move}' to server")
+            controllingClient?.onAction(it.move)
+        }
+    }
 
     // Do NOT call this directly in the UI thread, use fire(StartGameRequest(gameCreationModel)). This way, the game starting is done in the background
     // TODO put everything which is activated by events in a different class and call these from the controller by events

@@ -4,8 +4,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import sc.framework.plugins.Player
 import sc.networking.clients.*
-import sc.plugin2021.AbstractClient
-import sc.plugin2021.GamePlugin
+import sc.plugin2021.*
 import sc.protocol.responses.PrepareGameProtocolMessage
 import sc.protocol.responses.ProtocolErrorMessage
 import sc.server.Configuration
@@ -109,6 +108,13 @@ class ControllingClient(host: String, port: Int) {
         } else {
             logger.error("Could not prepare game!" + requestResult.error)
         }
+    }
+
+    fun onAction(move: Move) {
+        when ((game?.currentState as GameState).currentTeam) {
+            Team.ONE -> playerOne
+            Team.TWO -> playerTwo
+        }.sendMove(move)
     }
 
     companion object {
