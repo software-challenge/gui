@@ -25,6 +25,7 @@ class AppStyle : Stylesheet() {
         val darkBoard by cssclass()
         val undeployedPiece by cssclass()
         val fieldUnplaceable by cssclass()
+        val pieceUnselectable by cssclass()
         val hoverColor by cssclass()
 
         val colorRED by cssclass()
@@ -85,6 +86,9 @@ class AppStyle : Stylesheet() {
         }
         fieldUnplaceable {
             backgroundColor += Color.BLACK
+        }
+        pieceUnselectable {
+            opacity = 0.6
         }
 
         colorRED {

@@ -1,5 +1,6 @@
 package sc.gui.view
 
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.Property
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -14,7 +15,7 @@ import sc.plugin2021.Color
 import sc.plugin2021.PieceShape
 import tornadofx.*
 
-class PiecesListFragment(undeployedPieces: Property<Collection<PieceShape>>, private val color: Color) : Fragment() {
+class PiecesListFragment(private val color: Color, undeployedPieces: Property<Collection<PieceShape>>, validPieces: ObjectProperty<ArrayList<PieceShape>>) : Fragment() {
     val controller: GameController by inject()
     private val boardController: BoardController by inject()
     private val shapes: ObservableList<PieceShape> = FXCollections.observableArrayList(undeployedPieces.value)
@@ -32,19 +33,19 @@ class PiecesListFragment(undeployedPieces: Property<Collection<PieceShape>>, pri
                     Color.BLUE -> AppStyle.borderBLUE
                     Color.GREEN -> AppStyle.borderGREEN
                     Color.YELLOW -> AppStyle.borderYELLOW
-                })
+                }, AppStyle.pieceUnselectable)
                 this += piece
 
 
                 setOnScroll { event ->
-                    if (controller.turnColorProperty().get() == piece.model.colorProperty().get()) {
+                    if (validPieces.value.contains(shape)) {
                         piece.model.scroll(event.deltaY)
                     }
                     event.consume()
                 }
 
                 setOnMouseClicked { event ->
-                    if (controller.turnColorProperty().get() == piece.model.colorProperty().get()) {
+                    if (validPieces.value.contains(shape)) {
                         if (event.button == MouseButton.PRIMARY) {
                             logger.debug("Clicked on $color $shape")
                             controller.selectPiece(piece.model)
@@ -57,11 +58,15 @@ class PiecesListFragment(undeployedPieces: Property<Collection<PieceShape>>, pri
                 }
 
                 setOnMouseEntered {
-                    addClass(AppStyle.hoverColor)
+                    if (validPieces.value.contains(shape)) {
+                        addClass(AppStyle.hoverColor)
+                    }
                 }
 
                 setOnMouseExited {
-                    removeClass(AppStyle.hoverColor)
+                    if (hasClass(AppStyle.hoverColor)) {
+                        removeClass(AppStyle.hoverColor)
+                    }
                 }
             }
         }
@@ -79,6 +84,17 @@ class PiecesListFragment(undeployedPieces: Property<Collection<PieceShape>>, pri
             for (shape in new) {
                 if (!shapes.contains(shape)) {
                     shapes.add(shape)
+                }
+            }
+        }
+        validPieces.addListener { _, _, new ->
+            piecesList.forEach {
+                if (new.contains(it.key)) {
+                    if (it.value.hasClass(AppStyle.pieceUnselectable)) {
+                        it.value.removeClass(AppStyle.pieceUnselectable)
+                    }
+                } else if (!it.value.hasClass(AppStyle.pieceUnselectable)) {
+                    it.value.addClass(AppStyle.pieceUnselectable)
                 }
             }
         }

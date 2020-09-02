@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory
 import sc.gui.model.PiecesModel
 import sc.gui.view.PiecesFragment
 import sc.plugin2021.*
+import sc.plugin2021.util.GameRuleLogic
+import sc.shared.InvalidMoveException
 import tornadofx.*
 import kotlin.math.max
 
@@ -129,8 +131,9 @@ class CalculatedShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<Set<C
 
 
 class GameController : Controller() {
-    private var currentPiece: PiecesModel by property(PiecesModel(Color.RED, PieceShape.MONO))
     private val boardController: BoardController by inject()
+    private var gameState: GameState = GameState()
+
     private var availableTurns: Int by property(0)
     private var currentTurn: Int by property(0)
     private var turnColor: Color by property(Color.RED)
@@ -151,8 +154,17 @@ class GameController : Controller() {
     fun undeployedBluePiecesProperty() = getProperty(GameController::undeployedBluePieces)
     fun undeployedGreenPiecesProperty() = getProperty(GameController::undeployedGreenPieces)
     fun undeployedYellowPiecesProperty() = getProperty(GameController::undeployedYellowPieces)
+    private var validRedPieces: ArrayList<PieceShape> by property(ArrayList())
+    private var validBluePieces: ArrayList<PieceShape> by property(ArrayList())
+    private var validGreenPieces: ArrayList<PieceShape> by property(ArrayList())
+    private var validYellowPieces: ArrayList<PieceShape> by property(ArrayList())
+    fun validRedPiecesProperty() = getProperty(GameController::validRedPieces)
+    fun validBluePiecesProperty() = getProperty(GameController::validBluePieces)
+    fun validGreenPiecesProperty() = getProperty(GameController::validGreenPieces)
+    fun validYellowPiecesProperty() = getProperty(GameController::validYellowPieces)
 
     // use selected* to access the property of currentPiece in order to always correctly be automatically rebind
+    private var currentPiece: PiecesModel by property(PiecesModel(Color.RED, PieceShape.MONO))
     private fun currentPieceProperty() = getProperty(GameController::currentPiece)
     var selectedColor: ColorBinding = ColorBinding(currentPieceProperty())
     var selectedShape: ShapeBinding = ShapeBinding(currentPieceProperty())
@@ -163,6 +175,8 @@ class GameController : Controller() {
     init {
         subscribe<NewGameState> { event ->
             logger.debug("New game state")
+            gameState = event.gameState
+            isHumanTurnProperty().set(false)
             availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
             currentTurnProperty().set(event.gameState.turn)
             turnColorProperty().set(event.gameState.currentColor)
@@ -171,11 +185,28 @@ class GameController : Controller() {
             undeployedGreenPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.GREEN])
             undeployedYellowPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.YELLOW])
             boardController.board.boardProperty().set(event.gameState.board)
+            validRedPiecesProperty().set(ArrayList())
+            validBluePiecesProperty().set(ArrayList())
+            validGreenPiecesProperty().set(ArrayList())
+            validYellowPiecesProperty().set(ArrayList())
         }
-        subscribe<HumanMoveRequest> {
+        subscribe<HumanMoveRequest> { event ->
             logger.debug("Human move request")
             isHumanTurnProperty().set(true)
             boardController.calculateIsPlaceableBoard()
+
+            val validatedShapes = ArrayList<PieceShape>()
+            for (shape in event.gameState.undeployedPieceShapes[event.gameState.currentColor]!!) {
+                if (isSelectable(shape)) {
+                    validatedShapes.add(shape)
+                }
+            }
+            when (event.gameState.currentColor) {
+                Color.RED -> validRedPiecesProperty()
+                Color.BLUE -> validBluePiecesProperty()
+                Color.GREEN -> validGreenPiecesProperty()
+                Color.YELLOW -> validYellowPiecesProperty()
+            }.set(validatedShapes)
         }
     }
 
@@ -204,6 +235,18 @@ class GameController : Controller() {
 
     fun scroll(deltaY: Double) {
         currentPieceProperty().get().scroll(deltaY)
+    }
+
+    private fun isSelectable(shape: PieceShape): Boolean {
+        if (turnColorProperty().get() == turnColorProperty().get() && isHumanTurnProperty().get()) {
+            try {
+                GameRuleLogic.validateShape(gameState, shape)
+                return true
+            } catch (e: InvalidMoveException) {
+                // nothing to do here. Why do boolean work with exceptions?
+            }
+        }
+        return false
     }
 
     companion object {
