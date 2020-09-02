@@ -35,8 +35,10 @@ class ShapeConverter : StringConverter<PieceShape>() {
 }
 
 class GameView : View() {
+    private val appController: AppController by inject()
     private val clientController: ClientController by inject()
     private val gameController: GameController by inject()
+    private val gameEndedView: GameEndedView by inject()
     private val redUndeployedPieces = PiecesListFragment(Color.RED, gameController.undeployedRedPiecesProperty(), gameController.validRedPiecesProperty())
     private val blueUndeployedPieces = PiecesListFragment(Color.BLUE, gameController.undeployedBluePiecesProperty(), gameController.validBluePiecesProperty())
     private val greenUndeployedPieces = PiecesListFragment(Color.GREEN, gameController.undeployedGreenPiecesProperty(), gameController.validGreenPiecesProperty())
@@ -128,6 +130,10 @@ class GameView : View() {
     init {
         subscribe<StartGameRequest> { event ->
             clientController.startGame("localhost", 13050, event.gameCreationModel)
+        }
+        subscribe<GameOverEvent> { event ->
+            gameEndedView.gameEnded(event.result)
+            appController.changeViewTo(GameEndedView::class)
         }
 
 

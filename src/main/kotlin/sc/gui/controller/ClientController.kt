@@ -81,6 +81,7 @@ class StartGameRequest(val gameCreationModel: GameCreationModel) : FXEvent(Event
 class NewGameState(val gameState: GameState) : FXEvent()
 class HumanMoveRequest(val gameState: GameState) : FXEvent()
 class HumanMoveAction(val move: Move) : FXEvent()
+class GameOverEvent(val result: GameResult) : FXEvent()
 
 
 class ClientController : Controller() {
@@ -119,7 +120,9 @@ class ClientController : Controller() {
         }
 
         controllingClient = ControllingClient(host, port)
-        controllingClient!!.startNewGame(player1, player2, listener)
+        controllingClient!!.startNewGame(player1, player2, listener) { result ->
+            fire(GameOverEvent(result))
+        }
     }
 
     fun newGameState() {

@@ -13,9 +13,10 @@ import sc.shared.SlotDescriptor
 import java.net.ConnectException
 import kotlin.system.exitProcess
 
-class LobbyListener(val logger: Logger) : ILobbyClientListener {
+class LobbyListener(val logger: Logger): ILobbyClientListener {
 
     private var numberJoined = 0
+    private var gameOverHandler: (result: GameResult) -> Unit = {}
 
     override fun onNewState(roomId: String?, state: Any?) {
         logger.debug("lobby: new state for $roomId")
@@ -44,6 +45,11 @@ class LobbyListener(val logger: Logger) : ILobbyClientListener {
 
     override fun onGameOver(roomId: String?, data: GameResult?) {
         logger.debug("lobby: $roomId game is over")
+        if (data != null) {
+            gameOverHandler(data)
+        } else {
+            logger.error("got no game result!")
+        }
     }
 
     override fun onGamePaused(roomId: String?, nextPlayer: Player?) {
@@ -52,6 +58,10 @@ class LobbyListener(val logger: Logger) : ILobbyClientListener {
 
     override fun onGameObserved(roomId: String?) {
         logger.debug("lobby: $roomId game was observed")
+    }
+
+    fun setGameOverHandler(handler: (result: GameResult) -> Unit) {
+       this.gameOverHandler = handler
     }
 
 }
@@ -89,10 +99,12 @@ class ControllingClient(host: String, port: Int) {
         lobby.addListener(adminListener)
     }
 
-    fun startNewGame(playerOne: AbstractClient, playerTwo: AbstractClient, listener: IUpdateListener) {
+    fun startNewGame(playerOne: AbstractClient, playerTwo: AbstractClient, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
         this.playerOne = playerOne
         this.playerTwo = playerTwo
         this.listener = listener
+        this.lobbyListener.setGameOverHandler(onGameOver)
+
         val requestResult = lobby.prepareGameAndWait(
                 GamePlugin.PLUGIN_UUID,
                 SlotDescriptor("One", false, false),

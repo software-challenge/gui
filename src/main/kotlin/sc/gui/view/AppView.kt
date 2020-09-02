@@ -47,11 +47,6 @@ class AppView : View("Software-Challenge Germany") {
                         controller.changeViewTo(GameCreationView::class)
                     }
                 }
-                item("Start", "Shortcut+R").action {
-                    // TODO: remove
-                    controller.changeViewTo(GameView::class)
-                    fire(StartGameRequest(GameCreationModel()))
-                }
                 item("Toggle Darkmode").action {
                     controller.toggleDarkmode()
                 }
