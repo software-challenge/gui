@@ -137,14 +137,26 @@ class BoardView : View() {
             if (place.hasClass(AppStyle.colorRED)) {
                 place.removeClass(AppStyle.colorRED)
             }
+            if (place.hasClass(AppStyle.placeableRED)) {
+                place.removeClass(AppStyle.placeableRED)
+            }
             if (place.hasClass(AppStyle.colorBLUE)) {
                 place.removeClass(AppStyle.colorBLUE)
+            }
+            if (place.hasClass(AppStyle.placeableBLUE)) {
+                place.removeClass(AppStyle.placeableBLUE)
             }
             if (place.hasClass(AppStyle.colorGREEN)) {
                 place.removeClass(AppStyle.colorGREEN)
             }
+            if (place.hasClass(AppStyle.placeableGREEN)) {
+                place.removeClass(AppStyle.placeableGREEN)
+            }
             if (place.hasClass(AppStyle.colorYELLOW)) {
                 place.removeClass(AppStyle.colorYELLOW)
+            }
+            if (place.hasClass(AppStyle.placeableYELLOW)) {
+                place.removeClass(AppStyle.placeableYELLOW)
             }
             if (place.hasClass(AppStyle.fieldUnplaceable)) {
                 place.removeClass(AppStyle.fieldUnplaceable)
@@ -154,11 +166,21 @@ class BoardView : View() {
 
     private fun paneHoverEnter(x: Int, y: Int) {
         controller.currentHover = Coordinates(x, y)
-        controller.currentPlaceable = controller.isPlaceable(x, y, controller.game.selectedCalculatedShape.get())
+        controller.hoverable = controller.isHoverable(x, y, controller.game.selectedCalculatedShape.get())
+        controller.currentPlaceable = controller.isPlaceable(x,y, controller.game.selectedCalculatedShape.get())
+
         for (place in controller.game.selectedCalculatedShape.get()) {
             if (controller.hoverInBound(x + place.x, y + place.y)) {
-                if (!controller.currentPlaceable) {
+                if (!controller.hoverable) {
                     getPane(x + place.x, y + place.y).addClass(AppStyle.fieldUnplaceable)
+                } else if (controller.currentPlaceable) {
+                    getPane(x + place.x, y + place.y).addClass(when (controller.game.selectedColor.get()) {
+                        Color.RED -> AppStyle.placeableRED
+                        Color.BLUE -> AppStyle.placeableBLUE
+                        Color.GREEN -> AppStyle.placeableGREEN
+                        Color.YELLOW -> AppStyle.placeableYELLOW
+                        else -> throw Exception("Unknown player color for hover effect")
+                    })
                 } else {
                     getPane(x + place.x, y + place.y).addClass(when (controller.game.selectedColor.get()) {
                         Color.RED -> AppStyle.colorRED
@@ -173,6 +195,7 @@ class BoardView : View() {
     }
 
     private fun paneHoverExit() {
+        controller.currentPlaceable = false
         if (controller.currentHover != null) {
             cleanupHover()
         }

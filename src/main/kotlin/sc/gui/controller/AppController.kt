@@ -15,20 +15,25 @@ class AppController : Controller() {
     fun <T: UIComponent> changeViewTo(nodeType: KClass<T>) {
         logger.debug("Requested View change from ${model.currentViewProperty().get().name} -> $nodeType")
         find(when (model.currentViewProperty().get()) {
-            ViewTypes.GAME -> GameView::class
             ViewTypes.GAME_CREATION -> GameCreationView::class
+            ViewTypes.GAME_ENDED -> GameEndedView::class
+            ViewTypes.GAME -> GameView::class
             ViewTypes.START -> StartView::class
             else -> throw Exception("Unknown type of view")
         }).replaceWith(nodeType)
         model.previousViewProperty().set(model.currentViewProperty().get())
         model.currentViewProperty().set(when (nodeType) {
-            GameView::class -> {
-                view.title = "Spiele Blockus - Software-Challenge Germany"
-                ViewTypes.GAME
-            }
             GameCreationView::class -> {
                 view.title = "Neues Spiel - Software-Challenge Germany"
                 ViewTypes.GAME_CREATION
+            }
+            GameEndedView::class -> {
+                view.title = "Spiel beendet - Software-Challenge Germany"
+                ViewTypes.GAME_ENDED
+            }
+            GameView::class -> {
+                view.title = "Spiele Blockus - Software-Challenge Germany"
+                ViewTypes.GAME
             }
             StartView::class -> {
                 view.title = "Software-Challenge Germany"
@@ -58,6 +63,6 @@ class AppController : Controller() {
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(BoardView::class.java)
+        private val logger = LoggerFactory.getLogger(AppController::class.java)
     }
 }

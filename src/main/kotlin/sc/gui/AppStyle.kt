@@ -10,9 +10,13 @@ class AppStyle : Stylesheet() {
         val tackyButton by cssclass()
 
         private val red = c("#AA0100")
+        private val placeableRed = c("#FB0A12")
         private val blue = c("#005784")
-        private val yellow = c("#9E8900")
+        private val placeableBlue = c("#31A2F2")
         private val green = c("#2B7200")
+        private val placeableGreen = c("#55E601")
+        private val yellow = c("#9E8900")
+        private val placeableYellow = c("#FEDE06")
 
         private val gotuRegular = Font.loadFont("file:resources/fonts/NotoSans-Regular.ttf", 16.0)
         private val rounding = multi(box(8.percent))
@@ -29,14 +33,17 @@ class AppStyle : Stylesheet() {
         val hoverColor by cssclass()
 
         val colorRED by cssclass()
+        val placeableRED by cssclass()
         val borderRED by cssclass()
         val colorBLUE by cssclass()
+        val placeableBLUE by cssclass()
         val borderBLUE by cssclass()
         val colorGREEN by cssclass()
+        val placeableGREEN by cssclass()
         val borderGREEN by cssclass()
         val colorYELLOW by cssclass()
+        val placeableYELLOW by cssclass()
         val borderYELLOW by cssclass()
-
 
 
     }
@@ -94,12 +101,18 @@ class AppStyle : Stylesheet() {
         colorRED {
             backgroundColor += red
         }
+        placeableRED {
+            backgroundColor += placeableRed
+        }
         borderRED {
             borderColor += box(red)
         }
 
         colorBLUE {
             backgroundColor += blue
+        }
+        placeableBLUE {
+            backgroundColor += placeableBlue
         }
         borderBLUE {
             borderColor += box(blue)
@@ -108,12 +121,18 @@ class AppStyle : Stylesheet() {
         colorGREEN {
             backgroundColor += green
         }
+        placeableGREEN {
+            backgroundColor += placeableGreen
+        }
         borderGREEN {
             borderColor += box(green)
         }
 
         colorYELLOW {
             backgroundColor += yellow
+        }
+        placeableYELLOW {
+            backgroundColor += placeableYellow
         }
         borderYELLOW {
             borderColor += box(yellow)

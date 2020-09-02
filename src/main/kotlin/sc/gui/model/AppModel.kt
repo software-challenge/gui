@@ -10,6 +10,7 @@ import kotlin.reflect.KClass
 
 enum class ViewTypes {
     GAME_CREATION,
+    GAME_ENDED,
     GAME,
     START
 }

@@ -139,11 +139,13 @@ class GameController : Controller() {
     private var turnColor: Color by property(Color.RED)
     private var isHumanTurn: Boolean by property(false)
     private var gameStarted: Boolean by property(false)
+    private var gameEnded: Boolean by property(false)
     fun turnColorProperty() = getProperty(GameController::turnColor)
     fun availableTurnsProperty() = getProperty(GameController::availableTurns)
     fun currentTurnProperty() = getProperty(GameController::currentTurn)
     fun isHumanTurnProperty() = getProperty(GameController::isHumanTurn)
     fun gameStartedProperty() = getProperty(GameController::gameStarted)
+    fun gameEndedProperty() = getProperty(GameController::gameEnded)
 
     // we need to have them split separately otherwise we cannot listen to a specific color alone
     private var undeployedRedPieces: Collection<PieceShape> by property(PieceShape.shapes.values)
@@ -176,7 +178,6 @@ class GameController : Controller() {
         subscribe<NewGameState> { event ->
             logger.debug("New game state")
             gameState = event.gameState
-            isHumanTurnProperty().set(false)
             availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
             currentTurnProperty().set(event.gameState.turn)
             turnColorProperty().set(event.gameState.currentColor)
@@ -193,7 +194,7 @@ class GameController : Controller() {
         subscribe<HumanMoveRequest> { event ->
             logger.debug("Human move request")
             isHumanTurnProperty().set(true)
-            boardController.calculateIsPlaceableBoard()
+            boardController.calculateIsPlaceableBoard(event.gameState.board, event.gameState.currentColor)
 
             when (event.gameState.currentColor) {
                 Color.RED -> validRedPiecesProperty()
@@ -246,6 +247,6 @@ class GameController : Controller() {
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(PiecesFragment::class.java)
+        private val logger = LoggerFactory.getLogger(GameController::class.java)
     }
 }
