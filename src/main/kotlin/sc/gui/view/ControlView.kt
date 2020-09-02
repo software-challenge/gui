@@ -2,6 +2,7 @@ package sc.gui.view
 
 import javafx.beans.binding.Bindings
 import javafx.geometry.Insets
+import javafx.scene.control.Button
 import sc.gui.AppStyle
 import sc.gui.controller.ClientController
 import sc.gui.controller.GameController
@@ -11,6 +12,9 @@ import tornadofx.*
 class ControlView() : View() {
     private val gameController: GameController by inject()
     private val clientController: ClientController by inject()
+    private val playPauseButton: Button = button {
+        text = "Start"
+    }
 
     override val root = hbox {
         label("Selected: ")
@@ -47,12 +51,7 @@ class ControlView() : View() {
         }
         hbox {
             padding = Insets(0.0, 10.0, 0.0, 10.0)
-            button {
-                text = "Pause / Play"
-                setOnMouseClicked {
-                    clientController.togglePause()
-                }
-            }
+            this += playPauseButton
         }
         button {
             text = "Previous"
@@ -69,6 +68,20 @@ class ControlView() : View() {
             setOnMouseClicked {
                 clientController.next()
             }
+        }
+    }
+
+    init {
+        playPauseButton.setOnMouseClicked {
+            if (!gameController.gameStartedProperty().get()) {
+                gameController.gameStartedProperty().set(true)
+            }
+            if (clientController.controllingClient?.game?.isPaused!!) {
+                playPauseButton.text = "Pause"
+            } else {
+                playPauseButton.text = "Play"
+            }
+            clientController.togglePause()
         }
     }
 }

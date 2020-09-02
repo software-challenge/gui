@@ -67,13 +67,10 @@ class PiecesListFragment(undeployedPieces: Property<Collection<PieceShape>>, pri
         }
 
         undeployedPieces.addListener { _, _, new ->
-            logger.debug("New undeployed pieces fo $color contains")
-
             // we need to use an extra list to prevent an ConcurrentModificationException
             val toRemove = ArrayList<PieceShape>()
             for (shape in shapes) {
                 if (!new.contains(shape)) {
-                    logger.debug("Piece ${shape.name} has been removed")
                     toRemove.add(shape)
                 }
             }
@@ -81,7 +78,6 @@ class PiecesListFragment(undeployedPieces: Property<Collection<PieceShape>>, pri
 
             for (shape in new) {
                 if (!shapes.contains(shape)) {
-                    logger.debug("Piece ${shape.name} has been added")
                     shapes.add(shape)
                 }
             }
@@ -99,7 +95,6 @@ class PiecesListFragment(undeployedPieces: Property<Collection<PieceShape>>, pri
         }
 
         children.bind(shapes) {
-            logger.debug("Adding child $color, ${it.name}")
             piecesList[it]
         }
     }

@@ -135,10 +135,12 @@ class GameController : Controller() {
     private var currentTurn: Int by property(0)
     private var turnColor: Color by property(Color.RED)
     private var isHumanTurn: Boolean by property(false)
+    private var gameStarted: Boolean by property(false)
     fun turnColorProperty() = getProperty(GameController::turnColor)
     fun availableTurnsProperty() = getProperty(GameController::availableTurns)
     fun currentTurnProperty() = getProperty(GameController::currentTurn)
     fun isHumanTurnProperty() = getProperty(GameController::isHumanTurn)
+    fun gameStartedProperty() = getProperty(GameController::gameStarted)
 
     // we need to have them split separately otherwise we cannot listen to a specific color alone
     private var undeployedRedPieces: Collection<PieceShape> by property(PieceShape.shapes.values)
@@ -168,12 +170,24 @@ class GameController : Controller() {
             undeployedBluePiecesProperty().set(event.gameState.undeployedPieceShapes[Color.BLUE])
             undeployedGreenPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.GREEN])
             undeployedYellowPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.YELLOW])
+            boardController.board.boardProperty().set(event.gameState.board)
         }
         subscribe<HumanMoveRequest> {
             logger.debug("Human move request")
             isHumanTurnProperty().set(true)
             boardController.calculateIsPlaceableBoard()
         }
+    }
+
+    fun clearGame() {
+        gameStartedProperty().set(false)
+        boardController.board.boardProperty().set(Board())
+        availableTurnsProperty().set(0)
+        currentTurnProperty().set(0)
+        undeployedRedPiecesProperty().set(PieceShape.values().toList())
+        undeployedBluePiecesProperty().set(PieceShape.values().toList())
+        undeployedGreenPiecesProperty().set(PieceShape.values().toList())
+        undeployedYellowPiecesProperty().set(PieceShape.values().toList())
     }
 
     fun selectPiece(piece: PiecesModel) {

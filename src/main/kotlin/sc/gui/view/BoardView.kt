@@ -90,11 +90,6 @@ class BoardView : View() {
     }
 
     init {
-        subscribe<NewGameState> { event ->
-            model.boardProperty().set(event.gameState.board)
-        }
-
-
         controller.game.selectedCalculatedShape.addListener { _, _, _ ->
             cleanupHover()
             if (controller.currentHover != null) {

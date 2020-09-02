@@ -28,11 +28,7 @@ class ServerController : Controller() {
         }
     }
 
-    fun endGame() {
-        // TODO
-    }
-
     fun stopServer() {
-        // TODO
+        server.close()
     }
 }

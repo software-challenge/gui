@@ -39,7 +39,6 @@ class AppView : View("Software-Challenge Germany") {
                                 content = "Willst du wirklich dein aktuelles Spiel verwerfen und ein neues anfangen?",
                                 actionFn = { btnType ->
                                     if (btnType.buttonData == ButtonBar.ButtonData.OK_DONE) {
-                                        serverController.endGame()
                                         controller.changeViewTo(GameCreationView::class)
                                     }
                                 }
@@ -107,8 +106,8 @@ class AppView : View("Software-Challenge Germany") {
         sochaIcon.fitHeight = 32.0
         sochaIcon.fitWidth = 32.0
         with(root) {
-            prefWidth = 1000.0
-            prefHeight = 660.0
+            prefWidth = 1100.0
+            prefHeight = 700.0
             center(StartView::class)
         }
 
