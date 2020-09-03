@@ -26,14 +26,6 @@ application {
 
 }
 
-sourceSets {
-    main {
-        resources {
-            srcDir( "plugins")
-        }
-    }
-}
-
 repositories {
     mavenCentral()
     maven {
