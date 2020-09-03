@@ -6,7 +6,7 @@ import sc.framework.plugins.Player
 import sc.gui.ControllingClient
 import sc.gui.HumanClient
 import sc.gui.TestClient
-import sc.gui.model.GameCreationModel
+import sc.gui.model.TeamSettings
 import sc.networking.clients.ILobbyClientListener
 import sc.networking.clients.IUpdateListener
 import sc.plugin2021.*
@@ -77,7 +77,7 @@ class UIGameListener(val onUpdateHandler: () -> Unit) : IUpdateListener {
     }
 }
 
-class StartGameRequest(val gameCreationModel: GameCreationModel) : FXEvent(EventBus.RunOn.BackgroundThread)
+class StartGameRequest(val playerOneSettings: TeamSettings, val playerTwoSettings: TeamSettings) : FXEvent(EventBus.RunOn.BackgroundThread)
 class NewGameState(val gameState: GameState) : FXEvent()
 class HumanMoveRequest(val gameState: GameState) : FXEvent()
 class HumanMoveAction(val move: Move) : FXEvent()
@@ -87,7 +87,6 @@ class GameOverEvent(val result: GameResult) : FXEvent()
 class ClientController : Controller() {
     var controllingClient: ControllingClient? = null
     private val listener: UIGameListener = UIGameListener(::newGameState)
-    var gameCreationModel: GameCreationModel? = null
 
     init {
         subscribe<HumanMoveAction> {
@@ -98,21 +97,20 @@ class ClientController : Controller() {
 
     // Do NOT call this directly in the UI thread, use fire(StartGameRequest(gameCreationModel)). This way, the game starting is done in the background
     // TODO put everything which is activated by events in a different class and call these from the controller by events
-    fun startGame(host: String = "localhost", port: Int = 13050, gameCreationModel: GameCreationModel = GameCreationModel()) {
-        this.gameCreationModel = gameCreationModel
+    fun startGame(host: String = "localhost", port: Int = 13050, playerOneSettings: TeamSettings, playerTwoSettings: TeamSettings) {
         // starting the game in the UI thread blocks the UI
 
         logger.debug("creating and observing")
 
         // NOTE that testClientOne and testClientTwo are currently *internal* clients to wire the logic of the GameHandlers to the server. When external clients should join the game, these are not needed.
         // TODO: implement client for HUMAN, MANUELL and COMPUTER
-        val player1 = when (gameCreationModel.selectedPlayerType1.value) {
+        val player1 = when (playerOneSettings.typeProperty()) {
             sc.gui.model.PlayerType.HUMAN -> HumanClient(PlayerType.PLAYER_ONE, host, port, ::humanMoveRequest)
             sc.gui.model.PlayerType.MANUELL -> TestClient(PlayerType.PLAYER_ONE, host, port)
             sc.gui.model.PlayerType.COMPUTER -> TestClient(PlayerType.PLAYER_ONE, host, port)
             else -> throw Exception("invalid playerType for player 1, cannot create game")
         }
-        val player2 = when (gameCreationModel.selectedPlayerType2.value) {
+        val player2 = when (playerTwoSettings.typeProperty()) {
             sc.gui.model.PlayerType.HUMAN -> HumanClient(PlayerType.PLAYER_TWO, host, port, ::humanMoveRequest)
             sc.gui.model.PlayerType.MANUELL -> TestClient(PlayerType.PLAYER_TWO, host, port)
             sc.gui.model.PlayerType.COMPUTER -> TestClient(PlayerType.PLAYER_TWO, host, port)

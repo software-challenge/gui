@@ -1,15 +1,19 @@
 package sc.gui.controller
 
-import sc.gui.model.GameCreationModel
+import sc.gui.model.TeamSettings
+import sc.gui.model.TeamSettingsModel
 import sc.gui.model.ViewTypes
 import sc.gui.view.GameView
 import tornadofx.*
 
 class GameCreationController : Controller() {
-    var model = GameCreationModel()
     private val appController: AppController by inject()
     private val gameController: GameController by inject()
 
+    private val playerOneSettings = TeamSettings()
+    val playerOneSettingsModel = TeamSettingsModel(playerOneSettings)
+    private val playerTwoSettings = TeamSettings()
+    val playerTwoSettingsModel = TeamSettingsModel(playerTwoSettings)
 
     fun createGame() {
         // as we currently just support a single game at a time
@@ -20,12 +24,12 @@ class GameCreationController : Controller() {
         }
 
         println("Creating new game")
-        println("Player 1: ${model.playerName1.value}, ${model.selectedPlayerType1.value}")
-        println("Selected executable: ${model.playerExecutable1.value}")
-        println("Player 2: ${model.playerName2.value}, ${model.selectedPlayerType2.value}")
-        println("Selected executable: ${model.playerExecutable2.value}")
+        playerOneSettingsModel.commit()
+        playerTwoSettingsModel.commit()
+        println("Player 1: ${playerOneSettingsModel.item.nameProperty()}, ${playerOneSettingsModel.item.typeProperty()}")
+        println("Player 2: ${playerTwoSettingsModel.item.nameProperty()}, ${playerTwoSettingsModel.item.typeProperty()}")
         appController.changeViewTo(GameView::class)
 
-        fire(StartGameRequest(model))
+        fire(StartGameRequest(playerOneSettingsModel.item, playerTwoSettingsModel.item))
     }
 }

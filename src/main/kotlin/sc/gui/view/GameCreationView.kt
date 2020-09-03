@@ -1,14 +1,17 @@
 package sc.gui.view
 
+import javafx.beans.Observable
+import javafx.beans.binding.Bindings
 import javafx.beans.property.Property
+import javafx.beans.value.ObservableValue
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.stage.FileChooser
 import sc.gui.controller.AppController
 import sc.gui.controller.GameCreationController
-import sc.gui.model.PlayerType
-import sc.gui.model.ViewTypes
+import sc.gui.model.*
+import sc.plugin2021.Team
 import tornadofx.*
 import java.io.File
 
@@ -23,10 +26,10 @@ class GameCreationView : View() {
         center = form {
             hbox {
                 vbox(20) {
-                    add(PlayerFragment(1))
+                    add(PlayerFragment(Team.ONE, controller.playerOneSettingsModel))
                 }
                 vbox(20) {
-                    add(PlayerFragment(2))
+                    add(PlayerFragment(Team.TWO, controller.playerTwoSettingsModel))
                 }
             }
         }
@@ -39,8 +42,7 @@ class GameCreationView : View() {
                     controller.createGame()
                 }
 
-                // TODO
-                enableWhen(controller.model.valid)
+                enableWhen(Bindings.and(controller.playerOneSettingsModel.valid, controller.playerTwoSettingsModel.valid))
             }
 
             button("Zurück") {
@@ -57,54 +59,46 @@ class GameCreationView : View() {
     }
 }
 
-class PlayerFragment(private val player: Int) : Fragment() {
+class PlayerFragment(private val team: Team, private val settings: TeamSettingsModel) : Fragment() {
     val controller: GameCreationController by inject()
 
     override var root = vbox(20) {
-        fieldset("Spieler Nr. $player") {
-            textfield(getPlayerName()).required()
-            add(PlayerFileSelectFragment(player))
+        fieldset("Spieler Nr. $team") {
+            textfield(settings.name).required()
+            add(PlayerFileSelectFragment(team, settings))
         }
     }
 
 
-    private fun getPlayerName(): Property<String> {
-        if (player == 1) {
-            return controller.model.playerName1
-        }
-        return controller.model.playerName2
-    }
 }
 
-class PlayerFileSelectFragment(private val player: Int) : Fragment() {
+class PlayerFileSelectFragment(private val team: Team, private val settings: TeamSettingsModel) : Fragment() {
     val controller: GameCreationController by inject()
-    private val playerTypes: ObservableList<PlayerType> = FXCollections.observableArrayList(PlayerType.HUMAN, PlayerType.MANUELL, PlayerType.COMPUTER)
 
     override var root = borderpane {
         top = hbox {
-            combobox(getPlayerType(), playerTypes) {
-                getPlayerType().value
-            }
+            combobox(settings.type, PlayerType.values().toList())
         }
     }
 
     private fun updatePlayerType() {
         // TODO: work with proper binding of property
-        when (getPlayerType().value) {
+
+        when (settings.type.getValue()) {
             PlayerType.COMPUTER -> {
                 root.center = hbox(20) {
                     button("Client wählen") {
                         action {
-                            val fileChooser = FileChooser()
-                            fileChooser.title = "Client suchen"
-                            fileChooser.extensionFilters.addAll(
-                                    FileChooser.ExtensionFilter("Alle Dateien", "*.*"),
-                                    FileChooser.ExtensionFilter("jar", "*.jar")
+                            val selectedFile = chooseFile(
+                                    "Client wählen",
+                                    arrayOf(
+                                            FileChooser.ExtensionFilter("Alle Dateien", "*.*"),
+                                            FileChooser.ExtensionFilter("jar", "*.jar")
+                                    )
                             )
-                            val selectedFile = fileChooser.showOpenDialog(find(AppView::class).currentWindow)
-                            if (selectedFile != null) {
+                            if (selectedFile != null && selectedFile.isNotEmpty()) {
                                 println("Selected file $selectedFile")
-                                getPlayerExecutable().value = selectedFile
+                                settings.executable.setValue(selectedFile.first())
                             }
                         }
                     }
@@ -119,50 +113,35 @@ class PlayerFileSelectFragment(private val player: Int) : Fragment() {
                 root.center = label("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
                 root.bottom = label()
             }
-            else -> {
+            PlayerType.INTERNAL -> {
+                root.center = label("Ein interner Computerspieler wird hier spielen")
+                root.bottom = label()
+            }
+            PlayerType.HUMAN -> {
                 root.center = label("Ein Mensch wird das Spiel hier spielen")
                 root.bottom = label()
             }
         }
     }
 
-    private fun getPlayerType(): Property<PlayerType> {
-        if (player == 1) {
-            return controller.model.selectedPlayerType1
-        }
-        return controller.model.selectedPlayerType2
-    }
-
-    private fun getPlayerExecutable(): Property<File> {
-        if (player == 1) {
-            return controller.model.playerExecutable1
-        }
-        return controller.model.playerExecutable2
-    }
-
 
     init {
-        if (player == 1) {
-            controller.model.selectedPlayerType1.onChange {
-                updatePlayerType()
-            }
-            controller.model.playerExecutable1.onChange {
-                root.bottom = textflow {
-                    label("Ausgewählte Datei: ")
-                    label(controller.model.playerExecutable1.value.absolutePath)
-                }
-            }
-        } else {
-            controller.model.selectedPlayerType2.onChange {
-                updatePlayerType()
-            }
-            controller.model.playerExecutable2.onChange {
-                root.bottom = textflow {
-                    label("Ausgewählte Datei: ")
-                    label(controller.model.playerExecutable2.value.absolutePath)
-                }
-            }
+        settings.type.onChange {
+            updatePlayerType()
+            settings.validate()
         }
+        settings.executable.onChange {
+                root.bottom = textflow {
+                    label("Ausgewählte Datei: ")
+                    label(settings.executable.getValue().absolutePath)
+                }
+            }
         updatePlayerType()
+
+        val obs: ObservableValue<File?> = settings.executable
+        settings.validationContext.addValidator(root.bottom, obs, ValidationTrigger.OnChange()) {
+            if (settings.type.value == PlayerType.COMPUTER && settings.executable.value == null) error("Error") else null
+        }
+        settings.validate()
     }
 }

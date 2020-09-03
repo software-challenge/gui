@@ -133,7 +133,7 @@ class GameView : View() {
 
     init {
         subscribe<StartGameRequest> { event ->
-            clientController.startGame("localhost", 13050, event.gameCreationModel)
+            clientController.startGame("localhost", 13050, event.playerOneSettings, event.playerTwoSettings)
         }
 
 

@@ -11,7 +11,6 @@ import sc.gui.controller.AppController
 import sc.gui.controller.GameController
 import sc.gui.controller.ServerController
 import sc.gui.controller.StartGameRequest
-import sc.gui.model.GameCreationModel
 import sc.gui.model.ViewTypes
 import sc.plugin2021.Rotation
 import tornadofx.*
