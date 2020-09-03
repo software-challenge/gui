@@ -2,6 +2,7 @@ package sc.gui
 
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
+import sc.gui.view.AppView
 import tornadofx.*
 
 class AppStyle : Stylesheet() {
@@ -18,7 +19,7 @@ class AppStyle : Stylesheet() {
         private val yellow = c("#9E8900")
         private val placeableYellow = c("#FEDE06")
 
-        private val gotuRegular = Font.loadFont("file:resources/fonts/NotoSans-Regular.ttf", 16.0)
+        private val gotuRegular = Font.loadFont(AppView::class.java.getResource("/fonts/NotoSans-Regular.ttf").toExternalForm(), 16.0)
         private val rounding = multi(box(8.percent))
 
         val fullWidth by cssclass()

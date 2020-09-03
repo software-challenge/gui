@@ -4,6 +4,7 @@ import javafx.scene.SnapshotParameters
 import javafx.scene.canvas.Canvas
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import sc.gui.GuiApp
 import sc.gui.controller.*
 import sc.gui.model.PiecesModel
 import sc.plugin2021.Color
@@ -15,7 +16,9 @@ import java.io.File
 class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
     private val boardController: BoardController by inject()
     val model: PiecesModel = PiecesModel(color, shape)
-    private val image: ImageView = ImageView("file:resources/graphics/blokus/${model.colorProperty().get()}/${model.shapeProperty().get().name.toLowerCase()}.png")
+    val path: String = "/graphics/blokus/${model.colorProperty().get().name.toLowerCase()}/${model.shapeProperty().get().name.toLowerCase()}.png"
+    val imageUrl: String = PiecesFragment::class.java.getResource(path).toExternalForm()
+    private val image: ImageView = ImageView(imageUrl)
 
     constructor(selectedColor: ColorBinding, selectedShape: ShapeBinding, selectedRotation: RotationBinding, selectedFlip: FlipBinding) : this(selectedColor.value, selectedShape.value) {
         selectedColor.addListener { _, _, new -> model.colorProperty().set(new) }
@@ -41,10 +44,9 @@ class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
     }
 
     fun updateImage() {
-        val imagePath = "resources/graphics/blokus/${model.colorProperty().get().toString().toLowerCase()}/${model.shapeProperty().get().name.toLowerCase()}.png"
-        val f = File(imagePath)
+        val imagePath = "/graphics/blokus/${model.colorProperty().get().name.toLowerCase()}/${model.shapeProperty().get().name.toLowerCase()}.png"
         val size = boardController.board.calculatedBlockSizeProperty().get() * 2
-        image.image = Image(f.toURI().toString(), size, size, true, false)
+        image.image = Image(PiecesFragment::class.java.getResource(imagePath).toExternalForm(), size, size, true, false)
 
         if (model.flipProperty().get()) {
             val canvas = Canvas(image.image.width, image.image.height)

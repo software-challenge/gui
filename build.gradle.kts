@@ -23,6 +23,15 @@ application {
         // For accessing InputMap used in RangeSliderBehavior
         "--add-exports=javafx.controls/com.sun.javafx.scene.control.inputmap=ALL-UNNAMED"
     )
+
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDir( "plugins")
+        }
+    }
 }
 
 repositories {
@@ -46,6 +55,7 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 }
+
 
 javafx {
     version = "13"

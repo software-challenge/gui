@@ -3,6 +3,7 @@ package sc.gui.view
 import javafx.application.Platform
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
+import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
@@ -15,12 +16,13 @@ import sc.plugin2021.Rotation
 import tornadofx.*
 import java.awt.Desktop
 import java.net.URI
+import javax.imageio.ImageIO
 
 class AppView : View("Software-Challenge Germany") {
     val controller: AppController by inject()
     private val gameController: GameController by inject()
     private val serverController: ServerController by inject()
-    private val sochaIcon = ImageView("file:resources/icon.png")
+    private val sochaIcon = ImageView(AppView::class.java.getResource("/icon.png").toExternalForm())
 
     override val root = borderpane {
         addClass(AppStyle.lightColorSchema)

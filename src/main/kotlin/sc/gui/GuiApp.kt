@@ -19,7 +19,7 @@ class GuiApp : App(AppView::class, AppStyle::class) {
     init {
         reloadStylesheetsOnFocus()
         server.startServer()
-        addStageIcon(Image("file:resources/icon.png"))
+        addStageIcon(Image(GuiApp::class.java.getResource("/icon.png").toExternalForm()))
     }
 }
 
