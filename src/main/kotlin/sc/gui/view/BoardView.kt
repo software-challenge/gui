@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.BoardController
+import sc.gui.controller.GameController
 import sc.gui.controller.NewGameState
 import sc.gui.model.BoardModel
 import sc.plugin2021.*
@@ -71,6 +72,7 @@ class BlockImage(private val size: Property<Double>) : ImageView(Image(BlockImag
 }
 
 class BoardView : View() {
+    private val gameController: GameController by inject()
     val controller: BoardController by inject()
     val model: BoardModel by inject()
     private val appController: AppController by inject()
@@ -165,6 +167,10 @@ class BoardView : View() {
     }
 
     private fun paneHoverEnter(x: Int, y: Int) {
+        if (gameController.gameEndedProperty().get()) {
+            return
+        }
+
         controller.currentHover = Coordinates(x, y)
         controller.hoverable = controller.isHoverable(x, y, controller.game.selectedCalculatedShape.get())
         controller.currentPlaceable = controller.isPlaceable(x,y, controller.game.selectedCalculatedShape.get())

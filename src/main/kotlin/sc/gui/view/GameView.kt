@@ -135,7 +135,6 @@ class GameView : View() {
             clientController.startGame("localhost", 13050, event.gameCreationModel)
         }
         subscribe<GameOverEvent> { event ->
-            // usage of EmptyBoardView as a placeholder to remount BoardView at the same position for a new game
             gameEndedView.gameEnded(event.result)
             appController.changeViewTo(GameEndedView::class)
         }

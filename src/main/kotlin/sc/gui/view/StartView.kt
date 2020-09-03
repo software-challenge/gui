@@ -1,21 +1,35 @@
 package sc.gui.view
 
+import javafx.geometry.Insets
+import javafx.geometry.Pos
 import sc.gui.controller.AppController
 import tornadofx.*
 
-class StartView: View() {
+class StartView : View() {
     private val controller: AppController by inject()
-    override val root = borderpane {
-        center = vbox {
-            label("Willkommen bei der Software-Challenge!")
-            button {
-                text = "Neues Spiel"
-                setOnMouseClicked {
-                    controller.changeViewTo(GameCreationView::class)
+    override val root = vbox {
+        alignment = Pos.CENTER
+
+        vbox {
+            alignment = Pos.TOP_CENTER
+            label {
+                style {
+                    fontSize = 32.px
+                }
+                text = "Willkommen bei der Software-Challenge!"
+            }
+            vbox {
+                alignment = Pos.TOP_CENTER
+                padding = Insets(40.0, 0.0, 0.0, 0.0)
+
+                button {
+                    text = "Neues Spiel starten"
+                    setOnMouseClicked {
+                        controller.changeViewTo(GameCreationView::class)
+                    }
                 }
             }
         }
-
     }
 }
 

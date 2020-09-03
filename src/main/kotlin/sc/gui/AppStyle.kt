@@ -25,9 +25,9 @@ class AppStyle : Stylesheet() {
         val fullWidth by cssclass()
         val lightColorSchema by cssclass()
         val darkColorSchema by cssclass()
-
         val lightBoard by cssclass()
         val darkBoard by cssclass()
+
         val undeployedPiece by cssclass()
         val fieldUnplaceable by cssclass()
         val pieceUnselectable by cssclass()
