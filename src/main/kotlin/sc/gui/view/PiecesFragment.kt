@@ -16,8 +16,8 @@ import java.io.File
 class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
     private val boardController: BoardController by inject()
     val model: PiecesModel = PiecesModel(color, shape)
-    val path: String = "/graphics/blokus/${model.colorProperty().get().name.toLowerCase()}/${model.shapeProperty().get().name.toLowerCase()}.png"
-    val imageUrl: String = PiecesFragment::class.java.getResource(path).toExternalForm()
+    private val path: String = "/graphics/blokus/${model.colorProperty().get().name.toLowerCase()}/${model.shapeProperty().get().name.toLowerCase()}.png"
+    private val imageUrl: String = PiecesFragment::class.java.getResource(path).toExternalForm()
     private val image: ImageView = ImageView(imageUrl)
 
     constructor(selectedColor: ColorBinding, selectedShape: ShapeBinding, selectedRotation: RotationBinding, selectedFlip: FlipBinding) : this(selectedColor.value, selectedShape.value) {

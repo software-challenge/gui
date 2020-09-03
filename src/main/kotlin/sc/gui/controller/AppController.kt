@@ -11,16 +11,11 @@ import kotlin.reflect.KClass
 class AppController : Controller() {
     val model = AppModel()
     private val view: AppView by inject()
-    private val gameController: GameController by inject()
 
     fun <T: UIComponent> changeViewTo(nodeType: KClass<T>) {
         logger.debug("Requested View change from ${model.currentViewProperty().get().name} -> $nodeType")
         find(when (model.currentViewProperty().get()) {
             ViewTypes.GAME_CREATION -> GameCreationView::class
-            ViewTypes.GAME_ENDED -> {
-                gameController.gameEndedProperty().set(false)
-                GameEndedView::class
-            }
             ViewTypes.GAME -> GameView::class
             ViewTypes.START -> StartView::class
             else -> throw Exception("Unknown type of view")
@@ -30,10 +25,6 @@ class AppController : Controller() {
             GameCreationView::class -> {
                 view.title = "Neues Spiel - Software-Challenge Germany"
                 ViewTypes.GAME_CREATION
-            }
-            GameEndedView::class -> {
-                view.title = "Spiel beendet - Software-Challenge Germany"
-                ViewTypes.GAME_ENDED
             }
             GameView::class -> {
                 view.title = "Spiele Blockus - Software-Challenge Germany"

@@ -131,10 +131,7 @@ class CalculatedShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<Set<C
 
 
 class GameController : Controller() {
-    private val appController: AppController by inject()
     private val boardController: BoardController by inject()
-    private val view: GameView by inject()
-    private val gameEndedView: GameEndedView by inject()
     private var gameState: GameState = GameState()
 
     private var availableTurns: Int by property(0)
@@ -208,26 +205,13 @@ class GameController : Controller() {
                 isSelectable(it)
             } as ArrayList<PieceShape>?)
         }
-        subscribe<GameOverEvent> { event ->
+        subscribe<GameOverEvent> {
             gameEndedProperty().set(true)
-        }
-        appController.model.isGameProperty().addListener { _, oldStatus, newStatus ->
-            logger.debug("isGame changed from $oldStatus -> $newStatus")
-            if (newStatus) {
-                logger.debug("Trying to add BoardView to GameView")
-                view.game.center {
-                    this += find(BoardView::class)
-                }
-            } else {
-                logger.debug("Trying to add BoardView to GameEndedView")
-                gameEndedView.game.center {
-                    this += find(BoardView::class)
-                }
-            }
         }
     }
 
     fun clearGame() {
+        gameEndedProperty().set(false)
         gameStartedProperty().set(false)
         boardController.board.boardProperty().set(Board())
         availableTurnsProperty().set(0)

@@ -47,7 +47,6 @@ class GameCreationView : View() {
                 action {
                     appController.changeViewTo(when (appController.model.previousViewProperty().get()) {
                         ViewTypes.GAME_CREATION -> GameCreationView::class
-                        ViewTypes.GAME_ENDED -> GameEndedView::class
                         ViewTypes.GAME -> GameView::class
                         ViewTypes.START -> StartView::class
                         else -> throw Exception("Unknown type of view")

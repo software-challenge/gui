@@ -1,6 +1,7 @@
 package sc.gui.view
 
 import javafx.application.Platform
+import javafx.beans.binding.Bindings
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
 import javafx.scene.image.Image
@@ -33,6 +34,7 @@ class AppView : View("Software-Challenge Germany") {
                     Platform.exit()
                 }
                 item("Neues Spiel", "Shortcut+N").action {
+                    enableWhen(controller.model.currentViewProperty().isNotEqualTo(ViewTypes.GAME_CREATION))
                     println("New Game!")
                     if (controller.model.currentViewProperty().get() == ViewTypes.GAME) {
                         alert(
