@@ -85,11 +85,10 @@ class AppView : View("Software-Challenge Germany") {
             menu("Hilfe") {
                 item("Spielregeln", "Shortcut+S").action {
                     // TODO: github.io Link der Doku einfügen
-                    Desktop.getDesktop().browse(URI("https://www.software-challenge.de"))
+                    Desktop.getDesktop().browse(URI("https://cau-kiel-tech-inf.github.io/socha-enduser-docs/spiele/blokus/regeln.html"))
                 }
-                item("Hilfe", "Shortcut+H").action {
-                    // TODO: github.io Link der Doku einfügen
-                    Desktop.getDesktop().browse(URI("https://www.software-challenge.de"))
+                item("Dokumentation", "Shortcut+D").action {
+                    Desktop.getDesktop().browse(URI("https://cau-kiel-tech-inf.github.io/socha-enduser-docs/"))
                 }
                 item("Webseite", "Shortcut+I").action {
                     Desktop.getDesktop().browse(URI("https://www.software-challenge.de"))
