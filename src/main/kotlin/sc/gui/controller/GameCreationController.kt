@@ -17,8 +17,7 @@ class GameCreationController : Controller() {
 
     fun createGame() {
         // as we currently just support a single game at a time
-        if (appController.model.previousViewProperty().get() == ViewTypes.GAME ||
-                appController.model.previousViewProperty().get() == ViewTypes.GAME_ENDED) {
+        if (appController.model.previousViewProperty().get() == ViewTypes.GAME) {
             gameController.clearGame()
             //TODO("Kill previous game")
         }
