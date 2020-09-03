@@ -5,6 +5,7 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import sc.gui.controller.GameController
+import sc.plugin2021.util.Constants
 import sc.shared.GameResult
 import sc.shared.PlayerScore
 import tornadofx.*
@@ -16,8 +17,8 @@ class GameEndedView : View() {
     private val gameResult = label {
         padding = Insets(0.0, 0.0, 10.0, 0.0)
         style {
-            fontSize = 24.px
-            textFill = Color.GOLDENROD
+            fontSize = 32.px
+            textFill = Color.GOLD
         }
     }
     private val player1Name = label()
@@ -29,27 +30,28 @@ class GameEndedView : View() {
         hgrow = Priority.NEVER
 
         row {
-            add(player1Name, 1, 1)
-            add(player1Score, 2, 1)
+            this += player1Name
+            this += player1Score
         }
         row {
-            add(player2Name, 1, 2)
-            add(player2Score, 2, 2)
+            this += player2Name
+            this += player2Score
         }
         constraintsForColumn(1).percentWidth = 60.0
         constraintsForColumn(2).percentWidth = 40.0
     }
     private val leftPane = vbox {
-        alignment = Pos.CENTER
+        paddingAll = 10.0
+        alignment = Pos.TOP_CENTER
+
         this += gameResult
         this += points
     }
     val game = borderpane {
-        fitToParentWidth()
     }
     override val root = hbox {
-        paddingAll = 10.0
-        alignment = Pos.CENTER
+        fitToParentWidth()
+        alignment = Pos.TOP_CENTER
 
         this += leftPane
         this += game
@@ -77,5 +79,36 @@ class GameEndedView : View() {
         player1Score.text = player1.cause.name
         player2Name.text = player2.reason
         player2Score.text = player2.cause.name
+    }
+
+    fun resize() {
+        val width = root.widthProperty().get()
+        var height = root.heightProperty().get()
+        val app = find(AppView::class).root
+        // 50px buffer for menubar etc.
+        if (app.height - 50 < root.height) {
+            height = app.height - 50
+        }
+        leftPane.prefWidthProperty().set(width * 0.3)
+        game.prefWidthProperty().set(width * 0.7)
+
+        val size = minOf(width * 0.7, height)
+
+        val board = find(BoardView::class)
+        board.grid.setMaxSize(size, size)
+        board.grid.setMinSize(size, size)
+        board.model.calculatedBlockSizeProperty().set(size / Constants.BOARD_SIZE)
+    }
+
+    override fun onDock() {
+        super.onDock()
+        resize()
+    }
+
+    init {
+        val resizer = ChangeListener<Number> { _, _, _ -> resize() }
+        // responsive scaling
+        root.widthProperty().addListener(resizer)
+        root.heightProperty().addListener(resizer)
     }
 }

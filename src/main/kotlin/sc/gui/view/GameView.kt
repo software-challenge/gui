@@ -108,6 +108,11 @@ class GameView : View() {
         }
     }
 
+    override fun onDock() {
+        super.onDock()
+        resize()
+    }
+
     fun resize() {
         val width = root.widthProperty().get()
         var height = root.heightProperty().get()
@@ -125,8 +130,7 @@ class GameView : View() {
         val board = find(BoardView::class)
         board.grid.setMaxSize(size, size)
         board.grid.setMinSize(size, size)
-
-        find(BoardView::class).model.calculatedBlockSizeProperty().set(size / Constants.BOARD_SIZE)
+        board.model.calculatedBlockSizeProperty().set(size / Constants.BOARD_SIZE)
     }
 
     init {
@@ -146,9 +150,7 @@ class GameView : View() {
         greenUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
 
 
-        val resizer = ChangeListener<Number> { _, _, _ ->
-            resize()
-        }
+        val resizer = ChangeListener<Number> { _, _, _ -> resize() }
         // responsive scaling
         root.widthProperty().addListener(resizer)
         root.heightProperty().addListener(resizer)
