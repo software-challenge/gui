@@ -53,7 +53,7 @@ class GameView : View() {
         this += yellowUndeployedPieces
         this += greenUndeployedPieces
     }
-    private val game = borderpane {
+    val game = borderpane {
         top(StatusView::class)
         center {
             this += find(BoardView::class)
@@ -135,9 +135,9 @@ class GameView : View() {
             clientController.startGame("localhost", 13050, event.gameCreationModel)
         }
         subscribe<GameOverEvent> { event ->
-            // TODO: works not yet (board will be hidden on new game after game end screen)
-            //gameEndedView.gameEnded(event.result)
-            //appController.changeViewTo(GameEndedView::class)
+            // usage of EmptyBoardView as a placeholder to remount BoardView at the same position for a new game
+            gameEndedView.gameEnded(event.result)
+            appController.changeViewTo(GameEndedView::class)
         }
 
 

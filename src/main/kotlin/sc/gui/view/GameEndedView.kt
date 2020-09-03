@@ -39,20 +39,20 @@ class GameEndedView : View() {
         constraintsForColumn(1).percentWidth = 60.0
         constraintsForColumn(2).percentWidth = 40.0
     }
-    private val leftPane = hbox {
+    private val leftPane = vbox {
         alignment = Pos.CENTER
         this += gameResult
         this += points
     }
-    private val rightPane = hbox {
-        this += find(BoardView::class)
+    val game = borderpane {
+        fitToParentWidth()
     }
-    override val root = vbox {
+    override val root = hbox {
         paddingAll = 10.0
         alignment = Pos.CENTER
 
         this += leftPane
-        this += rightPane
+        this += game
     }
 
     fun gameEnded(result: GameResult) {
