@@ -65,6 +65,7 @@ class ControlView() : View() {
                     this += playPauseButton
                 }
                 button {
+                    disableWhen(gameController.currentTurnProperty().isEqualTo(0))
                     text = "Previous"
                     setOnMouseClicked {
                         clientController.previous()
@@ -75,6 +76,7 @@ class ControlView() : View() {
                     textProperty().bind(Bindings.concat(gameController.currentTurnProperty(), " / ", gameController.availableTurnsProperty()))
                 }
                 button {
+                    disableWhen(gameController.currentTurnProperty().isEqualTo(gameController.availableTurnsProperty()))
                     text = "Next"
                     setOnMouseClicked {
                         clientController.next()
