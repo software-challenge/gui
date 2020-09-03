@@ -135,7 +135,6 @@ class GameView : View() {
 
     init {
         subscribe<StartGameRequest> { event ->
-            gameController.gameEndedProperty().set(false)
             clientController.startGame("localhost", 13050, event.gameCreationModel)
         }
         subscribe<GameOverEvent> { event ->

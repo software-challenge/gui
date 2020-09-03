@@ -4,6 +4,7 @@ import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import sc.gui.controller.AppController
 import sc.gui.controller.GameController
 import sc.plugin2021.util.Constants
 import sc.shared.GameResult
@@ -12,6 +13,7 @@ import tornadofx.*
 
 class GameEndedView : View() {
     private val gameController: GameController by inject()
+    private val appController: AppController by inject()
     private var result: GameResult? = null
 
     private val gameResult = label {
@@ -42,10 +44,38 @@ class GameEndedView : View() {
     }
     private val leftPane = vbox {
         paddingAll = 10.0
-        alignment = Pos.TOP_CENTER
+        style {
+            backgroundColor += Color.GRAY
+        }
 
-        this += gameResult
-        this += points
+        vbox {
+            alignment = Pos.TOP_CENTER
+            style {
+                backgroundColor += Color.CYAN
+            }
+
+            this += gameResult
+            this += points
+        }
+        vbox {
+            alignment = Pos.BOTTOM_CENTER
+            padding = Insets(0.0, 0.0, 10.0, 0.0)
+            prefHeight = Double.MAX_VALUE
+            useMaxHeight = true
+            vgrow = Priority.ALWAYS
+            style {
+                backgroundColor += Color.FLORALWHITE
+            }
+
+            button {
+                text = "Spiel beenden"
+
+                action {
+                    appController.changeViewTo(StartView::class)
+                    gameController.clearGame()
+                }
+            }
+        }
     }
     val game = borderpane {
     }
