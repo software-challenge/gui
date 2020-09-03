@@ -180,7 +180,12 @@ class GameController : Controller() {
             gameState = event.gameState
             availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
             currentTurnProperty().set(event.gameState.turn)
-            turnColorProperty().set(event.gameState.currentColor)
+
+            // I don't know why orderedColors becomes an empty array and results in CurrentColor being inaccessible (throwing error) when the game ended,
+            // but this is how we can avoid it for now TODO("fix this in the plugin")
+            if (event.gameState.orderedColors.isNotEmpty()) {
+                turnColorProperty().set(event.gameState.currentColor)
+            }
             undeployedRedPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.RED])
             undeployedBluePiecesProperty().set(event.gameState.undeployedPieceShapes[Color.BLUE])
             undeployedGreenPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.GREEN])

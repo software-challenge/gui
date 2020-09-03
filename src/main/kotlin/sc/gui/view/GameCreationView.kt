@@ -84,7 +84,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
     private fun updatePlayerType() {
         // TODO: work with proper binding of property
 
-        when (settings.type.getValue()) {
+        when (settings.type.value) {
             PlayerType.COMPUTER -> {
                 root.center = hbox(20) {
                     button("Client wählen") {
@@ -96,9 +96,9 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
                                             FileChooser.ExtensionFilter("jar", "*.jar")
                                     )
                             )
-                            if (selectedFile != null && selectedFile.isNotEmpty()) {
+                            if (selectedFile.isNotEmpty()) {
                                 println("Selected file $selectedFile")
-                                settings.executable.setValue(selectedFile.first())
+                                settings.executable.value = selectedFile.first()
                             }
                         }
                     }
@@ -121,6 +121,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
                 root.center = label("Ein Mensch wird das Spiel hier spielen")
                 root.bottom = label()
             }
+            else -> throw Exception("Unknown Player-Type")
         }
     }
 
