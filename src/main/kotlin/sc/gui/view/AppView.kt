@@ -65,7 +65,7 @@ class AppView : View("Software-Challenge Germany") {
                 }
             }
             menu("Steuerung") {
-                enableWhen(controller.model.isGameProperty())
+                enableWhen(controller.model.currentViewProperty().isEqualTo(ViewTypes.GAME))
                 menu("Rotieren") {
                     item("Scrollen", "Mausrad")
                     item("Uhrzeigersinn", "D").action {
