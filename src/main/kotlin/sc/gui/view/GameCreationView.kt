@@ -63,7 +63,7 @@ class PlayerFragment(private val team: Team, private val settings: TeamSettingsM
     val controller: GameCreationController by inject()
 
     override var root = vbox(20) {
-        fieldset("Spieler Nr. $team") {
+        fieldset(if (team == Team.ONE) "Erster Spieler" else "Zweiter Spieler") {
             textfield(settings.name).required()
             add(PlayerFileSelectFragment(team, settings))
         }

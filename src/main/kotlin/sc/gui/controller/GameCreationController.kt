@@ -1,5 +1,6 @@
 package sc.gui.controller
 
+import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.model.TeamSettingsModel
 import sc.gui.model.ViewTypes
@@ -14,6 +15,13 @@ class GameCreationController : Controller() {
     val playerOneSettingsModel = TeamSettingsModel(playerOneSettings)
     private val playerTwoSettings = TeamSettings()
     val playerTwoSettingsModel = TeamSettingsModel(playerTwoSettings)
+
+    init {
+        playerOneSettings.nameProperty().set("Spieler 1")
+        playerOneSettings.typeProperty().set(PlayerType.INTERNAL)
+        playerTwoSettings.nameProperty().set("Spieler 2")
+        playerTwoSettings.typeProperty().set(PlayerType.HUMAN)
+    }
 
     fun createGame() {
         // as we currently just support a single game at a time
