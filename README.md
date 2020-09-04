@@ -12,7 +12,7 @@
 Klone das Repository und führe den Befehl `gradlew run` aus.
 
 ## Vorraussetzungen
-Für die kompilierte Version wird eine JRE mindestens Java 8 vorrausgesetzt.
+Für die kompilierte Version wird eine JRE mindestens Java 11 vorrausgesetzt.
 Zur Entwicklung wird ein JDK von Version 11 oder höher benötigt.
 
 Zur Zeit muss sich das Server-Projekt "neben" diesem Projekt (also im selben Elternverzeichnis) in einem Verzeichnis mit dem Namen "server" befinden.
