@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("java")
     id("application")
     kotlin("jvm") version "1.3.41"
     id("org.openjfx.javafxplugin") version "0.0.9"
@@ -44,10 +43,28 @@ dependencies {
 
 
 java {
+    /*
     sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_1_8
+     */
 }
 
+tasks.compileJava {
+    options.release.set(9) // earlier versions do not work because of JavaFX support
+}
+
+/*
+This does not work as intended (puts plugins dir in ./build, but we want it in the distributions):
+tasks.register<Copy>("copyPlugins") {
+    from("plugins")
+    include("*.jar")
+    into("$buildDir/plugins")
+}
+
+tasks.build {
+    dependsOn("copyPlugins")
+}
+ */
 
 javafx {
     version = "13"
