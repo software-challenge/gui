@@ -2,11 +2,14 @@ package sc.gui
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import sc.api.plugins.IGameState
+import sc.api.plugins.TwoPlayerGameState
 import sc.framework.plugins.Player
 import sc.networking.clients.*
 import sc.plugin2021.*
 import sc.protocol.responses.PrepareGameProtocolMessage
 import sc.protocol.responses.ProtocolErrorMessage
+import sc.protocol.responses.ProtocolMessage
 import sc.server.Configuration
 import sc.shared.GameResult
 import sc.shared.SlotDescriptor
@@ -18,7 +21,7 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
     private var numberJoined = 0
     private var gameOverHandler: (result: GameResult) -> Unit = {}
 
-    override fun onNewState(roomId: String?, state: Any?) {
+    override fun onNewState(roomId: String?, state: IGameState?) {
         logger.debug("lobby: new state for $roomId")
     }
 
@@ -26,7 +29,7 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
         logger.debug("lobby: new error for $roomId")
     }
 
-    override fun onRoomMessage(roomId: String?, data: Any?) {
+    override fun onRoomMessage(roomId: String?, data: ProtocolMessage?) {
         logger.debug("lobby: new message for $roomId")
     }
 

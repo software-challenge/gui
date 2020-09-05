@@ -2,6 +2,7 @@ package sc.gui.controller
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import sc.api.plugins.IGameState
 import sc.framework.plugins.Player
 import sc.gui.ControllingClient
 import sc.gui.HumanClient
@@ -12,6 +13,7 @@ import sc.networking.clients.IUpdateListener
 import sc.plugin2021.*
 import sc.protocol.responses.PrepareGameProtocolMessage
 import sc.protocol.responses.ProtocolErrorMessage
+import sc.protocol.responses.ProtocolMessage
 import sc.shared.GameResult
 import tornadofx.Controller
 import tornadofx.EventBus
@@ -19,7 +21,7 @@ import tornadofx.FXEvent
 
 // This is the listener to update the global state of the server (lobby)
 class UILobbyListener : ILobbyClientListener {
-    override fun onNewState(roomId: String?, state: Any?) {
+    override fun onNewState(roomId: String?, state: IGameState?) {
         logger.debug("listener: onNewState")
         val gameState = state as GameState
         logger.debug("This is what I got: $gameState")
@@ -29,7 +31,7 @@ class UILobbyListener : ILobbyClientListener {
         logger.debug("listener: onError")
     }
 
-    override fun onRoomMessage(roomId: String?, data: Any?) {
+    override fun onRoomMessage(roomId: String?, data: ProtocolMessage?) {
         logger.debug("listener: onRoomMessage")
     }
 
