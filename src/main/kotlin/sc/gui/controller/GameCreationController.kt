@@ -27,14 +27,10 @@ class GameCreationController : Controller() {
         // as we currently just support a single game at a time
         if (appController.model.previousViewProperty().get() == ViewTypes.GAME) {
             gameController.clearGame()
-            //TODO("Kill previous game")
         }
 
-        println("Creating new game")
         playerOneSettingsModel.commit()
         playerTwoSettingsModel.commit()
-        println("Player 1: ${playerOneSettingsModel.item.nameProperty()}, ${playerOneSettingsModel.item.typeProperty()}")
-        println("Player 2: ${playerTwoSettingsModel.item.nameProperty()}, ${playerTwoSettingsModel.item.typeProperty()}")
         appController.changeViewTo(GameView::class)
 
         fire(StartGameRequest(playerOneSettingsModel.item, playerTwoSettingsModel.item))

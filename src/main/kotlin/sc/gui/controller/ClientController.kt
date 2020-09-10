@@ -4,6 +4,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
 import sc.framework.plugins.Player
+import sc.gui.ComputerClient
 import sc.gui.ControllingClient
 import sc.gui.HumanClient
 import sc.gui.TestClient
@@ -104,19 +105,18 @@ class ClientController : Controller() {
 
         logger.debug("creating and observing")
 
-        // NOTE that testClientOne and testClientTwo are currently *internal* clients to wire the logic of the GameHandlers to the server. When external clients should join the game, these are not needed.
-        // TODO: implement client for HUMAN, MANUELL and COMPUTER
+        // TODO: implement client for MANUALLY
         val player1 = when (playerOneSettings.typeProperty().value) {
             sc.gui.model.PlayerType.HUMAN -> HumanClient(PlayerType.PLAYER_ONE, host, port, ::humanMoveRequest)
-            sc.gui.model.PlayerType.MANUELL -> TestClient(PlayerType.PLAYER_ONE, host, port)
-            sc.gui.model.PlayerType.COMPUTER -> TestClient(PlayerType.PLAYER_ONE, host, port)
+            sc.gui.model.PlayerType.MANUALLY -> TestClient(PlayerType.PLAYER_ONE, host, port)
+            sc.gui.model.PlayerType.COMPUTER -> ComputerClient(playerOneSettings.executableProperty.get(), PlayerType.PLAYER_ONE, host, port)
             sc.gui.model.PlayerType.INTERNAL -> TestClient(PlayerType.PLAYER_ONE, host, port)
             else -> throw Exception("invalid playerType for player 1, cannot create game")
         }
         val player2 = when (playerTwoSettings.typeProperty().value) {
             sc.gui.model.PlayerType.HUMAN -> HumanClient(PlayerType.PLAYER_TWO, host, port, ::humanMoveRequest)
-            sc.gui.model.PlayerType.MANUELL -> TestClient(PlayerType.PLAYER_TWO, host, port)
-            sc.gui.model.PlayerType.COMPUTER -> TestClient(PlayerType.PLAYER_TWO, host, port)
+            sc.gui.model.PlayerType.MANUALLY -> TestClient(PlayerType.PLAYER_TWO, host, port)
+            sc.gui.model.PlayerType.COMPUTER -> ComputerClient(playerTwoSettings.executableProperty.get(), PlayerType.PLAYER_TWO, host, port)
             sc.gui.model.PlayerType.INTERNAL -> TestClient(PlayerType.PLAYER_TWO, host, port)
             else -> throw Exception("invalid playerType for player 2, cannot create game")
         }

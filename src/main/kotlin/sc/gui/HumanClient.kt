@@ -7,7 +7,7 @@ import sc.plugin2021.*
 import sc.shared.GameResult
 
 // connects our game handler (ClientListener) to the server
-class HumanClient(playerType: PlayerType, host: String, port: Int, moveRequestHandler: (gs: GameState) -> Unit) : AbstractClient(host, port) {
+class HumanClient(playerType: PlayerType, host: String, port: Int, moveRequestHandler: (gs: GameState) -> Unit) : AbstractGuiClient(host, port) {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(HumanClient::class.java)
     }

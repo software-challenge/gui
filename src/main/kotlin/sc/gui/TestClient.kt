@@ -9,7 +9,7 @@ import sc.plugin2021.util.GameRuleLogic
 import sc.shared.GameResult
 
 // connects our game handler (ClientListener) to the server
-class TestClient(playerType: PlayerType, host: String, port: Int): AbstractClient(host, port) {
+class TestClient(playerType: PlayerType, host: String, port: Int): AbstractGuiClient(host, port) {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(HumanClient::class.java)
     }

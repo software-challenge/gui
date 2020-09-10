@@ -22,7 +22,7 @@ enum class PlayerType {
             return "eigener Computerspieler, von GUI gestartet"
         }
     },
-    MANUELL {
+    MANUALLY {
         override fun toString(): String {
             return "eigener Computerspieler, manuell gestaret"
         }

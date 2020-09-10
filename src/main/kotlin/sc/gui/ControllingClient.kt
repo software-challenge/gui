@@ -79,8 +79,8 @@ class AdminListener(val logger: Logger) : IAdministrativeListener {
 class ControllingClient(host: String, port: Int) {
 
     var game: IControllableGame? = null
-    private lateinit var playerOne: AbstractClient
-    private lateinit var playerTwo: AbstractClient
+    private lateinit var playerOne: ClientInterface
+    private lateinit var playerTwo: ClientInterface
     private lateinit var listener: IUpdateListener
     private val lobbyListener: LobbyListener
     private val adminListener: AdminListener
@@ -102,7 +102,7 @@ class ControllingClient(host: String, port: Int) {
         lobby.addListener(adminListener)
     }
 
-    fun startNewGame(playerOne: AbstractClient, playerTwo: AbstractClient, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
+    fun startNewGame(playerOne: ClientInterface, playerTwo: ClientInterface, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
         this.playerOne = playerOne
         this.playerTwo = playerTwo
         this.listener = listener
@@ -125,11 +125,15 @@ class ControllingClient(host: String, port: Int) {
         }
     }
 
+    // only used for human players
     fun onAction(move: Move) {
-        when ((game?.currentState as GameState).currentTeam) {
+        var player = when ((game?.currentState as GameState).currentTeam) {
             Team.ONE -> playerOne
             Team.TWO -> playerTwo
-        }.sendMove(move)
+        }
+        if (player is HumanClient) {
+            player.sendMove(move)
+        }
     }
 
     companion object {

@@ -1,11 +1,7 @@
 package sc.gui.view
 
-import javafx.beans.Observable
 import javafx.beans.binding.Bindings
-import javafx.beans.property.Property
 import javafx.beans.value.ObservableValue
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.stage.FileChooser
 import sc.gui.controller.AppController
@@ -83,7 +79,6 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
 
     private fun updatePlayerType() {
         // TODO: work with proper binding of property
-
         when (settings.type.value) {
             PlayerType.COMPUTER -> {
                 root.center = hbox(20) {
@@ -109,9 +104,9 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
                     label("")
                 }
             }
-            PlayerType.MANUELL -> {
+            PlayerType.MANUALLY -> {
                 root.center = label("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
-                root.bottom = label()
+                root.bottom = label("(noch nicht unterstützt)")
             }
             PlayerType.INTERNAL -> {
                 root.center = label("Ein interner Computerspieler wird hier spielen")
@@ -141,7 +136,10 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
 
         val obs: ObservableValue<File?> = settings.executable
         settings.validationContext.addValidator(root.bottom, obs, ValidationTrigger.OnChange()) {
-            if (settings.type.value == PlayerType.COMPUTER && settings.executable.value == null) error("Error") else null
+            if (settings.type.value == PlayerType.COMPUTER && settings.executable.value == null) error("Bitte wähle eine ausführbare Datei aus") else null
+        }
+        settings.validationContext.addValidator(root.bottom, obs, ValidationTrigger.OnChange()) {
+            if (settings.type.value == PlayerType.MANUALLY) error("Manuell gestartete Computerspieler werden noch nicht unterstützt") else null
         }
         settings.validate()
     }
