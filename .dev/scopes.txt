@@ -2,6 +2,7 @@ readme
 git
 gradle
 travis
+ci
 
 ui
 logic
