@@ -5,7 +5,7 @@ plugins {
 	// Declared twice because plugins block has its own scope
 	val minJavaVersion = JavaVersion.VERSION_11
 	require(JavaVersion.current() >= minJavaVersion) {
-		"Need at least Java version $minJavaVersion"
+		"Building requires at least JDK $minJavaVersion - please look into the README."
 	}
 	
 	id("application")
@@ -39,13 +39,13 @@ repositories {
     }
 }
 
+val server = project.properties.getOrDefault("server", "../server") as String
+
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
-    implementation(files("../server/socha-sdk/build/libs/sdk.jar"))
-    implementation(files("../server/plugin/build/libs/blokus_2021.jar"))
-    implementation(files("../server/server/build/runnable/server.jar"))
-    implementation(fileTree("../server/server/build/runnable/lib") { include("*.jar") })
+    
+    implementation(fileTree("$server/server/build/runnable") { include("**/*.jar") })
 }
 
 tasks {
