@@ -8,6 +8,8 @@ import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.ClientController
 import sc.gui.controller.GameController
+import sc.gui.controller.GameCreationController
+import sc.gui.model.PlayerType
 import sc.plugin2021.Color
 import tornadofx.*
 
@@ -15,6 +17,7 @@ class ControlView() : View() {
     private val gameController: GameController by inject()
     private val clientController: ClientController by inject()
     private val appController: AppController by inject()
+    private val gameCreationController: GameCreationController by inject()
     private val playPauseButton: Button = button {
         text = "Start"
     }
@@ -108,7 +111,9 @@ class ControlView() : View() {
             if (!started) {
                 playPauseButton.text = "Start"
             } else {
-                root.left = selected
+                if (gameCreationController.playerOneSettingsModel.type.value == PlayerType.HUMAN || gameCreationController.playerTwoSettingsModel.type.value == PlayerType.HUMAN) {
+                    root.left = selected
+                }
             }
         }
         gameController.gameEndedProperty().addListener { _, _, ended ->
