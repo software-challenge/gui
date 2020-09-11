@@ -8,14 +8,17 @@ plugins {
 		"Building requires at least JDK $minJavaVersion - please look into the README."
 	}
 	
-	id("application")
-	kotlin("jvm") version "1.3.41"
+	application
+	kotlin("jvm") version "1.3.71"
 	id("org.openjfx.javafxplugin") version "0.0.9"
 	id("com.github.johnrengelman.shadow") version "6.0.0"
+	
+	id("com.github.ben-manes.versions") version "0.31.0"
+	id("se.patrikerdes.use-latest-versions") version "0.2.14"
 }
 
 group = "sc.gui"
-version = "1.0-SNAPSHOT"
+version = "21.0.0-pre"
 
 application {
     mainClassName = "sc.gui.GuiAppKt"
