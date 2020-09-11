@@ -1,10 +1,17 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+val minJavaVersion = JavaVersion.VERSION_11
 plugins {
-    id("application")
-    kotlin("jvm") version "1.3.41"
-    id("org.openjfx.javafxplugin") version "0.0.9"
-    id("com.github.johnrengelman.shadow") version "6.0.0"
+	// Declared twice because plugins block has its own scope
+	val minJavaVersion = JavaVersion.VERSION_11
+	require(JavaVersion.current() >= minJavaVersion) {
+		"Need at least Java version $minJavaVersion"
+	}
+	
+	id("application")
+	kotlin("jvm") version "1.3.41"
+	id("org.openjfx.javafxplugin") version "0.0.9"
+	id("com.github.johnrengelman.shadow") version "6.0.0"
 }
 
 group = "sc.gui"
@@ -41,38 +48,18 @@ dependencies {
     implementation(fileTree("../server/server/build/runnable/lib") { include("*.jar") })
 }
 
-
-java {
-    /*
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_1_8
-     */
-}
-
-tasks.compileJava {
-    options.release.set(9) // earlier versions do not work because of JavaFX support
-}
-
-/*
-This does not work as intended (puts plugins dir in ./build, but we want it in the distributions):
-tasks.register<Copy>("copyPlugins") {
-    from("plugins")
-    include("*.jar")
-    into("$buildDir/plugins")
-}
-
-tasks.build {
-    dependsOn("copyPlugins")
-}
- */
-
-javafx {
-    version = "13"
-    modules("javafx.controls", "javafx.fxml", "javafx.base", "javafx.graphics")
-}
-
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    jvmTarget = "11"
+tasks {
+	compileJava {
+		options.release.set(minJavaVersion.majorVersion.toInt())
+	}
+	
+	javafx {
+		version = "13"
+		modules("javafx.controls", "javafx.fxml", "javafx.base", "javafx.graphics")
+	}
+	
+	withType<KotlinCompile> {
+		kotlinOptions.jvmTarget = minJavaVersion.toString()
+	}
 }
 
