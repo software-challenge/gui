@@ -37,10 +37,10 @@ class ShapeConverter : StringConverter<PieceShape>() {
 class GameView : View() {
     private val clientController: ClientController by inject()
     private val gameController: GameController by inject()
-    private val redUndeployedPieces = PiecesListFragment(Color.RED, gameController.undeployedRedPiecesProperty(), gameController.validRedPiecesProperty())
-    private val blueUndeployedPieces = PiecesListFragment(Color.BLUE, gameController.undeployedBluePiecesProperty(), gameController.validBluePiecesProperty())
-    private val greenUndeployedPieces = PiecesListFragment(Color.GREEN, gameController.undeployedGreenPiecesProperty(), gameController.validGreenPiecesProperty())
-    private val yellowUndeployedPieces = PiecesListFragment(Color.YELLOW, gameController.undeployedYellowPiecesProperty(), gameController.validYellowPiecesProperty())
+    private val redUndeployedPieces = UndeployedPiecesFragment(Color.RED, gameController.undeployedRedPiecesProperty(), gameController.validRedPiecesProperty())
+    private val blueUndeployedPieces = UndeployedPiecesFragment(Color.BLUE, gameController.undeployedBluePiecesProperty(), gameController.validBluePiecesProperty())
+    private val greenUndeployedPieces = UndeployedPiecesFragment(Color.GREEN, gameController.undeployedGreenPiecesProperty(), gameController.validGreenPiecesProperty())
+    private val yellowUndeployedPieces = UndeployedPiecesFragment(Color.YELLOW, gameController.undeployedYellowPiecesProperty(), gameController.validYellowPiecesProperty())
 
 
     private val leftPane = vbox {

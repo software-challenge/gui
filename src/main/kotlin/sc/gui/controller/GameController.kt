@@ -140,6 +140,8 @@ class GameController : Controller() {
     private var isHumanTurn: Boolean by property(false)
     private var gameStarted: Boolean by property(false)
     private var gameEnded: Boolean by property(false)
+    private var previousTurnColor: Color by property(Color.RED)
+    fun previousTurnColorProperty() = getProperty(GameController::previousTurnColor)
     fun turnColorProperty() = getProperty(GameController::turnColor)
     fun availableTurnsProperty() = getProperty(GameController::availableTurns)
     fun currentTurnProperty() = getProperty(GameController::currentTurn)
@@ -178,12 +180,11 @@ class GameController : Controller() {
         subscribe<NewGameState> { event ->
             logger.debug("New game state")
             gameState = event.gameState
-            availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
-            currentTurnProperty().set(event.gameState.turn)
 
             // I don't know why orderedColors becomes an empty array and results in CurrentColor being inaccessible (throwing error) when the game ended,
             // but this is how we can avoid it for now TODO("fix this in the plugin")
             if (event.gameState.orderedColors.isNotEmpty()) {
+                previousTurnColorProperty().set(turnColorProperty().get())
                 turnColorProperty().set(event.gameState.currentColor)
             }
             undeployedRedPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.RED])
@@ -195,6 +196,8 @@ class GameController : Controller() {
             validBluePiecesProperty().set(ArrayList())
             validGreenPiecesProperty().set(ArrayList())
             validYellowPiecesProperty().set(ArrayList())
+            availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
+            currentTurnProperty().set(event.gameState.turn)
         }
         subscribe<HumanMoveRequest> { event ->
             logger.debug("Human move request")

@@ -2,7 +2,7 @@ package sc.gui.model
 
 import org.slf4j.LoggerFactory
 import sc.gui.view.BoardView
-import sc.gui.view.PiecesListFragment
+import sc.gui.view.UndeployedPiecesFragment
 import sc.plugin2021.*
 import tornadofx.*
 
@@ -20,6 +20,6 @@ class BoardModel : ItemViewModel<BoardView>() {
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(PiecesListFragment::class.java)
+        private val logger = LoggerFactory.getLogger(BoardModel::class.java)
     }
 }
