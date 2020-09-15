@@ -42,7 +42,7 @@ repositories {
     }
 }
 
-val backend = gradle.includedBuilds.single()
+val backend = gradle.includedBuilds.last()
 
 dependencies {
 	implementation(kotlin("stdlib-jdk8"))
