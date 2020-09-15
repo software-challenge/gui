@@ -1,5 +1,6 @@
 package sc.gui.view
 
+import javafx.beans.InvalidationListener
 import javafx.beans.binding.Bindings
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -82,6 +83,13 @@ class ControlView() : View() {
     }
 
     init {
+		val updatePauseState = {
+            if(clientController.controllingClient?.game?.isPaused!!) {
+                playPauseButton.text = "Play"
+            } else {
+                playPauseButton.text = "Pause"
+            }
+        }
         playPauseButton.setOnMouseClicked {
             if (!gameController.gameStartedProperty().get()) {
                 gameController.gameStartedProperty().set(true)
@@ -90,15 +98,15 @@ class ControlView() : View() {
                 appController.changeViewTo(StartView::class)
                 gameController.clearGame()
             } else {
-                if (clientController.controllingClient?.game?.isPaused!!) {
-                    playPauseButton.text = "Pause"
-                } else {
-                    playPauseButton.text = "Play"
-                }
                 clientController.togglePause()
+				updatePauseState()
             }
         }
-
+    
+        gameController.currentTurnProperty().addListener(InvalidationListener {
+			// When the game is paused externally e.g. when rewinding
+            updatePauseState()
+        })
         gameController.gameStartedProperty().addListener { _, _, started ->
             if (!started) {
                 playPauseButton.text = "Start"
