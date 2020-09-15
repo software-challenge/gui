@@ -42,27 +42,26 @@ repositories {
     }
 }
 
-val server = project.properties.getOrDefault("server", "../server") as String
+val backend = gradle.includedBuilds.single()
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+	implementation(kotlin("stdlib-jdk8"))
     implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
     
-    implementation(fileTree("$server/server/build/runnable") { include("**/*.jar") })
+    implementation(fileTree(backend.name + "/server/build/runnable") { include("**/*.jar") })
 }
 
 tasks {
 	compileJava {
 		options.release.set(minJavaVersion.majorVersion.toInt())
 	}
+	withType<KotlinCompile> {
+		dependsOn(backend.task(":server:deploy"))
+		kotlinOptions.jvmTarget = minJavaVersion.toString()
+	}
 	
 	javafx {
 		version = "13"
 		modules("javafx.controls", "javafx.fxml", "javafx.base", "javafx.graphics")
 	}
-	
-	withType<KotlinCompile> {
-		kotlinOptions.jvmTarget = minJavaVersion.toString()
-	}
 }
-
