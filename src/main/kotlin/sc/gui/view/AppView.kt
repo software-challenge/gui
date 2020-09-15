@@ -1,22 +1,19 @@
 package sc.gui.view
 
 import javafx.application.Platform
-import javafx.beans.binding.Bindings
+import javafx.beans.value.ObservableValue
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
-import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.GameController
 import sc.gui.controller.ServerController
-import sc.gui.controller.StartGameRequest
 import sc.gui.model.ViewTypes
 import sc.plugin2021.Rotation
 import tornadofx.*
 import java.awt.Desktop
 import java.net.URI
-import javax.imageio.ImageIO
 
 class AppView : View("Software-Challenge Germany") {
     val controller: AppController by inject()
@@ -116,5 +113,29 @@ class AppView : View("Software-Challenge Germany") {
         }
         root.widthProperty().addListener(resizer)
         root.heightProperty().addListener(resizer)
+    
+        titleProperty.bind(controller.model.currentViewProperty().stringBinding {
+            when(it) {
+                ViewTypes.GAME_CREATION -> "Neues Spiel - Software-Challenge Germany"
+                ViewTypes.GAME -> "Spiele Blokus - Software-Challenge Germany"
+                ViewTypes.START -> "Software-Challenge Germany"
+                null -> throw NoWhenBranchMatchedException("Current view can't be null!")
+            }
+        })
+    
+        controller.model.isDarkModeProperty().listenImmediately { value ->
+            if (value) {
+                root.removeClass(AppStyle.lightColorSchema)
+                root.addClass(AppStyle.darkColorSchema)
+            } else {
+                root.removeClass(AppStyle.darkColorSchema)
+                root.addClass(AppStyle.lightColorSchema)
+            }
+        }
     }
+}
+
+fun ObservableValue<Boolean>.listenImmediately(listener: (newValue: Boolean) -> Unit) {
+    listener(this.value)
+    addListener { _, _, new -> listener(new) }
 }
