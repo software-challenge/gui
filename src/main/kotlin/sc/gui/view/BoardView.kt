@@ -3,7 +3,6 @@ package sc.gui.view
 import javafx.beans.property.Property
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.Parent
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseButton
@@ -14,10 +13,11 @@ import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.BoardController
 import sc.gui.controller.GameController
-import sc.gui.controller.NewGameState
 import sc.gui.model.BoardModel
-import sc.plugin2021.*
+import sc.plugin2021.Color
+import sc.plugin2021.Coordinates
 import sc.plugin2021.Field
+import sc.plugin2021.FieldContent
 import sc.plugin2021.util.Constants
 import tornadofx.*
 
@@ -98,27 +98,14 @@ class BoardView : View() {
                 paneHoverEnter(controller.currentHover!!.x, controller.currentHover!!.y)
             }
         }
-
-        if (appController.model.isDarkModeProperty().get()) {
-            grid.addClass(AppStyle.darkBoard)
-        } else {
-            grid.addClass(AppStyle.lightBoard)
-        }
-        appController.model.isDarkModeProperty().addListener { _, _, _ ->
-            if (appController.model.isDarkModeProperty().get()) {
-                if (grid.hasClass(AppStyle.lightBoard)) {
-                    grid.removeClass(AppStyle.lightBoard)
-                }
-                if (!grid.hasClass(AppStyle.darkBoard)) {
-                    grid.addClass(AppStyle.darkBoard)
-                }
+    
+        appController.model.isDarkModeProperty().listenImmediately { value ->
+            if(value) {
+                grid.removeClass(AppStyle.lightBoard)
+                grid.addClass(AppStyle.darkBoard)
             } else {
-                if (grid.hasClass(AppStyle.darkBoard)) {
-                    grid.removeClass(AppStyle.darkBoard)
-                }
-                if (!grid.hasClass(AppStyle.lightBoard)) {
-                    grid.addClass(AppStyle.lightBoard)
-                }
+                grid.removeClass(AppStyle.darkBoard)
+                grid.addClass(AppStyle.lightBoard)
             }
         }
     }
