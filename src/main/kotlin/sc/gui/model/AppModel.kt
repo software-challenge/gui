@@ -15,12 +15,13 @@ enum class ViewTypes {
 }
 
 class AppModel : ItemViewModel<AppView>() {
+    private var isDarkMode: Boolean by property(true)
+	
     private var currentView: ViewTypes by property(ViewTypes.START)
     private var previousView: ViewTypes by property(ViewTypes.START)
-    private var isDarkMode: Boolean by property(false)
+    
+    fun isDarkModeProperty() = getProperty(AppModel::isDarkMode)
 
     fun currentViewProperty() = getProperty(AppModel::currentView)
     fun previousViewProperty() = getProperty(AppModel::previousView)
-
-    fun isDarkModeProperty() = getProperty(AppModel::isDarkMode)
 }
