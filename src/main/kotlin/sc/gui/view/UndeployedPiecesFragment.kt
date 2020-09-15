@@ -23,7 +23,6 @@ class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Prope
     private val piecesList = HashMap<PieceShape, HBox>()
     private val pieces = HashMap<PieceShape, PiecesFragment>()
 
-    private var unplayabe = false
     private val unplayableNotice = stackpane {
         addClass(AppStyle.pieceUnselectable)
         style {
@@ -34,6 +33,7 @@ class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Prope
             fill = javafx.scene.paint.Color.RED
             font = Font(20.0)
         }
+		isVisible = false
     }
 
     init {
@@ -106,20 +106,14 @@ class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Prope
             }
         }
 
-        controller.currentTurnProperty().addListener { _, _, new ->
-            if (new == 0 && unplayabe) {
-                unplayabe = false
-                unplayableNotice.removeFromParent()
-            }
-
-            if (controller.previousTurnColorProperty().get().next == color && controller.turnColorProperty().get() != color) {
-                if (!unplayabe) {
-                    unplayabe = true
-                    root += unplayableNotice
-                }
-            } else if (controller.turnColorProperty().get() == color && unplayabe) {
-                unplayabe = false
-                unplayableNotice.removeFromParent()
+        controller.currentTurnProperty().addListener { _, previous, new ->
+            when {
+                new == 0 -> unplayableNotice.isVisible = false
+                previous < new &&
+                        controller.previousTurnColorProperty().get().next == color &&
+                        controller.turnColorProperty().get() != color ->
+                    unplayableNotice.isVisible = true
+                controller.turnColorProperty().get() == color -> unplayableNotice.isVisible = false
             }
         }
 
@@ -157,6 +151,7 @@ class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Prope
                 piecesList[it]
             }
         }
+        add(unplayableNotice)
     }
 
     companion object {
