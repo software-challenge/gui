@@ -32,18 +32,10 @@ class ControlView() : View() {
                 else -> AppStyle.borderRED
             })
             gameController.selectedColor.addListener { _, _, newValue ->
-                if (hasClass(AppStyle.borderRED)) {
-                    removeClass(AppStyle.borderRED)
-                }
-                if (hasClass(AppStyle.borderBLUE)) {
-                    removeClass(AppStyle.borderBLUE)
-                }
-                if (hasClass(AppStyle.borderGREEN)) {
-                    removeClass(AppStyle.borderGREEN)
-                }
-                if (hasClass(AppStyle.borderYELLOW)) {
-                    removeClass(AppStyle.borderYELLOW)
-                }
+                removeClass(AppStyle.borderRED)
+                removeClass(AppStyle.borderBLUE)
+                removeClass(AppStyle.borderGREEN)
+                removeClass(AppStyle.borderYELLOW)
                 if (newValue != null) {
                     addClass(when (newValue) {
                         Color.RED -> AppStyle.borderRED
@@ -123,7 +115,7 @@ class ControlView() : View() {
             }
         }
         gameController.isHumanTurnProperty().addListener { _, _, humanTurn ->
-            if (humanTurn && selected.hasClass(AppStyle.pieceUnselectable)) {
+            if (humanTurn) {
                 selected.removeClass(AppStyle.pieceUnselectable)
             } else if (!humanTurn && !selected.hasClass(AppStyle.pieceUnselectable)) {
                 selected.addClass(AppStyle.pieceUnselectable)

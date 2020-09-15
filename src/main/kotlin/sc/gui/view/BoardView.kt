@@ -122,34 +122,16 @@ class BoardView : View() {
 
     // remove all applied Stylesheets during the hover-effect
     private fun cleanupHover() {
-        for (place in grid.children) {
-            if (place.hasClass(AppStyle.colorRED)) {
-                place.removeClass(AppStyle.colorRED)
-            }
-            if (place.hasClass(AppStyle.placeableRED)) {
-                place.removeClass(AppStyle.placeableRED)
-            }
-            if (place.hasClass(AppStyle.colorBLUE)) {
-                place.removeClass(AppStyle.colorBLUE)
-            }
-            if (place.hasClass(AppStyle.placeableBLUE)) {
-                place.removeClass(AppStyle.placeableBLUE)
-            }
-            if (place.hasClass(AppStyle.colorGREEN)) {
-                place.removeClass(AppStyle.colorGREEN)
-            }
-            if (place.hasClass(AppStyle.placeableGREEN)) {
-                place.removeClass(AppStyle.placeableGREEN)
-            }
-            if (place.hasClass(AppStyle.colorYELLOW)) {
-                place.removeClass(AppStyle.colorYELLOW)
-            }
-            if (place.hasClass(AppStyle.placeableYELLOW)) {
-                place.removeClass(AppStyle.placeableYELLOW)
-            }
-            if (place.hasClass(AppStyle.fieldUnplaceable)) {
-                place.removeClass(AppStyle.fieldUnplaceable)
-            }
+        for(place in grid.children) {
+            place.removeClass(AppStyle.colorRED)
+            place.removeClass(AppStyle.placeableRED)
+            place.removeClass(AppStyle.colorBLUE)
+            place.removeClass(AppStyle.placeableBLUE)
+            place.removeClass(AppStyle.colorGREEN)
+            place.removeClass(AppStyle.placeableGREEN)
+            place.removeClass(AppStyle.colorYELLOW)
+            place.removeClass(AppStyle.placeableYELLOW)
+            place.removeClass(AppStyle.fieldUnplaceable)
         }
     }
 

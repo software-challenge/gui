@@ -75,11 +75,9 @@ class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Prope
                         addClass(AppStyle.hoverColor)
                     }
                 }
-
+    
                 setOnMouseExited {
-                    if (hasClass(AppStyle.hoverColor)) {
-                        removeClass(AppStyle.hoverColor)
-                    }
+                    removeClass(AppStyle.hoverColor)
                 }
             }
         }
@@ -119,10 +117,8 @@ class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Prope
 
         validPieces.addListener { _, _, new ->
             piecesList.forEach {
-                if (new.contains(it.key)) {
-                    if (it.value.hasClass(AppStyle.pieceUnselectable)) {
-                        it.value.removeClass(AppStyle.pieceUnselectable)
-                    }
+                if(new.contains(it.key)) {
+                    it.value.removeClass(AppStyle.pieceUnselectable)
                 } else if (!it.value.hasClass(AppStyle.pieceUnselectable)) {
                     it.value.addClass(AppStyle.pieceUnselectable)
                 }
