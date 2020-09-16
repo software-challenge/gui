@@ -1,3 +1,4 @@
+import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val minJavaVersion = JavaVersion.VERSION_11
@@ -19,6 +20,11 @@ plugins {
 
 group = "sc.gui"
 version = "21.0.0-pre"
+try {
+	// Add hash suffix if git is available
+	version = version.toString() + "-" + Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short", "--verify", "HEAD")).inputStream.reader().readText().trim()
+} catch(_: java.io.IOException) {
+}
 
 application {
     mainClassName = "sc.gui.GuiAppKt"
@@ -63,5 +69,10 @@ tasks {
 	javafx {
 		version = "13"
 		modules("javafx.controls", "javafx.fxml", "javafx.base", "javafx.graphics")
+	}
+	
+	shadowJar {
+		destinationDirectory.set(buildDir)
+		archiveClassifier.set(OperatingSystem.current().familyName)
 	}
 }
