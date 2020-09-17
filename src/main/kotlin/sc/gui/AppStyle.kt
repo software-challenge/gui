@@ -55,21 +55,45 @@ class AppStyle : Stylesheet() {
         }
 
         lightColorSchema {
-            baseColor = c("#d1d1d1")
-            backgroundColor += c("#ebdada")
+            baseColor = c("#E0E0E0")
+            backgroundColor += c("#EEEEEE")
+            accentColor = Color.MEDIUMPURPLE
+            faintFocusColor = baseColor
+            menuBar {
+                backgroundColor += c("#BDBDBD")
+            }
+            contextMenu {
+                backgroundColor += c("#E0E0E0")
+            }
         }
         darkColorSchema {
             baseColor = c("#424242")
-            backgroundColor += c("#333333")
-            accentColor = Color.GRAY
-            faintFocusColor = Color.BLACK
-            focusColor = Color.BLUE
+            backgroundColor += c("#212121")
+            accentColor = Color.MEDIUMPURPLE
+            faintFocusColor = baseColor
+
+            menuBar {
+                backgroundColor += c("#2c2c2c")
+            }
+            contextMenu {
+                backgroundColor += c("#515151")
+            }
+            textField {
+                baseColor = Color.WHITE
+                textFill = c("#212121")
+            }
         }
         lightBoard {
-            backgroundColor += Color.LIGHTGRAY
+            backgroundColor += c("#E0E0E0")
+
         }
         darkBoard {
-            backgroundColor += Color.DARKGRAY
+            backgroundColor += c("#424242")
+        }
+
+        button {
+            backgroundRadius = multi((box(1.percent)))
+            borderRadius = multi((box(1.percent)))
         }
 
         tackyButton {
