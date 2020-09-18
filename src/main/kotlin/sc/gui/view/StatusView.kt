@@ -3,6 +3,7 @@ package sc.gui.view
 import javafx.beans.binding.StringBinding
 import javafx.geometry.Pos
 import javafx.scene.control.Label
+import sc.gui.AppStyle
 import sc.gui.controller.GameController
 import tornadofx.*
 
@@ -36,11 +37,12 @@ class StatusView() : View() {
 
     override val root = hbox {
         alignment = Pos.CENTER
-        statusLabel.style = "-fx-text-fill: white; -fx-font-size: 24pt;"
+        statusLabel.addClass(AppStyle.statusLable)
         this += statusLabel
     }
 
     init {
         statusLabel.bind(StatusBinding(game))
+
     }
 }

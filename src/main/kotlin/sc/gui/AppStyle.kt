@@ -3,6 +3,7 @@ package sc.gui
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import sc.gui.view.AppView
+import sc.gui.view.StatusView
 import tornadofx.*
 
 class AppStyle : Stylesheet() {
@@ -27,6 +28,8 @@ class AppStyle : Stylesheet() {
         val darkColorSchema by cssclass()
         val lightBoard by cssclass()
         val darkBoard by cssclass()
+
+        val statusLable by cssclass()
 
         val undeployedPiece by cssclass()
         val fieldUnplaceable by cssclass()
@@ -60,10 +63,14 @@ class AppStyle : Stylesheet() {
             accentColor = Color.MEDIUMPURPLE
             faintFocusColor = baseColor
             menuBar {
-                backgroundColor += c("#BDBDBD")
+                backgroundColor += c("#DEDEDE")
             }
             contextMenu {
                 backgroundColor += c("#E0E0E0")
+            }
+            statusLable {
+                textFill = c("#262626")
+                fontSize = 24.pt
             }
         }
         darkColorSchema {
@@ -82,10 +89,16 @@ class AppStyle : Stylesheet() {
                 baseColor = Color.WHITE
                 textFill = c("#212121")
             }
+            label {
+                textFill = c("#BDBDBD")
+            }
+            statusLable {
+                textFill = c("#E3E3E3")
+                fontSize = 24.pt
+            }
         }
         lightBoard {
             backgroundColor += c("#E0E0E0")
-
         }
         darkBoard {
             backgroundColor += c("#424242")
