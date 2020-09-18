@@ -12,3 +12,4 @@ out
 
 # Ignore gradle config
 gradle.properties
+/.github/actions/find-jar/node_modules/

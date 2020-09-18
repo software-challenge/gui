@@ -1,0 +1,8 @@
+name: 'Find Jar asset'
+description: 'Finds the jar which should be released as asset'
+outputs:
+  jar-path:
+    description: 'the path to the jar file'
+runs:
+  using: 'node12'
+  main: 'index.js'
