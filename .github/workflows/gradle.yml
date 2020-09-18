@@ -33,12 +33,80 @@ jobs:
         restore-keys: ${{ runner.os }}-gradle
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+    - name: Execute tests & integration tests
+      run: ./gradlew check
     - name: Assemble fat jar
       run: ./gradlew shadowJar
     - name: Upload jars as artifact
       uses: actions/upload-artifact@v2
       with:
+        name: release-jars
         path: build/*.jar
       continue-on-error: true
-    - name: Execute tests & integration tests
-      run: ./gradlew check
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/download-artifact@v2
+      with:
+        name: release-jars
+        path: build
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
+    # - name: Use Node.js
+    #   uses: actions/setup-node@v1
+    #   with:
+    #     node-version: 12
+    # - run: npm install
+    #   working-directory: ./.github/actions/find-jar/
+    # - name: Find Jar Assets
+    #   uses: ./.github/actions/find-jar/
+    #   id: find-jar
+    - name: Find windows Jar
+      id: win-jar
+      run: echo "::set-output name=path::$(ls build/*windows*.jar)"
+      shell: bash
+    - name: Find linux Jar
+      id: linux-jar
+      run: echo "::set-output name=path::$(ls build/*linux*.jar)"
+      shell: bash
+    - name: Find mac Jar
+      id: mac-jar
+      run: echo "::set-output name=path::$(ls build/*os\ x*.jar)"
+      shell: bash
+    - name: Upload Windows Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.win-jar.outputs.path }}
+        asset_name: gui.windows.jar
+        asset_content_type: application/jar
+    - name: Upload Linux Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.linux-jar.outputs.path }}
+        asset_name: gui.linux.jar
+        asset_content_type: application/jar
+    - name: Upload macOS Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.mac-jar.outputs.path }}
+        asset_name: gui.macos.jar
+        asset_content_type: application/jar
