@@ -40,17 +40,16 @@ jobs:
     - name: Upload jars as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: release-jars
+        name: software-challenge-gui-${{ github.sha }}-jars
         path: build/*.jar
       continue-on-error: true
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
     - uses: actions/download-artifact@v2
       with:
-        name: release-jars
+        name: software-challenge-gui-${{ github.sha }}-jars
         path: build
     - name: Create Release
       id: create_release
@@ -61,7 +60,7 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
         draft: true
-        prerelease: false
+        prerelease: true
     - name: Find windows Jar
       id: win-jar
       run: echo "::set-output name=path::$(ls build/*windows*.jar)"
@@ -81,8 +80,6 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ steps.win-jar.outputs.path }}
-        asset_name: gui.windows.jar
-        asset_content_type: application/jar
     - name: Upload Linux Release Asset
       uses: actions/upload-release-asset@v1
       env:
@@ -90,8 +87,6 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ steps.linux-jar.outputs.path }}
-        asset_name: gui.linux.jar
-        asset_content_type: application/jar
     - name: Upload macOS Release Asset
       uses: actions/upload-release-asset@v1
       env:
@@ -99,5 +94,3 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ steps.mac-jar.outputs.path }}
-        asset_name: gui.macos.jar
-        asset_content_type: application/jar
