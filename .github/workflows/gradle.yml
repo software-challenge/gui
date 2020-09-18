@@ -62,15 +62,6 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: true
         prerelease: false
-    # - name: Use Node.js
-    #   uses: actions/setup-node@v1
-    #   with:
-    #     node-version: 12
-    # - run: npm install
-    #   working-directory: ./.github/actions/find-jar/
-    # - name: Find Jar Assets
-    #   uses: ./.github/actions/find-jar/
-    #   id: find-jar
     - name: Find windows Jar
       id: win-jar
       run: echo "::set-output name=path::$(ls build/*windows*.jar)"
