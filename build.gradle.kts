@@ -19,7 +19,7 @@ plugins {
 }
 
 group = "sc.gui"
-version = "21.0.1"
+version = "21.0.2"
 try {
 	// Add hash suffix if git is available
 	version = version.toString() + "-" + Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short", "--verify", "HEAD")).inputStream.reader().readText().trim()
