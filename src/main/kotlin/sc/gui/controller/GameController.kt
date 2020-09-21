@@ -187,10 +187,10 @@ class GameController : Controller() {
                 previousTurnColorProperty().set(turnColorProperty().get())
                 turnColorProperty().set(event.gameState.currentColor)
             }
-            undeployedRedPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.RED])
-            undeployedBluePiecesProperty().set(event.gameState.undeployedPieceShapes[Color.BLUE])
-            undeployedGreenPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.GREEN])
-            undeployedYellowPiecesProperty().set(event.gameState.undeployedPieceShapes[Color.YELLOW])
+            undeployedRedPiecesProperty().set(event.gameState.undeployedPieceShapes(Color.RED))
+            undeployedBluePiecesProperty().set(event.gameState.undeployedPieceShapes(Color.BLUE))
+            undeployedGreenPiecesProperty().set(event.gameState.undeployedPieceShapes(Color.GREEN))
+            undeployedYellowPiecesProperty().set(event.gameState.undeployedPieceShapes(Color.YELLOW))
             boardController.board.boardProperty().set(event.gameState.board)
             validRedPiecesProperty().set(ArrayList())
             validBluePiecesProperty().set(ArrayList())
@@ -209,7 +209,7 @@ class GameController : Controller() {
                 Color.BLUE -> validBluePiecesProperty()
                 Color.GREEN -> validGreenPiecesProperty()
                 Color.YELLOW -> validYellowPiecesProperty()
-            }.set(event.gameState.undeployedPieceShapes[event.gameState.currentColor]?.filter {
+            }.set(event.gameState.undeployedPieceShapes(event.gameState.currentColor).filter {
                 isSelectable(it)
             } as ArrayList<PieceShape>?)
         }
