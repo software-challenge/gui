@@ -24,7 +24,7 @@ class ControlView() : View() {
     }
     private val selected = hbox {
         addClass(AppStyle.pieceUnselectable)
-        label("Selected: ")
+        label("Auswahl: ")
         hbox {
             addClass(AppStyle.undeployedPiece, when (gameController.selectedColor.value) {
                 Color.BLUE -> AppStyle.borderBLUE
