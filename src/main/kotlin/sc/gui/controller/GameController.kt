@@ -176,6 +176,8 @@ class GameController : Controller() {
     var selectedFlip: FlipBinding = FlipBinding(currentPieceProperty())
     var selectedCalculatedShape: CalculatedShapeBinding = CalculatedShapeBinding(currentPieceProperty())
 
+    fun isValidColor(color: Color): Boolean = gameState.orderedColors.contains(color)
+
     init {
         subscribe<NewGameState> { event ->
             logger.debug("New game state")
