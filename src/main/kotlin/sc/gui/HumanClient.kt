@@ -13,8 +13,7 @@ class HumanClient(playerType: PlayerType, host: String, port: Int, moveRequestHa
     }
 
     init {
-        val logic = HumanGameHandler(playerType, this, moveRequestHandler)
-        handler = logic
+        handler = HumanGameHandler(playerType, this, moveRequestHandler)
     }
 }
 
@@ -31,12 +30,8 @@ class HumanGameHandler(private val playerType: PlayerType, private val client: A
     }
 
     override fun onRequestAction() {
-        logger.debug("human ${this.playerType} got new action request!")
-        if (currentState != null) {
-            moveRequestHandler(currentState!!)
-        } else {
-            logger.error("got move request before gamestate")
-        }
+        logger.debug("$playerType got new action request!")
+        currentState?.let(moveRequestHandler) ?: logger.error("got move request before gamestate")
     }
 
     override fun onUpdate(player: Player, otherPlayer: Player) {

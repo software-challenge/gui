@@ -15,8 +15,7 @@ class TestClient(playerType: PlayerType, host: String, port: Int): AbstractGuiCl
     }
 
     init {
-        val logic = TestGameHandler(playerType, this)
-        handler = logic
+        handler = TestGameHandler(playerType, this)
     }
 }
 
@@ -32,16 +31,14 @@ class TestGameHandler(private val playerType: PlayerType, private val client: Ab
     }
 
     override fun onRequestAction() {
-        logger.debug(this.playerType.toString(), "got new action request!")
-        if (currentState != null) {
-            val possibleMoves = GameRuleLogic.getPossibleMoves(currentState!!)
-            if (possibleMoves.isEmpty())
+        logger.debug("$playerType got new action request!")
+        currentState?.let { state ->
+            val possibleMoves = GameRuleLogic.getPossibleMoves(state)
+            if(possibleMoves.isEmpty())
                 throw GameLogicException("No possible Moves found!?")
-
+    
             sendAction(possibleMoves.random())
-        } else {
-            logger.error("got move request before gamestate")
-        }
+        }?:logger.error("got move request before gamestate")
     }
 
     override fun onUpdate(player: Player, otherPlayer: Player) {
