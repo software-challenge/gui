@@ -85,9 +85,9 @@ class ControlView() : View() {
     init {
 		val updatePauseState = {
             if(clientController.controllingClient?.game?.isPaused!!) {
-                playPauseButton.text = "Play"
+                playPauseButton.text = "Weiter"
             } else {
-                playPauseButton.text = "Pause"
+                playPauseButton.text = "Anhalten"
             }
         }
         playPauseButton.setOnMouseClicked {
