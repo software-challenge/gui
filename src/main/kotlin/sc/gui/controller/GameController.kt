@@ -137,17 +137,23 @@ class GameController : Controller() {
     private var availableTurns: Int by property(0)
     private var currentTurn: Int by property(0)
     private var turnColor: Color by property(Color.RED)
+    private var currentTeam: Team by property(Team.ONE)
     private var isHumanTurn: Boolean by property(false)
     private var gameStarted: Boolean by property(false)
     private var gameEnded: Boolean by property(false)
     private var previousTurnColor: Color by property(Color.RED)
+    private var teamOneScore: Int by property(0)
+    private var teamTwoScore: Int by property(0)
     fun previousTurnColorProperty() = getProperty(GameController::previousTurnColor)
     fun turnColorProperty() = getProperty(GameController::turnColor)
+    fun currentTeamProperty() = getProperty(GameController::currentTeam)
     fun availableTurnsProperty() = getProperty(GameController::availableTurns)
     fun currentTurnProperty() = getProperty(GameController::currentTurn)
     fun isHumanTurnProperty() = getProperty(GameController::isHumanTurn)
     fun gameStartedProperty() = getProperty(GameController::gameStarted)
     fun gameEndedProperty() = getProperty(GameController::gameEnded)
+    fun teamOneScoreProperty() = getProperty(GameController::teamOneScore)
+    fun teamTwoScoreProperty() = getProperty(GameController::teamTwoScore)
 
     // we need to have them split separately otherwise we cannot listen to a specific color alone
     private var undeployedRedPieces: Collection<PieceShape> by property(PieceShape.shapes.values)
@@ -200,6 +206,9 @@ class GameController : Controller() {
             validYellowPiecesProperty().set(ArrayList())
             availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
             currentTurnProperty().set(event.gameState.turn)
+            currentTeamProperty().set(event.gameState.currentTeam)
+            teamOneScoreProperty().set(event.gameState.getPointsForPlayer(Team.ONE))
+            teamTwoScoreProperty().set(event.gameState.getPointsForPlayer(Team.TWO))
         }
         subscribe<HumanMoveRequest> { event ->
             logger.debug("Human move request")
