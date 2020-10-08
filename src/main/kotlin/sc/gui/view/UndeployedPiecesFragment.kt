@@ -117,7 +117,7 @@ class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Prope
                 }
             }
 
-            if (controller.turnColorProperty().get() == color) {
+            if (controller.currentColorProperty().get() == color) {
                 if (new.isNotEmpty()) {
                     pieces[new.last()]?.model?.let { controller.selectPiece(it) }
                 }

@@ -14,7 +14,7 @@ class StatusBinding(private val game: GameController) : StringBinding() {
         bind(game.currentTurnProperty())
         bind(game.currentTeamProperty())
         bind(game.isHumanTurnProperty())
-        bind(game.turnColorProperty())
+        bind(game.currentColorProperty())
         bind(game.gameEndedProperty())
     }
 
@@ -37,7 +37,7 @@ class StatusBinding(private val game: GameController) : StringBinding() {
                     Team.ONE -> "Erstes Team"
                     Team.TWO -> "Zweites Team"
                 }
-                return "$team, Farbe " + translateColor(game.turnColorProperty().get()) + " ist dran (Zug ${game.currentTurnProperty().get()})"
+                return "$team, Farbe " + translateColor(game.currentColorProperty().get()) + " ist dran (Zug ${game.currentTurnProperty().get()})"
             }
         }
         return "Drücke auf Start"

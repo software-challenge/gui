@@ -143,8 +143,8 @@ class GameController : Controller() {
     private var previousTurnColor: Color by property(Color.RED)
     private var teamOneScore: Int by property(0)
     private var teamTwoScore: Int by property(0)
-    fun previousTurnColorProperty() = getProperty(GameController::previousTurnColor)
-    fun turnColorProperty() = getProperty(GameController::turnColor)
+    fun previousColorProperty() = getProperty(GameController::previousTurnColor)
+    fun currentColorProperty() = getProperty(GameController::turnColor)
     fun currentTeamProperty() = getProperty(GameController::currentTeam)
     fun availableTurnsProperty() = getProperty(GameController::availableTurns)
     fun currentTurnProperty() = getProperty(GameController::currentTurn)
@@ -190,8 +190,9 @@ class GameController : Controller() {
             // I don't know why orderedColors becomes an empty array and results in CurrentColor being inaccessible (throwing error) when the game ended,
             // but this is how we can avoid it for now TODO("fix this in the plugin")
             if (event.gameState.orderedColors.isNotEmpty()) {
-                previousTurnColorProperty().set(turnColorProperty().get())
-                turnColorProperty().set(event.gameState.currentColor)
+                previousColorProperty().set(currentColorProperty().get())
+                currentColorProperty().set(event.gameState.currentColor)
+                currentTeamProperty().set(event.gameState.currentTeam)
             }
             undeployedRedPiecesProperty().set(event.gameState.undeployedPieceShapes(Color.RED))
             undeployedBluePiecesProperty().set(event.gameState.undeployedPieceShapes(Color.BLUE))
@@ -204,7 +205,6 @@ class GameController : Controller() {
             validYellowPiecesProperty().set(ArrayList())
             availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
             currentTurnProperty().set(event.gameState.turn)
-            currentTeamProperty().set(event.gameState.currentTeam)
             teamOneScoreProperty().set(event.gameState.getPointsForPlayer(Team.ONE))
             teamTwoScoreProperty().set(event.gameState.getPointsForPlayer(Team.TWO))
         }
@@ -218,8 +218,13 @@ class GameController : Controller() {
                 Color.BLUE -> validBluePiecesProperty()
                 Color.GREEN -> validGreenPiecesProperty()
                 Color.YELLOW -> validYellowPiecesProperty()
-            }.set(event.gameState.undeployedPieceShapes(event.gameState.currentColor).filter {
-                isSelectable(it)
+            }.set(event.gameState.undeployedPieceShapes(event.gameState.currentColor).filter { shape ->
+                try {
+                    GameRuleLogic.validateShape(gameState, shape)
+                    true
+                } catch(ignored: InvalidMoveException) {
+                    false
+                }
             } as ArrayList<PieceShape>?)
         }
         subscribe<GameOverEvent> {
@@ -252,18 +257,6 @@ class GameController : Controller() {
 
     fun scroll(deltaY: Double) {
         currentPieceProperty().get().scroll(deltaY)
-    }
-
-    private fun isSelectable(shape: PieceShape): Boolean {
-        if (turnColorProperty().get() == turnColorProperty().get() && isHumanTurnProperty().get()) {
-            try {
-                GameRuleLogic.validateShape(gameState, shape)
-                return true
-            } catch (e: InvalidMoveException) {
-                // nothing to do here. Why do boolean work with exceptions?
-            }
-        }
-        return false
     }
 
     companion object {
