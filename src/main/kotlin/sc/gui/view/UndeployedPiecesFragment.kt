@@ -104,8 +104,8 @@ class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Prope
             }
         }
 
-        controller.currentTurnProperty().addListener { _, _, _ ->
-            unplayableNotice.isVisible = !controller.isValidColor(color)
+        controller.currentTurnProperty().addListener { _, _, turn ->
+            unplayableNotice.isVisible = turn != 0 && !controller.isValidColor(color)
         }
 
         validPieces.addListener { _, _, new ->
