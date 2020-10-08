@@ -6,3 +6,5 @@ ci
 ui
 logic
 protocol
+controller
+model

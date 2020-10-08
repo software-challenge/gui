@@ -1,6 +1,5 @@
 package sc.gui.model
 
-import javafx.beans.property.SimpleObjectProperty
 import tornadofx.*
 import java.io.File
 
@@ -28,18 +27,18 @@ enum class PlayerType {
 }
 
 class TeamSettings {
-    private var name: String by property<String>("Team")
-    fun nameProperty() = getProperty(TeamSettings::name)
-    private var type: PlayerType by property<PlayerType>(PlayerType.HUMAN)
-    fun typeProperty() = getProperty(TeamSettings::type)
-    val executableProperty = SimpleObjectProperty<File>()
-    private var executable: File? by executableProperty
+    val name = objectProperty("Team")
+    val type = objectProperty(PlayerType.HUMAN)
+    val executable = objectProperty<File>()
+	
+    val isHuman
+        get() = type.value == PlayerType.HUMAN
 }
 
 class TeamSettingsModel(settings: TeamSettings) : ItemViewModel<TeamSettings>(settings) {
-    val name = bind { settings.nameProperty() }
-    val type = bind { settings.typeProperty() }
-    val executable = bind(TeamSettings::executableProperty)
+    val name = bind(TeamSettings::name)
+    val type = bind(TeamSettings::type)
+    val executable = bind(TeamSettings::executable)
     
     val isHuman
         get() = type.value == PlayerType.HUMAN

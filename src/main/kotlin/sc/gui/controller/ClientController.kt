@@ -106,17 +106,17 @@ class ClientController : Controller() {
         logger.debug("creating and observing")
 
         // TODO: implement client for MANUALLY
-        val player1 = when (playerOneSettings.typeProperty().value) {
+        val player1 = when (playerOneSettings.type.value) {
             sc.gui.model.PlayerType.HUMAN -> HumanClient(PlayerType.PLAYER_ONE, host, port, ::humanMoveRequest)
             sc.gui.model.PlayerType.MANUALLY -> TestClient(PlayerType.PLAYER_ONE, host, port)
-            sc.gui.model.PlayerType.COMPUTER -> ComputerClient(playerOneSettings.executableProperty.get(), PlayerType.PLAYER_ONE, host, port)
+            sc.gui.model.PlayerType.COMPUTER -> ComputerClient(playerOneSettings.executable.get(), PlayerType.PLAYER_ONE, host, port)
             sc.gui.model.PlayerType.INTERNAL -> TestClient(PlayerType.PLAYER_ONE, host, port)
             else -> throw Exception("invalid playerType for player 1, cannot create game")
         }
-        val player2 = when (playerTwoSettings.typeProperty().value) {
+        val player2 = when (playerTwoSettings.type.value) {
             sc.gui.model.PlayerType.HUMAN -> HumanClient(PlayerType.PLAYER_TWO, host, port, ::humanMoveRequest)
             sc.gui.model.PlayerType.MANUALLY -> TestClient(PlayerType.PLAYER_TWO, host, port)
-            sc.gui.model.PlayerType.COMPUTER -> ComputerClient(playerTwoSettings.executableProperty.get(), PlayerType.PLAYER_TWO, host, port)
+            sc.gui.model.PlayerType.COMPUTER -> ComputerClient(playerTwoSettings.executable.get(), PlayerType.PLAYER_TWO, host, port)
             sc.gui.model.PlayerType.INTERNAL -> TestClient(PlayerType.PLAYER_TWO, host, port)
             else -> throw Exception("invalid playerType for player 2, cannot create game")
         }

@@ -19,10 +19,10 @@ class GameCreationController : Controller() {
     val playerTwoSettingsModel = TeamSettingsModel(playerTwoSettings)
 
     init {
-        playerOneSettings.nameProperty().set("Spieler 1")
-        playerOneSettings.typeProperty().set(PlayerType.INTERNAL)
-        playerTwoSettings.nameProperty().set("Spieler 2")
-        playerTwoSettings.typeProperty().set(PlayerType.HUMAN)
+        playerOneSettings.name.set("Spieler 1")
+        playerOneSettings.type.set(PlayerType.INTERNAL)
+        playerTwoSettings.name.set("Spieler 2")
+        playerTwoSettings.type.set(PlayerType.HUMAN)
     }
 
     fun createGame() {
@@ -38,5 +38,5 @@ class GameCreationController : Controller() {
         fire(StartGameRequest(playerOneSettingsModel.item, playerTwoSettingsModel.item))
     }
     
-    val hasHumanPlayerProperty = Bindings.createBooleanBinding(Callable { playerOneSettingsModel.isHuman || playerTwoSettingsModel.isHuman }, playerOneSettingsModel.type, playerTwoSettingsModel.type)
+    val hasHumanPlayer = Bindings.createBooleanBinding(Callable { playerOneSettings.isHuman || playerTwoSettings.isHuman }, playerOneSettings.type, playerTwoSettings.type)
 }

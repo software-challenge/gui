@@ -29,7 +29,7 @@ class ControlView : View() {
         text = "Start"
     }
     private val selected = hbox {
-        visibleProperty().bind(gameCreationController.hasHumanPlayerProperty)
+        visibleProperty().bind(gameCreationController.hasHumanPlayer)
         addClass(AppStyle.pieceUnselectable)
         label("Auswahl: ")
         hbox {
