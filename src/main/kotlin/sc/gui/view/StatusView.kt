@@ -27,12 +27,13 @@ class StatusBinding(private val game: GameController) : StringBinding() {
         }
 
     }
+    
     override fun computeValue(): String {
-        if (game.gameStartedProperty().get()) {
-            if (game.gameEndedProperty().get()) {
+        if(game.currentTurnProperty().get() > 0) {
+            if(game.gameEndedProperty().get()) {
                 return "Spiel ist beendet"
             } else {
-                val team = when (game.currentTeamProperty().get()) {
+                val team = when(game.currentTeamProperty().get()) {
                     Team.ONE -> "Erstes Team"
                     Team.TWO -> "Zweites Team"
                 }

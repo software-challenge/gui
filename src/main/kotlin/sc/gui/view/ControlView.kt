@@ -83,38 +83,31 @@ class ControlView() : View() {
     }
 
     init {
-		val updatePauseState = {
-            if(clientController.controllingClient?.game?.isPaused!!) {
-                playPauseButton.text = "Weiter"
+		val updatePauseState = { start: Boolean ->
+            if(clientController.controllingClient?.game?.isPaused == true) {
+                playPauseButton.text = if(start) "Start" else "Weiter"
             } else {
                 playPauseButton.text = "Anhalten"
             }
         }
         playPauseButton.setOnMouseClicked {
-            if (!gameController.gameStartedProperty().get()) {
-                gameController.gameStartedProperty().set(true)
+			if(gameController.currentTurnProperty().get() == 0) {
+                if (gameCreationController.playerOneSettingsModel.type.value == PlayerType.HUMAN || gameCreationController.playerTwoSettingsModel.type.value == PlayerType.HUMAN) {
+                    root.left = selected
+                }
             }
             if (gameController.gameEndedProperty().get()) {
                 appController.changeViewTo(StartView::class)
                 gameController.clearGame()
             } else {
                 clientController.togglePause()
-				updatePauseState()
+				updatePauseState(false)
             }
         }
     
-        gameController.currentTurnProperty().addListener(InvalidationListener {
-			// When the game is paused externally e.g. when rewinding
-            updatePauseState()
-        })
-        gameController.gameStartedProperty().addListener { _, _, started ->
-            if (!started) {
-                playPauseButton.text = "Start"
-            } else {
-                if (gameCreationController.playerOneSettingsModel.type.value == PlayerType.HUMAN || gameCreationController.playerTwoSettingsModel.type.value == PlayerType.HUMAN) {
-                    root.left = selected
-                }
-            }
+        // When the game is paused externally e.g. when rewinding
+        gameController.currentTurnProperty().addListener { _, _, turn ->
+            updatePauseState(turn == 0)
         }
         gameController.gameEndedProperty().addListener { _, _, ended ->
             if (ended) {
