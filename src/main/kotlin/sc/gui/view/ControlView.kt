@@ -1,6 +1,5 @@
 package sc.gui.view
 
-import javafx.beans.InvalidationListener
 import javafx.beans.binding.Bindings
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -10,11 +9,18 @@ import sc.gui.controller.AppController
 import sc.gui.controller.ClientController
 import sc.gui.controller.GameController
 import sc.gui.controller.GameCreationController
-import sc.gui.model.PlayerType
 import sc.plugin2021.Color
 import tornadofx.*
 
-class ControlView() : View() {
+val Color.borderStyle
+    get() = when(this) {
+        Color.BLUE -> AppStyle.borderBLUE
+        Color.GREEN -> AppStyle.borderGREEN
+        Color.YELLOW -> AppStyle.borderYELLOW
+        Color.RED -> AppStyle.borderRED
+    }
+
+class ControlView : View() {
     private val gameController: GameController by inject()
     private val clientController: ClientController by inject()
     private val appController: AppController by inject()
@@ -23,28 +29,16 @@ class ControlView() : View() {
         text = "Start"
     }
     private val selected = hbox {
+        visibleProperty().bind(gameCreationController.hasHumanPlayerProperty)
         addClass(AppStyle.pieceUnselectable)
         label("Auswahl: ")
         hbox {
-            addClass(AppStyle.undeployedPiece, when (gameController.selectedColor.value) {
-                Color.BLUE -> AppStyle.borderBLUE
-                Color.GREEN -> AppStyle.borderGREEN
-                Color.YELLOW -> AppStyle.borderYELLOW
-                else -> AppStyle.borderRED
-            })
-            gameController.selectedColor.addListener { _, _, newValue ->
-                removeClass(AppStyle.borderRED)
-                removeClass(AppStyle.borderBLUE)
-                removeClass(AppStyle.borderGREEN)
-                removeClass(AppStyle.borderYELLOW)
-                if (newValue != null) {
-                    addClass(when (newValue) {
-                        Color.RED -> AppStyle.borderRED
-                        Color.BLUE -> AppStyle.borderBLUE
-                        Color.GREEN -> AppStyle.borderGREEN
-                        Color.YELLOW -> AppStyle.borderYELLOW
-                    })
-                }
+            addClass(AppStyle.undeployedPiece, gameController.selectedColor.value.borderStyle)
+            gameController.selectedColor.addListener { _, old, new ->
+                if(old != null)
+                    removeClass(old.borderStyle)
+                if(new != null)
+                    addClass(new.borderStyle)
             }
             this += PiecesFragment(gameController.selectedColor, gameController.selectedShape, gameController.selectedRotation, gameController.selectedFlip)
         }
@@ -52,7 +46,7 @@ class ControlView() : View() {
 
     override val root = borderpane {
         padding = Insets(10.0, 0.0, 10.0, 0.0)
-
+		left = selected
         center {
             hbox {
                 alignment = Pos.TOP_CENTER
@@ -102,8 +96,7 @@ class ControlView() : View() {
     
         // When the game is paused externally e.g. when rewinding
         gameController.currentTurnProperty().addListener { _, _, turn ->
-            updatePauseState(turn < if(gameCreationController.hasHuman && !gameCreationController.playerOneSettingsModel.isHuman) 2 else 1)
-            root.left = if(gameCreationController.hasHuman) selected else null
+            updatePauseState(turn == 0)
         }
         gameController.gameEndedProperty().addListener { _, _, ended ->
             if (ended) {

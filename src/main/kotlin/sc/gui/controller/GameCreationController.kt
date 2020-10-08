@@ -1,11 +1,13 @@
 package sc.gui.controller
 
+import javafx.beans.binding.Bindings
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.model.TeamSettingsModel
 import sc.gui.model.ViewTypes
 import sc.gui.view.GameView
 import tornadofx.*
+import java.util.concurrent.Callable
 
 class GameCreationController : Controller() {
     private val appController: AppController by inject()
@@ -36,6 +38,5 @@ class GameCreationController : Controller() {
         fire(StartGameRequest(playerOneSettingsModel.item, playerTwoSettingsModel.item))
     }
     
-    val hasHuman
-        get() = playerOneSettingsModel.isHuman || playerTwoSettingsModel.isHuman
+    val hasHumanPlayerProperty = Bindings.createBooleanBinding(Callable { playerOneSettingsModel.isHuman || playerTwoSettingsModel.isHuman }, playerOneSettingsModel.type, playerTwoSettingsModel.type)
 }
