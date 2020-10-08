@@ -35,4 +35,7 @@ class GameCreationController : Controller() {
 
         fire(StartGameRequest(playerOneSettingsModel.item, playerTwoSettingsModel.item))
     }
+    
+    val hasHuman
+        get() = playerOneSettingsModel.isHuman || playerTwoSettingsModel.isHuman
 }

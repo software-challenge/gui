@@ -91,11 +91,6 @@ class ControlView() : View() {
             }
         }
         playPauseButton.setOnMouseClicked {
-			if(gameController.currentTurnProperty().get() == 0) {
-                if (gameCreationController.playerOneSettingsModel.type.value == PlayerType.HUMAN || gameCreationController.playerTwoSettingsModel.type.value == PlayerType.HUMAN) {
-                    root.left = selected
-                }
-            }
             if (gameController.gameEndedProperty().get()) {
                 appController.changeViewTo(StartView::class)
                 gameController.clearGame()
@@ -107,12 +102,12 @@ class ControlView() : View() {
     
         // When the game is paused externally e.g. when rewinding
         gameController.currentTurnProperty().addListener { _, _, turn ->
-            updatePauseState(turn == 0)
+            updatePauseState(turn < if(gameCreationController.hasHuman && !gameCreationController.playerOneSettingsModel.isHuman) 2 else 1)
+            root.left = if(gameCreationController.hasHuman) selected else null
         }
         gameController.gameEndedProperty().addListener { _, _, ended ->
             if (ended) {
                 playPauseButton.text = "Spiel beenden"
-                root.left = hbox()
             }
         }
         gameController.isHumanTurnProperty().addListener { _, _, humanTurn ->

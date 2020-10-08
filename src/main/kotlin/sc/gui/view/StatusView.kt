@@ -29,7 +29,7 @@ class StatusBinding(private val game: GameController) : StringBinding() {
     }
     
     override fun computeValue(): String {
-        if(game.currentTurnProperty().get() > 0) {
+        if(game.currentTurnProperty().get() > 1) {
             if(game.gameEndedProperty().get()) {
                 return "Spiel ist beendet"
             } else {

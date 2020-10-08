@@ -40,4 +40,7 @@ class TeamSettingsModel(settings: TeamSettings) : ItemViewModel<TeamSettings>(se
     val name = bind { settings.nameProperty() }
     val type = bind { settings.typeProperty() }
     val executable = bind(TeamSettings::executableProperty)
+    
+    val isHuman
+        get() = type.value == PlayerType.HUMAN
 }
