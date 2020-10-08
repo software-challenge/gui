@@ -46,14 +46,12 @@ class ControlView : View() {
 
     override val root = borderpane {
         padding = Insets(10.0, 0.0, 10.0, 0.0)
-		left = selected
+        left = selected
         center {
             hbox {
                 alignment = Pos.TOP_CENTER
-                hbox {
-                    padding = Insets(0.0, 10.0, 0.0, 10.0)
-                    this += playPauseButton
-                }
+                spacing = 10.0
+                this += playPauseButton
                 button {
                     disableWhen(gameController.currentTurnProperty().isEqualTo(0))
                     text = "⏮"
@@ -62,7 +60,6 @@ class ControlView : View() {
                     }
                 }
                 label {
-                    padding = Insets(0.0, 10.0, 0.0, 10.0)
                     textProperty().bind(Bindings.concat(gameController.currentTurnProperty(), " / ", gameController.availableTurnsProperty()))
                 }
                 button {
