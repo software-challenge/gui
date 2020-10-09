@@ -99,7 +99,7 @@ class BoardView : View() {
             }
         }
     
-        appController.model.isDarkModeProperty().listenImmediately { value ->
+        appController.model.isDarkMode.listenImmediately { value ->
             if(value) {
                 grid.removeClass(AppStyle.lightBoard)
                 grid.addClass(AppStyle.darkBoard)

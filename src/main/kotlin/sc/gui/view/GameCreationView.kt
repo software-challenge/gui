@@ -43,7 +43,7 @@ class GameCreationView : View() {
 
             button("Zurück") {
                 action {
-                    appController.changeViewTo(when (appController.model.previousViewProperty().get()) {
+                    appController.changeViewTo(when (appController.model.previousView.get()) {
                         ViewTypes.GAME_CREATION -> GameCreationView::class
                         ViewTypes.GAME -> GameView::class
                         ViewTypes.START -> StartView::class

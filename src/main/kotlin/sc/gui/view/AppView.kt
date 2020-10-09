@@ -30,9 +30,9 @@ class AppView : View("Software-Challenge Germany") {
                     Platform.exit()
                 }
                 item("Neues Spiel", "Shortcut+N").action {
-                    enableWhen(controller.model.currentViewProperty().isNotEqualTo(ViewTypes.GAME_CREATION))
+                    enableWhen(controller.model.currentView.isNotEqualTo(ViewTypes.GAME_CREATION))
                     println("New Game!")
-                    if (controller.model.currentViewProperty().get() == ViewTypes.GAME) {
+                    if (controller.model.currentView.get() == ViewTypes.GAME) {
                         alert(
                                 type = Alert.AlertType.CONFIRMATION,
                                 header = "Neues Spiel anfangen",
@@ -43,7 +43,7 @@ class AppView : View("Software-Challenge Germany") {
                                     }
                                 }
                         )
-                    } else if (controller.model.currentViewProperty().get() != ViewTypes.GAME_CREATION) {
+                    } else if (controller.model.currentView.get() != ViewTypes.GAME_CREATION) {
                         controller.changeViewTo(GameCreationView::class)
                     }
                 }
@@ -61,7 +61,7 @@ class AppView : View("Software-Challenge Germany") {
                 }
             }
             menu("Steuerung") {
-                enableWhen(controller.model.currentViewProperty().isEqualTo(ViewTypes.GAME))
+                enableWhen(controller.model.currentView.isEqualTo(ViewTypes.GAME))
                 menu("Rotieren") {
                     item("Scrollen", "Mausrad")
                     item("Uhrzeigersinn", "D").action {
@@ -107,14 +107,14 @@ class AppView : View("Software-Challenge Germany") {
 
         // responsive scaling
         val resizer = ChangeListener<Number> { _, _, _ ->
-            if (controller.model.currentViewProperty().get() == ViewTypes.GAME) {
+            if (controller.model.currentView.get() == ViewTypes.GAME) {
                 find(GameView::class).resize()
             }
         }
         root.widthProperty().addListener(resizer)
         root.heightProperty().addListener(resizer)
     
-        titleProperty.bind(controller.model.currentViewProperty().stringBinding {
+        titleProperty.bind(controller.model.currentView.stringBinding {
             when(it) {
                 ViewTypes.GAME_CREATION -> "Neues Spiel - Software-Challenge Germany"
                 ViewTypes.GAME -> "Spiele Blokus - Software-Challenge Germany"
@@ -123,7 +123,7 @@ class AppView : View("Software-Challenge Germany") {
             }
         })
     
-        controller.model.isDarkModeProperty().listenImmediately { value ->
+        controller.model.isDarkMode.listenImmediately { value ->
             if (value) {
                 root.removeClass(AppStyle.lightColorSchema)
                 root.addClass(AppStyle.darkColorSchema)
