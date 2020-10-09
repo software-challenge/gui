@@ -1,6 +1,7 @@
 package sc.gui
 
 import javafx.scene.image.Image
+import mu.KLogging
 import sc.gui.controller.ServerController
 import sc.gui.view.AppView
 import tornadofx.*
@@ -12,7 +13,7 @@ class GuiApp : App(AppView::class, AppStyle::class) {
     override fun stop() {
         super.stop()
         server.stopServer()
-        println("GuiApp stopped, ending program")
+        logger.debug("GuiApp stopped, ending program")
         exitProcess(0)
     }
 
@@ -21,6 +22,8 @@ class GuiApp : App(AppView::class, AppStyle::class) {
         server.startServer()
         addStageIcon(Image(GuiApp::class.java.getResource("/icon.png").toExternalForm()))
     }
+    
+    companion object: KLogging()
 }
 
 fun main(args: Array<String>) {

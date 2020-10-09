@@ -1,7 +1,7 @@
 package sc.gui.controller
 
 import javafx.beans.value.WritableValue
-import org.slf4j.LoggerFactory
+import mu.KLogging
 import sc.gui.model.AppModel
 import sc.gui.model.ViewType
 import sc.gui.view.*
@@ -22,9 +22,7 @@ class AppController: Controller() {
 		model.isDarkMode.toggle()
 	}
 	
-	companion object {
-		private val logger = LoggerFactory.getLogger(AppController::class.java)
-	}
+	companion object: KLogging()
 }
 
 fun WritableValue<Boolean>.toggle() {

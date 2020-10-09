@@ -5,6 +5,7 @@ import javafx.beans.value.ObservableValue
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
 import javafx.scene.image.ImageView
+import mu.KLogging
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.GameController
@@ -24,12 +25,12 @@ class AppView : View("Software-Challenge Germany") {
         top = menubar {
             menu(graphic = sochaIcon) {
                 item("Beenden", "Shortcut+Q").action {
-                    println("Quitting!")
+                    logger.debug("Quitting!")
                     Platform.exit()
                 }
                 item("Neues Spiel", "Shortcut+N").action {
                     enableWhen(controller.model.currentView.isNotEqualTo(ViewType.GAME_CREATION))
-                    println("New Game!")
+                    logger.debug("New Game!")
                     if (controller.model.currentView.get() == ViewType.GAME) {
                         alert(
                                 type = Alert.AlertType.CONFIRMATION,
@@ -51,11 +52,11 @@ class AppView : View("Software-Challenge Germany") {
                 separator()
                 item("Replay laden").action {
                     // TODO
-                    println("Replay wird geladen")
+                    logger.debug("Replay wird geladen")
                 }
                 item("Logs öffnen", "Shortcut+L").action {
                     // TODO
-                    println("Logs werden geöffnet")
+                    logger.debug("Logs werden geöffnet")
                 }
             }
             menu("Steuerung") {
@@ -131,6 +132,8 @@ class AppView : View("Software-Challenge Germany") {
             }
         }
     }
+    
+    companion object: KLogging()
 }
 
 fun ObservableValue<Boolean>.listenImmediately(listener: (newValue: Boolean) -> Unit) {
