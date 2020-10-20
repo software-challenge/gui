@@ -139,6 +139,7 @@ class GameController : Controller() {
     private var turnColor: Color by property(Color.RED)
     private var currentTeam: Team by property(Team.ONE)
     private var isHumanTurn: Boolean by property(false)
+    private var canSkip: Boolean by property(false)
     private var gameEnded: Boolean by property(false)
     private var previousTurnColor: Color by property(Color.RED)
     private var teamOneScore: Int by property(0)
@@ -149,6 +150,7 @@ class GameController : Controller() {
     fun availableTurnsProperty() = getProperty(GameController::availableTurns)
     fun currentTurnProperty() = getProperty(GameController::currentTurn)
     fun isHumanTurnProperty() = getProperty(GameController::isHumanTurn)
+    fun canSkipProperty() = getProperty(GameController::canSkip)
     fun gameEndedProperty() = getProperty(GameController::gameEnded)
     fun teamOneScoreProperty() = getProperty(GameController::teamOneScore)
     fun teamTwoScoreProperty() = getProperty(GameController::teamTwoScore)
@@ -186,6 +188,7 @@ class GameController : Controller() {
         subscribe<NewGameState> { event ->
             logger.debug("New game state")
             gameState = event.gameState
+            canSkipProperty().set(false)
 
             // I don't know why orderedColors becomes an empty array and results in CurrentColor being inaccessible (throwing error) when the game ended,
             // but this is how we can avoid it for now TODO("fix this in the plugin")
@@ -211,6 +214,7 @@ class GameController : Controller() {
         subscribe<HumanMoveRequest> { event ->
             logger.debug("Human move request")
             isHumanTurnProperty().set(true)
+            canSkipProperty().set(!gameEnded && isHumanTurn && !GameRuleLogic.isFirstMove(gameState))
             boardController.calculateIsPlaceableBoard(event.gameState.board, event.gameState.currentColor)
 
             when (event.gameState.currentColor) {

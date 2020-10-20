@@ -5,11 +5,9 @@ import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import sc.gui.AppStyle
-import sc.gui.controller.AppController
-import sc.gui.controller.ClientController
-import sc.gui.controller.GameController
-import sc.gui.controller.GameCreationController
+import sc.gui.controller.*
 import sc.plugin2021.Color
+import sc.plugin2021.SkipMove
 import tornadofx.*
 
 val Color.borderStyle
@@ -50,7 +48,14 @@ class ControlView : View() {
         center {
             hbox {
                 alignment = Pos.TOP_CENTER
-                spacing = 10.0
+                spacing = 8.0
+                button {
+                    enableWhen(gameController.canSkipProperty())
+                    text = "Skip"
+                    setOnMouseClicked {
+                        fire(HumanMoveAction(SkipMove(gameController.currentColorProperty().get())))
+                    }
+                }
                 this += playPauseButton
                 button {
                     disableWhen(gameController.currentTurnProperty().isEqualTo(0))
