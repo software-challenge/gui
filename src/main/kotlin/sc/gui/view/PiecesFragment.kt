@@ -57,13 +57,10 @@ class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
             else -> 0.0
         }
 
-        image.scaleX = 1.0
-        image.scaleY = 1.0
-        if (model.flipProperty().get()) {
-            when (model.rotationProperty().get()) {
-                Rotation.RIGHT, Rotation.LEFT -> image.scaleY = -1.0
-                else -> image.scaleX = -1.0
-            }
-        }
+        // flip imageview
+        val rotation = model.rotationProperty().get()
+        val flip = model.flipProperty().get()
+        image.scaleX = if (flip && (rotation == Rotation.NONE || rotation == Rotation.MIRROR)) -1.0 else 1.0
+        image.scaleY = if (flip && (rotation == Rotation.RIGHT || rotation == Rotation.LEFT)) -1.0 else 1.0
     }
 }
