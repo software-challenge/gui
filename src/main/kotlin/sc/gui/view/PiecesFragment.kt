@@ -4,6 +4,7 @@ import javafx.scene.SnapshotParameters
 import javafx.scene.canvas.Canvas
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import javafx.util.Duration
 import sc.gui.GuiApp
 import sc.gui.controller.*
 import sc.gui.model.PiecesModel
@@ -48,44 +49,21 @@ class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
         val size = boardController.board.calculatedBlockSizeProperty().get() * 2
         image.image = Image(PiecesFragment::class.java.getResource(imagePath).toExternalForm(), size, size, true, false)
 
-        if (model.flipProperty().get()) {
-            val canvas = Canvas(image.image.width, image.image.height)
-            val gc = canvas.graphicsContext2D
-            gc.save()
-            // TODO: set transparent background
-            gc.fill = javafx.scene.paint.Color.TRANSPARENT
-            gc.rect(0.0, 0.0, image.image.width, image.image.height)
-
-            // due to rotation we have to be careful how to flip the image
-            val x: Double = when (model.rotationProperty().get()) {
-                Rotation.RIGHT -> 0.0
-                Rotation.LEFT -> 0.0
-                else -> image.image.width
-            }
-            val y: Double = when (model.rotationProperty().get()) {
-                Rotation.RIGHT -> image.image.height
-                Rotation.LEFT -> image.image.height
-                else -> 0.0
-            }
-
-            // here the image is actually being flipped
-            gc.translate(x * 2, y * 2)
-            when (model.rotationProperty().get()) {
-                Rotation.RIGHT -> gc.scale(1.0, -1.0)
-                Rotation.LEFT -> gc.scale(1.0, -1.0)
-                Rotation.MIRROR -> gc.scale(-1.0, 1.0)
-                else -> gc.scale(-1.0, 1.0)
-            }
-            gc.drawImage(image.image, x, y)
-            image.image = canvas.snapshot(SnapshotParameters(), null)
-        }
-
         // apply rotation to imageview
         image.rotate = when (model.rotationProperty().get()) {
             Rotation.RIGHT -> 90.0
             Rotation.LEFT -> -90.0
             Rotation.MIRROR -> 180.0
             else -> 0.0
+        }
+
+        image.scaleX = 1.0
+        image.scaleY = 1.0
+        if (model.flipProperty().get()) {
+            when (model.rotationProperty().get()) {
+                Rotation.RIGHT, Rotation.LEFT -> image.scaleY = -1.0
+                else -> image.scaleX = -1.0
+            }
         }
     }
 }
