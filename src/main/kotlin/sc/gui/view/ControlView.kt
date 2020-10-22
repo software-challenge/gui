@@ -89,12 +89,12 @@ class ControlView : View() {
     }
 
     init {
-    val updatePauseState = { start: Boolean ->
-            if(clientController.controllingClient?.game?.isPaused == true) {
-                playPauseButton.text = if(start) "Start" else "Weiter"
-            } else {
-                playPauseButton.text = "Anhalten"
-            }
+        val updatePauseState = { start: Boolean ->
+                                     if(clientController.controllingClient?.game?.isPaused == true) {
+                                         playPauseButton.text = if(start) "Start" else "Weiter"
+                                     } else {
+                                         playPauseButton.text = "Anhalten"
+                                     }
         }
         playPauseButton.setOnMouseClicked {
             if (gameController.gameEndedProperty().get()) {
@@ -102,18 +102,18 @@ class ControlView : View() {
                 gameController.clearGame()
             } else {
                 clientController.togglePause()
-				updatePauseState(false)
+                updatePauseState(false)
             }
         }
 
         // When the game is paused externally e.g. when rewinding
         gameController.currentTurnProperty().addListener { _, _, turn ->
-            updatePauseState(turn == 0)
+                                                               updatePauseState(turn == 0)
         }
         gameController.gameEndedProperty().addListener { _, _, ended ->
-            if (ended) {
-                playPauseButton.text = "Spiel beenden"
-            }
+                                                             if (ended) {
+                                                                 playPauseButton.text = "Spiel beenden"
+                                                             }
         }
     }
 }
