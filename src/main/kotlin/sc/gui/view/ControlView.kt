@@ -26,36 +26,46 @@ class ControlView : View() {
     private val playPauseButton: Button = button {
         text = "Start"
     }
-    private val selected = hbox {
-        visibleProperty().bind(gameCreationController.hasHumanPlayer)
-        addClass(AppStyle.pieceUnselectable)
-        label("Auswahl: ")
-        hbox {
-            addClass(AppStyle.undeployedPiece, gameController.selectedColor.value.borderStyle)
-            gameController.selectedColor.addListener { _, old, new ->
-                if(old != null)
-                    removeClass(old.borderStyle)
-                if(new != null)
-                    addClass(new.borderStyle)
-            }
-            this += PiecesFragment(gameController.selectedColor, gameController.selectedShape, gameController.selectedRotation, gameController.selectedFlip)
-        }
-    }
 
-    override val root = borderpane {
-        padding = Insets(10.0, 0.0, 10.0, 0.0)
-        left = selected
-        center {
+    override val root = hbox {
+        spacing = 8.0
+        hbox {
+            spacing = 8.0
+            visibleProperty().bind(gameCreationController.hasHumanPlayer)
+            addClass(AppStyle.pieceUnselectable)
+            gameController.isHumanTurnProperty().addListener { _, _, humanTurn ->
+                                                                   if (humanTurn) {
+                                                                       removeClass(AppStyle.pieceUnselectable)
+                                                                   } else if (!humanTurn && !hasClass(AppStyle.pieceUnselectable)) {
+                                                                       addClass(AppStyle.pieceUnselectable)
+                                                                   }
+            }
+            label("Auswahl: ")
+            pane {
+                addClass(AppStyle.undeployedPiece, gameController.selectedColor.value.borderStyle)
+                gameController.selectedColor.addListener { _, old, new ->
+                                                               if(old != null)
+                                                           removeClass(old.borderStyle)
+                                                           if(new != null)
+                                                           addClass(new.borderStyle)
+                }
+                this += PiecesFragment(gameController.selectedColor, gameController.selectedShape, gameController.selectedRotation, gameController.selectedFlip)
+            }
+        }
+        vbox {
+            spacing = 8.0
             hbox {
                 alignment = Pos.TOP_CENTER
-                spacing = 8.0
                 button {
                     enableWhen(gameController.canSkipProperty())
-                    text = "Skip"
+                    text = "Passen"
                     setOnMouseClicked {
                         fire(HumanMoveAction(SkipMove(gameController.currentColorProperty().get())))
                     }
                 }
+            }
+            hbox {
+                spacing = 8.0
                 this += playPauseButton
                 button {
                     disableWhen(gameController.currentTurnProperty().isEqualTo(0))
@@ -79,7 +89,7 @@ class ControlView : View() {
     }
 
     init {
-		val updatePauseState = { start: Boolean ->
+    val updatePauseState = { start: Boolean ->
             if(clientController.controllingClient?.game?.isPaused == true) {
                 playPauseButton.text = if(start) "Start" else "Weiter"
             } else {
@@ -95,7 +105,7 @@ class ControlView : View() {
 				updatePauseState(false)
             }
         }
-    
+
         // When the game is paused externally e.g. when rewinding
         gameController.currentTurnProperty().addListener { _, _, turn ->
             updatePauseState(turn == 0)
@@ -103,13 +113,6 @@ class ControlView : View() {
         gameController.gameEndedProperty().addListener { _, _, ended ->
             if (ended) {
                 playPauseButton.text = "Spiel beenden"
-            }
-        }
-        gameController.isHumanTurnProperty().addListener { _, _, humanTurn ->
-            if (humanTurn) {
-                selected.removeClass(AppStyle.pieceUnselectable)
-            } else if (!humanTurn && !selected.hasClass(AppStyle.pieceUnselectable)) {
-                selected.addClass(AppStyle.pieceUnselectable)
             }
         }
     }
