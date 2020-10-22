@@ -190,6 +190,17 @@ class GameController : Controller() {
             gameState = event.gameState
             canSkipProperty().set(false)
 
+            /* TODO: remove */
+            println("""
+                ========================================================
+                $gameState
+                
+                ${gameState.board}
+                ========================================================
+            """.trimIndent())
+            /**/
+            throw (InvalidMoveException("the hell?"))
+
             // I don't know why orderedColors becomes an empty array and results in CurrentColor being inaccessible (throwing error) when the game ended,
             // but this is how we can avoid it for now TODO("fix this in the plugin")
             if (event.gameState.orderedColors.isNotEmpty()) {
