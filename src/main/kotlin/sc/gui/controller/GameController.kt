@@ -214,7 +214,7 @@ class GameController : Controller() {
         subscribe<HumanMoveRequest> { event ->
             logger.debug("Human move request")
             isHumanTurnProperty().set(true)
-            canSkipProperty().set(!gameEnded && isHumanTurn && !GameRuleLogic.isFirstMove(gameState))
+            canSkipProperty().set(!gameEnded && isHumanTurn && !GameRuleLogic.isFirstMove(event.gameState))
             boardController.calculateIsPlaceableBoard(event.gameState.board, event.gameState.currentColor)
 
             when (event.gameState.currentColor) {
@@ -223,12 +223,7 @@ class GameController : Controller() {
                 Color.GREEN -> validGreenPiecesProperty()
                 Color.YELLOW -> validYellowPiecesProperty()
             }.set(event.gameState.undeployedPieceShapes(event.gameState.currentColor).filter { shape ->
-                try {
-                    GameRuleLogic.validateShape(gameState, shape)
-                    true
-                } catch(ignored: InvalidMoveException) {
-                    false
-                }
+                GameRuleLogic.validateShape(event.gameState, shape) == null
             } as ArrayList<PieceShape>?)
         }
         subscribe<GameOverEvent> {
