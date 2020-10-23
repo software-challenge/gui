@@ -1,12 +1,7 @@
 package sc.gui.model
 
 import sc.gui.view.AppView
-import sc.gui.view.GameCreationView
-import sc.gui.view.GameView
-import sc.gui.view.StartView
-import sc.plugin2020.Game
 import tornadofx.*
-import kotlin.reflect.KClass
 
 enum class ViewTypes {
     GAME_CREATION,
