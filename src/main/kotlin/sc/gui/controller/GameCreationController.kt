@@ -4,8 +4,7 @@ import javafx.beans.binding.Bindings
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.model.TeamSettingsModel
-import sc.gui.model.ViewTypes
-import sc.gui.view.GameView
+import sc.gui.model.ViewType
 import tornadofx.*
 import java.util.concurrent.Callable
 
@@ -27,13 +26,13 @@ class GameCreationController : Controller() {
 
     fun createGame() {
         // as we currently just support a single game at a time
-        if (appController.model.previousView.get() == ViewTypes.GAME) {
+        if (appController.model.previousView.get() == ViewType.GAME) {
             gameController.clearGame()
         }
 
         playerOneSettingsModel.commit()
         playerTwoSettingsModel.commit()
-        appController.changeViewTo(GameView::class)
+        appController.changeViewTo(ViewType.GAME)
 
         fire(StartGameRequest(playerOneSettingsModel.item, playerTwoSettingsModel.item))
     }

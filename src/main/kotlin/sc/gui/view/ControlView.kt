@@ -1,11 +1,11 @@
 package sc.gui.view
 
 import javafx.beans.binding.Bindings
-import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import sc.gui.AppStyle
 import sc.gui.controller.*
+import sc.gui.model.ViewType
 import sc.plugin2021.Color
 import sc.plugin2021.SkipMove
 import tornadofx.*
@@ -98,7 +98,7 @@ class ControlView : View() {
         }
         playPauseButton.setOnMouseClicked {
             if (gameController.gameEndedProperty().get()) {
-                appController.changeViewTo(StartView::class)
+                appController.changeViewTo(ViewType.START)
                 gameController.clearGame()
             } else {
                 clientController.togglePause()

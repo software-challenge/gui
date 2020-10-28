@@ -3,7 +3,7 @@ package sc.gui.model
 import sc.gui.view.AppView
 import tornadofx.*
 
-enum class ViewTypes {
+enum class ViewType {
     GAME_CREATION,
     GAME,
     START
@@ -11,6 +11,6 @@ enum class ViewTypes {
 
 class AppModel : ItemViewModel<AppView>() {
     val isDarkMode = booleanProperty(true)
-    val currentView = objectProperty(ViewTypes.START)
-    val previousView = objectProperty(ViewTypes.START)
+    val currentView = objectProperty(ViewType.START)
+    val previousView = objectProperty(ViewType.START)
 }

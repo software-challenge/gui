@@ -8,8 +8,7 @@ import javafx.scene.image.ImageView
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.GameController
-import sc.gui.controller.ServerController
-import sc.gui.model.ViewTypes
+import sc.gui.model.ViewType
 import sc.plugin2021.Rotation
 import tornadofx.*
 import java.awt.Desktop
@@ -18,7 +17,6 @@ import java.net.URI
 class AppView : View("Software-Challenge Germany") {
     val controller: AppController by inject()
     private val gameController: GameController by inject()
-    private val serverController: ServerController by inject()
     private val sochaIcon = ImageView(AppView::class.java.getResource("/icon.png").toExternalForm())
 
     override val root = borderpane {
@@ -30,21 +28,21 @@ class AppView : View("Software-Challenge Germany") {
                     Platform.exit()
                 }
                 item("Neues Spiel", "Shortcut+N").action {
-                    enableWhen(controller.model.currentView.isNotEqualTo(ViewTypes.GAME_CREATION))
+                    enableWhen(controller.model.currentView.isNotEqualTo(ViewType.GAME_CREATION))
                     println("New Game!")
-                    if (controller.model.currentView.get() == ViewTypes.GAME) {
+                    if (controller.model.currentView.get() == ViewType.GAME) {
                         alert(
                                 type = Alert.AlertType.CONFIRMATION,
                                 header = "Neues Spiel anfangen",
                                 content = "Willst du wirklich dein aktuelles Spiel verwerfen und ein neues anfangen?",
                                 actionFn = { btnType ->
                                     if (btnType.buttonData == ButtonBar.ButtonData.OK_DONE) {
-                                        controller.changeViewTo(GameCreationView::class)
+                                        controller.changeViewTo(ViewType.GAME_CREATION)
                                     }
                                 }
                         )
-                    } else if (controller.model.currentView.get() != ViewTypes.GAME_CREATION) {
-                        controller.changeViewTo(GameCreationView::class)
+                    } else if (controller.model.currentView.get() != ViewType.GAME_CREATION) {
+                        controller.changeViewTo(ViewType.GAME_CREATION)
                     }
                 }
                 item("Toggle Darkmode").action {
@@ -61,7 +59,7 @@ class AppView : View("Software-Challenge Germany") {
                 }
             }
             menu("Steuerung") {
-                enableWhen(controller.model.currentView.isEqualTo(ViewTypes.GAME))
+                enableWhen(controller.model.currentView.isEqualTo(ViewType.GAME))
                 menu("Rotieren") {
                     item("Scrollen", "Mausrad")
                     item("Uhrzeigersinn", "D").action {
@@ -107,7 +105,7 @@ class AppView : View("Software-Challenge Germany") {
 
         // responsive scaling
         val resizer = ChangeListener<Number> { _, _, _ ->
-            if (controller.model.currentView.get() == ViewTypes.GAME) {
+            if (controller.model.currentView.get() == ViewType.GAME) {
                 find(GameView::class).resize()
             }
         }
@@ -116,9 +114,9 @@ class AppView : View("Software-Challenge Germany") {
     
         titleProperty.bind(controller.model.currentView.stringBinding {
             when(it) {
-                ViewTypes.GAME_CREATION -> "Neues Spiel - Software-Challenge Germany"
-                ViewTypes.GAME -> "Spiele Blokus - Software-Challenge Germany"
-                ViewTypes.START -> "Software-Challenge Germany"
+                ViewType.GAME_CREATION -> "Neues Spiel - Software-Challenge Germany"
+                ViewType.GAME -> "Spiele Blokus - Software-Challenge Germany"
+                ViewType.START -> "Software-Challenge Germany"
                 null -> throw NoWhenBranchMatchedException("Current view can't be null!")
             }
         })

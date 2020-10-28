@@ -3,6 +3,7 @@ package sc.gui.view
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import sc.gui.controller.AppController
+import sc.gui.model.ViewType
 import tornadofx.*
 
 class StartView : View() {
@@ -25,7 +26,7 @@ class StartView : View() {
                 button {
                     text = "Neues Spiel starten"
                     setOnMouseClicked {
-                        controller.changeViewTo(GameCreationView::class)
+                        controller.changeViewTo(ViewType.GAME_CREATION)
                     }
                 }
             }
