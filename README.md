@@ -14,7 +14,23 @@ Unsere Commit-Messages folgen dem Muster `type(scope): summary` (siehe [Karma Ru
 
     git config core.hooksPath .dev/githooks
 
-Um bei den Branches die Übersicht zu behalten, sollten diese ebenfalls nach der Konvention benannt werden - z.B. könnte ein Branch mit einem Release-Fix für Gradle `fix/gradle-release` heißen und ein Branch, der ein neues Login-Feature zur GUI hinzufügt, `feat/gui-login`.  
+Um bei den Branches die Übersicht zu behalten, sollten diese ebenfalls nach der Konvention benannt werden - z.B. könnte ein Branch mit einem Release-Fix für Gradle `fix/gradle-release` heißen und ein Branch, der ein neues Login-Feature zur GUI hinzufügt, `feat/gui-login`.
 Branches werden normalerweise beim Mergen zu einem einzelnen Commit zusammengefügt (Squash-Merge), es sei denn, die einzelnen Commits des Branches haben jeweils eine alleinstehende Aussagekraft.
 
 Detaillierte Informationen zu unserem Kollaborations-Stil findet ihr in der [Kull Konvention](https://xerus2000.github.io/kull).
+
+## Release
+
+Benötigt Schreibrechte auf das GitHub Repository!
+
+- Version in build.gradle.kt anpassen
+- Dann (VERSION entsprechend anpassen):
+  ```
+    export VERSION="21.0.x"
+    git commit -a -m "feat: release $VERSION"
+    git push
+    git tag -a -m "Release $VERSION" $VERSION
+    git push origin $VERSION
+  ```
+
+Es sollte ausserdem sichergestellt sein, dass die in der Version enthaltene Backend-Version ebenfalls released wird.
