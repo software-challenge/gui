@@ -1,37 +1,37 @@
 package sc.gui.controller
 
-import org.slf4j.LoggerFactory
+import javafx.beans.value.WritableValue
+import mu.KLogging
 import sc.gui.model.AppModel
-import sc.gui.model.ViewTypes
+import sc.gui.model.ViewType
 import sc.gui.view.*
 import tornadofx.*
-import kotlin.reflect.KClass
 
-class AppController : Controller() {
-    val model = AppModel()
-
-    fun <T: UIComponent> changeViewTo(nodeType: KClass<T>) {
-        logger.debug("Requested View change from ${model.currentViewProperty().get().name} -> $nodeType")
-        find(when (model.currentViewProperty().get()) {
-            ViewTypes.GAME_CREATION -> GameCreationView::class
-            ViewTypes.GAME -> GameView::class
-            ViewTypes.START -> StartView::class
-            null -> throw NoWhenBranchMatchedException("Current view can't be null!")
-        }).replaceWith(nodeType)
-        model.previousViewProperty().set(model.currentViewProperty().get())
-        model.currentViewProperty().set(when (nodeType) {
-            GameCreationView::class -> ViewTypes.GAME_CREATION
-            GameView::class -> ViewTypes.GAME
-            StartView::class -> ViewTypes.START
-            else -> throw NoWhenBranchMatchedException("Unknown new view: $nodeType")
-        })
-    }
-
-    fun toggleDarkmode() {
-        model.isDarkModeProperty().set(!model.isDarkModeProperty().get())
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(AppController::class.java)
-    }
+class AppController: Controller() {
+	val model = AppModel()
+	
+	fun changeViewTo(newView: ViewType) {
+		val current = model.currentView.get()
+		logger.debug("Requested View change from ${current.name} -> $newView")
+		find(current.view).replaceWith(newView.view)
+		model.previousView.set(current)
+		model.currentView.set(newView)
+	}
+	
+	fun toggleDarkmode() {
+		model.isDarkMode.toggle()
+	}
+	
+	companion object: KLogging()
 }
+
+fun WritableValue<Boolean>.toggle() {
+	value = !value
+}
+
+val ViewType.view
+	get() = when(this) {
+		ViewType.GAME_CREATION -> GameCreationView::class
+		ViewType.GAME -> GameView::class
+		ViewType.START -> StartView::class
+	}

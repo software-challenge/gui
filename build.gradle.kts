@@ -10,16 +10,16 @@ plugins {
 	}
 	
 	application
-	kotlin("jvm") version "1.3.71"
+	kotlin("jvm") version "1.3.72"
 	id("org.openjfx.javafxplugin") version "0.0.9"
-	id("com.github.johnrengelman.shadow") version "6.0.0"
+	id("com.github.johnrengelman.shadow") version "6.1.0"
 	
-	id("com.github.ben-manes.versions") version "0.31.0"
-	id("se.patrikerdes.use-latest-versions") version "0.2.14"
+	id("com.github.ben-manes.versions") version "0.33.0"
+	id("se.patrikerdes.use-latest-versions") version "0.2.15"
 }
 
 group = "sc.gui"
-version = "21.0.6"
+version = "21.0.7"
 try {
 	// Add hash suffix if git is available
 	version = version.toString() + "-" + Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short", "--verify", "HEAD")).inputStream.reader().readText().trim()
@@ -52,7 +52,8 @@ val backend = gradle.includedBuilds.last()
 
 dependencies {
 	implementation(kotlin("stdlib-jdk8"))
-    implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
+    implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT")
+	implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.3")
     
     implementation(fileTree(backend.name + "/server/build/runnable") { include("**/*.jar") })
 }
