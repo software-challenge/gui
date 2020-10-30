@@ -114,11 +114,14 @@ class AppView : View("Software-Challenge Germany") {
         root.widthProperty().addListener(resizer)
         root.heightProperty().addListener(resizer)
     
+        val gameTitle = "Blokus"
+		val version = resources.text("/version.txt")
+        val sochaTitle = "Software-Challenge GUI $version"
         titleProperty.bind(controller.model.currentView.stringBinding {
             when(it) {
-                ViewType.GAME_CREATION -> "Neues Spiel - Software-Challenge Germany"
-                ViewType.GAME -> "Spiele Blokus - Software-Challenge Germany"
-                ViewType.START -> "Software-Challenge Germany"
+                ViewType.GAME_CREATION -> "Neues Spiel - $sochaTitle"
+                ViewType.GAME -> "Spiele $gameTitle - $sochaTitle"
+                ViewType.START -> sochaTitle
                 null -> throw NoWhenBranchMatchedException("Current view can't be null!")
             }
         })
