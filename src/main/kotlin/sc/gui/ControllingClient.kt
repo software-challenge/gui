@@ -110,8 +110,8 @@ class ControllingClient(host: String, port: Int) {
 
         val requestResult = lobby.prepareGameAndWait(
                 GamePlugin.PLUGIN_UUID,
-                SlotDescriptor("One", false, false),
-                SlotDescriptor("Two", false, false)
+                SlotDescriptor("One", false, true),
+                SlotDescriptor("Two", false, true)
         )
 
         if (requestResult.isSuccessful) {
