@@ -81,4 +81,8 @@ tasks {
 		destinationDirectory.set(buildDir)
 		archiveClassifier.set(OperatingSystem.current().familyName)
 	}
+	
+	run.configure {
+		workingDir(buildDir.resolve("run").apply { mkdirs() })
+	}
 }

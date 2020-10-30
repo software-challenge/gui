@@ -8,10 +8,5 @@ build
 # Ignore gradle config
 gradle.properties
 
-# Ignore all outputs from gui and server
-*.log
-log
-out
-
 # Ignore generated files
 version.txt
