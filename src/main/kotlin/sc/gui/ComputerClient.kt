@@ -2,13 +2,12 @@ package sc.gui
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import sc.plugin2021.PlayerType
 import java.io.File
 import java.io.OutputStream
 
 
 // represents a client which is started by the GUI
-class ComputerClient(val clientExecutable: File, val type: PlayerType, val host: String, val port: Int): ClientInterface {
+class ComputerClient(val host: String, val port: Int, val clientExecutable: File): ClientInterface {
     override fun joinPreparedGame(reservation: String) {
         val args = arrayOf(
                 "--host", host,

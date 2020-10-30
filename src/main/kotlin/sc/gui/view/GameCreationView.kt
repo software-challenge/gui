@@ -99,16 +99,16 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
                     label("")
                 }
             }
-            PlayerType.MANUALLY -> {
+            PlayerType.MANUAL -> {
                 root.center = label("Das Programm muss nach Erstellung des Spiels manuell gestartet werden.")
                 root.bottom = label("(noch nicht unterstützt)")
             }
-            PlayerType.INTERNAL -> {
-                root.center = label("Ein interner Computerspieler wird hier spielen")
+            PlayerType.COMPUTER_EXAMPLE -> {
+                root.center = label("Ein interner Computerspieler")
                 root.bottom = label()
             }
             PlayerType.HUMAN -> {
-                root.center = label("Ein Mensch wird das Spiel hier spielen")
+                root.center = label("Ein von Hand gesteuerter Spieler")
                 root.bottom = label()
             }
             else -> throw Exception("Unknown Player-Type")
@@ -134,7 +134,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
             if (settings.type.value == PlayerType.COMPUTER && settings.executable.value == null) error("Bitte wähle eine ausführbare Datei aus") else null
         }
         settings.validationContext.addValidator(root.bottom, obs, ValidationTrigger.OnChange()) {
-            if (settings.type.value == PlayerType.MANUALLY) error("Manuell gestartete Computerspieler werden noch nicht unterstützt") else null
+            if (settings.type.value == PlayerType.MANUAL) error("Manuell gestartete Computerspieler werden noch nicht unterstützt") else null
         }
         settings.validate()
     }

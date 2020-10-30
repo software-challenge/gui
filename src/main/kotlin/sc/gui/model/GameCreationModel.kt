@@ -9,7 +9,7 @@ enum class PlayerType {
             return "Mensch"
         }
     },
-    INTERNAL {
+    COMPUTER_EXAMPLE {
         override fun toString(): String {
             return "Beispiel-Computerspieler"
         }
@@ -19,7 +19,7 @@ enum class PlayerType {
             return "eigener Computerspieler, von GUI gestartet"
         }
     },
-    MANUALLY {
+    MANUAL {
         override fun toString(): String {
             return "eigener Computerspieler, manuell gestaret"
         }
