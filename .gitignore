@@ -5,11 +5,13 @@ build
 # Ignore IDE-Settings
 .idea
 
+# Ignore gradle config
+gradle.properties
+
 # Ignore all outputs from gui and server
 *.log
 log
 out
 
-# Ignore gradle config
-gradle.properties
-/.github/actions/find-jar/node_modules/
+# Ignore generated files
+version.txt

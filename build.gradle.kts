@@ -62,6 +62,11 @@ tasks {
 	compileJava {
 		options.release.set(minJavaVersion.majorVersion.toInt())
 	}
+	processResources {
+		doFirst{
+			sourceSets["main"].resources.srcDirs.first().resolve("version.txt").writeText(version.toString())
+		}
+	}
 	withType<KotlinCompile> {
 		dependsOn(backend.task(":server:deploy"))
 		kotlinOptions.jvmTarget = minJavaVersion.toString()
