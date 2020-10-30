@@ -4,7 +4,7 @@ gradle
 ci
 
 ui
-logic
+view
 controller
 model
 networking

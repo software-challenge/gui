@@ -92,10 +92,10 @@ class BoardView : View() {
     }
 
     init {
-        controller.game.selectedCalculatedShape.addListener { _, _, _ ->
+        controller.game.selectedCalculatedShape.addListener { _ ->
             cleanupHover()
-            if (controller.currentHover != null) {
-                paneHoverEnter(controller.currentHover!!.x, controller.currentHover!!.y)
+			controller.currentHover?.run {
+                paneHoverEnter(x, y)
             }
         }
     
