@@ -15,7 +15,7 @@ class StatusBinding(private val game: GameController) : StringBinding() {
         bind(game.currentTeam)
         bind(game.isHumanTurn)
         bind(game.currentColor)
-        bind(game.gameEnded)
+        bind(game.gameResult)
     }
 
     fun translateColor(color: Color): String {
@@ -30,15 +30,12 @@ class StatusBinding(private val game: GameController) : StringBinding() {
     
     override fun computeValue(): String {
         if(game.currentTurn.get() > 0) {
-            if(game.gameEnded.get()) {
-                return "Spiel ist beendet"
-            } else {
-                val team = when(game.currentTeam.get()) {
+            return game.gameResult.get()?.run {
+                "Spiel ist beendet, Gewinner: " + this.winners?.first()?.displayName
+            } ?: when(game.currentTeam.get()) {
                     Team.ONE -> "Erstes Team"
                     Team.TWO -> "Zweites Team"
-                }
-                return "$team, Farbe " + translateColor(game.currentColor.get()) + " ist dran (Zug ${game.currentTurn.get()})"
-            }
+                } + "Farbe " + translateColor(game.currentColor.get()) + " ist dran (Zug ${game.currentTurn.get()})"
         }
         return "Drücke auf Start"
     }

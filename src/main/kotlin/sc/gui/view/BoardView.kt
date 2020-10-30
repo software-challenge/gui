@@ -136,7 +136,7 @@ class BoardView : View() {
     }
 
     private fun paneHoverEnter(x: Int, y: Int) {
-        if (gameController.gameEnded.get()) {
+        if (gameController.gameEnded()) {
             return
         }
 

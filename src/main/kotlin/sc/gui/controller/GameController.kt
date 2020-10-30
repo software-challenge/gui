@@ -2,12 +2,14 @@ package sc.gui.controller
 
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.binding.ObjectBinding
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.Property
 import org.slf4j.LoggerFactory
 import sc.gui.model.PiecesModel
 import sc.gui.view.*
 import sc.plugin2021.*
 import sc.plugin2021.util.GameRuleLogic
+import sc.shared.GameResult
 import sc.shared.InvalidMoveException
 import tornadofx.*
 import kotlin.math.max
@@ -141,10 +143,10 @@ class GameController : Controller() {
     val currentTeam = objectProperty(Team.ONE)
     val isHumanTurn = objectProperty(false)
     val canSkip = objectProperty(false)
-    val gameEnded = objectProperty(false)
     val previousColor = objectProperty(Color.RED)
     val teamOneScore = objectProperty(0)
     val teamTwoScore = objectProperty(0)
+    val gameResult: ObjectProperty<GameResult?> = objectProperty(null)
 
     // we need to have them split separately otherwise we cannot listen to a specific color alone
     val undeployedRedPieces = objectProperty(PieceShape.shapes.values)
@@ -197,7 +199,7 @@ class GameController : Controller() {
         subscribe<HumanMoveRequest> { event ->
             logger.debug("Human move request")
             isHumanTurn.set(true)
-            canSkip.set(!gameEnded.get() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(event.gameState))
+            canSkip.set(!gameEnded() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(event.gameState))
             boardController.calculateIsPlaceableBoard(event.gameState.board, event.gameState.currentColor)
 
             when (event.gameState.currentColor) {
@@ -209,13 +211,15 @@ class GameController : Controller() {
                 GameRuleLogic.validateShape(event.gameState, shape) == null
             } as ArrayList<PieceShape>?)
         }
-        subscribe<GameOverEvent> {
-            gameEnded.set(true)
+        subscribe<GameOverEvent> { event ->
+            gameResult.set(event.result)
         }
     }
 
+    fun gameEnded(): Boolean = gameResult.isNotNull.get()
+
     fun clearGame() {
-        gameEnded.set(false)
+        gameResult.set(null)
         boardController.board.boardProperty().set(Board())
         availableTurns.set(0)
         currentTurn.set(0)

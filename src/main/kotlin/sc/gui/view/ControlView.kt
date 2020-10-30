@@ -97,7 +97,7 @@ class ControlView : View() {
             }
         }
         playPauseButton.setOnMouseClicked {
-            if (gameController.gameEnded.get()) {
+            if (gameController.gameEnded()) {
                 appController.changeViewTo(ViewType.START)
                 gameController.clearGame()
             } else {
@@ -110,8 +110,8 @@ class ControlView : View() {
         gameController.currentTurn.addListener { _, _, turn ->
                                                                updatePauseState(turn == 0)
         }
-        gameController.gameEnded.addListener { _, _, ended ->
-                                                             if (ended) {
+        gameController.gameResult.addListener { _, _, result ->
+                                                             if (result != null) {
                                                                  playPauseButton.text = "Spiel beenden"
                                                              }
         }
