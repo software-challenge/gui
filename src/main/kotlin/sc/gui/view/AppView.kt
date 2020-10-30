@@ -39,6 +39,7 @@ class AppView : View("Software-Challenge Germany") {
                                 actionFn = { btnType ->
                                     if (btnType.buttonData == ButtonBar.ButtonData.OK_DONE) {
                                         controller.changeViewTo(ViewType.GAME_CREATION)
+                                        gameController.clearGame()
                                     }
                                 }
                         )
