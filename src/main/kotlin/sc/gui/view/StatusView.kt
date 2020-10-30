@@ -3,10 +3,12 @@ package sc.gui.view
 import javafx.beans.binding.StringBinding
 import javafx.geometry.Pos
 import javafx.scene.control.Label
+import sc.api.plugins.ITeam
 import sc.gui.AppStyle
 import sc.gui.controller.GameController
 import sc.plugin2021.Color
 import sc.plugin2021.Team
+import sc.shared.GameResult
 import tornadofx.*
 
 class StatusBinding(private val game: GameController) : StringBinding() {
@@ -25,17 +27,28 @@ class StatusBinding(private val game: GameController) : StringBinding() {
             Color.YELLOW -> "Gelb"
             Color.BLUE -> "Blau"
         }
-
     }
-    
+
+    fun winner(gameResult: GameResult): String = gameResult.winners?.firstOrNull()?.let { player ->
+        player.displayName + " (Farben " +
+                (player.color as Team).colors.joinToString(", ", transform = ::translateColor) +
+                ") hat gewonnen!"
+    } ?: "Unentschieden!"
+
+    fun irregularities(gameResult: GameResult): String = if (!gameResult.isRegular) {
+        gameResult.scores.first().reason
+    } else ""
+
     override fun computeValue(): String {
         if(game.currentTurn.get() > 0) {
-            return game.gameResult.get()?.run {
-                "Spiel ist beendet, Gewinner: " + this.winners?.first()?.displayName
+            return game.gameResult.get()?.let { gameResult ->
+                "Spiel ist beendet\n" +
+                        winner(gameResult) + "\n" +
+                        irregularities(gameResult)
             } ?: when(game.currentTeam.get()) {
                     Team.ONE -> "Erstes Team"
                     Team.TWO -> "Zweites Team"
-                } + "Farbe " + translateColor(game.currentColor.get()) + " ist dran (Zug ${game.currentTurn.get()})"
+                } + ", Farbe " + translateColor(game.currentColor.get()) + " ist dran (Zug ${game.currentTurn.get()})"
         }
         return "Drücke auf Start"
     }
