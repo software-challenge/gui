@@ -3,7 +3,6 @@ package sc.gui
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
-import sc.api.plugins.TwoPlayerGameState
 import sc.framework.plugins.Player
 import sc.networking.clients.*
 import sc.plugin2021.*
@@ -76,9 +75,9 @@ class AdminListener(val logger: Logger) : IAdministrativeListener {
 
 }
 
-class ControllingClient(host: String, port: Int) {
-
+class LobbyManager(host: String, port: Int) {
     var game: IControllableGame? = null
+	
     private lateinit var playerOne: ClientInterface
     private lateinit var playerTwo: ClientInterface
     private lateinit var listener: IUpdateListener
@@ -116,8 +115,7 @@ class ControllingClient(host: String, port: Int) {
 
         if (requestResult.isSuccessful) {
             val preparation = requestResult.result!!
-            game = lobby.observeAndControl(preparation)
-            game!!.addListener(listener)
+            game = lobby.observeAndControl(preparation).apply { addListener(listener) }
             playerOne.joinPreparedGame(preparation.reservations[0])
             playerTwo.joinPreparedGame(preparation.reservations[1])
         } else {
@@ -137,6 +135,6 @@ class ControllingClient(host: String, port: Int) {
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(ControllingClient::class.java)
+        private val logger = LoggerFactory.getLogger(LobbyManager::class.java)
     }
 }
