@@ -11,11 +11,11 @@ import tornadofx.*
 
 class StatusBinding(private val game: GameController) : StringBinding() {
     init {
-        bind(game.currentTurnProperty())
-        bind(game.currentTeamProperty())
-        bind(game.isHumanTurnProperty())
-        bind(game.currentColorProperty())
-        bind(game.gameEndedProperty())
+        bind(game.currentTurn)
+        bind(game.currentTeam)
+        bind(game.isHumanTurn)
+        bind(game.currentColor)
+        bind(game.gameEnded)
     }
 
     fun translateColor(color: Color): String {
@@ -29,15 +29,15 @@ class StatusBinding(private val game: GameController) : StringBinding() {
     }
     
     override fun computeValue(): String {
-        if(game.currentTurnProperty().get() > 0) {
-            if(game.gameEndedProperty().get()) {
+        if(game.currentTurn.get() > 0) {
+            if(game.gameEnded.get()) {
                 return "Spiel ist beendet"
             } else {
-                val team = when(game.currentTeamProperty().get()) {
+                val team = when(game.currentTeam.get()) {
                     Team.ONE -> "Erstes Team"
                     Team.TWO -> "Zweites Team"
                 }
-                return "$team, Farbe " + translateColor(game.currentColorProperty().get()) + " ist dran (Zug ${game.currentTurnProperty().get()})"
+                return "$team, Farbe " + translateColor(game.currentColor.get()) + " ist dran (Zug ${game.currentTurn.get()})"
             }
         }
         return "Drücke auf Start"
@@ -46,12 +46,12 @@ class StatusBinding(private val game: GameController) : StringBinding() {
 
 class ScoreBinding(private val game: GameController) : StringBinding() {
     init {
-        bind(game.teamOneScoreProperty())
-        bind(game.teamTwoScoreProperty())
+        bind(game.teamOneScore)
+        bind(game.teamTwoScore)
     }
 
     override fun computeValue(): String {
-        return "${game.teamOneScoreProperty().get()} : ${game.teamTwoScoreProperty().get()}"
+        return "${game.teamOneScore.get()} : ${game.teamTwoScore.get()}"
     }
 }
 

@@ -104,7 +104,7 @@ class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Prope
             }
         }
 
-        controller.currentTurnProperty().addListener { _, _, turn ->
+        controller.currentTurn.addListener { _, _, turn ->
             unplayableNotice.isVisible = turn != 0 && !controller.isValidColor(color)
         }
 
@@ -117,7 +117,7 @@ class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Prope
                 }
             }
 
-            if (controller.currentColorProperty().get() == color) {
+            if (controller.currentColor.get() == color) {
                 if (new.isNotEmpty()) {
                     pieces[new.last()]?.model?.let { controller.selectPiece(it) }
                 }

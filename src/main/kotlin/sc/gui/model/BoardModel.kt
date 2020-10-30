@@ -2,7 +2,6 @@ package sc.gui.model
 
 import org.slf4j.LoggerFactory
 import sc.gui.view.BoardView
-import sc.gui.view.UndeployedPiecesFragment
 import sc.plugin2021.*
 import tornadofx.*
 

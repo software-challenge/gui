@@ -33,21 +33,21 @@ class ControlView : View() {
             spacing = 8.0
             visibleProperty().bind(gameCreationController.hasHumanPlayer)
             addClass(AppStyle.pieceUnselectable)
-            gameController.isHumanTurnProperty().addListener { _, _, humanTurn ->
-                                                                   if (humanTurn) {
-                                                                       removeClass(AppStyle.pieceUnselectable)
-                                                                   } else if (!humanTurn && !hasClass(AppStyle.pieceUnselectable)) {
-                                                                       addClass(AppStyle.pieceUnselectable)
-                                                                   }
+            gameController.isHumanTurn.addListener { _, _, humanTurn ->
+                if(humanTurn) {
+                    removeClass(AppStyle.pieceUnselectable)
+                } else if(!humanTurn && !hasClass(AppStyle.pieceUnselectable)) {
+                    addClass(AppStyle.pieceUnselectable)
+                }
             }
             label("Auswahl: ")
             pane {
                 addClass(AppStyle.undeployedPiece, gameController.selectedColor.value.borderStyle)
                 gameController.selectedColor.addListener { _, old, new ->
-                                                               if(old != null)
-                                                           removeClass(old.borderStyle)
-                                                           if(new != null)
-                                                           addClass(new.borderStyle)
+                    if(old != null)
+                        removeClass(old.borderStyle)
+                    if(new != null)
+                        addClass(new.borderStyle)
                 }
                 this += PiecesFragment(gameController.selectedColor, gameController.selectedShape, gameController.selectedRotation, gameController.selectedFlip)
             }
@@ -57,10 +57,10 @@ class ControlView : View() {
             hbox {
                 alignment = Pos.TOP_CENTER
                 button {
-                    enableWhen(gameController.canSkipProperty())
+                    enableWhen(gameController.canSkip)
                     text = "Passen"
                     setOnMouseClicked {
-                        fire(HumanMoveAction(SkipMove(gameController.currentColorProperty().get())))
+                        fire(HumanMoveAction(SkipMove(gameController.currentColor.get())))
                     }
                 }
             }
@@ -68,17 +68,17 @@ class ControlView : View() {
                 spacing = 8.0
                 this += playPauseButton
                 button {
-                    disableWhen(gameController.currentTurnProperty().isEqualTo(0))
+                    disableWhen(gameController.currentTurn.isEqualTo(0))
                     text = "⏮"
                     setOnMouseClicked {
                         clientController.previous()
                     }
                 }
                 label {
-                    textProperty().bind(Bindings.concat(gameController.currentTurnProperty(), " / ", gameController.availableTurnsProperty()))
+                    textProperty().bind(Bindings.concat(gameController.currentTurn, " / ", gameController.availableTurns))
                 }
                 button {
-                    disableWhen(gameController.currentTurnProperty().isEqualTo(gameController.availableTurnsProperty()))
+                    disableWhen(gameController.currentTurn.isEqualTo(gameController.availableTurns))
                     text = "⏭"
                     setOnMouseClicked {
                         clientController.next()
@@ -97,7 +97,7 @@ class ControlView : View() {
                                      }
         }
         playPauseButton.setOnMouseClicked {
-            if (gameController.gameEndedProperty().get()) {
+            if (gameController.gameEnded.get()) {
                 appController.changeViewTo(ViewType.START)
                 gameController.clearGame()
             } else {
@@ -107,10 +107,10 @@ class ControlView : View() {
         }
 
         // When the game is paused externally e.g. when rewinding
-        gameController.currentTurnProperty().addListener { _, _, turn ->
+        gameController.currentTurn.addListener { _, _, turn ->
                                                                updatePauseState(turn == 0)
         }
-        gameController.gameEndedProperty().addListener { _, _, ended ->
+        gameController.gameEnded.addListener { _, _, ended ->
                                                              if (ended) {
                                                                  playPauseButton.text = "Spiel beenden"
                                                              }

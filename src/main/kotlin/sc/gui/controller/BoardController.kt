@@ -27,7 +27,7 @@ class BoardController : Controller() {
             val move = SetMove(Piece(color, game.selectedShape.get(), game.selectedRotation.get(), game.selectedFlip.get(), Coordinates(x, y)))
             GameRuleLogic.validateSetMove(board.boardProperty().get(), move)
             fire(HumanMoveAction(move))
-            game.isHumanTurnProperty().set(false)
+            game.isHumanTurn.set(false)
         } else {
             logger.debug("Set-Move seems invalid from GUI at $x, $y")
         }
@@ -73,7 +73,7 @@ class BoardController : Controller() {
     }
 
     fun isHoverable(x: Int, y: Int, shape: Set<Coordinates>): Boolean {
-        if (!game.isHumanTurnProperty().get()) {
+        if (!game.isHumanTurn.get()) {
             return false
         }
 
@@ -90,7 +90,7 @@ class BoardController : Controller() {
     }
 
     fun isPlaceable(x: Int, y: Int, shape: Set<Coordinates>): Boolean {
-        if (game.isHumanTurnProperty().get()) {
+        if (game.isHumanTurn.get()) {
             for (place in shape) {
                 // one field is enough as isHoverable prevents otherwise
                 if (hoverInBound(x + place.x, y + place.y) && isPlaceableBoard[x + place.x][y + place.y]) {

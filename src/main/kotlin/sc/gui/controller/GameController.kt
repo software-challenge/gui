@@ -131,123 +131,106 @@ class CalculatedShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<Set<C
 
 
 class GameController : Controller() {
-    private val boardController: BoardController by inject()
-    private var gameState: GameState = GameState()
+    val boardController: BoardController by inject()
+    
+    val gameState = objectProperty(GameState())
 
-    private var availableTurns: Int by property(0)
-    private var currentTurn: Int by property(0)
-    private var turnColor: Color by property(Color.RED)
-    private var currentTeam: Team by property(Team.ONE)
-    private var isHumanTurn: Boolean by property(false)
-    private var canSkip: Boolean by property(false)
-    private var gameEnded: Boolean by property(false)
-    private var previousTurnColor: Color by property(Color.RED)
-    private var teamOneScore: Int by property(0)
-    private var teamTwoScore: Int by property(0)
-    fun previousColorProperty() = getProperty(GameController::previousTurnColor)
-    fun currentColorProperty() = getProperty(GameController::turnColor)
-    fun currentTeamProperty() = getProperty(GameController::currentTeam)
-    fun availableTurnsProperty() = getProperty(GameController::availableTurns)
-    fun currentTurnProperty() = getProperty(GameController::currentTurn)
-    fun isHumanTurnProperty() = getProperty(GameController::isHumanTurn)
-    fun canSkipProperty() = getProperty(GameController::canSkip)
-    fun gameEndedProperty() = getProperty(GameController::gameEnded)
-    fun teamOneScoreProperty() = getProperty(GameController::teamOneScore)
-    fun teamTwoScoreProperty() = getProperty(GameController::teamTwoScore)
+    val availableTurns = objectProperty(0)
+    val currentTurn = objectProperty(0)
+    val currentColor = objectProperty(Color.RED)
+    val currentTeam = objectProperty(Team.ONE)
+    val isHumanTurn = objectProperty(false)
+    val canSkip = objectProperty(false)
+    val gameEnded = objectProperty(false)
+    val previousColor = objectProperty(Color.RED)
+    val teamOneScore = objectProperty(0)
+    val teamTwoScore = objectProperty(0)
 
     // we need to have them split separately otherwise we cannot listen to a specific color alone
-    private var undeployedRedPieces: Collection<PieceShape> by property(PieceShape.shapes.values)
-    private var undeployedBluePieces: Collection<PieceShape> by property(PieceShape.shapes.values)
-    private var undeployedGreenPieces: Collection<PieceShape> by property(PieceShape.shapes.values)
-    private var undeployedYellowPieces: Collection<PieceShape> by property(PieceShape.shapes.values)
-    fun undeployedRedPiecesProperty() = getProperty(GameController::undeployedRedPieces)
-    fun undeployedBluePiecesProperty() = getProperty(GameController::undeployedBluePieces)
-    fun undeployedGreenPiecesProperty() = getProperty(GameController::undeployedGreenPieces)
-    fun undeployedYellowPiecesProperty() = getProperty(GameController::undeployedYellowPieces)
-    private var validRedPieces: ArrayList<PieceShape> by property(ArrayList())
-    private var validBluePieces: ArrayList<PieceShape> by property(ArrayList())
-    private var validGreenPieces: ArrayList<PieceShape> by property(ArrayList())
-    private var validYellowPieces: ArrayList<PieceShape> by property(ArrayList())
-    fun validRedPiecesProperty() = getProperty(GameController::validRedPieces)
-    fun validBluePiecesProperty() = getProperty(GameController::validBluePieces)
-    fun validGreenPiecesProperty() = getProperty(GameController::validGreenPieces)
-    fun validYellowPiecesProperty() = getProperty(GameController::validYellowPieces)
+    val undeployedRedPieces = objectProperty(PieceShape.shapes.values)
+    val undeployedBluePieces = objectProperty(PieceShape.shapes.values)
+    val undeployedGreenPieces = objectProperty(PieceShape.shapes.values)
+    val undeployedYellowPieces = objectProperty(PieceShape.shapes.values)
+	
+    val validRedPieces = objectProperty(ArrayList<PieceShape>())
+    val validBluePieces = objectProperty(ArrayList<PieceShape>())
+    val validGreenPieces = objectProperty(ArrayList<PieceShape>())
+    val validYellowPieces = objectProperty(ArrayList<PieceShape>())
 
     // use selected* to access the property of currentPiece in order to always correctly be automatically rebind
-    private var currentPiece: PiecesModel by property(PiecesModel(Color.RED, PieceShape.MONO))
-    private fun currentPieceProperty() = getProperty(GameController::currentPiece)
-    var selectedColor: ColorBinding = ColorBinding(currentPieceProperty())
-    var selectedShape: ShapeBinding = ShapeBinding(currentPieceProperty())
-    var selectedRotation: RotationBinding = RotationBinding(currentPieceProperty())
-    var selectedFlip: FlipBinding = FlipBinding(currentPieceProperty())
-    var selectedCalculatedShape: CalculatedShapeBinding = CalculatedShapeBinding(currentPieceProperty())
+    val currentPiece = objectProperty(PiecesModel(Color.RED, PieceShape.MONO))
+    val selectedColor: ColorBinding = ColorBinding(currentPiece)
+    val selectedShape: ShapeBinding = ShapeBinding(currentPiece)
+    val selectedRotation: RotationBinding = RotationBinding(currentPiece)
+    val selectedFlip: FlipBinding = FlipBinding(currentPiece)
+    val selectedCalculatedShape: CalculatedShapeBinding = CalculatedShapeBinding(currentPiece)
 
-    fun isValidColor(color: Color): Boolean = gameState.orderedColors.contains(color)
+    fun isValidColor(color: Color): Boolean = gameState.get().orderedColors.contains(color)
 
     init {
         subscribe<NewGameState> { event ->
             logger.debug("New game state")
-            gameState = event.gameState
-            canSkipProperty().set(false)
+            gameState.set(event.gameState)
+            canSkip.set(false)
 
             // I don't know why orderedColors becomes an empty array and results in CurrentColor being inaccessible (throwing error) when the game ended,
             // but this is how we can avoid it for now TODO("fix this in the plugin")
             if (event.gameState.orderedColors.isNotEmpty()) {
-                previousColorProperty().set(currentColorProperty().get())
-                currentColorProperty().set(event.gameState.currentColor)
-                currentTeamProperty().set(event.gameState.currentTeam)
+                previousColor.set(currentColor.get())
+                currentColor.set(event.gameState.currentColor)
+                currentTeam.set(event.gameState.currentTeam)
             }
-            undeployedRedPiecesProperty().set(event.gameState.undeployedPieceShapes(Color.RED))
-            undeployedBluePiecesProperty().set(event.gameState.undeployedPieceShapes(Color.BLUE))
-            undeployedGreenPiecesProperty().set(event.gameState.undeployedPieceShapes(Color.GREEN))
-            undeployedYellowPiecesProperty().set(event.gameState.undeployedPieceShapes(Color.YELLOW))
+            undeployedRedPieces.set(event.gameState.undeployedPieceShapes(Color.RED))
+            undeployedBluePieces.set(event.gameState.undeployedPieceShapes(Color.BLUE))
+            undeployedGreenPieces.set(event.gameState.undeployedPieceShapes(Color.GREEN))
+            undeployedYellowPieces.set(event.gameState.undeployedPieceShapes(Color.YELLOW))
             boardController.board.boardProperty().set(event.gameState.board)
-            validRedPiecesProperty().set(ArrayList())
-            validBluePiecesProperty().set(ArrayList())
-            validGreenPiecesProperty().set(ArrayList())
-            validYellowPiecesProperty().set(ArrayList())
-            availableTurnsProperty().set(max(availableTurns, event.gameState.turn))
-            currentTurnProperty().set(event.gameState.turn)
-            teamOneScoreProperty().set(event.gameState.getPointsForPlayer(Team.ONE))
-            teamTwoScoreProperty().set(event.gameState.getPointsForPlayer(Team.TWO))
+            validRedPieces.set(ArrayList())
+            validBluePieces.set(ArrayList())
+            validGreenPieces.set(ArrayList())
+            validYellowPieces.set(ArrayList())
+            availableTurns.set(max(availableTurns.get(), event.gameState.turn))
+            currentTurn.set(event.gameState.turn)
+            teamOneScore.set(event.gameState.getPointsForPlayer(Team.ONE))
+            teamTwoScore.set(event.gameState.getPointsForPlayer(Team.TWO))
         }
         subscribe<HumanMoveRequest> { event ->
             logger.debug("Human move request")
-            isHumanTurnProperty().set(true)
-            canSkipProperty().set(!gameEnded && isHumanTurn && !GameRuleLogic.isFirstMove(event.gameState))
+            isHumanTurn.set(true)
+            canSkip.set(!gameEnded.get() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(event.gameState))
             boardController.calculateIsPlaceableBoard(event.gameState.board, event.gameState.currentColor)
 
             when (event.gameState.currentColor) {
-                Color.RED -> validRedPiecesProperty()
-                Color.BLUE -> validBluePiecesProperty()
-                Color.GREEN -> validGreenPiecesProperty()
-                Color.YELLOW -> validYellowPiecesProperty()
+                Color.RED -> validRedPieces
+                Color.BLUE -> validBluePieces
+                Color.GREEN -> validGreenPieces
+                Color.YELLOW -> validYellowPieces
             }.set(event.gameState.undeployedPieceShapes(event.gameState.currentColor).filter { shape ->
                 GameRuleLogic.validateShape(event.gameState, shape) == null
             } as ArrayList<PieceShape>?)
         }
         subscribe<GameOverEvent> {
-            gameEndedProperty().set(true)
+            gameEnded.set(true)
         }
     }
 
     fun clearGame() {
-        gameEndedProperty().set(false)
+        gameEnded.set(false)
         boardController.board.boardProperty().set(Board())
-        availableTurnsProperty().set(0)
-        currentTurnProperty().set(0)
-        undeployedRedPiecesProperty().set(PieceShape.values().toList())
-        undeployedBluePiecesProperty().set(PieceShape.values().toList())
-        undeployedGreenPiecesProperty().set(PieceShape.values().toList())
-        undeployedYellowPiecesProperty().set(PieceShape.values().toList())
+        availableTurns.set(0)
+        currentTurn.set(0)
+        undeployedRedPieces.set(PieceShape.values().toList())
+        undeployedBluePieces.set(PieceShape.values().toList())
+        undeployedGreenPieces.set(PieceShape.values().toList())
+        undeployedYellowPieces.set(PieceShape.values().toList())
     }
 
     fun selectPiece(piece: PiecesModel) {
-        currentPieceProperty().set(piece)
+        currentPiece.set(piece)
     }
 
     fun flipPiece() {
-        currentPieceProperty().get().flipPiece()
+        currentPiece.get().flipPiece()
     }
 
     fun rotatePiece(rotate: Rotation) {
@@ -255,7 +238,7 @@ class GameController : Controller() {
     }
 
     fun scroll(deltaY: Double) {
-        currentPieceProperty().get().scroll(deltaY)
+        currentPiece.get().scroll(deltaY)
     }
 
     companion object {
