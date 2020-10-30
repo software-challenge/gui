@@ -6,6 +6,7 @@ import sc.api.plugins.IGameState
 import sc.framework.plugins.Player
 import sc.networking.clients.*
 import sc.plugin2021.*
+import sc.protocol.helpers.RequestResult
 import sc.protocol.responses.PrepareGameProtocolMessage
 import sc.protocol.responses.ProtocolErrorMessage
 import sc.protocol.responses.ProtocolMessage
@@ -113,13 +114,15 @@ class LobbyManager(host: String, port: Int) {
                 SlotDescriptor("Two", false, true)
         )
 
-        if (requestResult.isSuccessful) {
-            val preparation = requestResult.result!!
-            game = lobby.observeAndControl(preparation).apply { addListener(listener) }
-            playerOne.joinPreparedGame(preparation.reservations[0])
-            playerTwo.joinPreparedGame(preparation.reservations[1])
-        } else {
-            logger.error("Could not prepare game!" + requestResult.error)
+        when(requestResult) {
+            is RequestResult.Success -> {
+				val preparation = requestResult.result
+                game = lobby.observeAndControl(preparation).apply { addListener(listener) }
+                playerOne.joinPreparedGame(preparation.reservations[0])
+                playerTwo.joinPreparedGame(preparation.reservations[1])
+            }
+			is RequestResult.Error ->
+                logger.error("Could not prepare game!" + requestResult.error)
         }
     }
 
