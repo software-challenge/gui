@@ -10,7 +10,6 @@ import java.util.concurrent.Callable
 
 class GameCreationController : Controller() {
     private val appController: AppController by inject()
-    private val gameController: GameController by inject()
 
     private val playerOneSettings = TeamSettings()
     val playerOneSettingsModel = TeamSettingsModel(playerOneSettings)
@@ -25,11 +24,6 @@ class GameCreationController : Controller() {
     }
 
     fun createGame() {
-        // as we currently just support a single game at a time
-        if (appController.model.previousView.get() == ViewType.GAME) {
-            gameController.clearGame()
-        }
-
         playerOneSettingsModel.commit()
         playerTwoSettingsModel.commit()
         appController.changeViewTo(ViewType.GAME)
