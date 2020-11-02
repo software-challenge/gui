@@ -7,18 +7,18 @@ import sc.plugin2021.*
 import sc.shared.GameResult
 
 // connects our game handler (ClientListener) to the server
-class HumanClient(playerType: PlayerType, host: String, port: Int, moveRequestHandler: (gs: GameState) -> Unit) : AbstractGuiClient(host, port) {
+class HumanClient(host: String, port: Int, moveRequestHandler: (gs: GameState) -> Unit) : AbstractGuiClient(host, port) {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(HumanClient::class.java)
     }
 
     init {
-        handler = HumanGameHandler(playerType, this, moveRequestHandler)
+        handler = HumanGameHandler(this, moveRequestHandler)
     }
 }
 
 // handles communication with the server for a human player using the GUI
-class HumanGameHandler(private val playerType: PlayerType, private val client: AbstractClient, private val moveRequestHandler: (gs: GameState) -> Unit) : IGameHandler {
+class HumanGameHandler(private val client: AbstractClient, private val moveRequestHandler: (gs: GameState) -> Unit) : IGameHandler {
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(HumanGameHandler::class.java)
@@ -30,7 +30,7 @@ class HumanGameHandler(private val playerType: PlayerType, private val client: A
     }
 
     override fun onRequestAction() {
-        logger.debug("$playerType got new action request!")
+        logger.debug("Player ${client.team} got new action request!")
         currentState?.let(moveRequestHandler) ?: logger.error("got move request before gamestate")
     }
 

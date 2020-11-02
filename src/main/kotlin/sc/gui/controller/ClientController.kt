@@ -8,10 +8,12 @@ import sc.gui.ComputerClient
 import sc.gui.LobbyManager
 import sc.gui.HumanClient
 import sc.gui.TestClient
+import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.networking.clients.ILobbyClientListener
 import sc.networking.clients.IUpdateListener
-import sc.plugin2021.*
+import sc.plugin2021.GameState
+import sc.plugin2021.Move
 import sc.protocol.responses.PrepareGameProtocolMessage
 import sc.protocol.responses.ProtocolErrorMessage
 import sc.protocol.responses.ProtocolMessage
@@ -107,17 +109,17 @@ class ClientController : Controller() {
 
         // TODO: implement client for MANUALLY
         val player1 = when (playerOneSettings.type.value) {
-            sc.gui.model.PlayerType.HUMAN -> HumanClient(PlayerType.PLAYER_ONE, host, port, ::humanMoveRequest)
-            sc.gui.model.PlayerType.MANUALLY -> TestClient(PlayerType.PLAYER_ONE, host, port)
-            sc.gui.model.PlayerType.COMPUTER -> ComputerClient(playerOneSettings.executable.get(), PlayerType.PLAYER_ONE, host, port)
-            sc.gui.model.PlayerType.INTERNAL -> TestClient(PlayerType.PLAYER_ONE, host, port)
+            PlayerType.HUMAN -> HumanClient(host, port, ::humanMoveRequest)
+            PlayerType.COMPUTER_EXAMPLE -> TestClient(host, port)
+            PlayerType.COMPUTER -> ComputerClient(host, port, playerOneSettings.executable.get())
+            PlayerType.MANUAL -> TestClient(host, port)
             else -> throw Exception("invalid playerType for player 1, cannot create game")
         }
         val player2 = when (playerTwoSettings.type.value) {
-            sc.gui.model.PlayerType.HUMAN -> HumanClient(PlayerType.PLAYER_TWO, host, port, ::humanMoveRequest)
-            sc.gui.model.PlayerType.MANUALLY -> TestClient(PlayerType.PLAYER_TWO, host, port)
-            sc.gui.model.PlayerType.COMPUTER -> ComputerClient(playerTwoSettings.executable.get(), PlayerType.PLAYER_TWO, host, port)
-            sc.gui.model.PlayerType.INTERNAL -> TestClient(PlayerType.PLAYER_TWO, host, port)
+            PlayerType.HUMAN -> HumanClient(host, port, ::humanMoveRequest)
+            PlayerType.COMPUTER_EXAMPLE -> TestClient(host, port)
+            PlayerType.COMPUTER -> ComputerClient(host, port, playerTwoSettings.executable.get())
+            PlayerType.MANUAL -> TestClient(host, port)
             else -> throw Exception("invalid playerType for player 2, cannot create game")
         }
 

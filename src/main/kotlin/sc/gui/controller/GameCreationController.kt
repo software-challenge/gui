@@ -18,7 +18,7 @@ class GameCreationController : Controller() {
 
     init {
         playerOneSettings.name.set("Spieler 1")
-        playerOneSettings.type.set(PlayerType.INTERNAL)
+        playerOneSettings.type.set(PlayerType.COMPUTER_EXAMPLE)
         playerTwoSettings.name.set("Spieler 2")
         playerTwoSettings.type.set(PlayerType.HUMAN)
     }
