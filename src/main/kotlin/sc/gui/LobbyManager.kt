@@ -17,81 +17,81 @@ import java.net.ConnectException
 import kotlin.system.exitProcess
 
 class LobbyListener(val logger: Logger): ILobbyClientListener {
-
+    
     private var numberJoined = 0
     private var gameOverHandler: (result: GameResult) -> Unit = {}
-
+    
     override fun onNewState(roomId: String?, state: IGameState?) {
         logger.debug("lobby: new state for $roomId")
     }
-
+    
     override fun onError(roomId: String?, error: ProtocolErrorMessage?) {
         logger.debug("lobby: new error for $roomId")
     }
-
+    
     override fun onRoomMessage(roomId: String?, data: ProtocolMessage?) {
         logger.debug("lobby: new message for $roomId")
     }
-
+    
     override fun onGamePrepared(response: PrepareGameProtocolMessage?) {
         logger.debug("lobby: game was prepared")
     }
-
+    
     override fun onGameLeft(roomId: String?) {
         logger.debug("lobby: $roomId game was left")
     }
-
+    
     override fun onGameJoined(roomId: String?) {
         numberJoined++
         logger.debug("lobby: $roomId game was joined ($numberJoined)")
     }
-
+    
     override fun onGameOver(roomId: String?, data: GameResult?) {
         logger.debug("lobby: $roomId game is over")
-        if (data != null) {
+        if(data != null) {
             gameOverHandler(data)
         } else {
             logger.error("got no game result!")
         }
     }
-
+    
     override fun onGamePaused(roomId: String?, nextPlayer: Player?) {
         logger.debug("lobby: $roomId game was paused")
     }
-
+    
     override fun onGameObserved(roomId: String?) {
         logger.debug("lobby: $roomId game was observed")
     }
-
+    
     fun setGameOverHandler(handler: (result: GameResult) -> Unit) {
-       this.gameOverHandler = handler
+        this.gameOverHandler = handler
     }
-
+    
 }
 
-class AdminListener(val logger: Logger) : IAdministrativeListener {
+class AdminListener(val logger: Logger): IAdministrativeListener {
     override fun onGamePaused(roomId: String?, nextPlayer: Player?) {
         logger.debug("admin: game paused")
     }
-
+    
 }
 
 class LobbyManager(host: String, port: Int) {
     var game: IControllableGame? = null
-	
+    
     private lateinit var playerOne: ClientInterface
     private lateinit var playerTwo: ClientInterface
     private lateinit var listener: IUpdateListener
     private val lobbyListener: LobbyListener
     private val adminListener: AdminListener
-
+    
     private val lobby: LobbyClient = try {
         LobbyClient(host, port)
-    } catch (e: ConnectException) {
+    } catch(e: ConnectException) {
         logger.error("Could not connect to Server: " + e.message)
         exitProcess(1)
     }
-
+    
     init {
         lobby.start()
         lobby.authenticate(Configuration.get(Configuration.PASSWORD_KEY))
@@ -101,42 +101,42 @@ class LobbyManager(host: String, port: Int) {
         lobby.addListener(lobbyListener)
         lobby.addListener(adminListener)
     }
-
+    
     fun startNewGame(playerOne: ClientInterface, playerTwo: ClientInterface, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
         this.playerOne = playerOne
         this.playerTwo = playerTwo
         this.listener = listener
         this.lobbyListener.setGameOverHandler(onGameOver)
-
+        
         val requestResult = lobby.prepareGameAndWait(
-                GamePlugin.PLUGIN_UUID,
-                SlotDescriptor("One", false, true),
-                SlotDescriptor("Two", false, true)
+            GamePlugin.PLUGIN_UUID,
+            SlotDescriptor("One", false, true),
+            SlotDescriptor("Two", false, true)
         )
-
+        
         when(requestResult) {
             is RequestResult.Success -> {
-				val preparation = requestResult.result
+                val preparation = requestResult.result
                 game = lobby.observeAndControl(preparation).apply { addListener(listener) }
                 playerOne.joinPreparedGame(preparation.reservations[0])
                 playerTwo.joinPreparedGame(preparation.reservations[1])
             }
-			is RequestResult.Error ->
+            is RequestResult.Error ->
                 logger.error("Could not prepare game!" + requestResult.error)
         }
     }
-
+    
     // only used for human players
     fun onAction(move: Move) {
-        var player = when ((game?.currentState as GameState).currentTeam) {
+        var player = when((game?.currentState as GameState).currentTeam) {
             Team.ONE -> playerOne
             Team.TWO -> playerTwo
         }
-        if (player is HumanClient) {
+        if(player is HumanClient) {
             player.sendMove(move)
         }
     }
-
+    
     companion object {
         private val logger = LoggerFactory.getLogger(LobbyManager::class.java)
     }
