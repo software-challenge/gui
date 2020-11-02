@@ -2,3 +2,6 @@
 	path = backend
 	url = https://github.com/CAU-Kiel-Tech-Inf/backend
   shallow = true
+[submodule ".idea"]
+	path = .idea
+	url = git@github.com:CAU-Kiel-Tech-Inf/idea-config.git

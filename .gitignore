@@ -2,9 +2,6 @@
 .gradle
 build
 
-# Ignore IDE-Settings
-.idea
-
 # Ignore gradle config
 gradle.properties
 
