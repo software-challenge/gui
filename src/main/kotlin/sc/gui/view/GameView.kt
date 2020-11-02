@@ -1,38 +1,13 @@
 package sc.gui.view
 
-import javafx.collections.ObservableList
 import javafx.geometry.Insets
 import javafx.scene.input.KeyCode
 import javafx.scene.input.MouseButton
-import javafx.util.StringConverter
 import org.slf4j.LoggerFactory
 import sc.gui.controller.*
 import sc.plugin2021.*
 import sc.plugin2021.util.Constants
 import tornadofx.*
-
-class ColorConverter : StringConverter<Color>() {
-    override fun toString(color: Color?): String {
-        return color!!.name.toLowerCase()
-    }
-
-    override fun fromString(string: String?): Color {
-        TODO("Not yet implemented")
-    }
-}
-
-class PiecesScope(val pieces: ObservableList<Piece>) : Scope()
-
-class ShapeConverter : StringConverter<PieceShape>() {
-    override fun toString(piece: PieceShape?): String {
-        return piece!!.name.toLowerCase()
-    }
-
-    override fun fromString(string: String?): PieceShape {
-        TODO("Not yet implemented")
-    }
-
-}
 
 class GameView : View() {
     private val clientController: ClientController by inject()

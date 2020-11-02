@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
 import sc.framework.plugins.Player
 import sc.gui.ComputerClient
-import sc.gui.ControllingClient
+import sc.gui.LobbyManager
 import sc.gui.HumanClient
 import sc.gui.TestClient
 import sc.gui.model.PlayerType
@@ -90,13 +90,13 @@ class GameOverEvent(val result: GameResult) : FXEvent()
 
 
 class ClientController : Controller() {
-    var controllingClient: ControllingClient? = null
+    var lobbyManager: LobbyManager? = null
     private val listener: UIGameListener = UIGameListener(::newGameState)
 
     init {
         subscribe<HumanMoveAction> {
             logger.debug("Send '${it.move}' to server")
-            controllingClient?.onAction(it.move)
+            lobbyManager?.onAction(it.move)
         }
     }
 
@@ -123,15 +123,16 @@ class ClientController : Controller() {
             else -> throw Exception("invalid playerType for player 2, cannot create game")
         }
 
-        controllingClient = ControllingClient(host, port)
-        controllingClient!!.startNewGame(player1, player2, listener) { result ->
-            fire(GameOverEvent(result))
+        lobbyManager = LobbyManager(host, port).apply {
+            startNewGame(player1, player2, listener) { result ->
+                fire(GameOverEvent(result))
+            }
         }
     }
 
     fun newGameState() {
         logger.debug("ClientController got new update")
-        val gameControl = controllingClient?.game
+        val gameControl = lobbyManager?.game
         if (gameControl != null) {
             val gameState = gameControl.currentState as? GameState
             if (gameState != null) {
@@ -150,7 +151,7 @@ class ClientController : Controller() {
     }
 
     fun updateGameState() {
-        val gameState = controllingClient?.game?.currentState as? GameState
+        val gameState = lobbyManager?.game?.currentState as? GameState
         if (gameState != null) {
             logger.debug("gamestate is $gameState")
             fire(NewGameState(gameState))
@@ -158,17 +159,17 @@ class ClientController : Controller() {
     }
 
     fun previous() {
-        controllingClient?.game?.previous()
+        lobbyManager?.game?.previous()
         updateGameState()
     }
 
     fun next() {
-        controllingClient?.game?.next()
+        lobbyManager?.game?.next()
         updateGameState()
     }
 
     fun togglePause() {
-        val game = controllingClient?.game
+        val game = lobbyManager?.game
         if (game != null) {
             if (game.isPaused) {
                 game.unpause()

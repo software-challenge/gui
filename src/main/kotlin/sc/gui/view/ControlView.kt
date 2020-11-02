@@ -90,14 +90,14 @@ class ControlView : View() {
 
     init {
         val updatePauseState = { start: Boolean ->
-                                     if(clientController.controllingClient?.game?.isPaused == true) {
-                                         playPauseButton.text = if(start) "Start" else "Weiter"
-                                     } else {
-                                         playPauseButton.text = "Anhalten"
-                                     }
+            if(clientController.lobbyManager?.game?.isPaused == true) {
+                playPauseButton.text = if(start) "Start" else "Weiter"
+            } else {
+                playPauseButton.text = "Anhalten"
+            }
         }
         playPauseButton.setOnMouseClicked {
-            if (gameController.gameEnded.get()) {
+            if (gameController.gameEnded()) {
                 appController.changeViewTo(ViewType.START)
                 gameController.clearGame()
             } else {
@@ -110,8 +110,8 @@ class ControlView : View() {
         gameController.currentTurn.addListener { _, _, turn ->
                                                                updatePauseState(turn == 0)
         }
-        gameController.gameEnded.addListener { _, _, ended ->
-                                                             if (ended) {
+        gameController.gameResult.addListener { _, _, result ->
+                                                             if (result != null) {
                                                                  playPauseButton.text = "Spiel beenden"
                                                              }
         }
