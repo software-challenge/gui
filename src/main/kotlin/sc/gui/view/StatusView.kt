@@ -9,6 +9,7 @@ import sc.gui.controller.GameController
 import sc.plugin2021.Color
 import sc.plugin2021.Team
 import sc.shared.GameResult
+import sc.shared.ScoreCause
 import tornadofx.*
 
 class StatusBinding(private val game: GameController) : StringBinding() {
@@ -35,16 +36,21 @@ class StatusBinding(private val game: GameController) : StringBinding() {
                 ") hat gewonnen!"
     } ?: "Unentschieden!"
 
-    fun irregularities(gameResult: GameResult): String = if (!gameResult.isRegular) {
-        gameResult.scores.first().reason
-    } else ""
+    fun irregularities(gameResult: GameResult): String {
+        for (score in gameResult.scores) {
+            if (score.cause != ScoreCause.REGULAR)
+                return "Grund: ${score.reason.split("; move was").first()}!"
+        }
+        return ""
+    }
 
     override fun computeValue(): String {
         if(game.currentTurn.get() > 0) {
-            return game.gameResult.get()?.let { gameResult ->
-                "Spiel ist beendet\n" +
-                        winner(gameResult) + "\n" +
-                        irregularities(gameResult)
+            return game.gameResult.get()?.let { gameResult -> """
+                    Spiel ist beendet
+                    ${winner(gameResult)}
+                    ${irregularities(gameResult)}
+                """.trimIndent()
             } ?: when(game.currentTeam.get()) {
                     Team.ONE -> "Erstes Team"
                     Team.TWO -> "Zweites Team"
