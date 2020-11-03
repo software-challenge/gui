@@ -73,7 +73,6 @@ class AdminListener(val logger: Logger): IAdministrativeListener {
     override fun onGamePaused(roomId: String?, nextPlayer: Player?) {
         logger.debug("admin: game paused")
     }
-    
 }
 
 class LobbyManager(host: String, port: Int) {
@@ -81,7 +80,6 @@ class LobbyManager(host: String, port: Int) {
     
     private lateinit var playerOne: ClientInterface
     private lateinit var playerTwo: ClientInterface
-    private lateinit var listener: IUpdateListener
     private val lobbyListener: LobbyListener
     private val adminListener: AdminListener
     
@@ -102,10 +100,9 @@ class LobbyManager(host: String, port: Int) {
         lobby.addListener(adminListener)
     }
     
-    fun startNewGame(playerOne: ClientInterface, playerTwo: ClientInterface, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
-        this.playerOne = playerOne
-        this.playerTwo = playerTwo
-        this.listener = listener
+    fun startNewGame(players: Collection<ClientInterface>, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
+        this.playerOne = players.first()
+        this.playerTwo = players.last()
         this.lobbyListener.setGameOverHandler(onGameOver)
         
         val requestResult = lobby.prepareGameAndWait(
@@ -118,8 +115,7 @@ class LobbyManager(host: String, port: Int) {
             is RequestResult.Success -> {
                 val preparation = requestResult.result
                 game = lobby.observeAndControl(preparation).apply { addListener(listener) }
-                playerOne.joinPreparedGame(preparation.reservations[0])
-                playerTwo.joinPreparedGame(preparation.reservations[1])
+                players.forEachIndexed { i, player -> player.joinPreparedGame(preparation.reservations[i]) }
             }
             is RequestResult.Error ->
                 logger.error("Could not prepare game!" + requestResult.error)

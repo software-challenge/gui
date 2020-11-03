@@ -107,24 +107,18 @@ class ClientController : Controller() {
 
         logger.debug("creating and observing")
 
-        // TODO: implement client for MANUALLY
-        val player1 = when (playerOneSettings.type.value) {
-            PlayerType.HUMAN -> HumanClient(host, port, ::humanMoveRequest)
-            PlayerType.COMPUTER_EXAMPLE -> TestClient(host, port)
-            PlayerType.COMPUTER -> ComputerClient(host, port, playerOneSettings.executable.get())
-            PlayerType.MANUAL -> TestClient(host, port)
-            else -> throw Exception("invalid playerType for player 1, cannot create game")
-        }
-        val player2 = when (playerTwoSettings.type.value) {
-            PlayerType.HUMAN -> HumanClient(host, port, ::humanMoveRequest)
-            PlayerType.COMPUTER_EXAMPLE -> TestClient(host, port)
-            PlayerType.COMPUTER -> ComputerClient(host, port, playerTwoSettings.executable.get())
-            PlayerType.MANUAL -> TestClient(host, port)
-            else -> throw Exception("invalid playerType for player 2, cannot create game")
+        val players = arrayOf(playerOneSettings, playerTwoSettings).map {
+             when (it.type.value) {
+                PlayerType.HUMAN -> HumanClient(host, port, ::humanMoveRequest)
+                PlayerType.COMPUTER_EXAMPLE -> TestClient(host, port)
+                PlayerType.COMPUTER -> ComputerClient(host, port, it.executable.get())
+                PlayerType.MANUAL -> TestClient(host, port)
+                else -> throw IllegalArgumentException("Cannot create game: Invalid playerType ${it.type.value}")
+            }
         }
 
         lobbyManager = LobbyManager(host, port).apply {
-            startNewGame(player1, player2, listener) { result ->
+            startNewGame(players, listener) { result ->
                 fire(GameOverEvent(result))
             }
         }
