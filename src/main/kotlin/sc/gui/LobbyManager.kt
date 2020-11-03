@@ -101,20 +101,20 @@ class LobbyManager(host: String, port: Int) {
         lobby.addListener(adminListener)
     }
     
-    fun startNewGame(players: Collection<ClientInterface>, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
+    fun startNewGame(players: Collection<ClientInterface>, paused: Boolean, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
         this.lobbyListener.setGameOverHandler(onGameOver)
         
         val requestResult = lobby.prepareGameAndWait(PrepareGameRequest(
             GamePlugin.PLUGIN_UUID,
             SlotDescriptor("One", false),
             SlotDescriptor("Two", false),
-            players.none { it.type == PlayerType.HUMAN }
+            paused
         ))
         
         when (requestResult) {
             is RequestResult.Success -> {
                 val preparation = requestResult.result
-                game = lobby.observeAndControl(preparation.roomId, false).apply { addListener(listener) }
+                game = lobby.observeAndControl(preparation.roomId, paused).apply { addListener(listener) }
                 players.forEachIndexed { i, player -> player.joinPreparedGame(preparation.reservations[i]) }
             }
             is RequestResult.Error ->

@@ -113,7 +113,7 @@ class ClientController : Controller() {
         }
 
         lobbyManager = LobbyManager(host, port).apply {
-            startNewGame(players, listener) { result ->
+            startNewGame(players, players.none { it.type == PlayerType.HUMAN }, listener) { result ->
                 fire(GameOverEvent(result))
             }
         }

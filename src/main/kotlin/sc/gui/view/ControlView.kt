@@ -3,6 +3,7 @@ package sc.gui.view
 import javafx.beans.binding.Bindings
 import javafx.geometry.Pos
 import javafx.scene.control.Button
+import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
 import sc.gui.controller.*
 import sc.gui.model.ViewType
@@ -87,11 +88,13 @@ class ControlView : View() {
             }
         }
     }
-
+    
     init {
         val updatePauseState = { start: Boolean ->
-            if(clientController.lobbyManager?.game?.isPaused == true) {
-                playPauseButton.text = if(start) "Start" else "Weiter"
+            val paused = clientController.lobbyManager?.game?.isPaused
+            logger.trace("Button updatePauseState: $paused (start: $start)")
+            if (paused == true) {
+                playPauseButton.text = if (start) "Start" else "Weiter"
             } else {
                 playPauseButton.text = "Anhalten"
             }
@@ -105,15 +108,19 @@ class ControlView : View() {
                 updatePauseState(false)
             }
         }
-
+        
         // When the game is paused externally e.g. when rewinding
         gameController.currentTurn.addListener { _, _, turn ->
-                                                               updatePauseState(turn == 0)
+            updatePauseState(turn == 0)
         }
         gameController.gameResult.addListener { _, _, result ->
-                                                             if (result != null) {
-                                                                 playPauseButton.text = "Spiel beenden"
-                                                             }
+            if (result != null) {
+                playPauseButton.text = "Spiel beenden"
+            }
         }
+    }
+    
+    companion object {
+        private val logger = LoggerFactory.getLogger(this::class.java)
     }
 }
