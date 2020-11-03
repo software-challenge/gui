@@ -78,8 +78,6 @@ class AdminListener(val logger: Logger): IAdministrativeListener {
 class LobbyManager(host: String, port: Int) {
     var game: IControllableGame? = null
     
-    private lateinit var playerOne: ClientInterface
-    private lateinit var playerTwo: ClientInterface
     private val lobbyListener: LobbyListener
     private val adminListener: AdminListener
     
@@ -101,8 +99,6 @@ class LobbyManager(host: String, port: Int) {
     }
     
     fun startNewGame(players: Collection<ClientInterface>, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
-        this.playerOne = players.first()
-        this.playerTwo = players.last()
         this.lobbyListener.setGameOverHandler(onGameOver)
         
         val requestResult = lobby.prepareGameAndWait(
@@ -119,17 +115,6 @@ class LobbyManager(host: String, port: Int) {
             }
             is RequestResult.Error ->
                 logger.error("Could not prepare game!" + requestResult.error)
-        }
-    }
-    
-    // only used for human players
-    fun onAction(move: Move) {
-        var player = when((game?.currentState as GameState).currentTeam) {
-            Team.ONE -> playerOne
-            Team.TWO -> playerTwo
-        }
-        if(player is HumanClient) {
-            player.sendMove(move)
         }
     }
     

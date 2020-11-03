@@ -3,17 +3,16 @@ package sc.gui.controller
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
+import sc.api.plugins.exceptions.GameLogicException
 import sc.framework.plugins.Player
-import sc.gui.ComputerClient
-import sc.gui.LobbyManager
-import sc.gui.HumanClient
-import sc.gui.TestClient
+import sc.gui.*
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.networking.clients.ILobbyClientListener
 import sc.networking.clients.IUpdateListener
 import sc.plugin2021.GameState
 import sc.plugin2021.Move
+import sc.plugin2021.util.GameRuleLogic
 import sc.protocol.responses.PrepareGameProtocolMessage
 import sc.protocol.responses.ProtocolErrorMessage
 import sc.protocol.responses.ProtocolMessage
@@ -21,6 +20,7 @@ import sc.shared.GameResult
 import tornadofx.Controller
 import tornadofx.EventBus
 import tornadofx.FXEvent
+import java.util.concurrent.CompletableFuture
 
 // This is the listener to update the global state of the server (lobby)
 class UILobbyListener : ILobbyClientListener {
@@ -93,13 +93,6 @@ class ClientController : Controller() {
     var lobbyManager: LobbyManager? = null
     private val listener: UIGameListener = UIGameListener(::newGameState)
 
-    init {
-        subscribe<HumanMoveAction> {
-            logger.debug("Send '${it.move}' to server")
-            lobbyManager?.onAction(it.move)
-        }
-    }
-
     // Do NOT call this directly in the UI thread, use fire(StartGameRequest(gameCreationModel)). This way, the game starting is done in the background
     // TODO put everything which is activated by events in a different class and call these from the controller by events
     fun startGame(host: String = "localhost", port: Int = 13050, playerOneSettings: TeamSettings, playerTwoSettings: TeamSettings) {
@@ -109,10 +102,10 @@ class ClientController : Controller() {
 
         val players = arrayOf(playerOneSettings, playerTwoSettings).map {
              when (it.type.value) {
-                PlayerType.HUMAN -> HumanClient(host, port, ::humanMoveRequest)
-                PlayerType.COMPUTER_EXAMPLE -> TestClient(host, port)
+                PlayerType.HUMAN -> InternalClient(host, port, ::humanMoveRequest)
+                PlayerType.COMPUTER_EXAMPLE -> InternalClient(host, port, ::testClientMoveRequest)
                 PlayerType.COMPUTER -> ComputerClient(host, port, it.executable.get())
-                PlayerType.MANUAL -> TestClient(host, port)
+                PlayerType.MANUAL -> InternalClient(host, port, ::testClientMoveRequest)
                 else -> throw IllegalArgumentException("Cannot create game: Invalid playerType ${it.type.value}")
             }
         }
@@ -140,10 +133,22 @@ class ClientController : Controller() {
         }
     }
 
-    fun humanMoveRequest(gameState: GameState) {
+    fun humanMoveRequest(gameState: GameState): CompletableFuture<Move> {
+        val future = CompletableFuture<Move>()
+        subscribe<HumanMoveAction>(1) {
+            future.complete(it.move)
+        }
         fire(HumanMoveRequest(gameState))
+        return future
     }
-
+    
+    fun testClientMoveRequest(state: GameState): CompletableFuture<Move> {
+        val possibleMoves = GameRuleLogic.getPossibleMoves(state)
+        if(possibleMoves.isEmpty())
+            throw GameLogicException("No possible Moves found!")
+        return CompletableFuture.completedFuture(possibleMoves.random())
+    }
+    
     fun updateGameState() {
         val gameState = lobbyManager?.game?.currentState as? GameState
         if (gameState != null) {
