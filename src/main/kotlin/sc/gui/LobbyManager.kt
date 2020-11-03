@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
 import sc.framework.plugins.Player
 import sc.gui.controller.client.ClientInterface
+import sc.gui.model.PlayerType
 import sc.networking.clients.*
 import sc.plugin2021.*
 import sc.protocol.helpers.RequestResult
@@ -104,14 +105,14 @@ class LobbyManager(host: String, port: Int) {
         
         val requestResult = lobby.prepareGameAndWait(
             GamePlugin.PLUGIN_UUID,
-            SlotDescriptor("One", false, true),
-            SlotDescriptor("Two", false, true)
+            SlotDescriptor("One", false, false),
+            SlotDescriptor("Two", false, false)
         )
         
         when(requestResult) {
             is RequestResult.Success -> {
                 val preparation = requestResult.result
-                game = lobby.observeAndControl(preparation.roomId, false).apply { addListener(listener) }
+                game = lobby.observeAndControl(preparation.roomId, players.none { it.type == PlayerType.HUMAN }).apply { addListener(listener) }
                 players.forEachIndexed { i, player -> player.joinPreparedGame(preparation.reservations[i]) }
             }
             is RequestResult.Error ->
