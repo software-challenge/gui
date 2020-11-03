@@ -111,7 +111,6 @@ class GameView : View() {
             clientController.startGame("localhost", 13050, event.playerOneSettings, event.playerTwoSettings)
         }
 
-
         redUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
         blueUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
         yellowUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())

@@ -9,52 +9,48 @@ import java.io.OutputStream
 class ExecClient(val host: String, val port: Int, val clientExecutable: File): ClientInterface {
     override fun joinPreparedGame(reservation: String) {
         val args = arrayOf(
-                "--host", host,
-                "--port", port.toString(),
-                "--reservation", reservation
+            "--host", host,
+            "--port", port.toString(),
+            "--reservation", reservation
         )
         logger.debug("Starting ${clientExecutable.absolutePath} with arguments ${args.joinToString(" ")}")
-        val processBuilder = if (clientExecutable.absolutePath.endsWith(".jar", true)) {
-            ProcessBuilder("java", "-jar", clientExecutable.absolutePath, *args)
-        } else {
-            ProcessBuilder(clientExecutable.absolutePath, *args)
-        }
+        val processBuilder =
+            if (clientExecutable.absolutePath.endsWith(".jar", true)) {
+                ProcessBuilder("java", "-jar", clientExecutable.absolutePath, *args)
+            } else {
+                ProcessBuilder(clientExecutable.absolutePath, *args)
+            }
         val process = processBuilder.redirectErrorStream(true).start()
-
+        
         Thread {
             process.inputStream.transferTo(LogOutputStream(logger))
         }
     }
-
+    
     companion object {
         val logger: Logger = LoggerFactory.getLogger(ExecClient::class.java)
     }
 }
 
-/**
- * This class logs all bytes written to it as output stream with a specified logging level.
- *
- * @author [Christian Spannagel](mailto:cspannagel@web.de)
- * @version 1.0
- */
-class LogOutputStream(val logger: Logger) : OutputStream() {
-
-    /** The internal memory for the written bytes.  */
+/** This class logs all bytes written to it as output stream with a specified logging level. */
+class LogOutputStream(val logger: Logger): OutputStream() {
+    
+    /** The internal memory for the written bytes. */
     private var mem: String = ""
-
+    
     override fun write(b: Int) {
         val bytes = ByteArray(1)
         bytes[0] = (b and 0xff).toByte()
-        mem = mem + String(bytes)
+        mem += bytes
         if (mem.endsWith("\n")) {
             mem = mem.substring(0, mem.length - 1)
             flush()
         }
     }
-
+    
     override fun flush() {
         logger.info(mem)
         mem = ""
     }
-
+    
 }
