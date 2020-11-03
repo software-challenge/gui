@@ -4,6 +4,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
 import sc.framework.plugins.Player
+import sc.gui.controller.client.ClientInterface
 import sc.networking.clients.*
 import sc.plugin2021.*
 import sc.protocol.helpers.RequestResult

@@ -6,6 +6,8 @@ import sc.api.plugins.IGameState
 import sc.api.plugins.exceptions.GameLogicException
 import sc.framework.plugins.Player
 import sc.gui.*
+import sc.gui.controller.client.ExecClient
+import sc.gui.controller.client.InternalClient
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.networking.clients.ILobbyClientListener

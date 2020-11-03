@@ -1,4 +1,4 @@
-package sc.gui
+package sc.gui.controller.client
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
