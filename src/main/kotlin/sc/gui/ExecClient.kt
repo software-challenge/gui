@@ -14,12 +14,10 @@ class ExecClient(val host: String, val port: Int, val clientExecutable: File): C
             "--reservation", reservation
         )
         logger.debug("Starting ${clientExecutable.absolutePath} with arguments ${args.joinToString(" ")}")
-        val processBuilder =
-            if (clientExecutable.absolutePath.endsWith(".jar", true)) {
-                ProcessBuilder("java", "-jar", clientExecutable.absolutePath, *args)
-            } else {
-                ProcessBuilder(clientExecutable.absolutePath, *args)
-            }
+        val command = mutableListOf(clientExecutable.absolutePath, *args)
+        if (clientExecutable.absolutePath.endsWith(".jar", true))
+            command.addAll(0, listOf("java", "-jar"))
+        val processBuilder = ProcessBuilder(command)
         val process = processBuilder.redirectErrorStream(true).start()
         
         Thread {
