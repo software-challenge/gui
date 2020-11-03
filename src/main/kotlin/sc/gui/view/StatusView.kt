@@ -37,9 +37,15 @@ class StatusBinding(private val game: GameController) : StringBinding() {
     } ?: "Unentschieden!"
 
     fun irregularities(gameResult: GameResult): String {
-        for (score in gameResult.scores) {
-            if (score.cause != ScoreCause.REGULAR)
-                return "Grund: ${score.reason.split("; move was").first()}!"
+        loop@ for (score in gameResult.scores) {
+            when(score.cause) {
+                ScoreCause.REGULAR -> continue@loop
+                ScoreCause.LEFT -> return "Grund: Vorzeitiges Verlassen des Spiels"
+                ScoreCause.RULE_VIOLATION -> return "Grund: Regelverletzung"
+                ScoreCause.SOFT_TIMEOUT -> return "Grund: Überschreitung des Zeitlimits"
+                ScoreCause.HARD_TIMEOUT -> return "Grund: Keine Antwort auf Zuganfrage"
+                ScoreCause.UNKNOWN -> return "Grund: Kommunikationsfehler"
+            }
         }
         return ""
     }
