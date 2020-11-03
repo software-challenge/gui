@@ -111,7 +111,7 @@ class LobbyManager(host: String, port: Int) {
         when(requestResult) {
             is RequestResult.Success -> {
                 val preparation = requestResult.result
-                game = lobby.observeAndControl(preparation).apply { addListener(listener) }
+                game = lobby.observeAndControl(preparation.roomId, false).apply { addListener(listener) }
                 players.forEachIndexed { i, player -> player.joinPreparedGame(preparation.reservations[i]) }
             }
             is RequestResult.Error ->
