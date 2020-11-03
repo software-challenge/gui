@@ -104,7 +104,7 @@ class ClientController : Controller() {
              when (it.type.value) {
                 PlayerType.HUMAN -> InternalClient(host, port, ::humanMoveRequest)
                 PlayerType.COMPUTER_EXAMPLE -> InternalClient(host, port, ::testClientMoveRequest)
-                PlayerType.COMPUTER -> ComputerClient(host, port, it.executable.get())
+                PlayerType.COMPUTER -> ExecClient(host, port, it.executable.get())
                 PlayerType.MANUAL -> InternalClient(host, port, ::testClientMoveRequest)
                 else -> throw IllegalArgumentException("Cannot create game: Invalid playerType ${it.type.value}")
             }

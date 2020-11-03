@@ -5,16 +5,15 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.OutputStream
 
-
-// represents a client which is started by the GUI
-class ComputerClient(val host: String, val port: Int, val clientExecutable: File): ClientInterface {
+/** Represents a client started by the GUI from an executable. */
+class ExecClient(val host: String, val port: Int, val clientExecutable: File): ClientInterface {
     override fun joinPreparedGame(reservation: String) {
         val args = arrayOf(
                 "--host", host,
                 "--port", port.toString(),
                 "--reservation", reservation
         )
-        logger.debug("will start ${clientExecutable.absolutePath} with arguments ${args.joinToString(" ")}")
+        logger.debug("Starting ${clientExecutable.absolutePath} with arguments ${args.joinToString(" ")}")
         val processBuilder = if (clientExecutable.absolutePath.endsWith(".jar", true)) {
             ProcessBuilder("java", "-jar", clientExecutable.absolutePath, *args)
         } else {
@@ -28,7 +27,7 @@ class ComputerClient(val host: String, val port: Int, val clientExecutable: File
     }
 
     companion object {
-        val logger: Logger = LoggerFactory.getLogger(ComputerClient::class.java)
+        val logger: Logger = LoggerFactory.getLogger(ExecClient::class.java)
     }
 }
 
