@@ -2,6 +2,7 @@ package sc.gui.controller.client
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import sc.gui.model.PlayerType
 import java.io.File
 import java.io.OutputStream
 
@@ -24,6 +25,8 @@ class ExecClient(val host: String, val port: Int, val clientExecutable: File): C
             process.inputStream.transferTo(LogOutputStream(logger))
         }
     }
+    
+    override val type = PlayerType.COMPUTER
     
     companion object {
         val logger: Logger = LoggerFactory.getLogger(ExecClient::class.java)

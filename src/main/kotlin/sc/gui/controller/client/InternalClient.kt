@@ -3,12 +3,13 @@ package sc.gui.controller.client
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import sc.framework.plugins.Player
+import sc.gui.model.PlayerType
 import sc.plugin2021.*
 import sc.shared.GameResult
 import java.util.concurrent.CompletableFuture
 
 /** Connects our game handler (ClientListener) to the server. */
-class InternalClient(host: String, port: Int, moveRequestHandler: (state: GameState) -> CompletableFuture<Move>) : AbstractGuiClient(host, port) {
+class InternalClient(host: String, port: Int, override val type: PlayerType, moveRequestHandler: (state: GameState) -> CompletableFuture<Move>) : AbstractGuiClient(host, port) {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(InternalClient::class.java)
     }

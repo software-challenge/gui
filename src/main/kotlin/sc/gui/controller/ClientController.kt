@@ -102,13 +102,13 @@ class ClientController : Controller() {
 
         logger.debug("creating and observing")
 
-        val players = arrayOf(playerOneSettings, playerTwoSettings).map {
-             when (it.type.value) {
-                PlayerType.HUMAN -> InternalClient(host, port, ::humanMoveRequest)
-                PlayerType.COMPUTER_EXAMPLE -> InternalClient(host, port, ::testClientMoveRequest)
-                PlayerType.COMPUTER -> ExecClient(host, port, it.executable.get())
-                PlayerType.MANUAL -> InternalClient(host, port, ::testClientMoveRequest)
-                else -> throw IllegalArgumentException("Cannot create game: Invalid playerType ${it.type.value}")
+        val players = arrayOf(playerOneSettings, playerTwoSettings).map { teamSettings ->
+            when (val type = teamSettings.type.value) {
+                PlayerType.HUMAN -> InternalClient(host, port, type, ::humanMoveRequest)
+                PlayerType.COMPUTER_EXAMPLE -> InternalClient(host, port, type, ::testClientMoveRequest)
+                PlayerType.COMPUTER -> ExecClient(host, port, teamSettings.executable.get())
+                PlayerType.MANUAL -> InternalClient(host, port, type, ::testClientMoveRequest)
+                else -> throw IllegalArgumentException("Cannot create game: Invalid playerType $type")
             }
         }
 

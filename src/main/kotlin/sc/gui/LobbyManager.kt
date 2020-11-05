@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
 import sc.framework.plugins.Player
 import sc.gui.controller.client.ClientInterface
+import sc.gui.model.PlayerType
 import sc.networking.clients.*
-import sc.plugin2021.*
+import sc.plugin2021.GamePlugin
 import sc.protocol.helpers.RequestResult
+import sc.protocol.requests.PrepareGameRequest
 import sc.protocol.responses.PrepareGameProtocolMessage
 import sc.protocol.responses.ProtocolErrorMessage
 import sc.protocol.responses.ProtocolMessage
@@ -49,7 +51,7 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
     
     override fun onGameOver(roomId: String?, data: GameResult?) {
         logger.debug("lobby: $roomId game is over")
-        if(data != null) {
+        if (data != null) {
             gameOverHandler(data)
         } else {
             logger.error("got no game result!")
@@ -84,7 +86,7 @@ class LobbyManager(host: String, port: Int) {
     
     private val lobby: LobbyClient = try {
         LobbyClient(host, port)
-    } catch(e: ConnectException) {
+    } catch (e: ConnectException) {
         logger.error("Could not connect to Server: " + e.message)
         exitProcess(1)
     }
@@ -102,16 +104,17 @@ class LobbyManager(host: String, port: Int) {
     fun startNewGame(players: Collection<ClientInterface>, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
         this.lobbyListener.setGameOverHandler(onGameOver)
         
-        val requestResult = lobby.prepareGameAndWait(
+        val requestResult = lobby.prepareGameAndWait(PrepareGameRequest(
             GamePlugin.PLUGIN_UUID,
-            SlotDescriptor("One", false, true),
-            SlotDescriptor("Two", false, true)
-        )
+            SlotDescriptor("One", false),
+            SlotDescriptor("Two", false),
+            players.none { it.type == PlayerType.HUMAN }
+        ))
         
-        when(requestResult) {
+        when (requestResult) {
             is RequestResult.Success -> {
                 val preparation = requestResult.result
-                game = lobby.observeAndControl(preparation).apply { addListener(listener) }
+                game = lobby.observeAndControl(preparation.roomId, false).apply { addListener(listener) }
                 players.forEachIndexed { i, player -> player.joinPreparedGame(preparation.reservations[i]) }
             }
             is RequestResult.Error ->
