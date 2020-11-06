@@ -80,7 +80,7 @@ class AdminListener(val logger: Logger): IAdministrativeListener {
 
 class LobbyManager(host: String, port: Int) {
     var game: IControllableGame? = null
-    
+
     private val lobbyListener: LobbyListener
     private val adminListener: AdminListener
     
