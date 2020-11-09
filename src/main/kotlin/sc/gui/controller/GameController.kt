@@ -200,6 +200,7 @@ class GameController : Controller() {
             logger.debug("Human move request")
 
             val moves = GameRuleLogic.getPossibleMoves(event.gameState)
+            logger.debug("total: ${moves.size}")
 
             isHumanTurn.set(true)
             canSkip.set(!gameEnded() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(event.gameState))
