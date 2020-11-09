@@ -198,6 +198,9 @@ class GameController : Controller() {
         }
         subscribe<HumanMoveRequest> { event ->
             logger.debug("Human move request")
+
+            val moves = GameRuleLogic.getPossibleMoves(event.gameState)
+
             isHumanTurn.set(true)
             canSkip.set(!gameEnded() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(event.gameState))
             boardController.calculateIsPlaceableBoard(event.gameState.board, event.gameState.currentColor)
@@ -208,7 +211,7 @@ class GameController : Controller() {
                 Color.GREEN -> validGreenPieces
                 Color.YELLOW -> validYellowPieces
             }.set(event.gameState.undeployedPieceShapes(event.gameState.currentColor).filter { shape ->
-                GameRuleLogic.validateShape(event.gameState, shape) == null
+                moves.any { it.piece.kind == shape }
             } as ArrayList<PieceShape>?)
         }
         subscribe<GameOverEvent> { event ->
