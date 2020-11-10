@@ -202,8 +202,10 @@ class GameController : Controller() {
             logger.debug("Human move request")
 
             val state = event.gameState
-            val moves = GameRuleLogic.getPossibleMoves(state)
-            logger.debug("Number of possible moves: ${moves.size}")
+            val moves = state.undeployedPieceShapes().map {
+                it to GameRuleLogic.getPossibleMovesForShape(state, it)
+            }.toMap()
+            logger.debug("Number of possible moves: ${moves.toList().flatMap { it.second }.size}")
 
             isHumanTurn.set(true)
             canSkip.set(!gameEnded() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(state))
@@ -215,7 +217,7 @@ class GameController : Controller() {
                 Color.GREEN -> validGreenPieces
                 Color.YELLOW -> validYellowPieces
             }.set(state.undeployedPieceShapes(state.currentColor).filter { shape ->
-                moves.any { it.piece.kind == shape }
+                moves[shape]!!.isNotEmpty()
             } as ArrayList<PieceShape>?)
         }
         subscribe<GameOverEvent> { event ->
