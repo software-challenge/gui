@@ -1,6 +1,8 @@
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+val versionNumber = "21.1.0"
+
 val minJavaVersion = JavaVersion.VERSION_11
 plugins {
 	// Declared twice because plugins block has its own scope
@@ -19,7 +21,7 @@ plugins {
 }
 
 group = "sc.gui"
-version = "21.0.8"
+version = versionNumber
 try {
 	// Add hash suffix if git is available
 	version = version.toString() + "-" + Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short", "--verify", "HEAD")).inputStream.reader().readText().trim()
@@ -88,10 +90,10 @@ tasks {
 	
 	val release by creating {
 		group = "distribution"
-		description = "Creates and pushes a tagged commit"
+		description = "Creates and pushes a tagged commit with the current version"
 		doLast {
-			exec { commandLine("git", "commit", "-a", "-m", "release: $version") }
-			exec { commandLine("git", "tag", "-a", version) }
+			exec { commandLine("git", "commit", "-a", "-m", "release: $versionNumber") }
+			exec { commandLine("git", "tag", versionNumber) }
 			exec { commandLine("git", "push", "--follow-tags") }
 		}
 	}
