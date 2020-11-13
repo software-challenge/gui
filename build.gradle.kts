@@ -94,7 +94,7 @@ tasks {
 		doLast {
 			exec { commandLine("git", "commit", "-a", "-m", "release: $versionNumber") }
 			exec { commandLine("git", "tag", versionNumber) }
-			exec { commandLine("git", "push", "--follow-tags") }
+			exec { commandLine("git", "push", "origin", versionNumber, "master") }
 		}
 	}
 }
