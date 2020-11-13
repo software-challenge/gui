@@ -94,6 +94,7 @@ tasks {
 	}
 	
 	val release by creating {
+		dependsOn(check)
 		group = "distribution"
 		description = "Creates and pushes a tagged commit with the current version"
 		doLast {
