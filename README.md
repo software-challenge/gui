@@ -21,16 +21,7 @@ Detaillierte Informationen zu unserem Kollaborations-Stil findet ihr in der [Kul
 
 ## Release
 
-Benötigt Schreibrechte auf das GitHub Repository!
-
-- Version in build.gradle.kt anpassen
-- Dann (VERSION entsprechend anpassen):
-  ```
-    export VERSION="21.0.x"
-    git commit -a -m "feat: release $VERSION"
-    git push
-    git tag -a -m "Release $VERSION" $VERSION
-    git push origin $VERSION
-  ```
-
-Es sollte ausserdem sichergestellt sein, dass die in der Version enthaltene Backend-Version ebenfalls released wird.
+- Version in build.gradle.kts anpassen
+- `./gradlew release` ausführen - dies pusht einen neuen getaggten commit mit allen ausstehenden lokalen Änderungen
+- Entsprechendes backend-release erstellen
+- Von Github Actions erstelltes Release veröffentlichen

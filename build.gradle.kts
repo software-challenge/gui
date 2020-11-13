@@ -85,4 +85,14 @@ tasks {
 	run.configure {
 		workingDir(buildDir.resolve("run").apply { mkdirs() })
 	}
+	
+	val release by creating {
+		group = "distribution"
+		description = "Creates and pushes a tagged commit"
+		doLast {
+			exec { commandLine("git", "commit", "-a", "-m", "release: $version") }
+			exec { commandLine("git", "tag", "-a", version) }
+			exec { commandLine("git", "push", "--follow-tags") }
+		}
+	}
 }
