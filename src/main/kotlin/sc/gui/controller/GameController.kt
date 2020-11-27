@@ -172,43 +172,52 @@ class GameController : Controller() {
     init {
         subscribe<NewGameState> { event ->
             logger.debug("New game state")
-            gameState.set(event.gameState)
+
+            val state = event.gameState
+            gameState.set(state)
             canSkip.set(false)
 
             // I don't know why orderedColors becomes an empty array and results in CurrentColor being inaccessible (throwing error) when the game ended,
             // but this is how we can avoid it for now TODO("fix this in the plugin")
-            if (event.gameState.orderedColors.isNotEmpty()) {
+            if (state.orderedColors.isNotEmpty()) {
                 previousColor.set(currentColor.get())
-                currentColor.set(event.gameState.currentColor)
-                currentTeam.set(event.gameState.currentTeam)
+                currentColor.set(state.currentColor)
+                currentTeam.set(state.currentTeam)
             }
-            undeployedRedPieces.set(event.gameState.undeployedPieceShapes(Color.RED))
-            undeployedBluePieces.set(event.gameState.undeployedPieceShapes(Color.BLUE))
-            undeployedGreenPieces.set(event.gameState.undeployedPieceShapes(Color.GREEN))
-            undeployedYellowPieces.set(event.gameState.undeployedPieceShapes(Color.YELLOW))
-            boardController.board.boardProperty().set(event.gameState.board)
+            undeployedRedPieces.set(state.undeployedPieceShapes(Color.RED))
+            undeployedBluePieces.set(state.undeployedPieceShapes(Color.BLUE))
+            undeployedGreenPieces.set(state.undeployedPieceShapes(Color.GREEN))
+            undeployedYellowPieces.set(state.undeployedPieceShapes(Color.YELLOW))
+            boardController.board.boardProperty().set(state.board)
             validRedPieces.set(ArrayList())
             validBluePieces.set(ArrayList())
             validGreenPieces.set(ArrayList())
             validYellowPieces.set(ArrayList())
-            availableTurns.set(max(availableTurns.get(), event.gameState.turn))
-            currentTurn.set(event.gameState.turn)
-            teamOneScore.set(event.gameState.getPointsForPlayer(Team.ONE))
-            teamTwoScore.set(event.gameState.getPointsForPlayer(Team.TWO))
+            availableTurns.set(max(availableTurns.get(), state.turn))
+            currentTurn.set(state.turn)
+            teamOneScore.set(state.getPointsForPlayer(Team.ONE))
+            teamTwoScore.set(state.getPointsForPlayer(Team.TWO))
         }
         subscribe<HumanMoveRequest> { event ->
             logger.debug("Human move request")
-            isHumanTurn.set(true)
-            canSkip.set(!gameEnded() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(event.gameState))
-            boardController.calculateIsPlaceableBoard(event.gameState.board, event.gameState.currentColor)
 
-            when (event.gameState.currentColor) {
+            val state = event.gameState
+            val moves = state.undeployedPieceShapes().map {
+                it to GameRuleLogic.getPossibleMovesForShape(state, it)
+            }.toMap()
+            logger.debug("Number of possible moves: ${moves.toList().flatMap { it.second }.size}")
+
+            isHumanTurn.set(true)
+            canSkip.set(!gameEnded() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(state))
+            boardController.calculateIsPlaceableBoard(state.board, state.currentColor)
+
+            when (state.currentColor) {
                 Color.RED -> validRedPieces
                 Color.BLUE -> validBluePieces
                 Color.GREEN -> validGreenPieces
                 Color.YELLOW -> validYellowPieces
-            }.set(event.gameState.undeployedPieceShapes(event.gameState.currentColor).filter { shape ->
-                GameRuleLogic.validateShape(event.gameState, shape) == null
+            }.set(state.undeployedPieceShapes(state.currentColor).filter { shape ->
+                moves[shape]!!.isNotEmpty()
             } as ArrayList<PieceShape>?)
         }
         subscribe<GameOverEvent> { event ->
