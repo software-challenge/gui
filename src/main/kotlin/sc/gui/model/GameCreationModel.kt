@@ -1,5 +1,6 @@
 package sc.gui.model
 
+import javafx.beans.property.Property
 import tornadofx.*
 import java.io.File
 
@@ -36,9 +37,10 @@ class TeamSettings {
 }
 
 class TeamSettingsModel(settings: TeamSettings) : ItemViewModel<TeamSettings>(settings) {
-    val name = bind(TeamSettings::name)
-    val type = bind(TeamSettings::type)
-    val executable = bind(TeamSettings::executable)
+    // explicit declarations needed - see https://github.com/edvin/tornadofx2/issues/12
+    val name: Property<String> = bind(TeamSettings::name)
+    val type: Property<PlayerType> = bind(TeamSettings::type)
+    val executable: Property<File> = bind(TeamSettings::executable)
     
     val isHuman
         get() = type.value == PlayerType.HUMAN

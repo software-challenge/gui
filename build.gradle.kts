@@ -12,7 +12,7 @@ plugins {
 	}
 	
 	application
-	kotlin("jvm") version "1.3.72"
+	kotlin("jvm") version "1.4.20"
 	id("org.openjfx.javafxplugin") version "0.0.9"
 	id("com.github.johnrengelman.shadow") version "6.1.0"
 	
@@ -66,7 +66,7 @@ tasks {
 	}
 	processResources {
 		doFirst{
-			sourceSets["main"].resources.srcDirs.first().resolve("version.txt").writeText(version.toString())
+			sourceSets.main.get().resources.srcDirs.first().resolve("version.txt").writeText(version.toString())
 		}
 	}
 	withType<KotlinCompile> {
