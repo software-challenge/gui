@@ -54,7 +54,9 @@ val backend = gradle.includedBuilds.last()
 
 dependencies {
 	implementation(kotlin("stdlib-jdk8"))
-    implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT")
+	
+	implementation(kotlin("reflect"))
+    implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT") { exclude("org.jetbrains.kotlin", "kotlin-reflect") }
 	implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.3")
     
     implementation(fileTree(backend.name + "/server/build/runnable") { include("**/*.jar") })
@@ -71,7 +73,10 @@ tasks {
 	}
 	withType<KotlinCompile> {
 		dependsOn(backend.task(":server:deploy"))
-		kotlinOptions.jvmTarget = minJavaVersion.toString()
+		kotlinOptions{
+			jvmTarget = minJavaVersion.toString()
+			freeCompilerArgs = listOf("-Xjvm-default=all")
+		}
 	}
 	
 	javafx {
