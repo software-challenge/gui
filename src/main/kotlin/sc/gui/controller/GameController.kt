@@ -167,7 +167,7 @@ class GameController : Controller() {
     val selectedFlip: FlipBinding = FlipBinding(currentPiece)
     val selectedCalculatedShape: CalculatedShapeBinding = CalculatedShapeBinding(currentPiece)
 
-    fun isValidColor(color: Color): Boolean = gameState.get().orderedColors.contains(color)
+    fun isValidColor(color: Color): Boolean = gameState.get().isValid(color)
 
     init {
         subscribe<NewGameState> { event ->
