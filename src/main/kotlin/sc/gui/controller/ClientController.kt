@@ -95,11 +95,10 @@ class ClientController : Controller() {
     var lobbyManager: LobbyManager? = null
     private val listener: UIGameListener = UIGameListener(::newGameState)
 
-    // Do NOT call this directly in the UI thread, use fire(StartGameRequest(gameCreationModel)). This way, the game starting is done in the background
-    // TODO put everything which is activated by events in a different class and call these from the controller by events
+    // Do NOT call this directly in the UI thread, use fire(StartGameRequest(gameCreationModel))
+    // This way, the game starting is done in the background - otherwise the UI will be blocked
+    // TODO put everything triggered by events in a different class and call these from the controller using events
     fun startGame(host: String = "localhost", port: Int = 13050, playerOneSettings: TeamSettings, playerTwoSettings: TeamSettings) {
-        // starting the game in the UI thread blocks the UI
-
         logger.debug("creating and observing")
 
         val players = arrayOf(playerOneSettings, playerTwoSettings).map { teamSettings ->
