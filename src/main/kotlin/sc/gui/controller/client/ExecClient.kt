@@ -8,16 +8,25 @@ import java.io.OutputStream
 
 /** Represents a client started by the GUI from an executable. */
 class ExecClient(val host: String, val port: Int, val clientExecutable: File): ClientInterface {
+    override fun joinAnyGame() {
+        startClient(null)
+    }
+    
     override fun joinPreparedGame(reservation: String) {
-        val args = arrayOf(
+        startClient(reservation)
+    }
+    
+    private fun startClient(reservation: String?) {
+        val command = mutableListOf(
+            clientExecutable.absolutePath,
             "--host", host,
-            "--port", port.toString(),
-            "--reservation", reservation
+            "--port", port.toString()
         )
-        logger.debug("Starting ${clientExecutable.absolutePath} with arguments ${args.joinToString(" ")}")
-        val command = mutableListOf(clientExecutable.absolutePath, *args)
+        if (reservation != null)
+            command.addAll(listOf("--reservation", reservation))
         if (clientExecutable.absolutePath.endsWith(".jar", true))
             command.addAll(0, listOf("java", "-jar"))
+        logger.debug("Starting ${command.joinToString(" ")}")
         val processBuilder = ProcessBuilder(command)
         val process = processBuilder.redirectErrorStream(true).start()
         

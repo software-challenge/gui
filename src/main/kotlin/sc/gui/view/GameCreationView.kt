@@ -99,7 +99,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
                     label("")
                 }
             }
-            PlayerType.MANUAL -> {
+            PlayerType.EXTERNAL -> {
                 root.center = label("Spieler muss nach Erstellung des Spiels manuell gestartet werden")
                 root.bottom = label("")
             }

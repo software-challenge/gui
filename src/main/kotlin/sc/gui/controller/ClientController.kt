@@ -7,6 +7,7 @@ import sc.api.plugins.exceptions.GameLogicException
 import sc.framework.plugins.Player
 import sc.gui.*
 import sc.gui.controller.client.ExecClient
+import sc.gui.controller.client.ExternalClient
 import sc.gui.controller.client.InternalClient
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
@@ -26,41 +27,41 @@ import java.util.concurrent.CompletableFuture
 
 // This is the listener to update the global state of the server (lobby)
 class UILobbyListener : ILobbyClientListener {
-    override fun onNewState(roomId: String?, state: IGameState?) {
+    override fun onNewState(roomId: String, state: IGameState) {
         logger.debug("listener: onNewState")
         val gameState = state as GameState
         logger.debug("This is what I got: $gameState")
     }
 
-    override fun onError(roomId: String?, error: ProtocolErrorMessage?) {
+    override fun onError(roomId: String, error: ProtocolErrorMessage) {
         logger.debug("listener: onError")
     }
 
-    override fun onRoomMessage(roomId: String?, data: ProtocolMessage?) {
+    override fun onRoomMessage(roomId: String, data: ProtocolMessage) {
         logger.debug("listener: onRoomMessage")
     }
 
-    override fun onGamePrepared(response: PrepareGameProtocolMessage?) {
+    override fun onGamePrepared(response: PrepareGameProtocolMessage) {
         logger.debug("listener: onGamePrepared")
     }
 
-    override fun onGameLeft(roomId: String?) {
+    override fun onGameLeft(roomId: String) {
         logger.debug("listener: onGameLeft")
     }
 
-    override fun onGameJoined(roomId: String?) {
+    override fun onGameJoined(roomId: String) {
         logger.debug("listener: onGameJoined")
     }
 
-    override fun onGameOver(roomId: String?, data: GameResult?) {
+    override fun onGameOver(roomId: String, data: GameResult) {
         logger.debug("listener: onGameOver")
     }
 
-    override fun onGamePaused(roomId: String?, nextPlayer: Player?) {
+    override fun onGamePaused(roomId: String, nextPlayer: Player) {
         logger.debug("listener: onGamePaused")
     }
 
-    override fun onGameObserved(roomId: String?) {
+    override fun onGameObserved(roomId: String) {
         logger.debug("listener: onGameObserved")
     }
 
@@ -70,12 +71,12 @@ class UILobbyListener : ILobbyClientListener {
 }
 
 class UIGameListener(val onUpdateHandler: () -> Unit) : IUpdateListener {
-    override fun onUpdate(sender: Any?) {
+    override fun onUpdate(sender: Any) {
         logger.debug("game listener: onUpdate")
         onUpdateHandler()
     }
 
-    override fun onError(sender: String?) {
+    override fun onError(sender: String) {
         logger.debug("game listener: onError")
     }
 
@@ -106,13 +107,13 @@ class ClientController : Controller() {
                 PlayerType.HUMAN -> InternalClient(host, port, type, ::humanMoveRequest)
                 PlayerType.COMPUTER_EXAMPLE -> InternalClient(host, port, type, ::testClientMoveRequest)
                 PlayerType.COMPUTER -> ExecClient(host, port, teamSettings.executable.get())
-                PlayerType.MANUAL -> InternalClient(host, port, type, ::testClientMoveRequest)
+                PlayerType.EXTERNAL -> ExternalClient(host, port)
                 else -> throw IllegalArgumentException("Cannot create game: Invalid playerType $type")
             }
         }
 
         lobbyManager = LobbyManager(host, port).apply {
-            startNewGame(players, players.none { it.type == PlayerType.HUMAN }, listener) { result ->
+            startNewGame(players, players.none { it.type == PlayerType.EXTERNAL }, players.none { it.type == PlayerType.HUMAN }, listener) { result ->
                 fire(GameOverEvent(result))
             }
         }
