@@ -42,6 +42,7 @@ class LobbyManager(host: String, port: Int) {
     }
     
     fun startNewGame(players: Collection<ClientInterface>, prepared: Boolean, paused: Boolean, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
+        logger.debug("Starting new game (prepared: {}, paused: {}, players: {})", prepared, paused, players)
         this.lobbyListener.setGameOverHandler(onGameOver)
         val observeRoom = { roomId: String ->
             game = lobby.observeAndControl(roomId, paused).apply { addListener(listener) }
@@ -66,14 +67,17 @@ class LobbyManager(host: String, port: Int) {
             }
         } else {
             val iter = players.iterator()
-            lobbyListener.onAnyJoin { roomId ->
-                lobbyListener.onJoin(roomId) {
-                    if (iter.hasNext())
-                        iter.next().joinAnyGame()
-                }
-                observeRoom(roomId)
+            val join = {
+                if (iter.hasNext())
+                    iter.next().joinAnyGame()
             }
-            iter.next().joinAnyGame()
+            lobbyListener.onAnyJoin { roomId ->
+                logger.debug("LobbyManager started room $roomId")
+                lobbyListener.onJoin(roomId, join)
+                observeRoom(roomId)
+                join()
+            }
+            join()
         }
     }
     
