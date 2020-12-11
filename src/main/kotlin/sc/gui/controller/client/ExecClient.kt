@@ -8,6 +8,8 @@ import java.io.OutputStream
 
 /** Represents a client started by the GUI from an executable. */
 class ExecClient(val host: String, val port: Int, val clientExecutable: File): ClientInterface {
+    override val type = PlayerType.COMPUTER
+    
     override fun joinAnyGame() {
         startClient(null)
     }
@@ -35,7 +37,7 @@ class ExecClient(val host: String, val port: Int, val clientExecutable: File): C
         }
     }
     
-    override val type = PlayerType.COMPUTER
+    override fun toString() = super.toString() + " on $host:$port running '$clientExecutable'"
     
     companion object {
         val logger: Logger = LoggerFactory.getLogger(ExecClient::class.java)

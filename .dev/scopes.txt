@@ -5,6 +5,7 @@ ci
 
 ui
 view
-controller
 model
 networking
+controller
+clients
