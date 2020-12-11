@@ -16,7 +16,7 @@ import sc.networking.clients.IUpdateListener
 import sc.plugin2021.GameState
 import sc.plugin2021.Move
 import sc.plugin2021.util.GameRuleLogic
-import sc.protocol.responses.PrepareGameProtocolMessage
+import sc.protocol.responses.GamePreparedResponse
 import sc.protocol.responses.ProtocolErrorMessage
 import sc.protocol.responses.ProtocolMessage
 import sc.shared.GameResult
@@ -41,7 +41,7 @@ class UILobbyListener : ILobbyClientListener {
         logger.debug("listener: onRoomMessage")
     }
 
-    override fun onGamePrepared(response: PrepareGameProtocolMessage) {
+    override fun onGamePrepared(response: GamePreparedResponse) {
         logger.debug("listener: onGamePrepared")
     }
 
