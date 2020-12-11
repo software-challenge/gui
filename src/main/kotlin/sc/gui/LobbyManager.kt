@@ -8,8 +8,9 @@ import sc.gui.controller.client.ClientInterface
 import sc.networking.clients.*
 import sc.plugin2021.GamePlugin
 import sc.protocol.helpers.RequestResult
+import sc.protocol.requests.ControlTimeoutRequest
 import sc.protocol.requests.PrepareGameRequest
-import sc.protocol.responses.PrepareGameProtocolMessage
+import sc.protocol.responses.GamePreparedResponse
 import sc.protocol.responses.ProtocolErrorMessage
 import sc.protocol.responses.ProtocolMessage
 import sc.server.Configuration
@@ -75,18 +76,12 @@ class LobbyManager(host: String, port: Int) {
                 logger.debug("LobbyManager started room $roomId")
                 lobbyListener.onJoin(roomId, join)
                 observeRoom(roomId)
+                players.indices.forEach {
+                    lobby.send(ControlTimeoutRequest(roomId, false, it))
+                }
                 join()
             }
             join()
-        }
-    }
-    
-    private fun joinPlayers(players: Iterator<ClientInterface>, roomId: String) {
-        if (players.hasNext()) {
-            lobbyListener.onJoin(roomId) {
-                joinPlayers(players, roomId)
-            }
-            players.next().joinAnyGame()
         }
     }
     
@@ -114,7 +109,7 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
         logger.debug("lobby: new message for $roomId")
     }
     
-    override fun onGamePrepared(response: PrepareGameProtocolMessage) {
+    override fun onGamePrepared(response: GamePreparedResponse) {
         logger.debug("lobby: game was prepared")
     }
     
