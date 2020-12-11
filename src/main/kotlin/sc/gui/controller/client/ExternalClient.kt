@@ -12,4 +12,6 @@ class ExternalClient(private val host: String, private val port: Int) : ClientIn
     override fun joinPreparedGame(reservation: String) {
         throw Exception("External/Manual client can't join a prepared game (reservation: $reservation)")
     }
+    
+    override fun toString() = super.toString() + " on $host:$port"
 }
