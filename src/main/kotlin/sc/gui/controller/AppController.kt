@@ -13,6 +13,10 @@ class AppController: Controller() {
 	fun changeViewTo(newView: ViewType) {
 		val current = model.currentView.get()
 		logger.debug("Requested View change from ${current.name} -> $newView")
+		if (current == newView) {
+			logger.warn("Noop view change request!")
+			return
+		}
 		find(current.view).replaceWith(newView.view)
 		model.previousView.set(current)
 		model.currentView.set(newView)
@@ -31,7 +35,8 @@ fun WritableValue<Boolean>.toggle() {
 
 val ViewType.view
 	get() = when(this) {
-		ViewType.GAME_CREATION -> GameCreationView::class
-		ViewType.GAME -> GameView::class
 		ViewType.START -> StartView::class
+		ViewType.GAME_CREATION -> GameCreationView::class
+        ViewType.GAME_LOADING -> GameLoadingView::class
+		ViewType.GAME -> GameView::class
 	}

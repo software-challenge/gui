@@ -13,7 +13,6 @@ class ServerController : Controller() {
     private val server = Lobby()
 
     fun startServer() {
-
         // output logback diagnostics to see if a logback.xml config was found
         val  lc = LoggerFactory.getILoggerFactory() as LoggerContext
         StatusPrinter.print(lc)
@@ -21,7 +20,7 @@ class ServerController : Controller() {
         Configuration.loadServerProperties()
         try {
             server.start()
-            //server.gameManager.pluginManager.loadPlugin(Game.javaClass, server.gameManager.pluginApi)
+            // TODO get address & port from server
         } catch (e: IOException) {
             e.printStackTrace()
             return

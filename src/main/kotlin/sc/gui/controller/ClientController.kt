@@ -1,16 +1,20 @@
 package sc.gui.controller
 
+import javafx.application.Platform
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
 import sc.api.plugins.exceptions.GameLogicException
 import sc.framework.plugins.Player
-import sc.gui.*
+import sc.gui.LobbyManager
 import sc.gui.controller.client.ExecClient
 import sc.gui.controller.client.ExternalClient
 import sc.gui.controller.client.InternalClient
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
+import sc.gui.model.ViewType
+import sc.gui.serverAddress
+import sc.gui.serverPort
 import sc.networking.clients.ILobbyClientListener
 import sc.networking.clients.IUpdateListener
 import sc.plugin2021.GameState
@@ -26,83 +30,84 @@ import tornadofx.FXEvent
 import java.util.concurrent.CompletableFuture
 
 // This is the listener to update the global state of the server (lobby)
-class UILobbyListener : ILobbyClientListener {
+class UILobbyListener: ILobbyClientListener {
     override fun onNewState(roomId: String, state: IGameState) {
         logger.debug("listener: onNewState")
         val gameState = state as GameState
         logger.debug("This is what I got: $gameState")
     }
-
+    
     override fun onError(roomId: String, error: ProtocolErrorMessage) {
         logger.debug("listener: onError")
     }
-
+    
     override fun onRoomMessage(roomId: String, data: ProtocolMessage) {
         logger.debug("listener: onRoomMessage")
     }
-
+    
     override fun onGamePrepared(response: GamePreparedResponse) {
         logger.debug("listener: onGamePrepared")
     }
-
+    
     override fun onGameLeft(roomId: String) {
         logger.debug("listener: onGameLeft")
     }
-
+    
     override fun onGameJoined(roomId: String) {
         logger.debug("listener: onGameJoined")
     }
-
+    
     override fun onGameOver(roomId: String, data: GameResult) {
         logger.debug("listener: onGameOver")
     }
-
+    
     override fun onGamePaused(roomId: String, nextPlayer: Player) {
         logger.debug("listener: onGamePaused")
     }
-
+    
     override fun onGameObserved(roomId: String) {
         logger.debug("listener: onGameObserved")
     }
-
+    
     companion object {
         val logger: Logger = LoggerFactory.getLogger(ClientController::class.java)
     }
 }
 
-class UIGameListener(val onUpdateHandler: () -> Unit) : IUpdateListener {
+class UIGameListener(val onUpdateHandler: () -> Unit): IUpdateListener {
     override fun onUpdate(sender: Any) {
         logger.debug("game listener: onUpdate")
         onUpdateHandler()
     }
-
+    
     override fun onError(sender: String) {
         logger.debug("game listener: onError")
     }
-
+    
     companion object {
         val logger: Logger = LoggerFactory.getLogger(ClientController::class.java)
     }
 }
 
-class StartGameRequest(val playerOneSettings: TeamSettings, val playerTwoSettings: TeamSettings) : FXEvent(EventBus.RunOn.BackgroundThread)
-class NewGameState(val gameState: GameState) : FXEvent()
-class HumanMoveRequest(val gameState: GameState) : FXEvent()
-class HumanMoveAction(val move: Move) : FXEvent()
-class GameOverEvent(val result: GameResult) : FXEvent()
+class StartGameRequest(val playerOneSettings: TeamSettings, val playerTwoSettings: TeamSettings): FXEvent(EventBus.RunOn.BackgroundThread)
+class NewGameState(val gameState: GameState): FXEvent()
+class HumanMoveRequest(val gameState: GameState): FXEvent()
+class HumanMoveAction(val move: Move): FXEvent()
+class GameOverEvent(val result: GameResult): FXEvent()
 
-
-class ClientController : Controller() {
+class ClientController: Controller() {
+    private val appController: AppController by inject()
+    
     var lobbyManager: LobbyManager? = null
     private val listener: UIGameListener = UIGameListener(::newGameState)
-
+    
     // Do NOT call this directly in the UI thread, use fire(StartGameRequest(gameCreationModel))
     // This way, the game starting is done in the background - otherwise the UI will be blocked
     // TODO put everything triggered by events in a different class and call these from the controller using events
-    fun startGame(host: String = "localhost", port: Int = 13050, playerOneSettings: TeamSettings, playerTwoSettings: TeamSettings) {
-        logger.debug("creating and observing")
-
-        val players = arrayOf(playerOneSettings, playerTwoSettings).map { teamSettings ->
+    fun startGame(playerSettings: Array<TeamSettings>, host: String = serverAddress, port: Int = serverPort) {
+        logger.debug("Creating and observing game on $host:$port")
+        
+        val players = playerSettings.map { teamSettings ->
             when (val type = teamSettings.type.value) {
                 PlayerType.HUMAN -> InternalClient(host, port, type, ::humanMoveRequest)
                 PlayerType.COMPUTER_EXAMPLE -> InternalClient(host, port, type, ::testClientMoveRequest)
@@ -111,14 +116,23 @@ class ClientController : Controller() {
                 else -> throw IllegalArgumentException("Cannot create game: Invalid playerType $type")
             }
         }
-
+        
         lobbyManager = LobbyManager(host, port).apply {
-            startNewGame(players, players.none { it.type == PlayerType.EXTERNAL }, players.none { it.type == PlayerType.HUMAN }, listener) { result ->
+            startNewGame(players, players.none { it.type == PlayerType.EXTERNAL }, players.none { it.type == PlayerType.HUMAN }, listener, { error ->
+                if (error != null) {
+                    // TODO proper error screen
+                    logger.error("Failed to start game!", error)
+                } else {
+                    Platform.runLater {
+                        appController.changeViewTo(ViewType.GAME)
+                    }
+                }
+            }, { result ->
                 fire(GameOverEvent(result))
-            }
+            })
         }
     }
-
+    
     fun newGameState() {
         logger.debug("ClientController got new update")
         val gameControl = lobbyManager?.game
@@ -134,7 +148,7 @@ class ClientController : Controller() {
             logger.debug("no controlling client yet")
         }
     }
-
+    
     fun humanMoveRequest(gameState: GameState): CompletableFuture<Move> {
         val future = CompletableFuture<Move>()
         subscribe<HumanMoveAction>(1) {
@@ -146,7 +160,7 @@ class ClientController : Controller() {
     
     fun testClientMoveRequest(state: GameState): CompletableFuture<Move> {
         val possibleMoves = GameRuleLogic.getPossibleMoves(state)
-        if(possibleMoves.isEmpty())
+        if (possibleMoves.isEmpty())
             throw GameLogicException("No possible Moves found!")
         return CompletableFuture.completedFuture(possibleMoves.random())
     }
@@ -158,17 +172,17 @@ class ClientController : Controller() {
             fire(NewGameState(gameState))
         }
     }
-
+    
     fun previous() {
         lobbyManager?.game?.previous()
         updateGameState()
     }
-
+    
     fun next() {
         lobbyManager?.game?.next()
         updateGameState()
     }
-
+    
     fun togglePause() {
         val game = lobbyManager?.game
         if (game != null) {
@@ -179,7 +193,7 @@ class ClientController : Controller() {
             }
         }
     }
-
+    
     companion object {
         val logger: Logger = LoggerFactory.getLogger(ClientController::class.java)
     }

@@ -10,13 +10,11 @@ import sc.plugin2021.util.Constants
 import tornadofx.*
 
 class GameView : View() {
-    private val clientController: ClientController by inject()
     private val gameController: GameController by inject()
     private val redUndeployedPieces = UndeployedPiecesFragment(Color.RED, gameController.undeployedRedPieces, gameController.validRedPieces)
     private val blueUndeployedPieces = UndeployedPiecesFragment(Color.BLUE, gameController.undeployedBluePieces, gameController.validBluePieces)
     private val greenUndeployedPieces = UndeployedPiecesFragment(Color.GREEN, gameController.undeployedGreenPieces, gameController.validGreenPieces)
     private val yellowUndeployedPieces = UndeployedPiecesFragment(Color.YELLOW, gameController.undeployedYellowPieces, gameController.validYellowPieces)
-
 
     private val leftPane = vbox {
         this += blueUndeployedPieces
@@ -107,15 +105,10 @@ class GameView : View() {
     }
 
     init {
-        subscribe<StartGameRequest> { event ->
-            clientController.startGame("localhost", 13050, event.playerOneSettings, event.playerTwoSettings)
-        }
-
         redUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
         blueUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
         yellowUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
         greenUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
-
 
         val resizer = ChangeListener<Number> { _, _, _ -> resize() }
         // responsive scaling
