@@ -4,9 +4,10 @@ import sc.gui.view.AppView
 import tornadofx.*
 
 enum class ViewType {
+    START,
     GAME_CREATION,
+    GAME_LOADING,
     GAME,
-    START
 }
 
 class AppModel : ItemViewModel<AppView>() {

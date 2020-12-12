@@ -19,11 +19,12 @@ import sc.shared.SlotDescriptor
 import java.net.ConnectException
 import kotlin.system.exitProcess
 
+data class GameStartException(val error: ProtocolErrorMessage) : Exception("Failed to start game: ${error.message}")
+
 class LobbyManager(host: String, port: Int) {
     var game: IControllableGame? = null
     
     private val lobbyListener: LobbyListener
-    private val adminListener: AdminListener
     
     private val lobby: LobbyClient = try {
         LobbyClient(host, port)
@@ -35,14 +36,11 @@ class LobbyManager(host: String, port: Int) {
     init {
         lobby.start()
         lobby.authenticate(Configuration.get(Configuration.PASSWORD_KEY))
-        // these listeners are just there to see which events we get (seems like we get not many)
         lobbyListener = LobbyListener(logger)
-        adminListener = AdminListener(logger)
         lobby.addListener(lobbyListener)
-        lobby.addListener(adminListener)
     }
     
-    fun startNewGame(players: Collection<ClientInterface>, prepared: Boolean, paused: Boolean, listener: IUpdateListener, onGameOver: (result: GameResult) -> Unit) {
+    fun startNewGame(players: Collection<ClientInterface>, prepared: Boolean, paused: Boolean, listener: IUpdateListener, onGameStarted: (error: Throwable?) -> Unit, onGameOver: (result: GameResult) -> Unit) {
         logger.debug("Starting new game (prepared: {}, paused: {}, players: {})", prepared, paused, players)
         this.lobbyListener.setGameOverHandler(onGameOver)
         val observeRoom = { roomId: String ->
@@ -62,15 +60,18 @@ class LobbyManager(host: String, port: Int) {
                     val preparation = requestResult.result
                     observeRoom(preparation.roomId)
                     players.forEachIndexed { i, player -> player.joinPreparedGame(preparation.reservations[i]) }
+                    onGameStarted(null)
                 }
                 is RequestResult.Error ->
-                    logger.error("Could not prepare game!", requestResult.error)
+                    onGameStarted(GameStartException(requestResult.error))
             }
         } else {
             val iter = players.iterator()
             val join = {
                 if (iter.hasNext())
                     iter.next().joinAnyGame()
+                else
+                    onGameStarted(null)
             }
             lobbyListener.onAnyJoin { roomId ->
                 logger.debug("LobbyManager started room $roomId")
@@ -157,10 +158,3 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
     }
     
 }
-
-class AdminListener(val logger: Logger): IAdministrativeListener {
-    override fun onGamePaused(roomId: String, nextPlayer: Player) {
-        logger.debug("admin: game paused")
-    }
-}
-

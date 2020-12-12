@@ -26,10 +26,10 @@ class GameCreationController : Controller() {
     fun createGame() {
         playerOneSettingsModel.commit()
         playerTwoSettingsModel.commit()
-        appController.changeViewTo(ViewType.GAME)
+        appController.changeViewTo(ViewType.GAME_LOADING)
 
         fire(StartGameRequest(playerOneSettingsModel.item, playerTwoSettingsModel.item))
     }
     
-    val hasHumanPlayer = Bindings.createBooleanBinding(Callable { playerOneSettings.isHuman || playerTwoSettings.isHuman }, playerOneSettings.type, playerTwoSettings.type)
+    val hasHumanPlayer = Bindings.createBooleanBinding({ playerOneSettings.isHuman || playerTwoSettings.isHuman }, playerOneSettings.type, playerTwoSettings.type)
 }
