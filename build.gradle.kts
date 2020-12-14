@@ -1,12 +1,11 @@
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val versionNumber = "21.1.0"
+val versionNumber = "21.2.0"
 
 val minJavaVersion = JavaVersion.VERSION_11
 plugins {
-	// Declared twice because plugins block has its own scope
-	val minJavaVersion = JavaVersion.VERSION_11
+	val minJavaVersion = JavaVersion.VERSION_11 // Declared twice because plugins block has its own scope
 	require(JavaVersion.current() >= minJavaVersion) {
 		"Building requires at least JDK $minJavaVersion - please look into the README."
 	}
