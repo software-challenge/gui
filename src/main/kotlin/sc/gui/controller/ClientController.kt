@@ -117,6 +117,7 @@ class ClientController: Controller() {
             }
         }
         
+        lobbyManager?.game?.cancel()
         lobbyManager = LobbyManager(host, port).apply {
             startNewGame(players, players.none { it.type == PlayerType.EXTERNAL }, players.none { it.type == PlayerType.HUMAN }, listener, { error ->
                 if (error != null) {
