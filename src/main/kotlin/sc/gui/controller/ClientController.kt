@@ -128,7 +128,7 @@ class ClientController: Controller() {
                         appController.changeViewTo(ViewType.GAME)
                     }
                 }
-            }, { result ->
+            }, { room, result ->
                 fire(GameOverEvent(result))
             })
         }

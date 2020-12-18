@@ -17,9 +17,11 @@ import sc.server.Configuration
 import sc.shared.GameResult
 import sc.shared.SlotDescriptor
 import java.net.ConnectException
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Future
 import kotlin.system.exitProcess
 
-data class GameStartException(val error: ProtocolErrorMessage) : Exception("Failed to start game: ${error.message}")
+data class GameStartException(val error: ProtocolErrorMessage): Exception("Failed to start game: ${error.message}")
 
 class LobbyManager(host: String, port: Int) {
     var game: IControllableGame? = null
@@ -40,10 +42,12 @@ class LobbyManager(host: String, port: Int) {
         lobby.addListener(lobbyListener)
     }
     
-    fun startNewGame(players: Collection<ClientInterface>, prepared: Boolean, paused: Boolean, listener: IUpdateListener, onGameStarted: (error: Throwable?) -> Unit, onGameOver: (result: GameResult) -> Unit) {
+    fun startNewGame(players: Collection<ClientInterface>, prepared: Boolean, paused: Boolean, listener: IUpdateListener, onGameStarted: (error: Throwable?) -> Unit, onGameOver: (roomId: String, result: GameResult) -> Unit): Future<String> {
         logger.debug("Starting new game (prepared: {}, paused: {}, players: {})", prepared, paused, players)
-        this.lobbyListener.setGameOverHandler(onGameOver)
+        val result = CompletableFuture<String>()
         val observeRoom = { roomId: String ->
+            result.complete(roomId)
+            this.lobbyListener.setGameOverHandler(roomId) { result -> onGameOver(roomId, result) }
             game = lobby.observeAndControl(roomId, paused).apply { addListener(listener) }
         }
         
@@ -84,6 +88,7 @@ class LobbyManager(host: String, port: Int) {
             }
             join()
         }
+        return result
     }
     
     companion object {
@@ -91,9 +96,11 @@ class LobbyManager(host: String, port: Int) {
     }
 }
 
+typealias GameOverHandler = (GameResult) -> Unit
+
 class LobbyListener(val logger: Logger): ILobbyClientListener {
     
-    private var gameOverHandler: (result: GameResult) -> Unit = {}
+    private val gameOverHandlers = HashMap<String, GameOverHandler>()
     
     private val roomsJoined = HashMap<String, Int>()
     private val waiters: MutableMap<String?, MutableCollection<(String) -> Unit>> = HashMap()
@@ -142,7 +149,7 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
     
     override fun onGameOver(roomId: String, data: GameResult) {
         logger.debug("lobby: $roomId game is over")
-        gameOverHandler(data)
+        gameOverHandlers[roomId]?.invoke(data)
     }
     
     override fun onGamePaused(roomId: String, nextPlayer: Player) {
@@ -153,8 +160,8 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
         logger.debug("lobby: $roomId game was observed")
     }
     
-    fun setGameOverHandler(handler: (result: GameResult) -> Unit) {
-        this.gameOverHandler = handler
+    fun setGameOverHandler(roomId: String, handler: GameOverHandler) {
+        gameOverHandlers[roomId] = handler
     }
     
 }
