@@ -21,18 +21,9 @@ class StatusBinding(private val game: GameController) : StringBinding() {
         bind(game.gameResult)
     }
 
-    fun translateColor(color: Color): String {
-        return when(color) {
-            Color.RED -> "Rot"
-            Color.GREEN -> "Grün"
-            Color.YELLOW -> "Gelb"
-            Color.BLUE -> "Blau"
-        }
-    }
-
     fun winner(gameResult: GameResult): String = gameResult.winners?.firstOrNull()?.let { player ->
         player.displayName + " (Farben " +
-                (player.color as Team).colors.joinToString(", ", transform = ::translateColor) +
+                (player.color as Team).colors.joinToString(", ", transform = Color::german) +
                 ") hat gewonnen!"
     } ?: "Unentschieden!"
 
@@ -57,10 +48,7 @@ class StatusBinding(private val game: GameController) : StringBinding() {
                     ${winner(gameResult)}
                     ${irregularities(gameResult)}
                 """.trimIndent()
-            } ?: when(game.currentTeam.get()) {
-                    Team.ONE -> "Erstes Team"
-                    Team.TWO -> "Zweites Team"
-                } + ", Farbe " + translateColor(game.currentColor.get()) + " ist dran (Zug ${game.currentTurn.get()})"
+            } ?: "${game.currentTeam.get()}, ${game.currentColor.get()} ist dran (Zug ${game.currentTurn.get()})"
         }
         return "Drücke auf Start"
     }
