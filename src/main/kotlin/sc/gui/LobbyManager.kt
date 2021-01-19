@@ -5,7 +5,10 @@ import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
 import sc.framework.plugins.Player
 import sc.gui.controller.client.ClientInterface
-import sc.networking.clients.*
+import sc.networking.clients.IControllableGame
+import sc.networking.clients.ILobbyClientListener
+import sc.networking.clients.IUpdateListener
+import sc.networking.clients.LobbyClient
 import sc.plugin2021.GamePlugin
 import sc.protocol.helpers.RequestResult
 import sc.protocol.requests.ControlTimeoutRequest
@@ -40,7 +43,7 @@ class LobbyManager(host: String, port: Int) {
         lobby.addListener(lobbyListener)
     }
     
-    fun startNewGame(players: Collection<ClientInterface>, prepared: Boolean, paused: Boolean, listener: IUpdateListener, onGameStarted: (error: Throwable?) -> Unit, onGameOver: (result: GameResult) -> Unit) {
+    fun startNewGame(players: Collection<ClientInterface>, playerNames: Collection<String>, prepared: Boolean, paused: Boolean, listener: IUpdateListener, onGameStarted: (error: Throwable?) -> Unit, onGameOver: (result: GameResult) -> Unit) {
         logger.debug("Starting new game (prepared: {}, paused: {}, players: {})", prepared, paused, players)
         this.lobbyListener.setGameOverHandler(onGameOver)
         val observeRoom = { roomId: String ->
@@ -50,8 +53,8 @@ class LobbyManager(host: String, port: Int) {
         if (prepared) {
             val requestResult = lobby.prepareGameAndWait(PrepareGameRequest(
                 GamePlugin.PLUGIN_UUID,
-                SlotDescriptor("One", false),
-                SlotDescriptor("Two", false),
+                SlotDescriptor(playerNames.first(), false),
+                SlotDescriptor(playerNames.last(), false),
                 paused
             ))
             
