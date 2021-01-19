@@ -119,7 +119,7 @@ class ClientController: Controller() {
         
         lobbyManager?.game?.cancel()
         lobbyManager = LobbyManager(host, port).apply {
-            startNewGame(players, players.none { it.type == PlayerType.EXTERNAL }, players.none { it.type == PlayerType.HUMAN }, listener, { error ->
+            startNewGame(players, playerSettings.map { it.name.get() }, players.none { it.type == PlayerType.EXTERNAL }, players.none { it.type == PlayerType.HUMAN }, listener, { error ->
                 if (error != null) {
                     // TODO proper error screen
                     logger.error("Failed to start game!", error)
