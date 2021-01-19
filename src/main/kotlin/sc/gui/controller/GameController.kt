@@ -147,6 +147,8 @@ class GameController : Controller() {
     val previousColor = objectProperty(Color.RED)
     val teamOneScore = objectProperty(0)
     val teamTwoScore = objectProperty(0)
+    
+    val playerNames = objectProperty<Array<String>>()
     val gameResult: ObjectProperty<GameResult?> = objectProperty(null)
 
     // we need to have them split separately otherwise we cannot listen to a specific color alone
@@ -185,6 +187,7 @@ class GameController : Controller() {
                 currentColor.set(state.currentColor)
                 currentTeam.set(state.currentTeam)
             }
+            playerNames.set(state.playerNames)
             undeployedRedPieces.set(state.undeployedPieceShapes(Color.RED))
             undeployedBluePieces.set(state.undeployedPieceShapes(Color.BLUE))
             undeployedGreenPieces.set(state.undeployedPieceShapes(Color.GREEN))
