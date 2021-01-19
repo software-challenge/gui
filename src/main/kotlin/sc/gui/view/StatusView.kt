@@ -18,6 +18,7 @@ class StatusBinding(private val game: GameController) : StringBinding() {
         bind(game.isHumanTurn)
         bind(game.currentColor)
         bind(game.gameResult)
+        bind(game.playerNames)
     }
 
     fun winner(gameResult: GameResult): String = gameResult.winners?.firstOrNull()?.let { player ->
@@ -47,7 +48,7 @@ class StatusBinding(private val game: GameController) : StringBinding() {
                 ${winner(gameResult)}
                 ${irregularities(gameResult)}
             """.trimIndent()
-        } ?: "${game.currentTeam.get()}, ${game.currentColor.get()} ist dran"
+        } ?: "${game.playerNames.get()?.get(game.currentTeam.get().index) ?: game.currentTeam.get()}, ${game.currentColor.get()} ist dran"
     }
 }
 
