@@ -3,7 +3,6 @@ package sc.gui.view
 import javafx.beans.binding.StringBinding
 import javafx.geometry.Pos
 import javafx.scene.control.Label
-import sc.api.plugins.ITeam
 import sc.gui.AppStyle
 import sc.gui.controller.GameController
 import sc.plugin2021.Color
@@ -22,9 +21,8 @@ class StatusBinding(private val game: GameController) : StringBinding() {
     }
 
     fun winner(gameResult: GameResult): String = gameResult.winners?.firstOrNull()?.let { player ->
-        player.displayName + " (Farben " +
-                (player.color as Team).colors.joinToString(", ", transform = Color::german) +
-                ") hat gewonnen!"
+        player.displayName +
+        " (" + (player.color as Team).colors.joinToString("+", transform = Color::german) + ") hat gewonnen!"
     } ?: "Unentschieden!"
 
     fun irregularities(gameResult: GameResult): String {
@@ -42,30 +40,30 @@ class StatusBinding(private val game: GameController) : StringBinding() {
     }
 
     override fun computeValue(): String {
-        if(game.currentTurn.get() > 0) {
-            return game.gameResult.get()?.let { gameResult -> """
-                    Spiel ist beendet
-                    ${winner(gameResult)}
-                    ${irregularities(gameResult)}
-                """.trimIndent()
-            } ?: "${game.currentTeam.get()}, ${game.currentColor.get()} ist dran (Zug ${game.currentTurn.get()})"
-        }
-        return "Drücke auf Start"
+        if(game.currentTurn.get() <= 0)
+            return "Drücke auf Start"
+        return game.gameResult.get()?.let { gameResult -> """
+                Spiel ist beendet
+                ${winner(gameResult)}
+                ${irregularities(gameResult)}
+            """.trimIndent()
+        } ?: "${game.currentTeam.get()}, ${game.currentColor.get()} ist dran"
     }
 }
 
 class ScoreBinding(private val game: GameController) : StringBinding() {
     init {
+        bind(game.currentRound)
         bind(game.teamOneScore)
         bind(game.teamTwoScore)
     }
 
     override fun computeValue(): String {
-        return "${game.teamOneScore.get()} : ${game.teamTwoScore.get()}"
+        return "Runde ${game.currentRound.get()} - ${game.teamOneScore.get()} : ${game.teamTwoScore.get()}"
     }
 }
 
-class StatusView() : View() {
+class StatusView : View() {
     private val game: GameController by inject()
     private val scoreLabel = Label()
     private val statusLabel = Label()

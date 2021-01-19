@@ -6,12 +6,12 @@ import javafx.beans.property.ObjectProperty
 import javafx.beans.property.Property
 import org.slf4j.LoggerFactory
 import sc.gui.model.PiecesModel
-import sc.gui.view.*
+import sc.gui.view.PiecesFragment
 import sc.plugin2021.*
 import sc.plugin2021.util.GameRuleLogic
 import sc.shared.GameResult
-import sc.shared.InvalidMoveException
-import tornadofx.*
+import tornadofx.Controller
+import tornadofx.objectProperty
 import kotlin.math.max
 
 // The following *Binding-classes are necessary to automatically unbind and rebind to a new piece (when switched)
@@ -34,7 +34,7 @@ class ColorBinding(piece: Property<PiecesModel>) : ObjectBinding<Color>() {
     }
 
     override fun computeValue(): Color {
-        logger.debug("Color: ${model.value.colorProperty().get()}")
+        logger.debug("Color: {}", model.value.colorProperty().get())
         return model.value.colorProperty().get()
     }
 
@@ -139,6 +139,7 @@ class GameController : Controller() {
 
     val availableTurns = objectProperty(0)
     val currentTurn = objectProperty(0)
+    val currentRound = objectProperty(0)
     val currentColor = objectProperty(Color.RED)
     val currentTeam = objectProperty(Team.ONE)
     val isHumanTurn = objectProperty(false)
@@ -195,13 +196,14 @@ class GameController : Controller() {
             validYellowPieces.set(ArrayList())
             availableTurns.set(max(availableTurns.get(), state.turn))
             currentTurn.set(state.turn)
+            currentRound.set(state.round)
             teamOneScore.set(state.getPointsForPlayer(Team.ONE))
             teamTwoScore.set(state.getPointsForPlayer(Team.TWO))
         }
         subscribe<HumanMoveRequest> { event ->
-            logger.debug("Human move request")
-
             val state = event.gameState
+            logger.debug("Human move request for ${state.currentColor}")
+            
             val moves = state.undeployedPieceShapes().map {
                 it to GameRuleLogic.getPossibleMovesForShape(state, it)
             }.toMap()
@@ -232,6 +234,7 @@ class GameController : Controller() {
         boardController.board.boardProperty().set(Board())
         availableTurns.set(0)
         currentTurn.set(0)
+        currentRound.set(0)
         undeployedRedPieces.set(PieceShape.values().toList())
         undeployedBluePieces.set(PieceShape.values().toList())
         undeployedGreenPieces.set(PieceShape.values().toList())
