@@ -27,7 +27,7 @@ class ExecClient(val host: String, val port: Int, val clientExecutable: File): C
         if (reservation != null)
             command.addAll(listOf("--reservation", reservation))
         if (clientExecutable.absolutePath.endsWith(".jar", true))
-            command.addAll(0, listOf("java", "-jar"))
+            command.addAll(0, listOf(File(System.getProperty("java.home")).resolve("bin/java").takeIf { it.exists() }?.toString() ?: "java", "-jar"))
         logger.debug("Starting ${command.joinToString(" ")}")
         val processBuilder = ProcessBuilder(command)
         val process = processBuilder.redirectErrorStream(true).start()
