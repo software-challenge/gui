@@ -158,6 +158,8 @@ class GameController : Controller() {
         Color.values().associateWith { objectProperty(emptyList()) })
 
     // use selected* to access the property of currentPiece in order to always correctly be automatically rebind
+    // TODO maybe this should be nullable rather than having a random default -
+    //  then it could also be unset to prevent spurious errors like https://github.com/CAU-Kiel-Tech-Inf/gui/issues/43
     val currentPiece = objectProperty(PiecesModel(Color.RED, PieceShape.MONO))
     val selectedColor: ColorBinding = ColorBinding(currentPiece)
     val selectedShape: ShapeBinding = ShapeBinding(currentPiece)
@@ -195,20 +197,19 @@ class GameController : Controller() {
         }
         subscribe<HumanMoveRequest> { event ->
             val state = event.gameState
-            logger.debug("Human move request for ${state.currentColor}")
-            
             val moves = state.undeployedPieceShapes().map {
                 it to GameRuleLogic.getPossibleMovesForShape(state, it)
             }.toMap()
-            logger.debug("Number of possible moves: ${moves.toList().flatMap { it.second }.size}")
-
+            logger.debug("Human move request for {} - {} possible moves",
+                state.currentColor,
+                moves.values.sumBy { it.size })
+    
             isHumanTurn.set(true)
             canSkip.set(!gameEnded() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(state))
             boardController.calculateIsPlaceableBoard(state.board, state.currentColor)
     
-            validPieces[state.currentColor]!!.set(
-                state.undeployedPieceShapes(state.currentColor)
-                    .filter { shape -> moves[shape]!!.isNotEmpty() })
+            validPieces.getValue(state.currentColor)
+                .set(moves.filterValues { it.isNotEmpty() }.keys)
         }
         subscribe<GameOverEvent> { event ->
             gameResult.set(event.result)
