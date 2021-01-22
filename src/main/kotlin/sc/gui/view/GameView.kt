@@ -4,25 +4,26 @@ import javafx.geometry.Insets
 import javafx.scene.input.KeyCode
 import javafx.scene.input.MouseButton
 import org.slf4j.LoggerFactory
-import sc.gui.controller.*
-import sc.plugin2021.*
+import sc.gui.controller.GameController
+import sc.plugin2021.Color
+import sc.plugin2021.Rotation
+import sc.plugin2021.Team
 import sc.plugin2021.util.Constants
 import tornadofx.*
+import java.util.*
 
 class GameView : View() {
     private val gameController: GameController by inject()
-    private val redUndeployedPieces = UndeployedPiecesFragment(Color.RED, gameController.undeployedRedPieces, gameController.validRedPieces)
-    private val blueUndeployedPieces = UndeployedPiecesFragment(Color.BLUE, gameController.undeployedBluePieces, gameController.validBluePieces)
-    private val greenUndeployedPieces = UndeployedPiecesFragment(Color.GREEN, gameController.undeployedGreenPieces, gameController.validGreenPieces)
-    private val yellowUndeployedPieces = UndeployedPiecesFragment(Color.YELLOW, gameController.undeployedYellowPieces, gameController.validYellowPieces)
-
+    private val undeployedPieces = EnumMap(
+        Color.values().associateWith { color ->
+            UndeployedPiecesFragment(color, gameController.undeployedPieces.getValue(color), gameController.validPieces.getValue(color))
+        })
+    
     private val leftPane = vbox {
-        this += blueUndeployedPieces
-        this += redUndeployedPieces
+        replaceChildren(*undeployedPieces.filterKeys { it.team == Team.ONE }.values.toTypedArray())
     }
     private val rightPane = vbox {
-        this += yellowUndeployedPieces
-        this += greenUndeployedPieces
+        replaceChildren(*undeployedPieces.filterKeys { it.team == Team.TWO }.values.toTypedArray())
     }
     val game = borderpane {
         top(StatusView::class)
@@ -105,10 +106,7 @@ class GameView : View() {
     }
 
     init {
-        redUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
-        blueUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
-        yellowUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
-        greenUndeployedPieces.root.prefHeightProperty().bind(root.heightProperty())
+        undeployedPieces.forEach { (_, pieces) -> pieces.root.prefHeightProperty().bind(root.heightProperty()) }
 
         val resizer = ChangeListener<Number> { _, _, _ -> resize() }
         // responsive scaling

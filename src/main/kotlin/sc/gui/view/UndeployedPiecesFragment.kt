@@ -1,7 +1,6 @@
 package sc.gui.view
 
 import javafx.beans.property.ObjectProperty
-import javafx.beans.property.Property
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
@@ -16,7 +15,11 @@ import sc.plugin2021.Color
 import sc.plugin2021.PieceShape
 import tornadofx.*
 
-class UndeployedPiecesFragment(private val color: Color, undeployedPieces: Property<Collection<PieceShape>>, validPieces: ObjectProperty<ArrayList<PieceShape>>) : Fragment() {
+class UndeployedPiecesFragment(
+    private val color: Color,
+    undeployedPieces: ObjectProperty<Collection<PieceShape>>,
+    validPieces: ObjectProperty<Collection<PieceShape>>
+) : Fragment() {
     val controller: GameController by inject()
     private val boardController: BoardController by inject()
     private val shapes: ObservableList<PieceShape> = FXCollections.observableArrayList(undeployedPieces.value)
