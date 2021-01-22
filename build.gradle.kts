@@ -89,7 +89,10 @@ tasks {
 	}
 	
 	run.configure {
-		workingDir(buildDir.resolve("run").apply { mkdirs() })
+		workingDir(buildDir.resolve("tmp"))
+        doFirst {
+        	workingDir.mkdirs()
+		}
 	}
 	
 	val release by creating {
