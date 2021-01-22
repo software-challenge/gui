@@ -111,18 +111,19 @@ class UndeployedPiecesFragment(
             unplayableNotice.isVisible = turn != 0 && !controller.isValidColor(color)
         }
 
-        validPieces.addListener { _, _, new ->
-            piecesList.forEach {
-                if(new.contains(it.key)) {
-                    it.value.removeClass(AppStyle.pieceUnselectable)
-                } else if (!it.value.hasClass(AppStyle.pieceUnselectable)) {
-                    it.value.addClass(AppStyle.pieceUnselectable)
+        validPieces.addListener { _, _, value ->
+            piecesList.forEach { (piece, box) ->
+                if(value.contains(piece)) {
+                    box.removeClass(AppStyle.pieceUnselectable)
+                } else if (!box.hasClass(AppStyle.pieceUnselectable)) {
+                    box.addClass(AppStyle.pieceUnselectable)
                 }
             }
 
             if (controller.currentColor.get() == color) {
-                if (new.isNotEmpty()) {
-                    pieces[new.last()]?.model?.let { controller.selectPiece(it) }
+                logger.debug("Current color ${color.name} can place $value")
+                if (value.isNotEmpty()) {
+                    controller.selectPiece(pieces.filterKeys { it in value }.values.last().model)
                 }
             }
         }
