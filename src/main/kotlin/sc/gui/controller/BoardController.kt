@@ -3,11 +3,10 @@ package sc.gui.controller
 import org.slf4j.LoggerFactory
 import sc.gui.model.BoardModel
 import sc.gui.view.BoardView
-import sc.gui.view.PiecesFragment
 import sc.plugin2021.*
 import sc.plugin2021.util.Constants
 import sc.plugin2021.util.GameRuleLogic
-import tornadofx.*
+import tornadofx.Controller
 
 class BoardController : Controller() {
     var currentHover: Coordinates? = null
@@ -21,7 +20,7 @@ class BoardController : Controller() {
 
     fun handleClick(x: Int, y: Int) {
         if (isHoverable(x, y, game.selectedCalculatedShape.get()) && isPlaceable(x, y, game.selectedCalculatedShape.get())) {
-            logger.debug("Set-Move seems valid from GUI at $x, $y")
+            logger.debug("Set-Move from GUI at [$x,$y] seems valid")
             val color = game.selectedColor.get()
 
             val move = SetMove(Piece(color, game.selectedShape.get(), game.selectedRotation.get(), game.selectedFlip.get(), Coordinates(x, y)))
@@ -29,7 +28,7 @@ class BoardController : Controller() {
             fire(HumanMoveAction(move))
             game.isHumanTurn.set(false)
         } else {
-            logger.debug("Set-Move seems invalid from GUI at $x, $y")
+            logger.debug("Set-Move from GUI at [$x,$y] seems invalid")
         }
 
     }
@@ -39,7 +38,7 @@ class BoardController : Controller() {
     }
 
     fun calculateIsPlaceableBoard(board: Board, color: Color) {
-        logger.debug("Calculating isPlaceableBoard...")
+        logger.debug("Calculating where pieces can be hovered and placed on the board...")
         for (x in 0 until Constants.BOARD_SIZE) {
             for (y in 0 until Constants.BOARD_SIZE) {
                 if (board[x, y].content != FieldContent.EMPTY) {
@@ -65,7 +64,7 @@ class BoardController : Controller() {
             }
         }
 
-        // corner palces are allowed to be placed
+        // corners are always placeable
         isPlaceableBoard[0][0] = true
         isPlaceableBoard[0][Constants.BOARD_SIZE - 1] = true
         isPlaceableBoard[Constants.BOARD_SIZE - 1][0] = true
