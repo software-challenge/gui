@@ -12,6 +12,7 @@ import sc.plugin2021.util.GameRuleLogic
 import sc.shared.GameResult
 import tornadofx.Controller
 import tornadofx.objectProperty
+import java.util.*
 import kotlin.math.max
 
 // The following *Binding-classes are necessary to automatically unbind and rebind to a new piece (when switched)
@@ -34,7 +35,6 @@ class ColorBinding(piece: Property<PiecesModel>) : ObjectBinding<Color>() {
     }
 
     override fun computeValue(): Color {
-        logger.debug("Color: {}", model.value.colorProperty().get())
         return model.value.colorProperty().get()
     }
 
@@ -149,18 +149,13 @@ class GameController : Controller() {
     val teamTwoScore = objectProperty(0)
     
     val playerNames = objectProperty<Array<String>>()
-    val gameResult: ObjectProperty<GameResult?> = objectProperty(null)
+    val gameResult = objectProperty<GameResult>()
 
-    // we need to have them split separately otherwise we cannot listen to a specific color alone
-    val undeployedRedPieces = objectProperty(PieceShape.shapes.values)
-    val undeployedBluePieces = objectProperty(PieceShape.shapes.values)
-    val undeployedGreenPieces = objectProperty(PieceShape.shapes.values)
-    val undeployedYellowPieces = objectProperty(PieceShape.shapes.values)
+    val undeployedPieces: Map<Color, ObjectProperty<Collection<PieceShape>>> = EnumMap(
+        Color.values().associateWith { objectProperty(PieceShape.shapes.values) })
 	
-    val validRedPieces = objectProperty(ArrayList<PieceShape>())
-    val validBluePieces = objectProperty(ArrayList<PieceShape>())
-    val validGreenPieces = objectProperty(ArrayList<PieceShape>())
-    val validYellowPieces = objectProperty(ArrayList<PieceShape>())
+    val validPieces: Map<Color, ObjectProperty<Collection<PieceShape>>> = EnumMap(
+        Color.values().associateWith { objectProperty(emptyList()) })
 
     // use selected* to access the property of currentPiece in order to always correctly be automatically rebind
     val currentPiece = objectProperty(PiecesModel(Color.RED, PieceShape.MONO))
@@ -180,24 +175,19 @@ class GameController : Controller() {
             gameState.set(state)
             canSkip.set(false)
 
-            // I don't know why orderedColors becomes an empty array and results in CurrentColor being inaccessible (throwing error) when the game ended,
-            // but this is how we can avoid it for now TODO("fix this in the plugin")
-            if (state.orderedColors.isNotEmpty()) {
-                previousColor.set(currentColor.get())
-                currentColor.set(state.currentColor)
-                currentTeam.set(state.currentTeam)
-            }
-            playerNames.set(state.playerNames)
-            undeployedRedPieces.set(state.undeployedPieceShapes(Color.RED))
-            undeployedBluePieces.set(state.undeployedPieceShapes(Color.BLUE))
-            undeployedGreenPieces.set(state.undeployedPieceShapes(Color.GREEN))
-            undeployedYellowPieces.set(state.undeployedPieceShapes(Color.YELLOW))
+            previousColor.set(currentColor.get())
+            currentColor.set(state.currentColor)
+            currentTeam.set(state.currentTeam)
             boardController.board.boardProperty().set(state.board)
-            validRedPieces.set(ArrayList())
-            validBluePieces.set(ArrayList())
-            validGreenPieces.set(ArrayList())
-            validYellowPieces.set(ArrayList())
+            undeployedPieces.forEach { (color, pieces) ->
+                pieces.set(state.undeployedPieceShapes(color))
+            }
+            validPieces.forEach { (_, pieces) ->
+                pieces.set(emptyList())
+            }
+            
             availableTurns.set(max(availableTurns.get(), state.turn))
+            playerNames.set(state.playerNames)
             currentTurn.set(state.turn)
             currentRound.set(state.round)
             teamOneScore.set(state.getPointsForPlayer(Team.ONE))
@@ -215,15 +205,10 @@ class GameController : Controller() {
             isHumanTurn.set(true)
             canSkip.set(!gameEnded() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(state))
             boardController.calculateIsPlaceableBoard(state.board, state.currentColor)
-
-            when (state.currentColor) {
-                Color.RED -> validRedPieces
-                Color.BLUE -> validBluePieces
-                Color.GREEN -> validGreenPieces
-                Color.YELLOW -> validYellowPieces
-            }.set(state.undeployedPieceShapes(state.currentColor).filter { shape ->
-                moves[shape]!!.isNotEmpty()
-            } as ArrayList<PieceShape>?)
+    
+            validPieces[state.currentColor]!!.set(
+                state.undeployedPieceShapes(state.currentColor)
+                    .filter { shape -> moves[shape]!!.isNotEmpty() })
         }
         subscribe<GameOverEvent> { event ->
             gameResult.set(event.result)
@@ -238,10 +223,7 @@ class GameController : Controller() {
         availableTurns.set(0)
         currentTurn.set(0)
         currentRound.set(0)
-        undeployedRedPieces.set(PieceShape.values().toList())
-        undeployedBluePieces.set(PieceShape.values().toList())
-        undeployedGreenPieces.set(PieceShape.values().toList())
-        undeployedYellowPieces.set(PieceShape.values().toList())
+        undeployedPieces.forEach { (_, pieces) -> pieces.set(PieceShape.values().toList()) }
     }
 
     fun selectPiece(piece: PiecesModel) {
