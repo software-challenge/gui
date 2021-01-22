@@ -28,11 +28,12 @@ class AppView : View("Software-Challenge Germany") {
                     logger.debug("Quitting!")
                     Platform.exit()
                 }
-                item("Neues Spiel", "Shortcut+N").action {
+                item("Neues Spiel", "Shortcut+N") {
                     enableWhen(controller.model.currentView.isNotEqualTo(ViewType.GAME_CREATION))
-                    logger.debug("New Game!")
-                    if (controller.model.currentView.get() == ViewType.GAME) {
-                        alert(
+                    action {
+                        logger.debug("New Game!")
+                        if (controller.model.currentView.get() == ViewType.GAME) {
+                            alert(
                                 type = Alert.AlertType.CONFIRMATION,
                                 header = "Neues Spiel anfangen",
                                 content = "Willst du wirklich dein aktuelles Spiel verwerfen und ein neues anfangen?",
@@ -42,9 +43,10 @@ class AppView : View("Software-Challenge Germany") {
                                         gameController.clearGame()
                                     }
                                 }
-                        )
-                    } else if (controller.model.currentView.get() != ViewType.GAME_CREATION) {
-                        controller.changeViewTo(ViewType.GAME_CREATION)
+                            )
+                        } else if (controller.model.currentView.get() != ViewType.GAME_CREATION) {
+                            controller.changeViewTo(ViewType.GAME_CREATION)
+                        }
                     }
                 }
                 item("Toggle Darkmode").action {
