@@ -15,7 +15,7 @@ plugins {
     id("org.openjfx.javafxplugin") version "0.0.9"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     
-    id("com.github.ben-manes.versions") version "0.33.0"
+    id("com.github.ben-manes.versions") version "0.36.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.15"
 }
 
@@ -28,7 +28,7 @@ try {
 }
 
 application {
-    mainClassName = "sc.gui.GuiAppKt"
+    mainClassName = "sc.gui.GuiAppKt" // not migrating from legacy because of https://github.com/johnrengelman/shadow/issues/609
     // these are required because of using JDK >8,
     // see https://github.com/controlsfx/controlsfx/wiki/Using-ControlsFX-with-JDK-9-and-above
     applicationDefaultJvmArgs = listOf(
@@ -53,7 +53,7 @@ dependencies {
     
     implementation(kotlin("reflect"))
     implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT") { exclude("org.jetbrains.kotlin", "kotlin-reflect") }
-    implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.3")
+    implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.4")
     
     implementation(fileTree(backend.name + "/server/build/runnable") { include("**/*.jar") })
 }
