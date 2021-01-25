@@ -47,19 +47,19 @@ class StatusBinding(private val game: GameController) : StringBinding() {
                 ${winner(gameResult)}
                 ${irregularities(gameResult)}
             """.trimIndent()
-        } ?: "${game.playerNames.get()?.get(game.currentTeam.get().index) ?: game.currentTeam.get()}, ${game.currentColor.get()} ist dran"
+        } ?: "${game.currentTeam.value?.index?.let { game.playerNames.value?.get(it) } ?: game.currentTeam.value}, ${game.currentColor.value} ist dran"
     }
 }
 
 class ScoreBinding(private val game: GameController) : StringBinding() {
     init {
         bind(game.currentRound)
-        bind(game.teamOneScore)
-        bind(game.teamTwoScore)
+        bind(game.teamScores)
     }
 
     override fun computeValue(): String {
-        return "Runde ${game.currentRound.get()} - ${game.teamOneScore.get()} : ${game.teamTwoScore.get()}"
+        return "Runde ${game.currentRound.get()} - " +
+               game.teamScores.value?.joinToString(" : ")
     }
 }
 

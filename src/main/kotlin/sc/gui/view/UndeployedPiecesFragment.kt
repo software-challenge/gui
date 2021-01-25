@@ -1,6 +1,6 @@
 package sc.gui.view
 
-import javafx.beans.property.ObjectProperty
+import javafx.beans.value.ObservableValue
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
@@ -17,8 +17,8 @@ import tornadofx.*
 
 class UndeployedPiecesFragment(
     private val color: Color,
-    undeployedPieces: ObjectProperty<Collection<PieceShape>>,
-    validPieces: ObjectProperty<Collection<PieceShape>>
+    undeployedPieces: ObservableValue<Collection<PieceShape>>,
+    validPieces: ObservableValue<Collection<PieceShape>>
 ) : Fragment() {
     val controller: GameController by inject()
     private val boardController: BoardController by inject()
@@ -37,6 +37,10 @@ class UndeployedPiecesFragment(
             font = Font(20.0)
         }
 		isVisible = false
+    
+        visibleProperty().bind(controller.currentTurn.booleanBinding {
+            it != 0 && !controller.isValidColor(color)
+        })
     }
 
     init {
@@ -107,24 +111,26 @@ class UndeployedPiecesFragment(
             }
         }
 
-        controller.currentTurn.addListener { _, _, turn ->
-            unplayableNotice.isVisible = turn != 0 && !controller.isValidColor(color)
-        }
-
         validPieces.addListener { _, _, value ->
-            piecesList.forEach { (piece, box) ->
-                if(value.contains(piece)) {
-                    box.removeClass(AppStyle.pieceUnselectable)
-                } else if (!box.hasClass(AppStyle.pieceUnselectable)) {
-                    box.addClass(AppStyle.pieceUnselectable)
+            if (controller.currentColor.value == color) {
+                piecesList.forEach { (piece, box) ->
+                    when {
+                        value.contains(piece) -> {
+                            box.removeClass(AppStyle.pieceUnselectable)
+                        }
+                        !box.hasClass(AppStyle.pieceUnselectable) -> {
+                            box.addClass(AppStyle.pieceUnselectable)
+                        }
+                    }
                 }
-            }
 
-            if (controller.currentColor.get() == color) {
                 logger.debug("Current color ${color.name} can place $value")
                 if (value.isNotEmpty()) {
                     controller.selectPiece(pieces.filterKeys { it in value }.values.last().model)
                 }
+            } else {
+                piecesList.forEach { (_, box) ->
+                    box.addClass(AppStyle.pieceUnselectable) }
             }
         }
     }

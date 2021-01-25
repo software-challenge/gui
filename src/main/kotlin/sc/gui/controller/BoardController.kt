@@ -7,6 +7,7 @@ import sc.plugin2021.*
 import sc.plugin2021.util.Constants
 import sc.plugin2021.util.GameRuleLogic
 import tornadofx.Controller
+import tornadofx.objectBinding
 
 class BoardController : Controller() {
     var currentHover: Coordinates? = null
@@ -15,6 +16,15 @@ class BoardController : Controller() {
     val board: BoardModel by inject()
     val view: BoardView by inject()
     val game: GameController by inject()
+    
+    init {
+        board.boardProperty().bind(game.gameState.objectBinding { it?.board })
+        subscribe<HumanMoveRequest> { event ->
+            val state = event.gameState
+            calculateIsPlaceableBoard(state.board, state.currentColor)
+        }
+    }
+    
     private var isHoverableBoard: Array<Array<Boolean>> = Array(Constants.BOARD_SIZE) { Array(Constants.BOARD_SIZE) { true } }
     private var isPlaceableBoard: Array<Array<Boolean>> = Array(Constants.BOARD_SIZE) { Array(Constants.BOARD_SIZE) { false } }
 
@@ -26,16 +36,14 @@ class BoardController : Controller() {
             val move = SetMove(Piece(color, game.selectedShape.get(), game.selectedRotation.get(), game.selectedFlip.get(), Coordinates(x, y)))
             GameRuleLogic.validateSetMove(board.boardProperty().get(), move)
             fire(HumanMoveAction(move))
-            game.isHumanTurn.set(false)
         } else {
             logger.debug("Set-Move from GUI at [$x,$y] seems invalid")
         }
 
     }
 
-    fun hoverInBound(x: Int, y: Int): Boolean {
-        return x >= 0 && y >= 0 && x < Constants.BOARD_SIZE && y < Constants.BOARD_SIZE
-    }
+    fun hoverInBound(x: Int, y: Int): Boolean =
+        x >= 0 && y >= 0 && x < Constants.BOARD_SIZE && y < Constants.BOARD_SIZE
 
     fun calculateIsPlaceableBoard(board: Board, color: Color) {
         logger.debug("Calculating where pieces can be hovered and placed on the board...")
@@ -72,10 +80,6 @@ class BoardController : Controller() {
     }
 
     fun isHoverable(x: Int, y: Int, shape: Set<Coordinates>): Boolean {
-        if (!game.isHumanTurn.get()) {
-            return false
-        }
-
         for (place in shape) {
             // check every adjacent field if it is the same color
             if (!hoverInBound(x + place.x, y + place.y)) {
@@ -84,20 +88,16 @@ class BoardController : Controller() {
                 return false
             }
         }
-
         return true
     }
 
     fun isPlaceable(x: Int, y: Int, shape: Set<Coordinates>): Boolean {
-        if (game.isHumanTurn.get()) {
-            for (place in shape) {
-                // one field is enough as isHoverable prevents otherwise
-                if (hoverInBound(x + place.x, y + place.y) && isPlaceableBoard[x + place.x][y + place.y]) {
-                    return true
-                }
+        for (place in shape) {
+            // one field is enough as isHoverable prevents otherwise
+            if (hoverInBound(x + place.x, y + place.y) && isPlaceableBoard[x + place.x][y + place.y]) {
+                return true
             }
         }
-
         return false
     }
 

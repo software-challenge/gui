@@ -4,15 +4,14 @@ import javafx.beans.binding.BooleanBinding
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.Property
+import javafx.beans.value.ObservableValue
 import org.slf4j.LoggerFactory
 import sc.gui.model.PiecesModel
 import sc.gui.view.PiecesFragment
 import sc.plugin2021.*
 import sc.plugin2021.util.GameRuleLogic
 import sc.shared.GameResult
-import tornadofx.Controller
-import tornadofx.nonNullObjectBinding
-import tornadofx.objectProperty
+import tornadofx.*
 import java.util.*
 import kotlin.math.max
 
@@ -134,29 +133,40 @@ class CalculatedShapeBinding(piece: Property<PiecesModel>) : ObjectBinding<Set<C
 
 
 class GameController : Controller() {
-    val boardController: BoardController by inject()
-    
-    val gameState = objectProperty(GameState())
-
-    val availableTurns = objectProperty(0)
-    val currentTurn = objectProperty(0)
-    val currentRound = objectProperty(0)
-    val currentColor = objectProperty(Color.RED)
-    val currentTeam = objectProperty(Team.ONE)
+    val gameState = objectProperty<GameState?>(null)
+    val gameResult = objectProperty<GameResult>()
     val isHumanTurn = objectProperty(false)
-    val canSkip = objectProperty(false)
-    val previousColor = objectProperty(Color.RED)
-    val teamOneScore = objectProperty(0)
-    val teamTwoScore = objectProperty(0)
+
+    val currentTurn = nonNullObjectBinding(gameState) { value?.turn ?: 0 }
+    val currentRound = nonNullObjectBinding(gameState) { value?.round ?: 0 }
+    val currentColor = nonNullObjectBinding(gameState) { value?.currentColor ?: Color.RED }
+    val currentTeam = nonNullObjectBinding(gameState) { value?.currentTeam ?: Team.ONE }
+    val teamScores = gameState.objectBinding { state ->
+        Team.values().map { state?.getPointsForPlayer(it) }
+    }
+    
+    val availableTurns = objectProperty(0).also { avTurns ->
+        currentTurn.addListener { _, _, turn ->
+            avTurns.set(turn?.let { max(it, avTurns.value) }) }
+    }
     
     val started = nonNullObjectBinding(currentTurn, isHumanTurn) {
         value > 0 || isHumanTurn.value
     }
-    val playerNames = objectProperty<Array<String>>()
-    val gameResult = objectProperty<GameResult>()
-
-    val undeployedPieces: Map<Color, ObjectProperty<Collection<PieceShape>>> = EnumMap(
-        Color.values().associateWith { objectProperty(PieceShape.shapes.values) })
+    val playerNames = gameState.objectBinding { it?.playerNames }
+    val gameEnded = gameResult.booleanBinding { it != null }
+    
+    val canSkip = isHumanTurn.booleanBinding(gameEnded) { humanTurn ->
+        (humanTurn == true && !gameEnded.value &&
+        gameState.value?.let { GameRuleLogic.isFirstMove(it) } == false).also {
+            logger.debug("Human turn $humanTurn - canSkip $it")
+        }
+    }
+    
+    val undeployedPieces: Map<Color, ObservableValue<Collection<PieceShape>>> = EnumMap(
+        Color.values().associateWith { color ->
+            nonNullObjectBinding(gameState, gameState) { value?.undeployedPieceShapes(color) ?: PieceShape.values().toList() }
+        })
 	
     val validPieces: Map<Color, ObjectProperty<Collection<PieceShape>>> = EnumMap(
         Color.values().associateWith { objectProperty(emptyList()) })
@@ -171,64 +181,43 @@ class GameController : Controller() {
     val selectedFlip: FlipBinding = FlipBinding(currentPiece)
     val selectedCalculatedShape: CalculatedShapeBinding = CalculatedShapeBinding(currentPiece)
 
-    fun isValidColor(color: Color): Boolean = gameState.get().isValid(color)
+    fun isValidColor(color: Color): Boolean =
+            gameState.get()?.isValid(color) != false
 
     init {
         subscribe<NewGameState> { event ->
-            logger.debug("New game state")
-
             val state = event.gameState
+            logger.debug("New GameState $state")
             gameState.set(state)
-            canSkip.set(false)
-
-            previousColor.set(currentColor.get())
-            currentColor.set(state.currentColor)
-            currentTeam.set(state.currentTeam)
-            boardController.board.boardProperty().set(state.board)
-            undeployedPieces.forEach { (color, pieces) ->
-                pieces.set(state.undeployedPieceShapes(color))
-            }
-            validPieces.forEach { (_, pieces) ->
-                pieces.set(emptyList())
-            }
-            
-            availableTurns.set(max(availableTurns.get(), state.turn))
-            playerNames.set(state.playerNames)
-            currentTurn.set(state.turn)
-            currentRound.set(state.round)
-            teamOneScore.set(state.getPointsForPlayer(Team.ONE))
-            teamTwoScore.set(state.getPointsForPlayer(Team.TWO))
         }
         subscribe<HumanMoveRequest> { event ->
             val state = event.gameState
-            val moves = state.undeployedPieceShapes().map {
-                it to GameRuleLogic.getPossibleMovesForShape(state, it)
-            }.toMap()
+            val moves = EnumMap(
+                state.undeployedPieceShapes().associateWith {
+                    GameRuleLogic.getPossibleMovesForShape(state, it)
+                })
             logger.debug("Human move request for {} - {} possible moves",
                 state.currentColor,
                 moves.values.sumBy { it.size })
-    
+            
+            gameState.set(event.gameState)
             isHumanTurn.set(true)
-            canSkip.set(!gameEnded() && isHumanTurn.get() && !GameRuleLogic.isFirstMove(state))
-            boardController.calculateIsPlaceableBoard(state.board, state.currentColor)
     
             validPieces.getValue(state.currentColor)
                 .set(moves.filterValues { it.isNotEmpty() }.keys)
+        }
+        subscribe<HumanMoveAction> {
+            isHumanTurn.set(false)
         }
         subscribe<GameOverEvent> { event ->
             gameResult.set(event.result)
         }
     }
 
-    fun gameEnded(): Boolean = gameResult.isNotNull.get()
-
     fun clearGame() {
+        gameState.set(null)
         gameResult.set(null)
-        boardController.board.boardProperty().set(Board())
         availableTurns.set(0)
-        currentTurn.set(0)
-        currentRound.set(0)
-        undeployedPieces.forEach { (_, pieces) -> pieces.set(PieceShape.values().toList()) }
     }
 
     fun selectPiece(piece: PiecesModel) {
