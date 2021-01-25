@@ -97,9 +97,9 @@ class ControlView : View() {
         playPauseSkipButton.setOnMouseClicked {
             when {
                 gameController.canSkip.get() -> {
-                    fire(HumanMoveAction(SkipMove(gameController.currentColor.get())))
+                    fire(HumanMoveAction(SkipMove(gameController.currentColor.value)))
                 }
-                gameController.gameEnded() -> {
+                gameController.gameEnded.value -> {
                     appController.changeViewTo(ViewType.START)
                     gameController.clearGame()
                 }
@@ -113,7 +113,7 @@ class ControlView : View() {
         // When the game is paused externally e.g. when rewinding
         arrayOf(gameController.currentTurn, gameController.started, gameController.gameResult).forEach {
             it.addListener { _, _, _ ->
-                if (gameController.gameEnded()) {
+                if (gameController.gameEnded.value) {
                     playPauseSkipButton.text = "Spiel beenden"
                 } else {
                     updatePauseState(!gameController.started.value)
