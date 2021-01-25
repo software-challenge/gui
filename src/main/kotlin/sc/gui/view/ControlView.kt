@@ -1,7 +1,6 @@
 package sc.gui.view
 
 import javafx.beans.binding.Bindings
-import javafx.geometry.Pos
 import javafx.scene.control.Button
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
@@ -24,7 +23,7 @@ class ControlView : View() {
     private val clientController: ClientController by inject()
     private val appController: AppController by inject()
     private val gameCreationController: GameCreationController by inject()
-    private val playPauseButton: Button = button {
+    private val playPauseSkipButton: Button = button {
         text = "Start"
     }
 
@@ -56,18 +55,8 @@ class ControlView : View() {
         vbox {
             spacing = 8.0
             hbox {
-                alignment = Pos.TOP_CENTER
-                button {
-                    enableWhen(gameController.canSkip)
-                    text = "Passen"
-                    setOnMouseClicked {
-                        fire(HumanMoveAction(SkipMove(gameController.currentColor.get())))
-                    }
-                }
-            }
-            hbox {
                 spacing = 8.0
-                this += playPauseButton
+                this += playPauseSkipButton
                 button {
                     disableWhen(gameController.currentTurn.isEqualTo(0))
                     text = "⏮"
@@ -90,32 +79,44 @@ class ControlView : View() {
     }
     
     init {
+        // TODO properly implement State pattern for start/pause/play/skip/finish-button
         val updatePauseState = { start: Boolean ->
             val paused = clientController.lobbyManager?.game?.isPaused
             logger.trace("Button updatePauseState: $paused (start: $start)")
             if (paused == true) {
-                playPauseButton.text = if (start) "Start" else "Weiter"
+                playPauseSkipButton.text = if (start) "Start" else "Weiter"
             } else {
-                playPauseButton.text = "Anhalten"
+                playPauseSkipButton.text = "Anhalten"
             }
         }
-        playPauseButton.setOnMouseClicked {
-            if (gameController.gameEnded()) {
-                appController.changeViewTo(ViewType.START)
-                gameController.clearGame()
-            } else {
-                clientController.togglePause()
-                updatePauseState(false)
+        gameController.canSkip.addListener { _, _, canSkip ->
+            if(canSkip) {
+                playPauseSkipButton.text = "Passen"
             }
         }
-        
+        playPauseSkipButton.setOnMouseClicked {
+            when {
+                gameController.canSkip.get() -> {
+                    fire(HumanMoveAction(SkipMove(gameController.currentColor.get())))
+                }
+                gameController.gameEnded() -> {
+                    appController.changeViewTo(ViewType.START)
+                    gameController.clearGame()
+                }
+                else -> {
+                    clientController.togglePause()
+                    updatePauseState(false)
+                }
+            }
+        }
+    
         // When the game is paused externally e.g. when rewinding
         gameController.currentTurn.addListener { _, _, turn ->
             updatePauseState(turn == 0)
         }
         gameController.gameResult.addListener { _, _, result ->
             if (result != null) {
-                playPauseButton.text = "Spiel beenden"
+                playPauseSkipButton.text = "Spiel beenden"
             }
         }
     }
