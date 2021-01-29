@@ -11,6 +11,7 @@ import sc.plugin2021.*
 import sc.plugin2021.util.GameRuleLogic
 import sc.shared.GameResult
 import tornadofx.Controller
+import tornadofx.nonNullObjectBinding
 import tornadofx.objectProperty
 import java.util.*
 import kotlin.math.max
@@ -148,6 +149,9 @@ class GameController : Controller() {
     val teamOneScore = objectProperty(0)
     val teamTwoScore = objectProperty(0)
     
+    val started = nonNullObjectBinding(currentTurn, isHumanTurn) {
+        value > 0 || isHumanTurn.value
+    }
     val playerNames = objectProperty<Array<String>>()
     val gameResult = objectProperty<GameResult>()
 

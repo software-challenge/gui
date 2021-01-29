@@ -104,19 +104,20 @@ class ControlView : View() {
                     gameController.clearGame()
                 }
                 else -> {
-                    clientController.togglePause()
                     updatePauseState(false)
+                    clientController.togglePause()
                 }
             }
         }
     
         // When the game is paused externally e.g. when rewinding
-        gameController.currentTurn.addListener { _, _, turn ->
-            updatePauseState(turn == 0)
-        }
-        gameController.gameResult.addListener { _, _, result ->
-            if (result != null) {
-                playPauseSkipButton.text = "Spiel beenden"
+        arrayOf(gameController.currentTurn, gameController.started, gameController.gameResult).forEach {
+            it.addListener { _, _, _ ->
+                if (gameController.gameEnded()) {
+                    playPauseSkipButton.text = "Spiel beenden"
+                } else {
+                    updatePauseState(!gameController.started.value)
+                }
             }
         }
     }
