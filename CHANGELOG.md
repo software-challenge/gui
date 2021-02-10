@@ -13,18 +13,15 @@ for details on our versioning scheme.
 - Remove accidental disabling of an entire menubar item before a game is started ([610d722e1f5a6056ebfcdf2ec4a56ed349fd5ba0](https://github.com/CAU-Kiel-Tech-Inf/gui/commit/610d722e1f5a6056ebfcdf2ec4a56ed349fd5ba0))
 - Improve some internal algorithms
 
-## [21.2.1](https://github.com/CAU-Kiel-Tech-Inf/gui/commits/21.3.0) - 2021-01-29
+## [21.2.1](https://github.com/CAU-Kiel-Tech-Inf/gui/commits/21.2.1) - 2020-12-18
 - Cancel an existing game when starting a new one
 - Make in-game status display a little more concise
 
-## [21.2.0](https://github.com/CAU-Kiel-Tech-Inf/gui/commits/21.3.0) - 2021-01-29
-### Added
+## [21.2.0](https://github.com/CAU-Kiel-Tech-Inf/gui/commits/21.2.0) - 2020-12-14
 - Implement support for manually started clients
 - Add loading view when game is starting
 - Show winner info on game end (#58)
 - Highlight shapes that can currently be placed (#55)
-
-### Changed
 - Improve internal verification & publishing mechanisms
 
 ## 21 - Game Blokus
