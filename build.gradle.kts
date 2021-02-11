@@ -1,7 +1,7 @@
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val versionNumber = "21.3.0"
+val versionNumber = "21.3.1"
 
 val minJavaVersion = JavaVersion.VERSION_11
 plugins {
