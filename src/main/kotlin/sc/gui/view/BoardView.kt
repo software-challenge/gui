@@ -183,9 +183,10 @@ class BoardView: View() {
         val image = BlockImage(controller.board.calculatedBlockSizeProperty())
         image.fitWidthProperty().bind(controller.board.calculatedBlockSizeProperty())
         image.fitHeightProperty().bind(controller.board.calculatedBlockSizeProperty())
-        model.boardProperty().addListener { _, oldBoard, newBoard ->
-            if(oldBoard == null || oldBoard[x, y].content != newBoard[x, y].content) {
-                image.updateImage(newBoard[x, y].content)
+        controller.board.boardProperty().addListener { _, oldBoard, newBoard ->
+            val newContent = newBoard?.let { it[x, y].content } ?: FieldContent.EMPTY
+            if(oldBoard == null || oldBoard[x, y].content != newContent) {
+                image.updateImage(newContent)
             }
         }
         
