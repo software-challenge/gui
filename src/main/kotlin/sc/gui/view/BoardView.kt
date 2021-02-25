@@ -180,10 +180,10 @@ class BoardView: View() {
     private fun paneFromField(field: Field): HBox {
         val x = field.coordinates.x
         val y = field.coordinates.y
-        val image = BlockImage(controller.board.calculatedBlockSizeProperty())
-        image.fitWidthProperty().bind(controller.board.calculatedBlockSizeProperty())
-        image.fitHeightProperty().bind(controller.board.calculatedBlockSizeProperty())
-        controller.board.boardProperty().addListener { _, oldBoard, newBoard ->
+        val image = BlockImage(controller.boardModel.calculatedBlockSize)
+        image.fitWidthProperty().bind(controller.boardModel.calculatedBlockSize)
+        image.fitHeightProperty().bind(controller.boardModel.calculatedBlockSize)
+        controller.boardModel.board.addListener { _, oldBoard, newBoard ->
             val newContent = newBoard?.let { it[x, y].content } ?: FieldContent.EMPTY
             if(oldBoard == null || oldBoard[x, y].content != newContent) {
                 image.updateImage(newContent)

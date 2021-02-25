@@ -10,7 +10,7 @@ import sc.plugin2021.Rotation
 import sc.plugin2021.Team
 import sc.plugin2021.util.Constants
 import tornadofx.*
-import java.util.*
+import java.util.EnumMap
 
 class GameView : View() {
     private val gameController: GameController by inject()
@@ -102,7 +102,7 @@ class GameView : View() {
         val board = find(BoardView::class)
         board.grid.setMaxSize(size, size)
         board.grid.setMinSize(size, size)
-        board.model.calculatedBlockSizeProperty().set(size / Constants.BOARD_SIZE)
+        board.model.calculatedBlockSize.set(size / Constants.BOARD_SIZE)
     }
 
     init {

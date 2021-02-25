@@ -13,12 +13,12 @@ class BoardController : Controller() {
     var currentHover: Coordinates? = null
     var hoverable: Boolean = true
     var currentPlaceable: Boolean = false
-    val board: BoardModel by inject()
+    val boardModel: BoardModel by inject()
     val view: BoardView by inject()
     val game: GameController by inject()
     
     init {
-        board.boardProperty().bind(game.gameState.objectBinding { it?.board })
+        boardModel.board.bind(game.gameState.objectBinding { it?.board })
         subscribe<HumanMoveRequest> { event ->
             val state = event.gameState
             calculateIsPlaceableBoard(state.board, state.currentColor)
@@ -34,7 +34,7 @@ class BoardController : Controller() {
             val color = game.selectedColor.get()
 
             val move = SetMove(Piece(color, game.selectedShape.get(), game.selectedRotation.get(), game.selectedFlip.get(), Coordinates(x, y)))
-            GameRuleLogic.validateSetMove(board.boardProperty().get(), move)
+            GameRuleLogic.validateSetMove(boardModel.board.get(), move)
             fire(HumanMoveAction(move))
         } else {
             logger.debug("Set-Move from GUI at [$x,$y] seems invalid")

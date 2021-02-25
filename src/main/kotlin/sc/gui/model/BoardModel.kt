@@ -2,18 +2,16 @@ package sc.gui.model
 
 import org.slf4j.LoggerFactory
 import sc.gui.view.BoardView
-import sc.plugin2021.*
-import tornadofx.*
+import sc.plugin2021.Board
+import tornadofx.ItemViewModel
+import tornadofx.objectProperty
 
 class BoardModel : ItemViewModel<BoardView>() {
-    private var calculatedBlockSize: Double by property<Double>(16.0)
-    fun calculatedBlockSizeProperty() = getProperty(BoardModel::calculatedBlockSize)
-
-    private var board: Board by property<Board>()
-    fun boardProperty() = getProperty(BoardModel::board)
+    val calculatedBlockSize = objectProperty(16.0)
+    val board = objectProperty<Board>()
 
     init {
-        calculatedBlockSizeProperty().addListener { _, old, new ->
+        calculatedBlockSize.addListener { _, old, new ->
             logger.debug("Blocksize changed $old -> $new")
         }
     }

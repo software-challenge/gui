@@ -88,7 +88,7 @@ class UndeployedPiecesFragment(
                 }
             }
         }
-        boardController.board.calculatedBlockSizeProperty().addListener { _, _, _ ->
+        boardController.boardModel.calculatedBlockSize.addListener { _, _, _ ->
             pieces.forEach {
                 it.value.updateImage()
             }
