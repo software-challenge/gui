@@ -28,7 +28,7 @@ try {
 }
 
 application {
-    mainClassName = "sc.gui.GuiAppKt" // not migrating from legacy because of https://github.com/johnrengelman/shadow/issues/609
+    mainClassName = "sc.gui.GuiAppKt" // not migrating from legacy because of https://github.com/johnrengelman/shadow/issues/609 - waiting for 6.2 release
     // these are required because of using JDK >8,
     // see https://github.com/controlsfx/controlsfx/wiki/Using-ControlsFX-with-JDK-9-and-above
     applicationDefaultJvmArgs = listOf(
@@ -73,6 +73,10 @@ tasks {
             jvmTarget = minJavaVersion.toString()
             freeCompilerArgs = listOf("-Xjvm-default=all")
         }
+    }
+    
+    withType<Jar> {
+        manifest.attributes["Main-Class"] = application.mainClassName
     }
     
     javafx {
