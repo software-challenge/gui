@@ -1,18 +1,16 @@
 package sc.gui.view
 
-import javafx.scene.SnapshotParameters
-import javafx.scene.canvas.Canvas
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import javafx.util.Duration
-import sc.gui.GuiApp
 import sc.gui.controller.*
 import sc.gui.model.PiecesModel
 import sc.plugin2021.Color
 import sc.plugin2021.PieceShape
 import sc.plugin2021.Rotation
-import tornadofx.*
-import java.io.File
+import tornadofx.Fragment
+import tornadofx.hbox
+import tornadofx.plusAssign
+import tornadofx.tooltip
 
 class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
     private val boardController: BoardController by inject()
@@ -46,7 +44,7 @@ class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
 
     fun updateImage() {
         val imagePath = "/graphics/blokus/${model.colorProperty().get().name.toLowerCase()}/${model.shapeProperty().get().name.toLowerCase()}.png"
-        val size = boardController.board.calculatedBlockSizeProperty().get() * 2
+        val size = boardController.boardModel.calculatedBlockSize.get() * 2
         image.image = Image(PiecesFragment::class.java.getResource(imagePath).toExternalForm(), size, size, true, false)
 
         // apply rotation to imageview

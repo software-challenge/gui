@@ -12,7 +12,7 @@ import sc.plugin2021.*
 import sc.plugin2021.util.GameRuleLogic
 import sc.shared.GameResult
 import tornadofx.*
-import java.util.*
+import java.util.EnumMap
 import kotlin.math.max
 
 // The following *Binding-classes are necessary to automatically unbind and rebind to a new piece (when switched)
@@ -157,10 +157,10 @@ class GameController : Controller() {
     val gameEnded = gameResult.booleanBinding { it != null }
     
     val canSkip = isHumanTurn.booleanBinding(gameEnded) { humanTurn ->
-        (humanTurn == true && !gameEnded.value &&
-        gameState.value?.let { GameRuleLogic.isFirstMove(it) } == false).also {
-            logger.debug("Human turn $humanTurn - canSkip $it")
-        }
+        (humanTurn == true &&
+         !gameEnded.value &&
+         gameState.value?.let { GameRuleLogic.isFirstMove(it) } == false
+        ).also { logger.debug("Human turn $humanTurn - canSkip $it") }
     }
     
     val undeployedPieces: Map<Color, ObservableValue<Collection<PieceShape>>> = EnumMap(
