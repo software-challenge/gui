@@ -20,8 +20,9 @@ class BoardController : Controller() {
     init {
         boardModel.board.bind(game.gameState.objectBinding { it?.board })
         subscribe<HumanMoveRequest> { event ->
-            val state = event.gameState
-            calculateIsPlaceableBoard(state.board, state.currentColor)
+            event.gameState.let {
+                calculateIsPlaceableBoard(it.board, it.currentColor)
+            }
         }
     }
     

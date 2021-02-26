@@ -111,11 +111,14 @@ class UndeployedPiecesFragment(
             }
         }
 
-        validPieces.addListener { _, _, value ->
+        arrayOf(validPieces, controller.currentColor).map { it.onChange {
+            val vp = validPieces.value
+            if(logger.isTraceEnabled)
+                 logger.trace("$color (current: ${controller.currentColor.value}) can place $vp")
             if (controller.currentColor.value == color) {
                 piecesList.forEach { (piece, box) ->
                     when {
-                        value.contains(piece) -> {
+                        vp.contains(piece) -> {
                             box.removeClass(AppStyle.pieceUnselectable)
                         }
                         !box.hasClass(AppStyle.pieceUnselectable) -> {
@@ -124,15 +127,15 @@ class UndeployedPiecesFragment(
                     }
                 }
 
-                logger.debug("Current color ${color.name} can place $value")
-                if (value.isNotEmpty()) {
-                    controller.selectPiece(pieces.filterKeys { it in value }.values.last().model)
+                logger.debug("Current color ${color.name} can place $vp")
+                if (vp.isNotEmpty()) {
+                    controller.selectPiece(pieces.filterKeys { it in vp }.values.last().model)
                 }
             } else {
                 piecesList.forEach { (_, box) ->
                     box.addClass(AppStyle.pieceUnselectable) }
             }
-        }
+        }}
     }
 
     override val root = stackpane {

@@ -185,9 +185,12 @@ class GameController : Controller() {
             gameState.get()?.isValid(color) != false
 
     init {
+        // TODO this event is received repeatedly
         subscribe<NewGameState> { event ->
             val state = event.gameState
-            logger.debug("New GameState $state")
+            logger.debug("New state: $state")
+            if(logger.isTraceEnabled)
+                logger.trace(state.longString())
             gameState.set(state)
         }
         subscribe<HumanMoveRequest> { event ->
