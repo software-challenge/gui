@@ -18,10 +18,3 @@ Um bei den Branches die Übersicht zu behalten, sollten diese ebenfalls nach der
 Branches werden normalerweise beim Mergen zu einem einzelnen Commit zusammengefügt (Squash-Merge), es sei denn, die einzelnen Commits des Branches haben jeweils eine alleinstehende Aussagekraft.
 
 Detaillierte Informationen zu unserem Kollaborations-Stil findet ihr in der [Kull Konvention](https://xerus2000.github.io/kull).
-
-## Release
-
-- Version in build.gradle.kts anpassen
-- `./gradlew release` ausführen – dies pusht einen neuen getaggten commit mit allen ausstehenden lokalen Änderungen
-- Entsprechendes backend-release erstellen
-- Von Github Actions erstelltes Release veröffentlichen

@@ -1,7 +1,6 @@
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-val versionNumber = "21.3.2"
+import java.util.Properties
 
 val minJavaVersion = JavaVersion.VERSION_11
 plugins {
@@ -19,13 +18,20 @@ plugins {
     id("se.patrikerdes.use-latest-versions") version "0.2.15"
 }
 
-group = "sc.gui"
-version = versionNumber
-try {
-    // Add hash suffix if git is available
-    version = "$version-" + Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short", "--verify", "HEAD")).inputStream.reader().readText().trim()
-} catch (_: java.io.IOException) {
+val backend = gradle.includedBuilds.last()
+
+val versionFromBackend by lazy {
+    val versions = Properties().apply { load(backend.projectDir.resolve("gradle.properties").inputStream()) }
+    arrayOf("year", "minor", "patch").map { versions["socha.version.$it"].toString().toInt() }.joinToString(".")
 }
+
+group = "sc.gui"
+version = try {
+    Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags")).inputStream.reader().readText().trim().ifEmpty { null }
+} catch (_: java.io.IOException) {
+    null
+} ?: "${versionFromBackend}-custom"
+println("Current version: $version (Java version: ${JavaVersion.current()})")
 
 application {
     mainClassName = "sc.gui.GuiAppKt" // not migrating from legacy because of https://github.com/johnrengelman/shadow/issues/609 - waiting for 6.2 release
@@ -45,8 +51,6 @@ repositories {
     mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots")
 }
-
-val backend = gradle.includedBuilds.last()
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
@@ -99,11 +103,13 @@ tasks {
     val release by creating {
         dependsOn(check)
         group = "distribution"
-        description = "Creates and pushes a tagged commit with the current version"
+        description = "Creates and pushes a tagged commit according to the backend version"
         doLast {
-            exec { commandLine("git", "commit", "-a", "-m", "release: $versionNumber") }
-            exec { commandLine("git", "tag", versionNumber) }
-            exec { commandLine("git", "push", "origin", versionNumber, "master") }
+            val desc = project.properties["m"]?.toString()
+                       ?: throw InvalidUserDataException("Das Argument -Pm=\"Beschreibung dieser Version\" wird benötigt")
+            exec { commandLine("git", "commit", "-a", "-m", "release: $versionFromBackend") }
+            exec { commandLine("git", "tag", versionFromBackend, "-m", desc) }
+            exec { commandLine("git", "push", "--follow-tags") }
         }
     }
 }
