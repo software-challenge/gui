@@ -182,7 +182,7 @@ class GameController : Controller() {
     val selectedCalculatedShape: CalculatedShapeBinding = CalculatedShapeBinding(currentPiece)
 
     fun isValidColor(color: Color): Boolean =
-            gameState.get()?.isValid(color) != false
+            gameState.get()?.isValidColor(color) != false
 
     init {
         // TODO this event is received repeatedly

@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See [the changelog of the backend](https://github.com/CAU-Kiel-Tech-Inf/backend/blob/master/CHANGELOG.md)
 for details on our versioning scheme.
 
-## [Unreleased]
+## [21.4.0](https://github.com/CAU-Kiel-Tech-Inf/gui/commits/21.4.0) - 2021-01-29
+- Replay support
+
+## [21.3.3](https://github.com/CAU-Kiel-Tech-Inf/gui/commits/21.3.3) - 2021-02-26
+- Fix human getting wrongly colored piece ([#64](https://github.com/CAU-Kiel-Tech-Inf/gui/pull/64))
+- Stability improvements in backend
 
 ## [21.3.0](https://github.com/CAU-Kiel-Tech-Inf/gui/commits/21.3.0) - 2021-01-29
 - Unify skip and pass button ([#63](https://github.com/CAU-Kiel-Tech-Inf/gui/pull/63))
