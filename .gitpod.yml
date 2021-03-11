@@ -3,5 +3,7 @@ image:
 ports:
   - port: 6080
 tasks:
-  - init: ./gradlew build
+  - init: |
+      git submodule update --init --recursive
+      ./gradlew build
     command: ./gradlew run
