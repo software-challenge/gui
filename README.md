@@ -1,3 +1,5 @@
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/CAU-Kiel-Tech-Inf/gui)
+
 # <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><img width="64" src="https://raw.githubusercontent.com/CAU-Kiel-Tech-Inf/socha-gui/master/assets/build-resources/icon.png" alt="Software-Challenge Germany logo"></a> GUI für die Software-Challenge Germany ![.github/workflows/gradle.yml](https://github.com/CAU-Kiel-Tech-Inf/gui/workflows/.github/workflows/gradle.yml/badge.svg)
 
 ## Getting Started
