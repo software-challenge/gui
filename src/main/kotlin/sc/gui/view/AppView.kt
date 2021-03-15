@@ -94,6 +94,9 @@ class AppView : View("Software-Challenge Germany") {
                 item("Wettbewerb", "Shortcut+W").action {
                     Desktop.getDesktop().browse(URI("https://contest.software-challenge.de/saison/28"))
                 }
+                item("Feedback", "Shortcut+F").action {
+                    controller.changeViewTo(ViewType.FEEDBACK)
+                }
             }
         }
     }
@@ -125,6 +128,7 @@ class AppView : View("Software-Challenge Germany") {
                 ViewType.GAME_CREATION -> "Neues Spiel - $sochaTitle"
                 ViewType.GAME_LOADING -> "Starte Spiel $gameTitle - $sochaTitle"
                 ViewType.GAME -> "Spiele $gameTitle - $sochaTitle"
+                ViewType.FEEDBACK -> "Testitest"
                 null -> throw NoWhenBranchMatchedException("Current view can't be null!")
             }
         })

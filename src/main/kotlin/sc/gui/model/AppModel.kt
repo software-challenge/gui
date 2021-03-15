@@ -8,6 +8,7 @@ enum class ViewType {
     GAME_CREATION,
     GAME_LOADING,
     GAME,
+    FEEDBACK,
 }
 
 class AppModel : ItemViewModel<AppView>() {

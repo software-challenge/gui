@@ -58,6 +58,8 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT") { exclude("org.jetbrains.kotlin", "kotlin-reflect") }
     implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.4")
+    implementation("io.ktor:ktor-client-core:1.5.2")
+    implementation("io.ktor:ktor-client-apache:1.5.2")
     
     implementation(fileTree(backend.name + "/server/build/runnable") { include("**/*.jar") })
 }

@@ -39,4 +39,5 @@ val ViewType.view
 		ViewType.GAME_CREATION -> GameCreationView::class
         ViewType.GAME_LOADING -> GameLoadingView::class
 		ViewType.GAME -> GameView::class
+		ViewType.FEEDBACK -> FeedbackView::class
 	}
