@@ -94,6 +94,5 @@ class FeedbackController : Controller(){
                 }
             )
         }
-        println(response.status)
     }
 }

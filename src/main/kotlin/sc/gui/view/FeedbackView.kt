@@ -59,7 +59,7 @@ class FeedbackView : View() {
                     style {
                         fontSize = 23.px
                     }
-                    text = "Email (optional):"
+                    text = "Email zur Kontaktaufnahme (optional):"
                 }
                 email = textfield {
                 }
