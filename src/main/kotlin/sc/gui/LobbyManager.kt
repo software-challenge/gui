@@ -4,10 +4,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
 import sc.framework.plugins.Player
+import sc.gui.controller.IGameListener
 import sc.gui.controller.client.ClientInterface
 import sc.networking.clients.IControllableGame
 import sc.networking.clients.ILobbyClientListener
-import sc.networking.clients.IUpdateListener
 import sc.networking.clients.LobbyClient
 import sc.plugin2021.GamePlugin
 import sc.protocol.helpers.RequestResult
@@ -43,11 +43,11 @@ class LobbyManager(host: String, port: Int) {
         lobby.addListener(lobbyListener)
     }
     
-    fun startNewGame(players: Collection<ClientInterface>, playerNames: Collection<String>, prepared: Boolean, paused: Boolean, listener: IUpdateListener, onGameStarted: (error: Throwable?) -> Unit, onGameOver: (result: GameResult) -> Unit) {
+    fun startNewGame(players: Collection<ClientInterface>, playerNames: Collection<String>, prepared: Boolean, paused: Boolean, listener: IGameListener) {
         logger.debug("Starting new game (prepared: {}, paused: {}, players: {})", prepared, paused, players)
-        this.lobbyListener.setGameOverHandler(onGameOver)
         val observeRoom = { roomId: String ->
-            game = lobby.observeAndControl(roomId, paused).apply { addListener(listener) }
+            game = lobby.observeAndControl(roomId, paused)
+            lobbyListener.gameListeners[roomId] = listener
         }
         
         if (prepared) {
@@ -63,10 +63,10 @@ class LobbyManager(host: String, port: Int) {
                     val preparation = requestResult.result
                     observeRoom(preparation.roomId)
                     players.forEachIndexed { i, player -> player.joinPreparedGame(preparation.reservations[i]) }
-                    onGameStarted(null)
+                    listener.onGameStarted(null)
                 }
                 is RequestResult.Error ->
-                    onGameStarted(GameStartException(requestResult.error))
+                    listener.onGameStarted(GameStartException(requestResult.error))
             }
         } else {
             val iter = players.iterator()
@@ -74,7 +74,7 @@ class LobbyManager(host: String, port: Int) {
                 if (iter.hasNext())
                     iter.next().joinAnyGame()
                 else
-                    onGameStarted(null)
+                    listener.onGameStarted(null)
             }
             lobbyListener.onAnyJoin { roomId ->
                 logger.debug("LobbyManager started room $roomId")
@@ -96,17 +96,17 @@ class LobbyManager(host: String, port: Int) {
 
 class LobbyListener(val logger: Logger): ILobbyClientListener {
     
-    private var gameOverHandler: (result: GameResult) -> Unit = {}
-    
+    val gameListeners = HashMap<String, IGameListener>()
     private val roomsJoined = HashMap<String, Int>()
     private val waiters: MutableMap<String?, MutableCollection<(String) -> Unit>> = HashMap()
     
     override fun onNewState(roomId: String, state: IGameState) {
         logger.debug("lobby: new state for $roomId")
+        gameListeners[roomId]?.onNewState(state)
     }
     
-    override fun onError(roomId: String, error: ProtocolErrorMessage) {
-        logger.debug("lobby: new error for $roomId")
+    override fun onError(roomId: String?, error: ProtocolErrorMessage) {
+        logger.debug("lobby: new error $error for $roomId")
     }
     
     override fun onRoomMessage(roomId: String, data: ProtocolMessage) {
@@ -145,7 +145,7 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
     
     override fun onGameOver(roomId: String, data: GameResult) {
         logger.debug("lobby: $roomId game is over")
-        gameOverHandler(data)
+        gameListeners[roomId]?.onGameOver(data)
     }
     
     override fun onGamePaused(roomId: String, nextPlayer: Player) {
@@ -154,10 +154,6 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
     
     override fun onGameObserved(roomId: String) {
         logger.debug("lobby: $roomId game was observed")
-    }
-    
-    fun setGameOverHandler(handler: (result: GameResult) -> Unit) {
-        this.gameOverHandler = handler
     }
     
 }
