@@ -5,8 +5,7 @@ import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.model.TeamSettingsModel
 import sc.gui.model.ViewType
-import tornadofx.*
-import java.util.concurrent.Callable
+import tornadofx.Controller
 
 class GameCreationController : Controller() {
     private val appController: AppController by inject()

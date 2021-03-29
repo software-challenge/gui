@@ -1,7 +1,9 @@
 package sc.gui.model
 
 import sc.gui.view.AppView
-import tornadofx.*
+import tornadofx.ItemViewModel
+import tornadofx.booleanProperty
+import tornadofx.objectProperty
 
 enum class ViewType {
     START,

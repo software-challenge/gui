@@ -3,7 +3,6 @@ package sc.gui
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import sc.gui.view.AppView
-import sc.gui.view.StatusView
 import tornadofx.*
 
 class AppStyle : Stylesheet() {
@@ -48,8 +47,6 @@ class AppStyle : Stylesheet() {
         val colorYELLOW by cssclass()
         val placeableYELLOW by cssclass()
         val borderYELLOW by cssclass()
-
-
     }
 
     init {

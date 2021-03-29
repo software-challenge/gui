@@ -1,7 +1,8 @@
 package sc.gui.model
 
 import javafx.beans.property.Property
-import tornadofx.*
+import tornadofx.ItemViewModel
+import tornadofx.objectProperty
 import java.io.File
 
 enum class PlayerType {

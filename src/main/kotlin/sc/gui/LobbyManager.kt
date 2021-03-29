@@ -32,7 +32,7 @@ class LobbyManager(host: String, port: Int) {
     private val lobby: LobbyClient = try {
         LobbyClient(host, port)
     } catch (e: ConnectException) {
-        logger.error("Could not connect to Server: " + e.message)
+        logger.error("Could not connect to server: " + e.message)
         exitProcess(1)
     }
     
