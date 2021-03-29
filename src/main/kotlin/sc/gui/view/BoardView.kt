@@ -111,34 +111,18 @@ class BoardView: View() {
     }
     
     
-    private fun getPane(x: Int, y: Int): Node {
-        for(node in grid.children) {
-            if(GridPane.getColumnIndex(node) == x && GridPane.getRowIndex(node) == y) {
-                return node
-            }
-        }
-        throw Exception("Pane of ($x, $y) is not part of the BoardView")
-    }
+    private fun getPane(x: Int, y: Int): Node =
+        grid.children.find { node ->
+            GridPane.getColumnIndex(node) == x && GridPane.getRowIndex(node) == y
+        } ?: throw Exception("Pane of ($x, $y) is not part of the BoardView")
     
-    // remove all applied Stylesheets during the hover-effect
-    private fun cleanupHover() {
-        for(place in grid.children) {
-            place.removeClass(AppStyle.colorRED)
-            place.removeClass(AppStyle.placeableRED)
-            place.removeClass(AppStyle.colorBLUE)
-            place.removeClass(AppStyle.placeableBLUE)
-            place.removeClass(AppStyle.colorGREEN)
-            place.removeClass(AppStyle.placeableGREEN)
-            place.removeClass(AppStyle.colorYELLOW)
-            place.removeClass(AppStyle.placeableYELLOW)
-            place.removeClass(AppStyle.fieldUnplaceable)
-        }
-    }
+    /** Remove all applied Stylesheets during the hover-effect. */
+    private fun cleanupHover() =
+        grid.children.forEach { it.styleClass.clear() }
     
     private fun paneHoverEnter(x: Int, y: Int) {
-        if(gameController.gameEnded.value) {
+        if(gameController.gameEnded.value)
             return
-        }
         
         controller.currentHover = Coordinates(x, y)
         controller.hoverable = controller.isHoverable(x, y, controller.game.selectedCalculatedShape.get())
