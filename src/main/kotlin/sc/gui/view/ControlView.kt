@@ -80,13 +80,13 @@ class ControlView : View() {
     
     init {
         // TODO properly implement State pattern for start/pause/play/skip/finish-button
-        val updatePauseState = { start: Boolean ->
+        val updatePauseState = { atStart: Boolean ->
             val paused = clientController.lobbyManager?.game?.isPaused
-            logger.trace("Button updatePauseState: $paused (start: $start)")
-            if (paused == true) {
-                playPauseSkipButton.text = if (start) "Start" else "Weiter"
-            } else {
-                playPauseSkipButton.text = "Anhalten"
+            logger.debug("Button updatePauseState: $paused (at start: $atStart)")
+            playPauseSkipButton.text = when {
+                atStart -> "Start"
+                paused == true -> "Weiter"
+                else -> "Anhalten"
             }
         }
         gameController.canSkip.addListener { _, _, canSkip ->

@@ -41,7 +41,7 @@ class StatusBinding(private val game: GameController) : StringBinding() {
 
     override fun computeValue(): String {
         if(!game.started.value)
-            return "Drücke auf Start"
+            return ""
         return game.gameResult.get()?.let { gameResult -> """
                 Spiel ist beendet
                 ${winner(gameResult)}
@@ -58,6 +58,8 @@ class ScoreBinding(private val game: GameController) : StringBinding() {
     }
 
     override fun computeValue(): String {
+        if(game.currentRound.get() == 0)
+            return "Drücke auf Start"
         return "Runde ${game.currentRound.get()} - " +
                game.teamScores.value?.joinToString(" : ")
     }

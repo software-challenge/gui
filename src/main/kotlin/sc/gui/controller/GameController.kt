@@ -174,7 +174,9 @@ class GameController : Controller() {
     // use selected* to access the property of currentPiece in order to always correctly be automatically rebind
     // TODO maybe this should be nullable rather than having a random default -
     //  then it could also be unset to prevent spurious errors like https://github.com/CAU-Kiel-Tech-Inf/gui/issues/43
-    val currentPiece = objectProperty(PiecesModel(Color.RED, PieceShape.MONO))
+    private val emptyPiece = PiecesModel(Color.RED, PieceShape.MONO)
+    val currentPiece = objectProperty(emptyPiece)
+    // TODO remove these useless binding classes
     val selectedColor: ColorBinding = ColorBinding(currentPiece)
     val selectedShape: ShapeBinding = ShapeBinding(currentPiece)
     val selectedRotation: RotationBinding = RotationBinding(currentPiece)
@@ -221,8 +223,10 @@ class GameController : Controller() {
         gameState.set(null)
         gameResult.set(null)
         availableTurns.set(0)
+        isHumanTurn.set(false)
+        currentPiece.set(emptyPiece)
     }
-
+    
     fun selectPiece(piece: PiecesModel) {
         currentPiece.set(piece)
     }
