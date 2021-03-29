@@ -68,7 +68,8 @@ class ClientController: Controller() {
                 else -> throw IllegalArgumentException("Cannot create game: Invalid playerType $type")
             }
         }
-        
+        // TODO handle client start failures
+    
         lobbyManager?.game?.cancel()
         lobbyManager = LobbyManager(host, port).apply {
             startNewGame(players, playerSettings.map { it.name.get() }, players.none { it.type == PlayerType.EXTERNAL }, players.none { it.type == PlayerType.HUMAN }, listener)

@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory
 import sc.server.Configuration
 import sc.server.Lobby
 import tornadofx.Controller
-import java.io.IOException
 
 class ServerController : Controller() {
     private val server = Lobby()
@@ -17,13 +16,8 @@ class ServerController : Controller() {
         StatusPrinter.print(lc)
 
         Configuration.loadServerProperties()
-        try {
-            server.start()
-            // TODO get address & port from server
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return
-        }
+        server.start()
+        // TODO get address & port from server
     }
 
     fun stopServer() {
