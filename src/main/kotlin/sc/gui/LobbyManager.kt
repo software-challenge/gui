@@ -79,11 +79,11 @@ class LobbyManager(host: String, port: Int) {
             lobbyListener.onAnyJoin { roomId ->
                 logger.debug("LobbyManager started room $roomId")
                 lobbyListener.onJoin(roomId, join)
+                join()
                 observeRoom(roomId)
                 players.indices.forEach {
                     lobby.send(ControlTimeoutRequest(roomId, false, it))
                 }
-                join()
             }
             join()
         }
@@ -101,31 +101,31 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
     private val waiters: MutableMap<String?, MutableCollection<(String) -> Unit>> = HashMap()
     
     override fun onNewState(roomId: String, state: IGameState) {
-        logger.debug("lobby: new state for $roomId")
+        logger.debug("lobby: new gamestate in $roomId")
         gameListeners[roomId]?.onNewState(state)
     }
     
     override fun onError(roomId: String?, error: ProtocolErrorMessage) {
-        logger.debug("lobby: new error $error for $roomId")
+        logger.debug("lobby: new error $error in $roomId")
     }
     
     override fun onRoomMessage(roomId: String, data: ProtocolMessage) {
-        logger.debug("lobby: new message for $roomId")
+        logger.debug("lobby: new message in $roomId")
     }
     
     override fun onGamePrepared(response: GamePreparedResponse) {
-        logger.debug("lobby: game was prepared")
+        logger.debug("lobby: a game has been prepared")
     }
     
     override fun onGameLeft(roomId: String) {
-        logger.debug("lobby: $roomId game was left")
+        logger.debug("lobby: room $roomId was left")
     }
     
     override fun onGameJoined(roomId: String) {
         roomsJoined[roomId] = roomsJoined.getOrDefault(roomId, 0) + 1
         (waiters[roomId].orEmpty() + waiters.remove(null).orEmpty())
             .forEach { it(roomId) }
-        logger.debug("lobby: $roomId game was joined ($roomsJoined)")
+        logger.debug("lobby: room $roomId was joined (total: $roomsJoined)")
     }
     
     /** The callback is called once with a roomId as soon as a player joins. */
@@ -144,16 +144,16 @@ class LobbyListener(val logger: Logger): ILobbyClientListener {
         } ?: roomsJoined.values.sum()
     
     override fun onGameOver(roomId: String, data: GameResult) {
-        logger.debug("lobby: $roomId game is over")
+        logger.debug("lobby: game over in room $roomId")
         gameListeners[roomId]?.onGameOver(data)
     }
     
     override fun onGamePaused(roomId: String, nextPlayer: Player) {
-        logger.debug("lobby: $roomId game was paused")
+        logger.debug("lobby: game paused in room $roomId")
     }
     
     override fun onGameObserved(roomId: String) {
-        logger.debug("lobby: $roomId game was observed")
+        logger.debug("lobby: room $roomId is being observed")
     }
     
 }
