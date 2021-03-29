@@ -4,8 +4,11 @@ import javafx.beans.value.WritableValue
 import mu.KLogging
 import sc.gui.model.AppModel
 import sc.gui.model.ViewType
-import sc.gui.view.*
-import tornadofx.*
+import sc.gui.view.GameCreationView
+import sc.gui.view.GameLoadingView
+import sc.gui.view.GameView
+import sc.gui.view.StartView
+import tornadofx.Controller
 
 class AppController: Controller() {
 	val model = AppModel()

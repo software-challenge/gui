@@ -2,12 +2,11 @@ package sc.gui.controller
 
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.core.util.StatusPrinter
+import org.slf4j.LoggerFactory
 import sc.server.Configuration
 import sc.server.Lobby
-import tornadofx.*
+import tornadofx.Controller
 import java.io.IOException
-import org.slf4j.LoggerFactory
-
 
 class ServerController : Controller() {
     private val server = Lobby()

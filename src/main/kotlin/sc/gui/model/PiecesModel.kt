@@ -5,8 +5,9 @@ import sc.plugin2021.Color
 import sc.plugin2021.Coordinates
 import sc.plugin2021.PieceShape
 import sc.plugin2021.Rotation
-import tornadofx.*
-
+import tornadofx.ItemViewModel
+import tornadofx.getProperty
+import tornadofx.property
 
 class PiecesModel(color: Color, shape: PieceShape) : ItemViewModel<PiecesFragment>() {
     private var color: Color by property(color)

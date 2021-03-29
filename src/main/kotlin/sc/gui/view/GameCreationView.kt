@@ -6,7 +6,8 @@ import javafx.geometry.Pos
 import javafx.stage.FileChooser
 import sc.gui.controller.AppController
 import sc.gui.controller.GameCreationController
-import sc.gui.model.*
+import sc.gui.model.PlayerType
+import sc.gui.model.TeamSettingsModel
 import sc.plugin2021.Team
 import tornadofx.*
 import java.io.File

@@ -4,7 +4,10 @@ import javafx.scene.image.Image
 import mu.KLogging
 import sc.gui.controller.ServerController
 import sc.gui.view.AppView
-import tornadofx.*
+import tornadofx.App
+import tornadofx.addStageIcon
+import tornadofx.launch
+import tornadofx.reloadStylesheetsOnFocus
 import kotlin.system.exitProcess
 
 class GuiApp : App(AppView::class, AppStyle::class) {
