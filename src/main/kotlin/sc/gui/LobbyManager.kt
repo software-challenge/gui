@@ -1,6 +1,7 @@
 package sc.gui
 
 import org.slf4j.LoggerFactory
+import sc.api.plugins.IGamePlugin
 import sc.api.plugins.IGameState
 import sc.gui.controller.IGameListener
 import sc.gui.controller.client.ClientInterface
@@ -55,7 +56,7 @@ class LobbyManager(host: String, port: Int) {
             })
             
             lobby.send(PrepareGameRequest(
-                    GamePlugin.PLUGIN_UUID,
+                    IGamePlugin.loadPluginId(),
                     SlotDescriptor(playerNames.first(), false),
                     SlotDescriptor(playerNames.last(), false),
                     paused
