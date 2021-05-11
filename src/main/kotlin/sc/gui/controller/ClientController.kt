@@ -8,7 +8,7 @@ import sc.api.plugins.exceptions.GameLogicException
 import sc.gui.LobbyManager
 import sc.gui.controller.client.ExecClient
 import sc.gui.controller.client.ExternalClient
-import sc.gui.controller.client.InternalClient
+import sc.gui.controller.client.GuiClient
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.model.ViewType
@@ -61,8 +61,8 @@ class ClientController: Controller() {
         
         val players = playerSettings.map { teamSettings ->
             when (val type = teamSettings.type.value) {
-                PlayerType.HUMAN -> InternalClient(host, port, type, ::humanMoveRequest)
-                PlayerType.COMPUTER_EXAMPLE -> InternalClient(host, port, type, ::testClientMoveRequest)
+                PlayerType.HUMAN -> GuiClient(host, port, type, ::humanMoveRequest)
+                PlayerType.COMPUTER_EXAMPLE -> GuiClient(host, port, type, ::getSimpleMove)
                 PlayerType.COMPUTER -> ExecClient(host, port, teamSettings.executable.get())
                 PlayerType.EXTERNAL -> ExternalClient(host, port)
                 else -> throw IllegalArgumentException("Cannot create game: Invalid playerType $type")
@@ -85,7 +85,7 @@ class ClientController: Controller() {
         return future
     }
     
-    fun testClientMoveRequest(state: GameState): CompletableFuture<Move> {
+    fun getSimpleMove(state: GameState): CompletableFuture<Move> {
         val possibleMoves = GameRuleLogic.getPossibleMoves(state)
         if (possibleMoves.isEmpty())
             throw GameLogicException("No possible Moves found!")
