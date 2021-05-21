@@ -4,14 +4,20 @@ import javafx.beans.value.WritableValue
 import mu.KLogging
 import sc.gui.model.AppModel
 import sc.gui.model.ViewType
-import sc.gui.view.GameCreationView
-import sc.gui.view.GameLoadingView
-import sc.gui.view.GameView
-import sc.gui.view.StartView
+import sc.gui.view.*
 import tornadofx.Controller
+import tornadofx.FXEvent
+
+class NavigateBackEvent: FXEvent()
 
 class AppController: Controller() {
 	val model = AppModel()
+	
+	init {
+		subscribe<NavigateBackEvent> {
+			changeViewTo(model.previousView.get())
+		}
+	}
 	
 	fun changeViewTo(newView: ViewType) {
 		val current = model.currentView.get()
