@@ -13,7 +13,7 @@ import tornadofx.*
 
 class StatusBinding(private val game: GameController) : StringBinding() {
     init {
-        bind(game.started)
+        bind(game.gameStarted)
         bind(game.currentTeam)
         bind(game.currentColor)
         bind(game.playerNames)
@@ -40,7 +40,7 @@ class StatusBinding(private val game: GameController) : StringBinding() {
     }
 
     override fun computeValue(): String {
-        if(!game.started.value)
+        if(!game.gameStarted.value)
             return ""
         return game.gameResult.get()?.let { gameResult -> """
                 Spiel ist beendet

@@ -4,6 +4,6 @@ import sc.gui.model.PlayerType
 
 interface ClientInterface {
     val type: PlayerType
-    fun joinAnyGame()
+    fun joinGameRoom(roomId: String)
     fun joinPreparedGame(reservation: String)
 }

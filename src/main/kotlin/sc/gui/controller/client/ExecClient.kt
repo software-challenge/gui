@@ -10,25 +10,27 @@ import java.io.OutputStream
 class ExecClient(val host: String, val port: Int, val clientExecutable: File): ClientInterface {
     override val type = PlayerType.COMPUTER
     
-    override fun joinAnyGame() {
-        startClient(null)
+    override fun joinGameRoom(roomId: String) {
+        startClient("--room", roomId)
     }
     
     override fun joinPreparedGame(reservation: String) {
-        startClient(reservation)
+        startClient("--reservation", reservation)
     }
     
-    private fun startClient(reservation: String?) {
+    private fun startClient(vararg options: String) {
         val command = mutableListOf(
             clientExecutable.absolutePath,
             "--host", host,
-            "--port", port.toString()
+            "--port", port.toString(),
+            *options
         )
-        if (reservation != null)
-            command.addAll(listOf("--reservation", reservation))
         if (clientExecutable.absolutePath.endsWith(".jar", true))
-            command.addAll(0, listOf(File(System.getProperty("java.home")).resolve("bin/java").takeIf { it.exists() }?.toString() ?: "java", "-jar"))
-        logger.debug("Starting ${command.joinToString(" ")}")
+            command.addAll(0, listOf(
+                    File(System.getProperty("java.home"), "bin").resolve("java")
+                            .takeIf { it.exists() }?.toString() ?: "java",
+                    "-jar"))
+        logger.debug("Starting '${command.joinToString(" ")}'")
         val processBuilder = ProcessBuilder(command)
         val process = processBuilder.redirectErrorStream(true).start()
         

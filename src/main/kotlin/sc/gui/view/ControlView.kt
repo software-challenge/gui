@@ -1,13 +1,12 @@
 package sc.gui.view
 
 import javafx.beans.binding.Bindings
-import javafx.scene.control.Button
-import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
-import sc.gui.controller.*
-import sc.gui.model.ViewType
+import sc.gui.GamePausedEvent
+import sc.gui.controller.GameController
+import sc.gui.controller.GameCreationController
+import sc.gui.controller.HumanMoveAction
 import sc.plugin2021.Color
-import sc.plugin2021.SkipMove
 import tornadofx.*
 
 val Color.borderStyle
@@ -18,20 +17,33 @@ val Color.borderStyle
         Color.RED -> AppStyle.borderRED
     }
 
+sealed class GameControlEvent: FXEvent()
+data class PauseGame(val pause: Boolean): GameControlEvent()
+data class StepGame(val steps: Int): GameControlEvent()
+/** Signals that the current game should be terminated.
+ * @param close whether to return to start screen */
+data class TerminateGame(val close: Boolean = true): GameControlEvent()
+
+/** Encapsulates the different actions of the GameControlButton.
+ * @param action the event to fire when this state is invoked */
+enum class GameControlState(val text: String, val action: FXEvent) {
+    START("Start", PauseGame(false)),
+    PLAYING("Anhalten", PauseGame(true)),
+    PAUSED("Weiter", PauseGame(false)),
+    SKIP("Passen", HumanMoveAction(null)),
+    FINISHED("Spiel beenden", TerminateGame());
+}
+
 class ControlView : View() {
     private val gameController: GameController by inject()
-    private val clientController: ClientController by inject()
-    private val appController: AppController by inject()
-    private val gameCreationController: GameCreationController by inject()
-    private val playPauseSkipButton: Button = button {
-        text = "Start"
-    }
+    private val gameControlState = objectProperty(GameControlState.START)
+    private val hasHuman = find(GameCreationController::class).hasHumanPlayer
 
     override val root = hbox {
         spacing = 8.0
         hbox {
             spacing = 8.0
-            visibleProperty().bind(gameCreationController.hasHumanPlayer)
+            visibleProperty().bind(hasHuman)
             addClass(AppStyle.pieceUnselectable)
             gameController.isHumanTurn.addListener { _, _, humanTurn ->
                 if(humanTurn) {
@@ -56,12 +68,24 @@ class ControlView : View() {
             spacing = 8.0
             hbox {
                 spacing = 8.0
-                this += playPauseSkipButton
+                button(gameControlState.get().text) {
+                    gameControlState.addListener { _, _, state ->
+                        isDisable = false
+                        text = state.text
+                    }
+                    setOnMouseClicked {
+                        if(gameControlState.value == GameControlState.PAUSED)
+                            gameControlState.set(GameControlState.PLAYING)
+                        else
+                            isDisable = true
+                        fire(gameControlState.value.action)
+                    }
+                }
                 button {
                     disableWhen(gameController.currentTurn.isEqualTo(0))
                     text = "⏮"
                     setOnMouseClicked {
-                        clientController.previous()
+                        fire(StepGame(-1))
                     }
                 }
                 label {
@@ -71,7 +95,7 @@ class ControlView : View() {
                     disableWhen(gameController.currentTurn.isEqualTo(gameController.availableTurns))
                     text = "⏭"
                     setOnMouseClicked {
-                        clientController.next()
+                        fire(StepGame(1))
                     }
                 }
             }
@@ -79,50 +103,24 @@ class ControlView : View() {
     }
     
     init {
-        // TODO properly implement State pattern for start/pause/play/skip/finish-button
-        val updatePauseState = { atStart: Boolean ->
-            val paused = clientController.lobbyManager?.game?.isPaused
-            logger.debug("Button updatePauseState: $paused (at start: $atStart)")
-            playPauseSkipButton.text = when {
-                atStart -> "Start"
-                paused == true -> "Weiter"
-                else -> "Anhalten"
-            }
+        gameController.canSkip.onChange {
+            if(it)
+                gameControlState.set(GameControlState.SKIP)
         }
-        gameController.canSkip.addListener { _, _, canSkip ->
-            if(canSkip) {
-                playPauseSkipButton.text = "Passen"
-            }
+        gameController.gameStarted.onChange {
+            if(it)
+                if(!hasHuman.get())
+                    gameControlState.set(GameControlState.PLAYING)
+            else
+                gameControlState.set(GameControlState.START)
         }
-        playPauseSkipButton.setOnMouseClicked {
-            when {
-                gameController.canSkip.get() -> {
-                    fire(HumanMoveAction(SkipMove(gameController.currentColor.value)))
-                }
-                gameController.gameEnded.value -> {
-                    appController.changeViewTo(ViewType.START)
-                    gameController.clearGame()
-                }
-                else -> {
-                    updatePauseState(false)
-                    clientController.togglePause()
-                }
-            }
+        gameController.gameEnded.onChange {
+            if(it)
+                gameControlState.set(GameControlState.FINISHED)
         }
-    
-        // When the game is paused externally e.g. when rewinding
-        arrayOf(gameController.currentTurn, gameController.started, gameController.gameResult).forEach {
-            it.addListener { _, _, _ ->
-                if (gameController.gameEnded.value) {
-                    playPauseSkipButton.text = "Spiel beenden"
-                } else {
-                    updatePauseState(!gameController.started.value)
-                }
-            }
+        subscribe<GamePausedEvent> {
+            gameControlState.set(GameControlState.PAUSED)
         }
     }
     
-    companion object {
-        private val logger = LoggerFactory.getLogger(this::class.java)
-    }
 }
