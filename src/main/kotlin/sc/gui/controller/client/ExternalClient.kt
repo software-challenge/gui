@@ -5,8 +5,8 @@ import sc.gui.model.PlayerType
 class ExternalClient(private val host: String, private val port: Int) : ClientInterface {
     override val type = PlayerType.EXTERNAL
     
-    override fun joinAnyGame() {
-        println("Please start the manual client on $host:$port")
+    override fun joinGameRoom(roomId: String) {
+        println("Please start the manual client on $host:$port to join room $roomId")
     }
     
     override fun joinPreparedGame(reservation: String) {

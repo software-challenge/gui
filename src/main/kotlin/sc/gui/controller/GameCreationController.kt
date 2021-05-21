@@ -30,5 +30,7 @@ class GameCreationController : Controller() {
         fire(StartGameRequest(playerOneSettingsModel.item, playerTwoSettingsModel.item))
     }
     
-    val hasHumanPlayer = Bindings.createBooleanBinding({ playerOneSettings.isHuman || playerTwoSettings.isHuman }, playerOneSettings.type, playerTwoSettings.type)
+    val hasHumanPlayer = Bindings.createBooleanBinding(
+            { playerOneSettings.isHuman || playerTwoSettings.isHuman },
+            playerOneSettings.type, playerTwoSettings.type)
 }

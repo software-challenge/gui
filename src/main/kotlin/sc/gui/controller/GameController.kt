@@ -6,6 +6,8 @@ import javafx.beans.property.ObjectProperty
 import javafx.beans.property.Property
 import javafx.beans.value.ObservableValue
 import org.slf4j.LoggerFactory
+import sc.gui.GameOverEvent
+import sc.gui.NewGameState
 import sc.gui.model.PiecesModel
 import sc.gui.view.PiecesFragment
 import sc.plugin2021.*
@@ -150,11 +152,11 @@ class GameController : Controller() {
             avTurns.set(turn?.let { max(it, avTurns.value) }) }
     }
     
-    val started = nonNullObjectBinding(currentTurn, isHumanTurn) {
-        value > 0 || isHumanTurn.value
-    }
-    val playerNames = gameState.objectBinding { it?.playerNames }
+    val gameStarted =
+            booleanBinding(currentTurn, isHumanTurn)
+            { value > 0 || isHumanTurn.value }
     val gameEnded = gameResult.booleanBinding { it != null }
+    val playerNames = gameState.objectBinding { it?.playerNames }
     
     val canSkip = isHumanTurn.booleanBinding(gameEnded) { humanTurn ->
         (humanTurn == true &&

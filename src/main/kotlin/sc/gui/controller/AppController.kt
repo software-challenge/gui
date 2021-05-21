@@ -2,6 +2,7 @@ package sc.gui.controller
 
 import javafx.beans.value.WritableValue
 import mu.KLogging
+import sc.gui.GameReadyEvent
 import sc.gui.model.AppModel
 import sc.gui.model.ViewType
 import sc.gui.view.*
@@ -16,6 +17,12 @@ class AppController: Controller() {
 	init {
 		subscribe<NavigateBackEvent> {
 			changeViewTo(model.previousView.get())
+		}
+		subscribe<GameReadyEvent> {
+			changeViewTo(ViewType.GAME)
+		}
+		subscribe<TerminateGame> {
+			changeViewTo(ViewType.START)
 		}
 	}
 	
