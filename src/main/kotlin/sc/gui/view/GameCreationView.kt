@@ -4,8 +4,8 @@ import javafx.beans.binding.Bindings
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Pos
 import javafx.stage.FileChooser
-import sc.gui.controller.AppController
 import sc.gui.controller.GameCreationController
+import sc.gui.controller.NavigateBackEvent
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettingsModel
 import sc.plugin2021.Team
@@ -13,7 +13,6 @@ import tornadofx.*
 import java.io.File
 
 class GameCreationView : View() {
-    private val appController: AppController by inject()
     val controller: GameCreationController by inject()
 
     override val root = borderpane {
@@ -44,7 +43,7 @@ class GameCreationView : View() {
 
             button("Zurück") {
                 action {
-                    appController.changeViewTo(appController.model.previousView.get())
+                    fire(NavigateBackEvent())
                 }
             }
         }
