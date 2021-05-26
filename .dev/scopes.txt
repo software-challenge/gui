@@ -6,6 +6,6 @@ ci
 ui
 view
 model
-networking
+network
 controller
 clients
