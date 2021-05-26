@@ -6,6 +6,7 @@ import sc.gui.GamePausedEvent
 import sc.gui.controller.GameController
 import sc.gui.controller.GameCreationController
 import sc.gui.controller.HumanMoveAction
+import sc.gui.view.GameControlState.*
 import sc.plugin2021.Color
 import tornadofx.*
 
@@ -36,7 +37,7 @@ enum class GameControlState(val text: String, val action: FXEvent) {
 
 class ControlView : View() {
     private val gameController: GameController by inject()
-    private val gameControlState = objectProperty(GameControlState.START)
+    private val gameControlState = objectProperty(START)
     private val hasHuman = find(GameCreationController::class).hasHumanPlayer
 
     override val root = hbox {
@@ -74,11 +75,19 @@ class ControlView : View() {
                         text = state.text
                     }
                     setOnMouseClicked {
-                        if(gameControlState.value == GameControlState.PAUSED)
-                            gameControlState.set(GameControlState.PLAYING)
+                        if(gameControlState.value == PAUSED)
+                            gameControlState.set(PLAYING)
                         else
                             isDisable = true
                         fire(gameControlState.value.action)
+                    }
+                    gameController.canSkip.onChange {
+                        if(it) {
+                            gameControlState.set(SKIP)
+                            isDisable = false
+                        } else if(gameControlState.value == SKIP) {
+                            isDisable = true
+                        }
                     }
                 }
                 button {
@@ -103,23 +112,19 @@ class ControlView : View() {
     }
     
     init {
-        gameController.canSkip.onChange {
-            if(it)
-                gameControlState.set(GameControlState.SKIP)
-        }
         gameController.gameStarted.onChange {
             if(it)
                 if(!hasHuman.get())
-                    gameControlState.set(GameControlState.PLAYING)
+                    gameControlState.set(PLAYING)
             else
-                gameControlState.set(GameControlState.START)
+                gameControlState.set(START)
         }
         gameController.gameEnded.onChange {
             if(it)
-                gameControlState.set(GameControlState.FINISHED)
+                gameControlState.set(FINISHED)
         }
         subscribe<GamePausedEvent> {
-            gameControlState.set(GameControlState.PAUSED)
+            gameControlState.set(PAUSED)
         }
     }
     
