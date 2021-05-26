@@ -74,12 +74,19 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
                 controller.step()
             // TODO consider step size
         }
-        subscribe<TerminateGame> { controller.cancel() }
+        var isOver = false
+        subscribe<TerminateGame> {
+            if (!isOver)
+                controller.cancel()
+        }
         client.observe(roomId) { msg ->
             logger.trace("New RoomMessage in {}: {}", roomId, msg)
             when (msg) {
                 is MementoMessage -> fire(NewGameState(msg.state as GameState)) // TODO save
-                is GameResult -> fire(GameOverEvent(msg))
+                is GameResult -> {
+                    isOver = true
+                    fire(GameOverEvent(msg))
+                }
                 is ErrorMessage -> {
                     logger.warn("Error in $roomId: $msg")
                 }
