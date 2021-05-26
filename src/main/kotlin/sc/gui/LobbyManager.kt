@@ -2,7 +2,8 @@ package sc.gui
 
 import org.slf4j.LoggerFactory
 import sc.api.plugins.IGamePlugin
-import sc.gui.controller.*
+import sc.api.plugins.IGameState
+import sc.gui.controller.Player
 import sc.gui.controller.client.ClientInterface
 import sc.gui.model.PlayerType
 import sc.gui.view.PauseGame
@@ -17,6 +18,7 @@ import sc.protocol.responses.ErrorPacket
 import sc.protocol.responses.GamePreparedResponse
 import sc.protocol.room.ErrorMessage
 import sc.protocol.room.GamePaused
+import sc.protocol.room.MementoMessage
 import sc.server.Configuration
 import sc.shared.GameResult
 import sc.shared.SlotDescriptor
@@ -30,7 +32,7 @@ import kotlin.system.exitProcess
 
 sealed class GameUpdateEvent: FXEvent()
 class GameReadyEvent: GameUpdateEvent()
-data class NewGameState(val gameState: GameState): GameUpdateEvent()
+data class NewGameState(val gameState: IGameState): GameUpdateEvent()
 class GamePausedEvent: GameUpdateEvent()
 data class GameOverEvent(val result: GameResult): GameUpdateEvent()
 
@@ -74,10 +76,9 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
         }
         subscribe<TerminateGame> { controller.cancel() }
         client.observe(roomId) { msg ->
-            // FIXME doesn't receive any messages
             logger.trace("New RoomMessage in {}: {}", roomId, msg)
             when (msg) {
-                is GameState -> fire(NewGameState(msg)) // TODO save
+                is MementoMessage -> fire(NewGameState(msg.state as GameState)) // TODO save
                 is GameResult -> fire(GameOverEvent(msg))
                 is ErrorMessage -> {
                     logger.warn("Error in $roomId: $msg")

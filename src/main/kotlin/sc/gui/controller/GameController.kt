@@ -159,10 +159,9 @@ class GameController : Controller() {
     val playerNames = gameState.objectBinding { it?.playerNames }
     
     val canSkip = isHumanTurn.booleanBinding(gameEnded) { humanTurn ->
-        (humanTurn == true &&
+        humanTurn == true &&
          !gameEnded.value &&
          gameState.value?.let { GameRuleLogic.isFirstMove(it) } == false
-        ).also { logger.debug("Human turn $humanTurn - canSkip $it") }
     }
     
     val undeployedPieces: Map<Color, ObservableValue<Collection<PieceShape>>> = EnumMap(
@@ -192,6 +191,10 @@ class GameController : Controller() {
         // TODO this event is received repeatedly
         subscribe<NewGameState> { event ->
             val state = event.gameState
+            if(state !is GameState) {
+                logger.warn("Received unknown state: $state")
+                return@subscribe
+            }
             logger.debug("New state: $state")
             if(logger.isTraceEnabled)
                 logger.trace(state.longString())
