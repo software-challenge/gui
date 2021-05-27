@@ -12,12 +12,14 @@ class ServerController : Controller() {
 
     fun startServer() {
         // output logback diagnostics to see if a logback.xml config was found
-        val  lc = LoggerFactory.getILoggerFactory() as LoggerContext
+        val lc = LoggerFactory.getILoggerFactory() as LoggerContext
         StatusPrinter.print(lc)
 
         Configuration.loadServerProperties()
+        Configuration.set(Configuration.SAVE_REPLAY, true)
         server.start()
         // TODO get address & port from server
+        // TODO do we have to communicate via network at all?
     }
 
     fun stopServer() {
