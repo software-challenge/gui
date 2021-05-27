@@ -51,11 +51,17 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
             is GamePreparedResponse -> {
                 enterRoom(packet.roomId)
                 var reservationIndex = 0
-                pendingPlayers.forEach { player ->
-                    if (player.type == PlayerType.EXTERNAL)
+                pendingPlayers.removeAll { player ->
+                    if (player.type == PlayerType.EXTERNAL) {
                         player.joinGameRoom(packet.roomId)
-                    else
+                    } else {
+                        if(reservationIndex >= packet.reservations.size) {
+                            logger.warn("More players than reservations, left with {}", pendingPlayers)
+                            return@removeAll false
+                        }
                         player.joinPreparedGame(packet.reservations[reservationIndex++])
+                    }
+                    true
                 }
             }
             is ErrorPacket -> {
