@@ -43,7 +43,7 @@ class GameCreationView : View() {
 
             button("Zurück") {
                 action {
-                    fire(NavigateBackEvent())
+                    fire(NavigateBackEvent)
                 }
             }
         }

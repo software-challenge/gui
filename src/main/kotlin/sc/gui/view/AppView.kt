@@ -5,6 +5,7 @@ import javafx.beans.value.ObservableValue
 import mu.KLogging
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
+import sc.gui.controller.CreateGame
 import sc.gui.controller.GameController
 import sc.gui.model.ViewType
 import sc.plugin2021.Rotation
@@ -34,8 +35,8 @@ class AppView : View("Software-Challenge Germany") {
                                 header = "Neues Spiel anfangen",
                                 content = "Willst du wirklich dein aktuelles Spiel verwerfen und ein neues anfangen?",
                             ) { fire(TerminateGame()) }
-                        } else if (controller.model.currentView.get() != ViewType.GAME_CREATION) {
-                            controller.changeViewTo(ViewType.GAME_CREATION)
+                        } else {
+                            fire(CreateGame)
                         }
                     }
                 }
