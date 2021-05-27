@@ -1,8 +1,11 @@
 package sc.gui.view
 
 import javafx.beans.binding.Bindings
+import javafx.beans.property.Property
+import mu.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.GamePausedEvent
+import sc.gui.GameReadyEvent
 import sc.gui.controller.GameController
 import sc.gui.controller.GameCreationController
 import sc.gui.controller.HumanMoveAction
@@ -36,8 +39,10 @@ enum class GameControlState(val text: String, val action: FXEvent) {
 }
 
 class ControlView : View() {
+    private val logger = KotlinLogging.logger {}
+    
     private val gameController: GameController by inject()
-    private val gameControlState = objectProperty(START)
+    private val gameControlState: Property<GameControlState> = objectProperty(START)
     private val hasHuman = find(GameCreationController::class).hasHumanPlayer
 
     override val root = hbox {
@@ -69,21 +74,20 @@ class ControlView : View() {
             spacing = 8.0
             hbox {
                 spacing = 8.0
-                button(gameControlState.get().text) {
-                    gameControlState.addListener { _, _, state ->
-                        isDisable = false
-                        text = state.text
+                button {
+                    fun updateState(state: GameControlState?) {
+                        logger.debug { "Updating $this to State $state" }
+                        isDisable = state == null
+                        state?.let { text = it.text }
                     }
-                    setOnMouseClicked {
-                        if(gameControlState.value == PAUSED)
-                            gameControlState.set(PLAYING)
-                        else
-                            isDisable = true
+                    updateState(gameControlState.value)
+                    gameControlState.onChange(::updateState)
+                    action {
                         fire(gameControlState.value.action)
                     }
                     gameController.canSkip.onChange {
                         if(it) {
-                            gameControlState.set(SKIP)
+                            gameControlState.value = SKIP
                             isDisable = false
                         } else if(gameControlState.value == SKIP) {
                             isDisable = true
@@ -113,18 +117,26 @@ class ControlView : View() {
     
     init {
         gameController.gameStarted.onChange {
-            if(it)
-                if(!hasHuman.get())
-                    gameControlState.set(PLAYING)
-            else
-                gameControlState.set(START)
+            logger.debug { "Game started: $it, state ${gameControlState.value}, hasHuman ${hasHuman.get()}" }
+            if (it) {
+                if(hasHuman.get()) {
+                    gameControlState.value = SKIP
+                    gameControlState.value = null
+                } else {
+                    gameControlState.value = PLAYING
+                }
+            }
         }
         gameController.gameEnded.onChange {
             if(it)
-                gameControlState.set(FINISHED)
+                gameControlState.value = FINISHED
         }
-        subscribe<GamePausedEvent> {
-            gameControlState.set(PAUSED)
+        subscribe<GameReadyEvent> {
+            logger.debug { "Game ready, state ${gameControlState.value}, hasHuman ${hasHuman.get()}" }
+            gameControlState.value = START
+        }
+        subscribe<GamePausedEvent> { event ->
+            gameControlState.value = if(event.paused) PAUSED else PLAYING
         }
     }
     
