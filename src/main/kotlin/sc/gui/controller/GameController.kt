@@ -7,6 +7,7 @@ import javafx.beans.property.Property
 import javafx.beans.value.ObservableValue
 import org.slf4j.LoggerFactory
 import sc.gui.GameOverEvent
+import sc.gui.GameReadyEvent
 import sc.gui.NewGameState
 import sc.gui.model.PiecesModel
 import sc.gui.view.PiecesFragment
@@ -222,9 +223,12 @@ class GameController : Controller() {
         subscribe<GameOverEvent> { event ->
             gameResult.set(event.result)
         }
+        subscribe<GameReadyEvent> {
+            clearGame()
+        }
     }
 
-    fun clearGame() {
+    private fun clearGame() {
         gameState.set(null)
         gameResult.set(null)
         availableTurns.set(0)

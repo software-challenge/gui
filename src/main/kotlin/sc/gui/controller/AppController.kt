@@ -22,7 +22,7 @@ class AppController: Controller() {
 			changeViewTo(ViewType.GAME)
 		}
 		subscribe<TerminateGame> {
-			changeViewTo(ViewType.START)
+			changeViewTo(ViewType.GAME_CREATION)
 		}
 	}
 	
