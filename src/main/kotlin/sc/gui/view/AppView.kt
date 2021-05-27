@@ -2,8 +2,6 @@ package sc.gui.view
 
 import javafx.application.Platform
 import javafx.beans.value.ObservableValue
-import javafx.scene.control.Alert
-import javafx.scene.control.ButtonBar
 import mu.KLogging
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
@@ -32,17 +30,10 @@ class AppView : View("Software-Challenge Germany") {
                     action {
                         logger.debug("New Game!")
                         if (controller.model.currentView.get() == ViewType.GAME) {
-                            alert(
-                                type = Alert.AlertType.CONFIRMATION,
+                            confirm(
                                 header = "Neues Spiel anfangen",
                                 content = "Willst du wirklich dein aktuelles Spiel verwerfen und ein neues anfangen?",
-                                actionFn = { btnType ->
-                                    if (btnType.buttonData == ButtonBar.ButtonData.OK_DONE) {
-                                        controller.changeViewTo(ViewType.GAME_CREATION)
-                                        gameController.clearGame()
-                                    }
-                                }
-                            )
+                            ) { fire(TerminateGame()) }
                         } else if (controller.model.currentView.get() != ViewType.GAME_CREATION) {
                             controller.changeViewTo(ViewType.GAME_CREATION)
                         }
