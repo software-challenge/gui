@@ -2,7 +2,7 @@ package sc.gui.view
 
 import javafx.application.Platform
 import javafx.beans.value.ObservableValue
-import mu.KLogging
+import mu.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.CreateGame
@@ -11,7 +11,11 @@ import sc.gui.model.ViewType
 import sc.plugin2021.Rotation
 import tornadofx.*
 import java.awt.Desktop
+import java.awt.Desktop.Action
+import java.io.File
 import java.net.URI
+
+private val logger = KotlinLogging.logger {}
 
 class AppView : View("Software-Challenge Germany") {
     val controller: AppController by inject()
@@ -40,7 +44,7 @@ class AppView : View("Software-Challenge Germany") {
                         }
                     }
                 }
-                item("Toggle Darkmode").action {
+                item("Dunkles Design umschalten").action {
                     controller.toggleDarkmode()
                 }
                 separator()
@@ -49,8 +53,7 @@ class AppView : View("Software-Challenge Germany") {
                     logger.debug("Replay wird geladen")
                 }
                 item("Logs öffnen", "Shortcut+L").action {
-                    // TODO
-                    logger.debug("Logs werden geöffnet")
+                    File("log").absoluteFile.browse()
                 }
             }
             menu("Steuerung") {
@@ -73,17 +76,16 @@ class AppView : View("Software-Challenge Germany") {
             }
             menu("Hilfe") {
                 item("Spielregeln", "Shortcut+S").action {
-                    // TODO: github.io Link der Doku einfügen
-                    Desktop.getDesktop().browse(URI("https://cau-kiel-tech-inf.github.io/socha-enduser-docs/spiele/blokus/regeln.html"))
+                    "https://cau-kiel-tech-inf.github.io/socha-enduser-docs/spiele/blokus/regeln.html".browseUrl()
                 }
                 item("Dokumentation", "Shortcut+D").action {
-                    Desktop.getDesktop().browse(URI("https://cau-kiel-tech-inf.github.io/socha-enduser-docs/"))
+                    "https://cau-kiel-tech-inf.github.io/socha-enduser-docs/".browseUrl()
                 }
                 item("Webseite", "Shortcut+I").action {
-                    Desktop.getDesktop().browse(URI("https://www.software-challenge.de"))
+                    "https://www.software-challenge.de".browseUrl()
                 }
                 item("Wettbewerb", "Shortcut+W").action {
-                    Desktop.getDesktop().browse(URI("https://contest.software-challenge.de/saison/28"))
+                    "https://contest.software-challenge.de/saison/current".browseUrl()
                 }
             }
         }
@@ -130,11 +132,26 @@ class AppView : View("Software-Challenge Germany") {
             }
         }
     }
-    
-    companion object: KLogging()
 }
 
 fun <T> ObservableValue<T>.listenImmediately(listener: (newValue: T) -> Unit) {
     listener(this.value)
     addListener { _, _, new -> listener(new) }
+}
+
+fun String.browseUrl() {
+    URI(this).openDesktop(Action.BROWSE, Desktop::browse)
+}
+
+fun File.browse() {
+    openDesktop(Action.OPEN, Desktop::browseFileDirectory)
+}
+
+fun <T> T.openDesktop(action: Action, open: Desktop.(T) -> Unit) {
+    val desktop = Desktop.getDesktop()
+    logger.debug("Opening {} on {}", this, desktop)
+    if(desktop.isSupported(action))
+        open(desktop, this)
+    else
+        Runtime.getRuntime().exec("xdg-open $this")
 }
