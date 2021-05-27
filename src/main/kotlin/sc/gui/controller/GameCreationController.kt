@@ -1,10 +1,10 @@
 package sc.gui.controller
 
-import javafx.beans.binding.Bindings
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.model.TeamSettingsModel
 import tornadofx.Controller
+import tornadofx.booleanBinding
 
 class GameCreationController: Controller() {
     private val playerOneSettings = TeamSettings()
@@ -25,7 +25,7 @@ class GameCreationController: Controller() {
         fire(StartGameRequest(playerOneSettingsModel.item, playerTwoSettingsModel.item))
     }
     
-    val hasHumanPlayer = Bindings.createBooleanBinding(
-            { playerOneSettings.isHuman || playerTwoSettings.isHuman },
-            playerOneSettings.type, playerTwoSettings.type)
+    val hasHumanPlayer =
+            booleanBinding(playerOneSettings.type, playerTwoSettings.type)
+            { playerOneSettings.isHuman || playerTwoSettings.isHuman }
 }

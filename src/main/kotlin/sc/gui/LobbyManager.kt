@@ -23,6 +23,7 @@ import sc.server.Configuration
 import sc.shared.GameResult
 import sc.shared.SlotDescriptor
 import tornadofx.Controller
+import tornadofx.EventRegistration
 import tornadofx.FXEvent
 import java.net.ConnectException
 import java.util.ArrayDeque
@@ -33,7 +34,7 @@ import kotlin.system.exitProcess
 sealed class GameUpdateEvent: FXEvent()
 class GameReadyEvent: GameUpdateEvent()
 data class NewGameState(val gameState: IGameState): GameUpdateEvent()
-class GamePausedEvent: GameUpdateEvent()
+data class GamePausedEvent(val paused: Boolean): GameUpdateEvent()
 data class GameOverEvent(val result: GameResult): GameUpdateEvent()
 
 class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePacket> {
@@ -74,14 +75,17 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
     /** Take over the prepared room and start observing. */
     private fun enterRoom(roomId: String) {
         val controller = client.control(roomId)
-        subscribe<PauseGame> { event -> controller.pause(event.pause) }
-        subscribe<StepGame> { event ->
-            if(event.steps > 0)
-                controller.step()
-            // TODO consider step size
-        }
+        val subs = arrayOf(
+                subscribe<PauseGame> { event -> controller.pause(event.pause) },
+                subscribe<StepGame> { event ->
+                    if (event.steps > 0)
+                        controller.step()
+                    // TODO consider step size
+                }
+        )
         var isOver = false
-        subscribe<TerminateGame> {
+        subscribe<TerminateGame>(1) {
+            subs.forEach(EventRegistration::unsubscribe)
             if (!isOver)
                 controller.cancel()
         }
@@ -96,7 +100,7 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
                 is ErrorMessage -> {
                     logger.warn("Error in $roomId: $msg")
                 }
-                is GamePaused -> fire(GamePausedEvent())
+                is GamePaused -> fire(GamePausedEvent(msg.paused))
             }
         }
         fire(GameReadyEvent())

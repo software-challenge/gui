@@ -134,7 +134,7 @@ class AppView : View("Software-Challenge Germany") {
     companion object: KLogging()
 }
 
-fun ObservableValue<Boolean>.listenImmediately(listener: (newValue: Boolean) -> Unit) {
+fun <T> ObservableValue<T>.listenImmediately(listener: (newValue: T) -> Unit) {
     listener(this.value)
     addListener { _, _, new -> listener(new) }
 }
