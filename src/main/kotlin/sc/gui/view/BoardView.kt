@@ -23,7 +23,7 @@ import tornadofx.*
 
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
-class BlockImage(private val size: Property<Double>): ImageView(Image(BlockImage::class.java.getResource("/graphics/blokus/single/empty.png").toExternalForm(), size.value, size.value, true, false)) {
+class BlockImage(private val size: Property<Double>): ImageView(Image(ResourceLookup(BlockImage::class)["/graphics/blokus/single/empty.png"], size.value, size.value, true, false)) {
     private var content = FieldContent.EMPTY
     
     override fun minHeight(width: Double): Double {
@@ -61,7 +61,7 @@ class BlockImage(private val size: Property<Double>): ImageView(Image(BlockImage
     
     fun updateImage(content: FieldContent) {
         this.content = content
-        this.image = Image(BlockImage::class.java.getResource("/graphics/blokus/single/${contentToString(content)}.png").toExternalForm(), size.value, size.value, true, false)
+        this.image = Image(ResourceLookup(this).stream("/graphics/blokus/single/${contentToString(content)}.png"), size.value, size.value, true, false)
     }
     
     init {
