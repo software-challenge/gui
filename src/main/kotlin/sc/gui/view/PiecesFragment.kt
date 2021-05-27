@@ -15,9 +15,7 @@ import tornadofx.tooltip
 class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
     private val boardController: BoardController by inject()
     val model: PiecesModel = PiecesModel(color, shape)
-    private val path: String = "/graphics/blokus/${model.colorProperty().get().name.toLowerCase()}/${model.shapeProperty().get().name.toLowerCase()}.png"
-    private val imageUrl: String = PiecesFragment::class.java.getResource(path).toExternalForm()
-    private val image: ImageView = ImageView(imageUrl)
+    private val image: ImageView = resources.imageview("/graphics/blokus/${model.colorProperty().get().name.toLowerCase()}/${model.shapeProperty().get().name.toLowerCase()}.png")
 
     constructor(selectedColor: ColorBinding, selectedShape: ShapeBinding, selectedRotation: RotationBinding, selectedFlip: FlipBinding) : this(selectedColor.value, selectedShape.value) {
         selectedColor.addListener { _, _, new -> model.colorProperty().set(new) }
@@ -45,7 +43,7 @@ class PiecesFragment(color: Color, shape: PieceShape) : Fragment() {
     fun updateImage() {
         val imagePath = "/graphics/blokus/${model.colorProperty().get().name.toLowerCase()}/${model.shapeProperty().get().name.toLowerCase()}.png"
         val size = boardController.boardModel.calculatedBlockSize.get() * 2
-        image.image = Image(PiecesFragment::class.java.getResource(imagePath).toExternalForm(), size, size, true, false)
+        image.image = Image(resources.stream(imagePath), size, size, true, false)
 
         // apply rotation to imageview
         image.rotate = when (model.rotationProperty().get()) {

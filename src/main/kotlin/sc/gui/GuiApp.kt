@@ -1,6 +1,5 @@
 package sc.gui
 
-import javafx.scene.image.Image
 import mu.KLogging
 import sc.gui.controller.ServerController
 import sc.gui.view.AppView
@@ -23,7 +22,7 @@ class GuiApp : App(AppView::class, AppStyle::class) {
     init {
         reloadStylesheetsOnFocus()
         server.startServer()
-        addStageIcon(Image(GuiApp::class.java.getResource("/icon.png").toExternalForm()))
+        addStageIcon(resources.image("/icon.png"))
     }
     
     companion object: KLogging()

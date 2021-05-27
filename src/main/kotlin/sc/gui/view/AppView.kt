@@ -4,7 +4,6 @@ import javafx.application.Platform
 import javafx.beans.value.ObservableValue
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
-import javafx.scene.image.ImageView
 import mu.KLogging
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
@@ -18,7 +17,7 @@ import java.net.URI
 class AppView : View("Software-Challenge Germany") {
     val controller: AppController by inject()
     private val gameController: GameController by inject()
-    private val sochaIcon = ImageView(AppView::class.java.getResource("/icon.png").toExternalForm())
+    private val sochaIcon = resources.imageview("/icon.png")
 
     override val root = borderpane {
         addClass(AppStyle.lightColorSchema)
