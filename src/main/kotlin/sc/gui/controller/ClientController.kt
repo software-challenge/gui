@@ -15,11 +15,10 @@ import sc.plugin2021.Move
 import sc.plugin2021.SkipMove
 import sc.plugin2021.util.GameRuleLogic
 import tornadofx.Controller
-import tornadofx.EventBus
 import tornadofx.FXEvent
 import java.util.concurrent.CompletableFuture
 
-data class StartGameRequest(val playerOneSettings: TeamSettings, val playerTwoSettings: TeamSettings): FXEvent(EventBus.RunOn.BackgroundThread)
+data class StartGameRequest(val playerOneSettings: TeamSettings, val playerTwoSettings: TeamSettings): FXEvent()
 data class HumanMoveRequest(val gameState: GameState): FXEvent()
 /** Human making a move.
  * @param move the move, or null to skip */

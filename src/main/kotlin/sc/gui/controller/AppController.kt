@@ -5,24 +5,38 @@ import mu.KLogging
 import sc.gui.GameReadyEvent
 import sc.gui.model.AppModel
 import sc.gui.model.ViewType
+import sc.gui.model.ViewType.*
 import sc.gui.view.*
 import tornadofx.Controller
 import tornadofx.FXEvent
+import tornadofx.task
 
-class NavigateBackEvent: FXEvent()
+object NavigateBackEvent: FXEvent()
+object CreateGame: FXEvent()
 
 class AppController: Controller() {
 	val model = AppModel()
+	private val clientController: ClientController by inject()
 	
 	init {
 		subscribe<NavigateBackEvent> {
 			changeViewTo(model.previousView.get())
 		}
+		subscribe<StartGameRequest> { event ->
+			changeViewTo(GAME_LOADING)
+            task(daemon = true) {
+				clientController.startGame(arrayOf(event.playerOneSettings, event.playerTwoSettings))
+			}
+		}
 		subscribe<GameReadyEvent> {
-			changeViewTo(ViewType.GAME)
+			changeViewTo(GAME)
+		}
+		subscribe<CreateGame> {
+			if(model.currentView.get() != GAME_CREATION)
+				changeViewTo(GAME_CREATION)
 		}
 		subscribe<TerminateGame> {
-			changeViewTo(ViewType.GAME_CREATION)
+			changeViewTo(GAME_CREATION)
 		}
 	}
 	
@@ -51,8 +65,8 @@ fun WritableValue<Boolean>.toggle() {
 
 val ViewType.view
 	get() = when(this) {
-		ViewType.START -> StartView::class
-		ViewType.GAME_CREATION -> GameCreationView::class
-        ViewType.GAME_LOADING -> GameLoadingView::class
-		ViewType.GAME -> GameView::class
+		START -> StartView::class
+		GAME_CREATION -> GameCreationView::class
+        GAME_LOADING -> GameLoadingView::class
+		GAME -> GameView::class
 	}
