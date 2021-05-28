@@ -28,14 +28,6 @@ class GameFlowController: Controller() {
     
     private val history = ArrayList<GameState>()
     var controller: IGameController? = null
-        set(value) {
-            if (value != null) {
-                fire(GameReadyEvent())
-            } else {
-                controller?.cancel()
-            }
-            field = value
-        }
     
     init {
         subscribe<PauseGame> { event ->
@@ -63,6 +55,7 @@ class GameFlowController: Controller() {
         }
         subscribe<TerminateGame> {
             history.clear()
+            controller?.cancel()
             controller = null
         }
         subscribe<NewGameState> { event ->

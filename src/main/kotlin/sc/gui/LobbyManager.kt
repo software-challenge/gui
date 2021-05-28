@@ -22,6 +22,7 @@ import sc.shared.GameResult
 import sc.shared.SlotDescriptor
 import tornadofx.Controller
 import tornadofx.FXEvent
+import tornadofx.error
 import java.net.ConnectException
 import java.util.ArrayDeque
 import java.util.Queue
@@ -53,7 +54,7 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
                     if (player.type == PlayerType.EXTERNAL) {
                         player.joinGameRoom(packet.roomId)
                     } else {
-                        if(reservationIndex >= packet.reservations.size) {
+                        if (reservationIndex >= packet.reservations.size) {
                             logger.warn("More players than reservations, left with {}", pendingPlayers)
                             return@removeAll false
                         }
@@ -63,8 +64,8 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
                 }
             }
             is ErrorPacket -> {
-                // TODO error popup
-                logger.error("Error, probably failed to prepare game: $packet")
+                error("Fehler in der Kommunikation mit dem Server", packet.toString())
+                logger.error("$packet")
             }
         }
     }
@@ -74,6 +75,7 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
     /** Take over the prepared room and start observing. */
     private fun enterRoom(roomId: String) {
         gameFlowController.controller = client.control(roomId)
+        subscribe<NewGameState>(1) { fire(GameReadyEvent()) }
         client.observe(roomId) { msg ->
             logger.trace("New RoomMessage in {}: {}", roomId, msg)
             when (msg) {
