@@ -42,8 +42,8 @@ class GameView : View() {
             if (it.button == MouseButton.SECONDARY) {
                 logger.debug("Right-click, flipping piece")
                 gameController.flipPiece()
+                it.consume()
             }
-            it.consume()
         }
         setOnScroll {
             gameController.scroll(it.deltaY)

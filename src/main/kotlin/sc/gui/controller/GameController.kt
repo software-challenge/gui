@@ -10,7 +10,6 @@ import sc.gui.GameOverEvent
 import sc.gui.GameReadyEvent
 import sc.gui.NewGameState
 import sc.gui.model.PiecesModel
-import sc.gui.view.PiecesFragment
 import sc.plugin2021.*
 import sc.plugin2021.util.GameRuleLogic
 import sc.shared.GameResult
@@ -39,10 +38,6 @@ class ColorBinding(piece: Property<PiecesModel>) : ObjectBinding<Color>() {
 
     override fun computeValue(): Color {
         return model.value.colorProperty().get()
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(PiecesFragment::class.java)
     }
 }
 
@@ -150,7 +145,7 @@ class GameController : Controller() {
     
     val availableTurns = objectProperty(0).also { avTurns ->
         currentTurn.addListener { _, _, turn ->
-            avTurns.set(turn?.let { max(it, avTurns.value) }) }
+            avTurns.set(max(turn, avTurns.value)) }
     }
     val atLatestTurn = booleanBinding(currentTurn, availableTurns)
         { currentTurn.value == availableTurns.value }
