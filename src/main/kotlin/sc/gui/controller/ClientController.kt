@@ -1,6 +1,7 @@
 package sc.gui.controller
 
 import sc.api.plugins.exceptions.GameLogicException
+import sc.gui.GamePausedEvent
 import sc.gui.LobbyManager
 import sc.gui.controller.client.ClientInterface
 import sc.gui.controller.client.ExecClient
@@ -54,6 +55,10 @@ class ClientController: Controller() {
         val future = CompletableFuture<Move>()
         subscribe<HumanMoveAction>(1) {
             future.complete(it.move ?: SkipMove(gameState.currentColor))
+        }
+        subscribe<GamePausedEvent>(1) { event ->
+            if(event.paused)
+                future.cancel(true)
         }
         fire(HumanMoveRequest(gameState))
         return future
