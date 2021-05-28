@@ -49,7 +49,7 @@ class ControlView : View() {
         spacing = 8.0
         hbox {
             spacing = 8.0
-            visibleProperty().bind(hasHuman)
+            visibleProperty().bind(gameController.gameEnded.booleanBinding(hasHuman) { it != true && hasHuman.value })
             addClass(AppStyle.pieceUnselectable)
             gameController.isHumanTurn.addListener { _, _, humanTurn ->
                 if(humanTurn) {
@@ -81,6 +81,7 @@ class ControlView : View() {
                         controlState?.let { text = it.text }
                     }
                     action {
+                        isDisable = true
                         fire(gameControlState.value.action)
                     }
                     gameController.canSkip.onChange {
@@ -96,6 +97,8 @@ class ControlView : View() {
                     disableWhen(gameController.currentTurn.isEqualTo(0))
                     text = "⏮"
                     setOnMouseClicked {
+                        if(gameController.atLatestTurn.value)
+                            fire(PauseGame(true))
                         fire(StepGame(-1))
                     }
                 }
@@ -103,7 +106,7 @@ class ControlView : View() {
                     textProperty().bind(Bindings.concat(gameController.currentTurn, " / ", gameController.availableTurns))
                 }
                 button {
-                    disableWhen(gameController.currentTurn.isEqualTo(gameController.availableTurns))
+                    disableWhen(gameController.atLatestTurn)
                     text = "⏭"
                     setOnMouseClicked {
                         fire(StepGame(1))
@@ -117,7 +120,7 @@ class ControlView : View() {
         gameController.gameStarted.onChange {
             logger.debug { "Game started: $it, state ${gameControlState.value}, hasHuman ${hasHuman.get()}" }
             if (it) {
-                if(hasHuman.get()) {
+                if(hasHuman.get() && !gameController.gameEnded.value) {
                     gameControlState.value = SKIP
                     gameControlState.value = null
                 } else {
@@ -125,9 +128,12 @@ class ControlView : View() {
                 }
             }
         }
-        gameController.gameEnded.onChange {
-            if(it)
-                gameControlState.value = FINISHED
+        arrayOf(gameController.atLatestTurn, gameController.gameEnded).forEach {
+            it.onChange {
+                logger.debug { "onChange of $it" }
+                if (gameController.gameEnded.value && gameController.atLatestTurn.value)
+                    gameControlState.value = FINISHED
+            }
         }
         subscribe<GameReadyEvent> {
             logger.debug { "Game ready, state ${gameControlState.value}, hasHuman ${hasHuman.get()}" }

@@ -3,12 +3,10 @@ package sc.gui
 import org.slf4j.LoggerFactory
 import sc.api.plugins.IGamePlugin
 import sc.api.plugins.IGameState
+import sc.gui.controller.GameFlowController
 import sc.gui.controller.Player
 import sc.gui.controller.client.ClientInterface
 import sc.gui.model.PlayerType
-import sc.gui.view.PauseGame
-import sc.gui.view.StepGame
-import sc.gui.view.TerminateGame
 import sc.networking.clients.AdminClient
 import sc.networking.clients.LobbyClient
 import sc.plugin2021.GameState
@@ -23,7 +21,6 @@ import sc.server.Configuration
 import sc.shared.GameResult
 import sc.shared.SlotDescriptor
 import tornadofx.Controller
-import tornadofx.EventRegistration
 import tornadofx.FXEvent
 import java.net.ConnectException
 import java.util.ArrayDeque
@@ -72,38 +69,20 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
         }
     }
     
+    private val gameFlowController by inject<GameFlowController>()
+    
     /** Take over the prepared room and start observing. */
     private fun enterRoom(roomId: String) {
-        val controller = client.control(roomId)
-        val subs = arrayOf(
-                subscribe<PauseGame> { event -> controller.pause(event.pause) },
-                subscribe<StepGame> { event ->
-                    if (event.steps > 0)
-                        controller.step()
-                    // TODO consider step size
-                }
-        )
-        var isOver = false
-        subscribe<TerminateGame>(1) {
-            subs.forEach(EventRegistration::unsubscribe)
-            if (!isOver)
-                controller.cancel()
-        }
+        gameFlowController.controller = client.control(roomId)
         client.observe(roomId) { msg ->
             logger.trace("New RoomMessage in {}: {}", roomId, msg)
             when (msg) {
-                is MementoMessage -> fire(NewGameState(msg.state as GameState)) // TODO save
-                is GameResult -> {
-                    isOver = true
-                    fire(GameOverEvent(msg))
-                }
-                is ErrorMessage -> {
-                    logger.warn("Error in $roomId: $msg")
-                }
+                is MementoMessage -> fire(NewGameState(msg.state as GameState))
+                is GameResult -> fire(GameOverEvent(msg))
+                is ErrorMessage -> logger.warn("Error in $roomId: $msg")
                 is GamePaused -> fire(GamePausedEvent(msg.paused))
             }
         }
-        fire(GameReadyEvent())
     }
     
     fun startNewGame(players: List<Player>, paused: Boolean) {
