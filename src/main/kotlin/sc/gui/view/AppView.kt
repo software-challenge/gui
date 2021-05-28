@@ -2,11 +2,13 @@ package sc.gui.view
 
 import javafx.application.Platform
 import javafx.beans.value.ObservableValue
+import javafx.stage.FileChooser
 import mu.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.CreateGame
 import sc.gui.controller.GameController
+import sc.gui.controller.GameFlowController
 import sc.gui.model.ViewType
 import sc.plugin2021.Rotation
 import tornadofx.*
@@ -19,6 +21,7 @@ private val logger = KotlinLogging.logger {}
 
 class AppView : View("Software-Challenge Germany") {
     val controller: AppController by inject()
+    private val gameFlowController: GameFlowController by inject()
     private val gameController: GameController by inject()
     private val sochaIcon = resources.imageview("/icon.png")
 
@@ -48,9 +51,12 @@ class AppView : View("Software-Challenge Germany") {
                     controller.toggleDarkmode()
                 }
                 separator()
-                item("Replay laden").action {
-                    // TODO
-                    logger.debug("Replay wird geladen")
+                item("Replay laden", "Shortcut+R").action {
+                    chooseFile("Replay laden", arrayOf(FileChooser.ExtensionFilter("XML", "*.xml", "*.xml.gz")), File("replays")).forEach {
+                        if (controller.model.currentView.get() == ViewType.GAME)
+                            fire(TerminateGame())
+                        gameFlowController.loadReplay(it)
+                    }
                 }
                 item("Logs öffnen", "Shortcut+L").action {
                     File("log").absoluteFile.browse()

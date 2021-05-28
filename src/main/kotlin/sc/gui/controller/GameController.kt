@@ -152,6 +152,8 @@ class GameController : Controller() {
         currentTurn.addListener { _, _, turn ->
             avTurns.set(turn?.let { max(it, avTurns.value) }) }
     }
+    val atLatestTurn = booleanBinding(currentTurn, availableTurns)
+        { currentTurn.value == availableTurns.value }
     
     val gameStarted =
             booleanBinding(currentTurn, isHumanTurn)
