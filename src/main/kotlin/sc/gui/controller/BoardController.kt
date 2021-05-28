@@ -30,6 +30,8 @@ class BoardController : Controller() {
     private var isPlaceableBoard: Array<Array<Boolean>> = Array(Constants.BOARD_SIZE) { Array(Constants.BOARD_SIZE) { false } }
 
     fun handleClick(x: Int, y: Int) {
+        if(!game.atLatestTurn.value)
+            return
         if (isHoverable(x, y, game.selectedCalculatedShape.get()) && isPlaceable(x, y, game.selectedCalculatedShape.get())) {
             logger.debug("Set-Move from GUI at [$x,$y] seems valid")
             val color = game.selectedColor.get()

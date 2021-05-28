@@ -128,9 +128,9 @@ class ControlView : View() {
                 }
             }
         }
-        arrayOf(gameController.atLatestTurn, gameController.gameEnded).forEach {
-            it.onChange {
-                logger.debug { "onChange of $it" }
+        arrayOf(gameController.atLatestTurn, gameController.gameEnded).forEach { observable ->
+            observable.onChange {
+                logger.debug { "onChange of $observable" }
                 if (gameController.gameEnded.value && gameController.atLatestTurn.value)
                     gameControlState.value = FINISHED
             }
