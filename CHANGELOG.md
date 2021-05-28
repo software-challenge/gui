@@ -6,7 +6,9 @@ See [the changelog of the backend](https://github.com/CAU-Kiel-Tech-Inf/backend/
 for details on our versioning scheme.
 
 ## [21.4.0](https://github.com/CAU-Kiel-Tech-Inf/gui/commits/21.4.0) - 2021-01-29
-- Replay support
+- Automatically save replays & implement loading replays
+- Utilise TornadoFX ResourceLookup & EventStreams more extensively
+- Open help links properly on Linux-based systems
 
 ## [21.3.3](https://github.com/CAU-Kiel-Tech-Inf/gui/commits/21.3.3) - 2021-02-26
 - Fix human getting wrongly colored piece ([#64](https://github.com/CAU-Kiel-Tech-Inf/gui/pull/64))
