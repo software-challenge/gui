@@ -226,6 +226,7 @@ class GameController : Controller() {
     }
 
     private fun clearGame() {
+        logger.debug("Resetting GameController")
         gameState.set(null)
         gameResult.set(null)
         availableTurns.set(0)
