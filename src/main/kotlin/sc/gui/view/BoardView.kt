@@ -11,20 +11,24 @@ import javafx.scene.layout.HBox
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
-import sc.gui.controller.BoardController
 import sc.gui.controller.GameController
-import sc.gui.model.BoardModel
-import sc.plugin2021.Color
-import sc.plugin2021.Coordinates
-import sc.plugin2021.Field
-import sc.plugin2021.FieldContent
-import sc.plugin2021.util.Constants
+import sc.plugin2022.Coordinates
+import sc.plugin2022.PieceType
+import sc.plugin2022.util.Constants
 import tornadofx.*
 
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
-class BlockImage(private val size: Property<Double>): ImageView(Image(ResourceLookup(BlockImage::class)["/graphics/blokus/single/empty.png"], size.value, size.value, true, false)) {
-    private var content = FieldContent.EMPTY
+class PieceImage(sizeProperty: Property<Double>, private val content: PieceType): ImageView() {
+    
+    init {
+        sizeProperty.listenImmediately { size ->
+            image = createImage(size)
+        }
+    }
+    
+    private fun createImage(size: Double) =
+            Image(ResourceLookup(this)["/graphics/blokus/single/$content.png"], size, size, true, false)
     
     override fun minHeight(width: Double): Double {
         return 16.0
@@ -47,41 +51,38 @@ class BlockImage(private val size: Property<Double>): ImageView(Image(ResourceLo
     override fun isResizable(): Boolean {
         return true
     }
-    
-    private fun contentToString(content: FieldContent): String {
-        return when(content) {
-            FieldContent.EMPTY -> "empty"
-            FieldContent.RED -> "red"
-            FieldContent.BLUE -> "blue"
-            FieldContent.GREEN -> "green"
-            FieldContent.YELLOW -> "yellow"
-            else -> throw Exception("Impossible field state: $content")
-        }
-    }
-    
-    fun updateImage(content: FieldContent) {
-        this.content = content
-        this.image = Image(ResourceLookup(this).stream("/graphics/blokus/single/${contentToString(content)}.png"), size.value, size.value, true, false)
-    }
-    
-    init {
-        size.addListener { _, _, _ ->
-            updateImage(content)
-        }
-    }
 }
 
 class BoardView: View() {
+    private val logger = LoggerFactory.getLogger(BoardView::class.java)
+    
     private val gameController: GameController by inject()
-    val controller: BoardController by inject()
-    val model: BoardModel by inject()
     private val appController: AppController by inject()
+    val pieces = HashMap<Coordinates, Node>()
+    val calculatedBlockSize = objectProperty(16.0)
+    
     val grid = gridpane {
         isGridLinesVisible = true
-        for(x in 0 until Constants.BOARD_SIZE) {
-            for(y in 0 until Constants.BOARD_SIZE) {
-                add(paneFromField(Field(Coordinates(x, y), FieldContent.EMPTY)), x, y)
+        gameController.gameState.onChange { state ->
+            state?.lastMove?.let { move ->
+                val piece = pieces[move.start] ?: return@let
+                piece.gridpaneConstraints {
+                    columnRowIndex(move.destination.x, move.destination.y)
+                }
+                // TODO animate
+                //  children.remove(piece)
+                //  piece.move(Duration.seconds(1.0), move)
             }
+        }
+        gameController.gameState.listenImmediately {
+            if(pieces.isEmpty() && it != null) {
+                it.currentPieces.forEach { (coords, piece) ->
+                    pieces[coords] = createPiece(coords, piece.type)
+                    // TODO this doesn't work with movement
+                }
+            }
+        }
+        for (x in 0 until Constants.BOARD_SIZE) {
             constraintsForRow(x).percentHeight = 100.0 / Constants.BOARD_SIZE
             constraintsForColumn(x).percentWidth = 100.0 / Constants.BOARD_SIZE
         }
@@ -92,15 +93,8 @@ class BoardView: View() {
     }
     
     init {
-        controller.game.selectedCalculatedShape.addListener { _ ->
-            cleanupHover()
-            controller.currentHover?.run {
-                paneHoverEnter(x, y)
-            }
-        }
-        
         appController.model.isDarkMode.listenImmediately { value ->
-            if(value) {
+            if (value) {
                 grid.removeClass(AppStyle.lightBoard)
                 grid.addClass(AppStyle.darkBoard)
             } else {
@@ -110,96 +104,50 @@ class BoardView: View() {
         }
     }
     
-    
     private fun getPane(x: Int, y: Int): Node =
-        grid.children.find { node ->
-            GridPane.getColumnIndex(node) == x && GridPane.getRowIndex(node) == y
-        } ?: throw Exception("Pane of ($x, $y) is not part of the BoardView")
+            grid.children.find { node ->
+                GridPane.getColumnIndex(node) == x && GridPane.getRowIndex(node) == y
+            } ?: throw Exception("Pane of ($x, $y) is not part of the BoardView")
     
-    /** Remove all applied Stylesheets during the hover-effect. */
-    private fun cleanupHover() =
-        grid.children.forEach { it.styleClass.clear() }
-    
-    private fun paneHoverEnter(x: Int, y: Int) {
-        if(gameController.gameEnded.value)
-            return
-        
-        controller.currentHover = Coordinates(x, y)
-        controller.hoverable = controller.isHoverable(x, y, controller.game.selectedCalculatedShape.get())
-        controller.currentPlaceable = controller.isPlaceable(x, y, controller.game.selectedCalculatedShape.get())
-        
-        for(place in controller.game.selectedCalculatedShape.get()) {
-            if(controller.hoverInBound(x + place.x, y + place.y)) {
-                if(!controller.hoverable) {
-                    getPane(x + place.x, y + place.y).addClass(AppStyle.fieldUnplaceable)
-                } else if(controller.currentPlaceable) {
-                    getPane(x + place.x, y + place.y).addClass(when(controller.game.selectedColor.get()) {
-                        Color.RED -> AppStyle.placeableRED
-                        Color.BLUE -> AppStyle.placeableBLUE
-                        Color.GREEN -> AppStyle.placeableGREEN
-                        Color.YELLOW -> AppStyle.placeableYELLOW
-                        else -> throw Exception("Unknown player color for hover effect")
-                    })
-                } else {
-                    getPane(x + place.x, y + place.y).addClass(when(controller.game.selectedColor.get()) {
-                        Color.RED -> AppStyle.colorRED
-                        Color.BLUE -> AppStyle.colorBLUE
-                        Color.GREEN -> AppStyle.colorGREEN
-                        Color.YELLOW -> AppStyle.colorYELLOW
-                        else -> throw Exception("Unknown player color for hover effect")
-                    })
-                }
-            }
-        }
-    }
-    
-    private fun paneHoverExit() {
-        controller.currentPlaceable = false
-        if(controller.currentHover != null) {
-            cleanupHover()
-        }
-        controller.currentHover = null
-    }
-    
-    private fun paneFromField(field: Field): HBox {
-        val x = field.coordinates.x
-        val y = field.coordinates.y
-        val image = BlockImage(controller.boardModel.calculatedBlockSize)
-        image.fitWidthProperty().bind(controller.boardModel.calculatedBlockSize)
-        image.fitHeightProperty().bind(controller.boardModel.calculatedBlockSize)
-        controller.boardModel.board.addListener { _, oldBoard, newBoard ->
-            val newContent = newBoard?.let { it[x, y].content } ?: FieldContent.EMPTY
-            if(oldBoard == null || oldBoard[x, y].content != newContent) {
-                image.updateImage(newContent)
-            }
-        }
+    private fun createPiece(coordinates: Coordinates, type: PieceType): HBox {
+        val image = PieceImage(calculatedBlockSize, type)
+        image.fitWidthProperty().bind(calculatedBlockSize)
+        image.fitHeightProperty().bind(calculatedBlockSize)
         
         return hbox {
             setOnMouseEntered {
-                paneHoverEnter(x, y)
+                addClass(AppStyle.hoverColor)
                 it.consume()
             }
             setOnMouseExited {
-                paneHoverExit()
+                removeClass(AppStyle.hoverColor)
                 it.consume()
             }
             setOnMouseClicked {
-                if(it.button == MouseButton.PRIMARY) {
-                    println("Clicked on pane $x, $y")
-                    cleanupHover()
-                    controller.handleClick(x, y)
-                } else if(it.button == MouseButton.SECONDARY) {
-                    logger.debug("Right-click, flipping piece")
-                    controller.game.flipPiece()
+                if (it.button == MouseButton.PRIMARY) {
+                    logger.debug("Clicked on pane $coordinates")
+                    handleClick(coordinates)
+                    it.consume()
                 }
-                it.consume()
             }
             
             this += image
         }
     }
     
-    companion object {
-        private val logger = LoggerFactory.getLogger(BoardView::class.java)
+    fun handleClick(coordinates: Coordinates) {
+        /* TODO
+        if(!game.atLatestTurn.value)
+            return
+        if (isHoverable(x, y, game.selectedCalculatedShape.get()) && isPlaceable(x, y, game.selectedCalculatedShape.get())) {
+            logger.debug("Set-Move from GUI at [$x,$y] seems valid")
+            val color = game.selectedColor.get()
+            
+            val move = SetMove(Piece(color, game.selectedShape.get(), game.selectedRotation.get(), game.selectedFlip.get(), Coordinates(x, y)))
+            GameRuleLogic.validateSetMove(board.get(), move)
+            fire(HumanMoveAction(move))
+        } else {
+            logger.debug("Set-Move from GUI at [$x,$y] seems invalid")
+        }*/
     }
 }

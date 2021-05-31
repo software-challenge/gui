@@ -14,7 +14,7 @@ class ExecClient(val host: String, val port: Int, val clientExecutable: File): C
         startClient("--room", roomId)
     }
     
-    override fun joinPreparedGame(reservation: String) {
+    override fun joinGameWithReservation(reservation: String) {
         startClient("--reservation", reservation)
     }
     

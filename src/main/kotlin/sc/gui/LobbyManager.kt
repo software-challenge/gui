@@ -9,7 +9,7 @@ import sc.gui.controller.client.ClientInterface
 import sc.gui.model.PlayerType
 import sc.networking.clients.AdminClient
 import sc.networking.clients.LobbyClient
-import sc.plugin2021.GameState
+import sc.plugin2022.GameState
 import sc.protocol.ResponsePacket
 import sc.protocol.requests.PrepareGameRequest
 import sc.protocol.responses.ErrorPacket
@@ -58,7 +58,7 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
                             logger.warn("More players than reservations, left with {}", pendingPlayers)
                             return@removeAll false
                         }
-                        player.joinPreparedGame(packet.reservations[reservationIndex++])
+                        player.joinGameWithReservation(packet.reservations[reservationIndex++])
                     }
                     true
                 }

@@ -4,28 +4,31 @@ import javafx.beans.binding.Bindings
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Pos
 import javafx.stage.FileChooser
-import sc.gui.controller.GameCreationController
+import sc.api.plugins.Team
 import sc.gui.controller.NavigateBackEvent
+import sc.gui.controller.StartGameRequest
 import sc.gui.model.PlayerType
+import sc.gui.model.TeamSettings
 import sc.gui.model.TeamSettingsModel
-import sc.plugin2021.Team
 import tornadofx.*
 import java.io.File
 
-class GameCreationView : View() {
-    val controller: GameCreationController by inject()
-
+class GameCreationView: View() {
+    private val playerSettingsModels =
+            arrayOf(TeamSettings("Spieler 1", PlayerType.COMPUTER_EXAMPLE),
+                    TeamSettings("Spieler 2", PlayerType.HUMAN))
+                    .map { TeamSettingsModel(it) }
+    
     override val root = borderpane {
         style {
             padding = box(20.px)
         }
         center = form {
             hbox {
-                vbox(20) {
-                    add(PlayerFragment(Team.ONE, controller.playerOneSettingsModel))
-                }
-                vbox(20) {
-                    add(PlayerFragment(Team.TWO, controller.playerTwoSettingsModel))
+                Team.values().forEach { team ->
+                    vbox(20) {
+                        add(PlayerFragment(team, playerSettingsModels[team.index]))
+                    }
                 }
             }
         }
@@ -35,12 +38,12 @@ class GameCreationView : View() {
             }
             button("Erstellen") {
                 action {
-                    controller.createGame()
+                    playerSettingsModels.all { it.commit() }
+                    fire(StartGameRequest(playerSettingsModels.map { it.item }))
                 }
-
-                enableWhen(Bindings.and(controller.playerOneSettingsModel.valid, controller.playerTwoSettingsModel.valid))
+                enableWhen(Bindings.and(playerSettingsModels[0].valid, playerSettingsModels[1].valid))
             }
-
+            
             button("Zurück") {
                 action {
                     fire(NavigateBackEvent)
@@ -50,28 +53,22 @@ class GameCreationView : View() {
     }
 }
 
-class PlayerFragment(private val team: Team, private val settings: TeamSettingsModel) : Fragment() {
-    val controller: GameCreationController by inject()
-
-    override var root = vbox(20) {
+class PlayerFragment(private val team: Team, private val settings: TeamSettingsModel): Fragment() {
+    override val root = vbox(20) {
         fieldset(if (team == Team.ONE) "Erster Spieler" else "Zweiter Spieler") {
             textfield(settings.name).required()
             add(PlayerFileSelectFragment(team, settings))
         }
     }
-
-
 }
 
-class PlayerFileSelectFragment(private val team: Team, private val settings: TeamSettingsModel) : Fragment() {
-    val controller: GameCreationController by inject()
-
-    override var root = borderpane {
+class PlayerFileSelectFragment(private val team: Team, private val settings: TeamSettingsModel): Fragment() {
+    override val root = borderpane {
         top = hbox {
             combobox(settings.type, PlayerType.values().toList())
         }
     }
-
+    
     private fun updatePlayerType() {
         // TODO: work with proper binding of property
         when (settings.type.value) {
@@ -114,21 +111,20 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
             else -> throw Exception("Unknown Player-Type")
         }
     }
-
-
+    
     init {
         settings.type.onChange {
             updatePlayerType()
             settings.validate()
         }
         settings.executable.onChange {
-                root.bottom = textflow {
-                    label("Ausgewählte Datei: ")
-                    label(settings.executable.getValue().absolutePath)
-                }
+            root.bottom = textflow {
+                label("Ausgewählte Datei: ")
+                label(settings.executable.value.absolutePath)
             }
+        }
         updatePlayerType()
-
+        
         val obs: ObservableValue<File?> = settings.executable
         settings.validationContext.addValidator(root.bottom, obs, ValidationTrigger.OnChange()) {
             if (settings.type.value == PlayerType.COMPUTER && settings.executable.value == null) error("Bitte wähle eine ausführbare Datei aus") else null

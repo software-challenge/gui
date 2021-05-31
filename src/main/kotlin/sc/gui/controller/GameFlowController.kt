@@ -12,7 +12,7 @@ import sc.gui.view.StepGame
 import sc.gui.view.TerminateGame
 import sc.networking.clients.GameLoaderClient
 import sc.networking.clients.IGameController
-import sc.plugin2021.GameState
+import sc.plugin2022.GameState
 import tornadofx.Controller
 import tornadofx.onChange
 import java.io.File

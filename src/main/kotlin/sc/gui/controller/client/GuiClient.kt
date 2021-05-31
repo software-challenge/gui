@@ -1,21 +1,26 @@
 package sc.gui.controller.client
 
-import sc.framework.plugins.Player
+import sc.api.plugins.IGameState
+import sc.api.plugins.IMove
 import sc.gui.model.PlayerType
-import sc.plugin2021.*
+import sc.networking.clients.LobbyClient
+import sc.player.IGameHandler
+import sc.plugin2022.GameState
+import sc.plugin2022.Move
 import sc.shared.GameResult
-import java.util.concurrent.CompletionStage
+import java.util.concurrent.CompletableFuture
 
 /** A client directly managed by the Gui. */
 class GuiClient(
         host: String,
         port: Int,
         override val type: PlayerType,
-        moveRequestHandler: (state: GameState) -> CompletionStage<Move>,
-): ClientInterface, AbstractClient(host, port) {
-    init {
-        handler = InternalGameHandler(this, moveRequestHandler)
-    }
+        moveRequestHandler: (state: GameState) -> CompletableFuture<Move>,
+): ClientInterface {
+    val player = LobbyClient(host, port).asPlayer(InternalGameHandler(moveRequestHandler))
+    
+    override fun joinGameRoom(roomId: String) = player.joinGameRoom(roomId)
+    override fun joinGameWithReservation(reservation: String) = player.joinGameWithReservation(reservation)
     
     private val location = "$host:$port"
     override fun toString() = super.toString() + " type $type on $location"
@@ -23,29 +28,22 @@ class GuiClient(
 
 /** Handles communication with the server for a player whose moves are supplied by [moveRequestHandler]. */
 class InternalGameHandler(
-        private val client: AbstractClient,
-        private val moveRequestHandler: (state: GameState) -> CompletionStage<Move>,
+        private val moveRequestHandler: (state: GameState) -> CompletableFuture<Move>,
 ): IGameHandler {
     private var currentState: GameState? = null
     
-    override fun gameEnded(data: GameResult, team: Team?, errorMessage: String?) {
+    override fun calculateMove(): IMove =
+            currentState?.let(moveRequestHandler)?.get()
+            ?: throw IllegalStateException("Received move request before GameState!")
+    
+    override fun onUpdate(gamestate: IGameState) {
+        currentState = gamestate as GameState
     }
     
-    override fun onRequestAction() {
-        currentState?.let(moveRequestHandler)?.thenAccept { sendAction(it) }
-        ?: throw IllegalStateException("Received move request before GameState!")
+    override fun onGameOver(data: GameResult) {
     }
     
-    override fun onUpdate(player: Player, otherPlayer: Player) {
-    }
-    
-    override fun onUpdate(gamestate: GameState) {
-        currentState = gamestate
-    }
-    
-    override fun sendAction(move: Move) {
-        client.sendMove(move)
+    override fun onError(error: String) {
     }
     
 }
-

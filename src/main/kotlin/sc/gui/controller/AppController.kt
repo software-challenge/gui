@@ -25,7 +25,7 @@ class AppController: Controller() {
 		subscribe<StartGameRequest> { event ->
 			changeViewTo(GAME_LOADING)
             task(daemon = true) {
-				clientController.startGame(arrayOf(event.playerOneSettings, event.playerTwoSettings))
+				clientController.startGame(event.settings)
 			}
 		}
 		subscribe<GameReadyEvent> {

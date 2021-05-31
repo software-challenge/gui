@@ -28,9 +28,9 @@ enum class PlayerType {
     };
 }
 
-class TeamSettings {
-    val name = objectProperty("Team")
-    val type = objectProperty(PlayerType.HUMAN)
+class TeamSettings(name: String? = "Team", type: PlayerType = PlayerType.HUMAN) {
+    val name = objectProperty(name)
+    val type = objectProperty(type)
     val executable = objectProperty<File>()
 	
     val isHuman

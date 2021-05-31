@@ -9,7 +9,7 @@ class ExternalClient(private val host: String, private val port: Int) : ClientIn
         println("Please start the manual client on $host:$port to join room $roomId")
     }
     
-    override fun joinPreparedGame(reservation: String) {
+    override fun joinGameWithReservation(reservation: String) {
         throw NotImplementedError("External/Manual client can't join a prepared game (reservation: $reservation)")
     }
     
