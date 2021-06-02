@@ -67,8 +67,8 @@ class StatusView: View() {
     
     override val root = hbox {
         alignment = Pos.CENTER
-        scoreLabel.addClass(AppStyle.statusLable)
-        statusLabel.addClass(AppStyle.statusLable)
+        scoreLabel.addClass(AppStyle.statusLabel)
+        statusLabel.addClass(AppStyle.statusLabel)
         this += vbox {
             alignment = Pos.CENTER
             this += scoreLabel

@@ -92,18 +92,6 @@ class BoardView: View() {
         this += grid
     }
     
-    init {
-        appController.model.isDarkMode.listenImmediately { value ->
-            if (value) {
-                grid.removeClass(AppStyle.lightBoard)
-                grid.addClass(AppStyle.darkBoard)
-            } else {
-                grid.removeClass(AppStyle.darkBoard)
-                grid.addClass(AppStyle.lightBoard)
-            }
-        }
-    }
-    
     private fun getPane(x: Int, y: Int): Node =
             grid.children.find { node ->
                 GridPane.getColumnIndex(node) == x && GridPane.getRowIndex(node) == y

@@ -25,10 +25,8 @@ class AppStyle: Stylesheet() {
         val fullWidth by cssclass()
         val lightColorSchema by cssclass()
         val darkColorSchema by cssclass()
-        val lightBoard by cssclass()
-        val darkBoard by cssclass()
         
-        val statusLable by cssclass()
+        val statusLabel by cssclass()
         
         val undeployedPiece by cssclass()
         val fieldUnplaceable by cssclass()
@@ -48,7 +46,7 @@ class AppStyle: Stylesheet() {
             font = gotuRegular
         }
         background {
-            opacity = 0.4
+            opacity = 0.6
             backgroundImage.addAll(arrayOf("beach", "sea_beach")
                     .map { ResourceLookup(this).url("/graphics/$it.png").toURI() })
             backgroundPosition = multi(
@@ -62,52 +60,40 @@ class AppStyle: Stylesheet() {
             val contain = BackgroundSize(1.0, BackgroundSize.AUTO, true, true, true, true)
             backgroundSize = multi(contain, contain)
         }
-        
+        statusLabel {
+            fontSize = 24.pt
+        }
+    
         lightColorSchema {
             baseColor = c("#E0E0E0")
-            backgroundColor += c("#EEEEEE")
-            accentColor = Color.MEDIUMPURPLE
-            faintFocusColor = baseColor
-            menuBar {
-                backgroundColor += c("#DEDEDE")
-            }
-            contextMenu {
-                backgroundColor += c("#E0E0E0")
-            }
-            statusLable {
-                textFill = c("#262626")
-                fontSize = 24.pt
-            }
-        }
-        darkColorSchema {
-            baseColor = c("#424242")
-            backgroundColor += c("#212121")
+            backgroundColor += c("#EEE")
             accentColor = Color.MEDIUMPURPLE
             faintFocusColor = baseColor
             
             menuBar {
-                backgroundColor += c("#2c2c2c")
+                backgroundColor = this@lightColorSchema.backgroundColor
             }
             contextMenu {
-                backgroundColor += c("#515151")
+                backgroundColor += baseColor
+            }
+        }
+        darkColorSchema {
+            baseColor = c("#444")
+            backgroundColor += c("#222")
+            accentColor = Color.MEDIUMPURPLE
+            faintFocusColor = baseColor
+            textFill = c("#EEE")
+    
+            menuBar {
+                backgroundColor = this@darkColorSchema.backgroundColor
+            }
+            contextMenu {
+                backgroundColor += c("#555")
             }
             textField {
                 baseColor = Color.WHITE
-                textFill = c("#212121")
+                textFill = c("#222")
             }
-            label {
-                textFill = c("#BDBDBD")
-            }
-            statusLable {
-                textFill = c("#E3E3E3")
-                fontSize = 24.pt
-            }
-        }
-        lightBoard {
-            backgroundColor += c("#E0E0E0")
-        }
-        darkBoard {
-            backgroundColor += c("#424242")
         }
         
         button {
