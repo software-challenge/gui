@@ -2,6 +2,9 @@ package sc.gui.view
 
 import javafx.application.Platform
 import javafx.beans.value.ObservableValue
+import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
+import javafx.scene.layout.StackPane
 import javafx.stage.FileChooser
 import mu.KotlinLogging
 import sc.gui.AppStyle
@@ -74,6 +77,7 @@ class AppView: View("Software-Challenge Germany") {
                 }
             }
         }
+        
     }
     
     init {
@@ -82,7 +86,13 @@ class AppView: View("Software-Challenge Germany") {
         with(root) {
             prefWidth = 1100.0
             prefHeight = 700.0
-            center(StartView::class)
+            center = StackPane(
+                    Region().apply {
+                        hgrow = Priority.ALWAYS
+                        vgrow = Priority.ALWAYS
+                        addClass(AppStyle.background)
+                    }
+            ).apply { add(StartView::class) }
         }
         
         // responsive scaling
