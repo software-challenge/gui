@@ -28,7 +28,7 @@ class PieceImage(sizeProperty: Property<Double>, private val content: PieceType)
     }
     
     private fun createImage(size: Double) =
-            Image(ResourceLookup(this)["/graphics/blokus/single/$content.png"], size, size, true, false)
+            Image(ResourceLookup(this)["/graphics/${content.toString().toLowerCase()}.png"], size, size, true, false)
     
     override fun minHeight(width: Double): Double {
         return 16.0
