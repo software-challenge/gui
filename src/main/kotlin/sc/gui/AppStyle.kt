@@ -3,7 +3,6 @@ package sc.gui
 import javafx.geometry.Side
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
-import javafx.scene.layout.BackgroundSize
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import tornadofx.*
@@ -47,18 +46,10 @@ class AppStyle: Stylesheet() {
         }
         background {
             opacity = 0.6
-            backgroundImage.addAll(arrayOf("beach", "sea_beach")
-                    .map { ResourceLookup(this).url("/graphics/$it.png").toURI() })
-            backgroundPosition = multi(
-                    BackgroundPosition(Side.LEFT, .5, true, Side.BOTTOM, .0, true),
-                    BackgroundPosition(Side.LEFT, .5, true, Side.TOP, .0, true),
-            )
-            backgroundRepeat = multi(
-                    BackgroundRepeat.NO_REPEAT to BackgroundRepeat.REPEAT,
-                    BackgroundRepeat.NO_REPEAT to BackgroundRepeat.NO_REPEAT,
-            )
-            val contain = BackgroundSize(1.0, BackgroundSize.AUTO, true, true, true, true)
-            backgroundSize = multi(contain, contain)
+            backgroundColor += c("#f2df8e")
+            backgroundImage += ResourceLookup(this).url("/graphics/sea_beach.png").toURI()
+            backgroundPosition += BackgroundPosition(Side.LEFT, .0, true, Side.TOP, -10.0, false)
+            backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.NO_REPEAT
         }
         statusLabel {
             fontSize = 24.pt
@@ -74,7 +65,7 @@ class AppStyle: Stylesheet() {
                 backgroundColor = this@lightColorSchema.backgroundColor
             }
             contextMenu {
-                backgroundColor += baseColor
+                backgroundColor += this@lightColorSchema.baseColor
             }
         }
         darkColorSchema {
@@ -88,7 +79,7 @@ class AppStyle: Stylesheet() {
                 backgroundColor = this@darkColorSchema.backgroundColor
             }
             contextMenu {
-                backgroundColor += c("#555")
+                backgroundColor += this@darkColorSchema.baseColor
             }
             textField {
                 baseColor = Color.WHITE
