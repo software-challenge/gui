@@ -95,15 +95,6 @@ class AppView: View("Software-Challenge Germany") {
             ).apply { add(StartView::class) }
         }
         
-        // responsive scaling
-        val resizer = ChangeListener<Number> { _, _, _ ->
-            if (controller.model.currentView.get() == ViewType.GAME) {
-                find(GameView::class).resize()
-            }
-        }
-        root.widthProperty().addListener(resizer)
-        root.heightProperty().addListener(resizer)
-        
         val gameTitle = "Blokus"
         val version = resources.text("/version.txt")
         val sochaTitle = "Software-Challenge GUI $version"

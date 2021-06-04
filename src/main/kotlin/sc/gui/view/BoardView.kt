@@ -1,6 +1,7 @@
 package sc.gui.view
 
-import javafx.beans.property.Property
+import javafx.beans.binding.Bindings
+import javafx.beans.value.ObservableValue
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.Image
@@ -8,9 +9,9 @@ import javafx.scene.image.ImageView
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
-import sc.gui.controller.AppController
 import sc.gui.controller.GameController
 import sc.plugin2022.Coordinates
 import sc.plugin2022.PieceType
@@ -19,11 +20,11 @@ import tornadofx.*
 
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
-class PieceImage(sizeProperty: Property<Double>, private val content: PieceType): ImageView() {
+class PieceImage(sizeProperty: ObservableValue<Number>, private val content: PieceType): ImageView() {
     
     init {
         sizeProperty.listenImmediately { size ->
-            image = createImage(size)
+            image = createImage(size.toDouble())
         }
     }
     
@@ -57,25 +58,29 @@ class BoardView: View() {
     private val logger = LoggerFactory.getLogger(BoardView::class.java)
     
     private val gameController: GameController by inject()
-    private val appController: AppController by inject()
     val pieces = HashMap<Coordinates, Node>()
-    val calculatedBlockSize = objectProperty(16.0)
+    
+    val size = doubleProperty(16.0)
+    val calculatedBlockSize = size.doubleBinding { it!!.toDouble() / Constants.BOARD_SIZE }
     
     val grid = gridpane {
         isGridLinesVisible = true
+        paddingAll = AppStyle.spacing
+        maxHeightProperty().bind(size)
+        maxWidthProperty().bind(size)
         gameController.gameState.onChange { state ->
             state?.lastMove?.let { move ->
-                val piece = pieces[move.start] ?: return@let
-                piece.gridpaneConstraints {
-                    columnRowIndex(move.destination.x, move.destination.y)
-                }
+                // val piece = pieces[move.start] ?: return@let
+                // piece.gridpaneConstraints {
+                //     columnRowIndex(move.destination.x, move.destination.y)
+                // }
                 // TODO animate
                 //  children.remove(piece)
                 //  piece.move(Duration.seconds(1.0), move)
             }
         }
         gameController.gameState.listenImmediately {
-            if(pieces.isEmpty() && it != null) {
+            if (pieces.isEmpty() && it != null) {
                 it.currentPieces.forEach { (coords, piece) ->
                     pieces[coords] = createPiece(coords, piece.type)
                     // TODO this doesn't work with movement
@@ -87,9 +92,10 @@ class BoardView: View() {
             constraintsForColumn(x).percentWidth = 100.0 / Constants.BOARD_SIZE
         }
     }
-    override val root = hbox {
-        alignment = Pos.CENTER
-        this += grid
+    override val root = vbox(alignment = Pos.CENTER) {
+        size.bind(Bindings.min(widthProperty(), heightProperty()))
+        grid.vgrow = Priority.ALWAYS
+        add(grid)
     }
     
     private fun getPane(x: Int, y: Int): Node =
@@ -119,12 +125,12 @@ class BoardView: View() {
                 }
             }
             
-            this += image
+            // TODO this += image
         }
     }
     
     fun handleClick(coordinates: Coordinates) {
-        /* TODO
+        /* TODO human move actions
         if(!game.atLatestTurn.value)
             return
         if (isHoverable(x, y, game.selectedCalculatedShape.get()) && isPlaceable(x, y, game.selectedCalculatedShape.get())) {

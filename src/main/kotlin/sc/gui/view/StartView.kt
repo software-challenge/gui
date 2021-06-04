@@ -1,22 +1,22 @@
 package sc.gui.view
 
 import javafx.geometry.Pos
+import javafx.scene.text.TextAlignment
 import sc.gui.AppStyle
 import sc.gui.controller.CreateGame
 import tornadofx.*
 
 class StartView: View() {
-    override val root = vbox {
-        alignment = Pos.CENTER
-        spacing = AppStyle.spacing * 2
-        label {
+    override val root = vbox(AppStyle.spacing, Pos.CENTER) {
+        paddingAll = AppStyle.spacing
+        label("Willkommen bei der Software-Challenge!") {
             style {
                 fontSize = AppStyle.fontSizeHeader
             }
-            text = "Willkommen bei der Software-Challenge!"
+            isWrapText = true
+            textAlignment = TextAlignment.CENTER
         }
-        button {
-            text = "Neues Spiel starten"
+        button("Neues Spiel starten") {
             action {
                 fire(CreateGame)
             }

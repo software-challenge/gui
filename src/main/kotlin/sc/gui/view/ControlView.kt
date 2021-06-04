@@ -2,7 +2,9 @@ package sc.gui.view
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.Property
+import javafx.geometry.Pos
 import mu.KotlinLogging
+import sc.gui.AppStyle
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.controller.GameController
@@ -31,12 +33,10 @@ class ControlView: View() {
     private val gameController: GameController by inject()
     private val gameControlState: Property<GameControlState> = objectProperty(START)
     
-    override val root = hbox {
-        spacing = 8.0
-        vbox {
-            spacing = 8.0
+    override val root =
             hbox {
-                spacing = 8.0
+                alignment = Pos.CENTER
+                spacing = AppStyle.formSpacing
                 button {
                     gameControlState.listenImmediately { controlState ->
                         logger.debug { "Updating $this to State $controlState" }
@@ -68,8 +68,6 @@ class ControlView: View() {
                     }
                 }
             }
-        }
-    }
     
     init {
         gameController.gameStarted.onChange {
