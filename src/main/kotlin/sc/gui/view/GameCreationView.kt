@@ -2,9 +2,12 @@ package sc.gui.view
 
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ObservableValue
+import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.layout.Region
 import javafx.stage.FileChooser
 import sc.api.plugins.Team
+import sc.gui.AppStyle
 import sc.gui.controller.NavigateBackEvent
 import sc.gui.controller.StartGameRequest
 import sc.gui.model.PlayerType
@@ -20,22 +23,31 @@ class GameCreationView: View() {
                     .map { TeamSettingsModel(it) }
     
     override val root = borderpane {
-        style {
-            padding = box(20.px)
-        }
+        padding = Insets(AppStyle.spacing)
         center = form {
-            hbox {
+            alignment = Pos.CENTER
+            gridpane {
+                hgap = AppStyle.spacing
                 Team.values().forEach { team ->
-                    vbox(20) {
-                        add(PlayerFragment(team, playerSettingsModels[team.index]))
+                    val settings = playerSettingsModels[team.index]
+                    fieldset(if (team == Team.ONE) "Erster Spieler" else "Zweiter Spieler") {
+                        alignment = Pos.TOP_CENTER
+                        spacing = AppStyle.formSpacing
+                        textfield(settings.name) {
+                            promptText = "Name des Spielers ${team.index + 1}"
+                            required()
+                        }
+                        add(PlayerFileSelectFragment(team, settings))
+                        gridpaneConstraints {
+                            rowIndex = 0
+                            columnIndex = team.index
+                        }
                     }
+                    constraintsForColumn(team.index).percentWidth = 50.0
                 }
             }
         }
-        bottom = hbox {
-            style {
-                alignment = Pos.TOP_RIGHT
-            }
+        bottom = hbox(AppStyle.spacing, Pos.CENTER_RIGHT) {
             button("Erstellen") {
                 action {
                     playerSettingsModels.all { it.commit() }
@@ -43,7 +55,6 @@ class GameCreationView: View() {
                 }
                 enableWhen(Bindings.and(playerSettingsModels[0].valid, playerSettingsModels[1].valid))
             }
-            
             button("Zurück") {
                 action {
                     fire(NavigateBackEvent)
@@ -53,19 +64,11 @@ class GameCreationView: View() {
     }
 }
 
-class PlayerFragment(private val team: Team, private val settings: TeamSettingsModel): Fragment() {
-    override val root = vbox(20) {
-        fieldset(if (team == Team.ONE) "Erster Spieler" else "Zweiter Spieler") {
-            textfield(settings.name).required()
-            add(PlayerFileSelectFragment(team, settings))
-        }
-    }
-}
-
 class PlayerFileSelectFragment(private val team: Team, private val settings: TeamSettingsModel): Fragment() {
     override val root = borderpane {
-        top = hbox {
-            combobox(settings.type, PlayerType.values().toList())
+        prefHeight = AppStyle.fontSizeRegular.value * 9
+        top = combobox(settings.type, PlayerType.values().toList()) {
+            maxWidth = Double.MAX_VALUE
         }
     }
     
@@ -73,7 +76,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
         // TODO: work with proper binding of property
         when (settings.type.value) {
             PlayerType.COMPUTER -> {
-                root.center = hbox(20) {
+                root.center = hbox(AppStyle.spacing) {
                     button("Client wählen") {
                         action {
                             val selectedFile = chooseFile(
@@ -97,11 +100,11 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
                 }
             }
             PlayerType.EXTERNAL -> {
-                root.center = label("Spieler muss nach Erstellung des Spiels manuell gestartet werden")
+                root.center = label("Spieler muss nach Erstellung des Spiels separat gestartet werden")
                 root.bottom = label("")
             }
             PlayerType.COMPUTER_EXAMPLE -> {
-                root.center = label("Ein interner Computerspieler")
+                root.center = label("Ein einfacher, interner Computerspieler")
                 root.bottom = label()
             }
             PlayerType.HUMAN -> {
@@ -110,6 +113,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
             }
             else -> throw Exception("Unknown Player-Type")
         }
+        (root.center as Region).paddingTop = AppStyle.formSpacing
     }
     
     init {
@@ -119,8 +123,12 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
         }
         settings.executable.onChange {
             root.bottom = textflow {
+                val parentWidth = widthProperty()
                 label("Ausgewählte Datei: ")
-                label(settings.executable.value.absolutePath)
+                label(settings.executable.value.absolutePath) {
+                    isWrapText = true
+                    prefWidthProperty().bind(parentWidth)
+                }
             }
         }
         updatePlayerType()

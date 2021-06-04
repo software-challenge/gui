@@ -10,9 +10,6 @@ import tornadofx.*
 class AppStyle: Stylesheet() {
     
     companion object {
-        val background by cssclass()
-        val tackyButton by cssclass()
-        
         private val red = c("#AA0100")
         private val placeableRed = c("#FB0A12")
         private val blue = c("#005784")
@@ -21,6 +18,15 @@ class AppStyle: Stylesheet() {
         private val gotuRegular = Font.loadFont(ResourceLookup(this)["/fonts/NotoSans-Regular.ttf"], 16.0)
         private val rounding = multi(box(8.percent))
         
+        val spacing = 20.0
+        val formSpacing = spacing / 2
+        
+        val fontSizeRegular = 20.pt
+        val fontSizeBig = 24.pt
+        val fontSizeHeader = 32.pt
+    
+        val background by cssclass()
+    
         val fullWidth by cssclass()
         val lightColorSchema by cssclass()
         val darkColorSchema by cssclass()
@@ -43,6 +49,7 @@ class AppStyle: Stylesheet() {
     init {
         root {
             font = gotuRegular
+            fontSize = fontSizeRegular
         }
         background {
             opacity = 0.6
@@ -52,7 +59,7 @@ class AppStyle: Stylesheet() {
             backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.NO_REPEAT
         }
         statusLabel {
-            fontSize = 24.pt
+            fontSize = fontSizeBig
         }
     
         lightColorSchema {
@@ -92,14 +99,6 @@ class AppStyle: Stylesheet() {
             borderRadius = multi((box(1.percent)))
         }
         
-        tackyButton {
-            rotate = 5.deg
-            borderColor += box(red, blue)
-            fontSize = 20.px
-        }
-        label {
-            fontSize = 20.px
-        }
         fullWidth {
             prefWidth = 100.percent
         }

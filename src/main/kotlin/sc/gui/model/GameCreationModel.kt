@@ -18,12 +18,12 @@ enum class PlayerType {
     },
     COMPUTER {
         override fun toString(): String {
-            return "eigener Computerspieler, von GUI gestartet"
+            return "Eigener Computerspieler, von GUI gestartet"
         }
     },
     EXTERNAL {
         override fun toString(): String {
-            return "eigener Computerspieler, manuell gestaret"
+            return "Eigener Computerspieler, manuell gestartet"
         }
     };
 }
