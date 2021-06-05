@@ -1,5 +1,6 @@
 package sc.gui
 
+import javafx.application.Platform
 import org.slf4j.LoggerFactory
 import sc.api.plugins.IGamePlugin
 import sc.api.plugins.IGameState
@@ -64,7 +65,9 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
                 }
             }
             is ErrorPacket -> {
-                error("Fehler in der Kommunikation mit dem Server", packet.toString())
+                Platform.runLater {
+                    error("Fehler in der Kommunikation mit dem Server", packet.toString())
+                }
                 logger.error("$packet")
             }
         }

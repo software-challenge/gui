@@ -71,5 +71,6 @@ class GameFlowController: Controller() {
         fire(GameReadyEvent())
         gameController.availableTurns.set(history.last().turn)
         gameController.gameResult.set(loader.result)
+        gameController.gameState.set(history.first())
     }
 }
