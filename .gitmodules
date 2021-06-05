@@ -1,7 +1,8 @@
 [submodule "backend"]
 	path = backend
 	url = https://github.com/CAU-Kiel-Tech-Inf/backend
-  shallow = true
+	shallow = true
 [submodule ".idea"]
 	path = .idea
-	url = https://github.com/CAU-Kiel-Tech-Inf/idea-config.git
+	url = https://github.com/CAU-Kiel-Tech-Inf/idea-config
+	shallow = true
