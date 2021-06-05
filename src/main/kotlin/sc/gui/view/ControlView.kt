@@ -61,7 +61,11 @@ class ControlView: View() {
                     textProperty().bind(Bindings.concat(gameController.currentTurn, " / ", gameController.availableTurns))
                 }
                 button {
-                    disableWhen(gameController.atLatestTurn)
+                    disableProperty().bind(
+                            gameController.atLatestTurn.booleanBinding(gameController.gameEnded) {
+                                it == true && gameController.gameEnded.value
+                            }
+                    )
                     text = "⏭"
                     setOnMouseClicked {
                         fire(StepGame(1))
