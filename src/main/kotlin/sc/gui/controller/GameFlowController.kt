@@ -13,8 +13,7 @@ import sc.gui.view.TerminateGame
 import sc.networking.clients.GameLoaderClient
 import sc.networking.clients.IGameController
 import sc.plugin2022.GameState
-import tornadofx.Controller
-import tornadofx.onChange
+import tornadofx.*
 import java.io.File
 import java.io.IOException
 
@@ -54,6 +53,7 @@ class GameFlowController: Controller() {
                 controller = null
         }
         subscribe<TerminateGame> {
+            interval.pause()
             history.clear()
             controller?.cancel()
             controller = null
