@@ -65,15 +65,11 @@ class StatusView: View() {
     private val scoreLabel = Label()
     private val statusLabel = Label()
     
-    override val root = hbox {
-        alignment = Pos.CENTER
-        scoreLabel.addClass(AppStyle.statusLabel)
-        statusLabel.addClass(AppStyle.statusLabel)
-        this += vbox {
-            alignment = Pos.CENTER
-            this += scoreLabel
-            this += statusLabel
-        }
+    override val root = vbox(alignment = Pos.CENTER) {
+        addClass(AppStyle.statusLabel)
+        prefHeight = AppStyle.fontSizeBig.value * 6
+        add(scoreLabel)
+        add(statusLabel)
     }
     
     init {

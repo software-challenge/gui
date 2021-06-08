@@ -1,15 +1,18 @@
 package sc.gui.view
 
+import javafx.animation.FadeTransition
 import javafx.beans.binding.Bindings
+import javafx.beans.value.ObservableDoubleValue
 import javafx.beans.value.ObservableValue
+import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseButton
-import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
+import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
 import sc.gui.controller.GameController
@@ -18,6 +21,8 @@ import sc.plugin2022.GameState
 import sc.plugin2022.PieceType
 import sc.plugin2022.util.Constants
 import tornadofx.*
+
+private val logger = LoggerFactory.getLogger(BoardView::class.java)
 
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
@@ -38,24 +43,30 @@ class ResizableImageView(sizeProperty: ObservableValue<Number>, resource: String
     override fun isResizable(): Boolean = true
 }
 
-class PieceImage(private val sizeProperty: ObservableValue<Number>, private val content: PieceType): StackPane() {
+class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: PieceType): StackPane() {
+    val height
+        get() = children.size
+    
+    val stackOffset
+        get() = -(sizeProperty.get() / 10)
+    
     init {
         addChild(content.toString().toLowerCase())
     }
     
-    fun setHeight(height: Int) {
-        while (children.size < height) {
+    fun setHeight(newHeight: Int) {
+        while (height < newHeight) {
             addChild("blank")
         }
-        if(height < children.size) {
-            children.remove(0, children.size - height)
+        if (newHeight < height) {
+            children.remove(0, height - newHeight)
         }
     }
     
     fun addChild(graphic: String) {
         val childIndex = children.size + 1
         children.add(0, ResizableImageView(sizeProperty, ResourceLookup(this)["/graphics/$graphic.png"]).apply {
-            translateYProperty().bind(sizeProperty.doubleBinding(children) { - (it!!.toDouble() / 10) * (children.size - childIndex) })
+            translateYProperty().bind(sizeProperty.doubleBinding(children) { stackOffset * (children.size - childIndex) })
         })
     }
     
@@ -63,13 +74,16 @@ class PieceImage(private val sizeProperty: ObservableValue<Number>, private val 
 }
 
 class BoardView: View() {
-    private val logger = LoggerFactory.getLogger(BoardView::class.java)
     
     private val gameController: GameController by inject()
     val pieces = HashMap<Coordinates, PieceImage>()
     
     val size = doubleProperty(16.0)
-    val calculatedBlockSize = size.doubleBinding { (it!!.toDouble() / Constants.BOARD_SIZE) * 0.9 }
+    val gridSize
+        get() = size.value / Constants.BOARD_SIZE
+    val calculatedBlockSize = size.doubleBinding { gridSize * 0.9 }
+    
+    val transitionDuration = Duration(500.0)
     
     val grid = gridpane {
         isGridLinesVisible = true
@@ -79,24 +93,37 @@ class BoardView: View() {
         val listener = ChangeListener<GameState?> { _, oldState, state ->
             if (state == null)
                 return@ChangeListener
-            oldState?.board?.diff(state.board)?.forEach {
-                pieces[it.start]?.gridpaneConstraints {
-                    if (it.destination.isValid) {
-                        removePiece(it.destination)
-                        pieces[it.destination] = pieces.remove(it.start)!!
-                        // TODO animate
-                        //  children.remove(piece)
-                        //  piece.move(Duration.seconds(1.0), move)
-                        columnRowIndex(it.destination.x, it.destination.y)
-                    } else {
-                        removePiece(it.start)
+            // TODO finish outstanding animations
+            logger.trace("New state for board: ${state.longString()}")
+            val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reverse()).maxByOrNull { it.first?.turn ?: -1 }!!.second
+            lastMove?.let { move ->
+                pieces.remove(move.start)?.let { piece ->
+                    val oldPiece = pieces.remove(move.destination)
+                    pieces[move.destination] = piece
+                    val newHeight = state.board[move.destination]?.count ?: piece.height + (oldState?.board?.get(move.destination)?.count ?: 0)
+                    var heightDiff = newHeight - piece.height
+                    if (heightDiff < 0) {
+                        piece.setHeight(newHeight)
+                        heightDiff = 0
+                    }
+                    piece.move(transitionDuration, Point2D(move.delta.dx * gridSize, move.delta.dy * gridSize + heightDiff * piece.stackOffset)) {
+                        setOnFinished {
+                            piece.translateX = 0.0
+                            piece.translateY = 0.0
+                            piece.gridpaneConstraints { columnRowIndex(move.destination.x, move.destination.y) }
+                            logger.trace("Piece $piece finished animating to ${state.board[move.destination]}")
+                            piece.setHeight(newHeight)
+                            children.remove(oldPiece)
+                        }
                     }
                 }
             }
             state.board.forEach { (coords, piece) ->
                 pieces.computeIfAbsent(coords) {
-                    createPiece(coords, piece.type).also {
-                        add(it, coords.x, coords.y)
+                    createPiece(coords, piece.type).also { pieceImage ->
+                        pieceImage.opacity = 0.0
+                        pieceImage.setHeight(piece.count)
+                        add(pieceImage, coords.x, coords.y)
                     }
                 }
             }
@@ -105,12 +132,12 @@ class BoardView: View() {
                 val (c, image) = iter.next()
                 val piece = state.board[c]
                 if (piece == null) {
-                    children.remove(image)
+                    removePiece(image)
                     iter.remove()
+                    // TODO animate amber
                 } else {
-                    image.setHeight(piece.count)
-                    //image.disableProperty().set(piece.team != state.currentTeam)
-                    image.opacity = if (piece.team == state.currentTeam) 0.9 else 0.5
+                    // TODO image.disableProperty().set(piece.team != state.currentTeam)
+                    image.fade(transitionDuration, if (piece.team == state.currentTeam) 0.9 else 0.5)
                 }
             }
         }
@@ -127,13 +154,16 @@ class BoardView: View() {
         add(grid)
     }
     
-    private fun removePiece(coords: Coordinates): Boolean =
-            pieces.remove(coords)?.let { grid.children.remove(it) } ?: false
+    private fun removePiece(coords: Coordinates) {
+        pieces.remove(coords)?.let(::removePiece)
+    }
     
-    private fun getPane(x: Int, y: Int): Node =
-            grid.children.find { node ->
-                GridPane.getColumnIndex(node) == x && GridPane.getRowIndex(node) == y
-            } ?: throw Exception("Pane of ($x, $y) is not part of the BoardView")
+    private fun removePiece(piece: Node): FadeTransition =
+            piece.fade(transitionDuration, 0.0) {
+                setOnFinished {
+                    grid.children.remove(piece)
+                }
+            }
     
     private fun createPiece(coordinates: Coordinates, type: PieceType): PieceImage =
             PieceImage(calculatedBlockSize, type).apply {
