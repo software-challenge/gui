@@ -9,6 +9,7 @@ import javafx.scene.image.ImageView
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
+import javafx.scene.layout.StackPane
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
 import sc.gui.controller.GameController
@@ -20,37 +21,42 @@ import tornadofx.*
 
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
-class PieceImage(sizeProperty: ObservableValue<Number>, private val content: PieceType): ImageView() {
-    
+class ResizableImageView(sizeProperty: ObservableValue<Number>, resource: String): ImageView() {
     init {
-        sizeProperty.listenImmediately { size ->
-            image = createImage(size.toDouble())
+        imageProperty().bind(sizeProperty.objectBinding {
+            val size = it!!.toDouble()
+            Image(resource, size, size, true, false)
+        })
+        fitWidthProperty().bind(sizeProperty)
+        fitHeightProperty().bind(sizeProperty)
+    }
+    
+    override fun prefHeight(width: Double): Double = image.height
+    override fun minHeight(width: Double): Double = 16.0
+    override fun prefWidth(height: Double): Double = image.width
+    override fun minWidth(width: Double): Double = 16.0
+    override fun isResizable(): Boolean = true
+}
+
+class PieceImage(private val sizeProperty: ObservableValue<Number>, private val content: PieceType): StackPane() {
+    init {
+        addChild(content.toString().toLowerCase())
+    }
+    
+    fun setHeight(height: Int) {
+        while (children.size < height) {
+            addChild("blank")
+        }
+        if(height < children.size) {
+            children.remove(0, children.size - height)
         }
     }
     
-    private fun createImage(size: Double) =
-            Image(ResourceLookup(this)["/graphics/${content.toString().toLowerCase()}.png"], size, size, true, false)
-    
-    override fun minHeight(width: Double): Double {
-        return 16.0
-    }
-    
-    override fun prefHeight(width: Double): Double {
-        image ?: return minHeight(width)
-        return image.height
-    }
-    
-    override fun minWidth(height: Double): Double {
-        return 16.0
-    }
-    
-    override fun prefWidth(height: Double): Double {
-        image ?: return minWidth(height)
-        return image.width
-    }
-    
-    override fun isResizable(): Boolean {
-        return true
+    fun addChild(graphic: String) {
+        val childIndex = children.size + 1
+        children.add(0, ResizableImageView(sizeProperty, ResourceLookup(this)["/graphics/$graphic.png"]).apply {
+            translateYProperty().bind(sizeProperty.doubleBinding(children) { - (it!!.toDouble() / 10) * (children.size - childIndex) })
+        })
     }
     
     override fun toString(): String = "PieceImage@${Integer.toHexString(hashCode())}(content = $content)"
@@ -60,10 +66,10 @@ class BoardView: View() {
     private val logger = LoggerFactory.getLogger(BoardView::class.java)
     
     private val gameController: GameController by inject()
-    val pieces = HashMap<Coordinates, Node>()
+    val pieces = HashMap<Coordinates, PieceImage>()
     
     val size = doubleProperty(16.0)
-    val calculatedBlockSize = size.doubleBinding { it!!.toDouble() / Constants.BOARD_SIZE }
+    val calculatedBlockSize = size.doubleBinding { (it!!.toDouble() / Constants.BOARD_SIZE) * 0.9 }
     
     val grid = gridpane {
         isGridLinesVisible = true
@@ -102,6 +108,8 @@ class BoardView: View() {
                     children.remove(image)
                     iter.remove()
                 } else {
+                    image.setHeight(piece.count)
+                    //image.disableProperty().set(piece.team != state.currentTeam)
                     image.opacity = if (piece.team == state.currentTeam) 0.9 else 0.5
                 }
             }
@@ -127,10 +135,8 @@ class BoardView: View() {
                 GridPane.getColumnIndex(node) == x && GridPane.getRowIndex(node) == y
             } ?: throw Exception("Pane of ($x, $y) is not part of the BoardView")
     
-    private fun createPiece(coordinates: Coordinates, type: PieceType): Node =
+    private fun createPiece(coordinates: Coordinates, type: PieceType): PieceImage =
             PieceImage(calculatedBlockSize, type).apply {
-                fitWidthProperty().bind(calculatedBlockSize)
-                fitHeightProperty().bind(calculatedBlockSize)
                 setOnMouseEntered {
                     addClass(AppStyle.hoverColor)
                     it.consume()

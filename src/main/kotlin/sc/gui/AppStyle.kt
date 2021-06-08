@@ -52,7 +52,7 @@ class AppStyle: Stylesheet() {
             fontSize = fontSizeRegular
         }
         background {
-            opacity = 0.6
+            opacity = 0.8
             backgroundColor += c("#f2df8e")
             backgroundImage += ResourceLookup(this).url("/graphics/sea_beach.png").toURI()
             backgroundPosition += BackgroundPosition(Side.LEFT, .0, true, Side.TOP, -10.0, false)
