@@ -75,8 +75,8 @@ class ControlView: View() {
     
     init {
         gameController.gameStarted.onChange {
-            if (it)
-                gameControlState.value = PLAYING
+            if (it && gameControlState.value == START)
+                gameControlState.value = PAUSED
         }
         arrayOf(gameController.atLatestTurn, gameController.gameEnded).forEach { observable ->
             observable.onChange {
