@@ -19,6 +19,7 @@ import sc.gui.controller.GameController
 import sc.plugin2022.Coordinates
 import sc.plugin2022.GameState
 import sc.plugin2022.PieceType
+import sc.plugin2022.direction
 import sc.plugin2022.util.Constants
 import tornadofx.*
 
@@ -133,7 +134,6 @@ class BoardView: View() {
                     createPiece(coords, piece.type).also { pieceImage ->
                         pieceImage.opacity = 0.0
                         pieceImage.setHeight(piece.count)
-                        pieceImage.background = Background(BackgroundFill(c(if(piece.team.index == 0) "red" else "blue",0.5), CornerRadii.EMPTY, Insets.EMPTY))
                         add(pieceImage, coords.x, coords.y)
                     }
                 }
@@ -146,8 +146,10 @@ class BoardView: View() {
                     removePiece(image)
                     iter.remove()
                 } else {
-                    // TODO image.disableProperty().set(piece.team != state.currentTeam)
+                    image.scaleX = piece.team.direction.toDouble()
+                    image.background = Background(BackgroundFill(c(if (piece.team.index == 0) "red" else "blue",0.5), CornerRadii.EMPTY, Insets.EMPTY))
                     image.fade(transitionDuration, if (piece.team == state.currentTeam) 0.9 else 0.5)
+                    // TODO image.disableProperty().set(piece.team != state.currentTeam)
                 }
             }
         }
