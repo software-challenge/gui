@@ -38,6 +38,7 @@ class ControlView: View() {
                 alignment = Pos.CENTER
                 spacing = AppStyle.formSpacing
                 button {
+                    prefWidth = AppStyle.fontSizeRegular.value * 15
                     gameControlState.listenImmediately { controlState ->
                         logger.debug { "Updating $this to State $controlState" }
                         isDisable = controlState == null
