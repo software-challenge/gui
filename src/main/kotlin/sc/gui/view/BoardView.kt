@@ -93,8 +93,11 @@ class BoardView: View() {
         maxHeightProperty().bind(size)
         maxWidthProperty().bind(size)
         val listener = ChangeListener<GameState?> { _, oldState, state ->
-            if (state == null)
+            if (state == null) {
+                children.removeAll(pieces.values)
+                pieces.clear()
                 return@ChangeListener
+            }
             // TODO finish pending animations
             logger.trace("New state for board: ${state.longString()}")
             val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reverse()).maxByOrNull { it.first?.turn ?: -1 }!!.second

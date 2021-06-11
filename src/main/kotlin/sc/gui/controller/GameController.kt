@@ -3,8 +3,8 @@ package sc.gui.controller
 import org.slf4j.LoggerFactory
 import sc.api.plugins.Team
 import sc.gui.GameOverEvent
-import sc.gui.GameReadyEvent
 import sc.gui.NewGameState
+import sc.gui.view.TerminateGame
 import sc.plugin2022.GameState
 import sc.shared.GameResult
 import tornadofx.*
@@ -56,7 +56,7 @@ class GameController: Controller() {
         subscribe<GameOverEvent> { event ->
             gameResult.set(event.result)
         }
-        subscribe<GameReadyEvent> {
+        subscribe<TerminateGame> {
             clearGame()
         }
     }
