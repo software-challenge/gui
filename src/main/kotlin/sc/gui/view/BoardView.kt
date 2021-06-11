@@ -4,14 +4,14 @@ import javafx.animation.FadeTransition
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ObservableDoubleValue
 import javafx.beans.value.ObservableValue
+import javafx.geometry.Insets
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseButton
-import javafx.scene.layout.Priority
-import javafx.scene.layout.StackPane
+import javafx.scene.layout.*
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
@@ -116,6 +116,7 @@ class BoardView: View() {
                     createPiece(coords, piece.type).also { pieceImage ->
                         pieceImage.opacity = 0.0
                         pieceImage.setHeight(piece.count)
+                        pieceImage.background = Background(BackgroundFill(c(if(piece.team.index == 0) "red" else "blue",0.5), CornerRadii.EMPTY, Insets.EMPTY))
                         add(pieceImage, coords.x, coords.y)
                     }
                 }
@@ -145,10 +146,6 @@ class BoardView: View() {
         size.bind(Bindings.min(widthProperty(), heightProperty()))
         grid.vgrow = Priority.ALWAYS
         add(grid)
-    }
-    
-    private fun removePiece(coords: Coordinates) {
-        pieces.remove(coords)?.let(::removePiece)
     }
     
     private fun removePiece(piece: Node): FadeTransition =
