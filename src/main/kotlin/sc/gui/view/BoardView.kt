@@ -26,14 +26,14 @@ private val logger = LoggerFactory.getLogger(BoardView::class.java)
 
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
-class ResizableImageView(sizeProperty: ObservableValue<Number>, resource: String): ImageView() {
+class ResizableImageView(sizeProperty: ObservableValue<Number>, resource: String, scaling: Double = 1.0): ImageView() {
     init {
         imageProperty().bind(sizeProperty.objectBinding {
             val size = it!!.toDouble()
-            Image(resource, size, size, true, false)
+            val scaledSize = size * scaling
+            translateY = -size * (scaling - 1.0) / 5
+            Image(resource, scaledSize, scaledSize, true, true)
         })
-        fitWidthProperty().bind(sizeProperty)
-        fitHeightProperty().bind(sizeProperty)
     }
     
     override fun prefHeight(width: Double): Double = image.height
@@ -46,9 +46,6 @@ class ResizableImageView(sizeProperty: ObservableValue<Number>, resource: String
 class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: PieceType): StackPane() {
     val height
         get() = children.size
-    
-    val stackOffset
-        get() = -(sizeProperty.get() / 10)
     
     init {
         addChild(content.toString().toLowerCase())
@@ -64,10 +61,11 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     }
     
     fun addChild(graphic: String) {
-        val childIndex = children.size + 1
-        children.add(0, ResizableImageView(sizeProperty, ResourceLookup(this)["/graphics/$graphic.png"]).apply {
-            translateYProperty().bind(sizeProperty.doubleBinding(children) { stackOffset * (children.size - childIndex) })
-        })
+        children.add(0, ResizableImageView(
+                sizeProperty,
+                ResourceLookup(this)["/graphics/$graphic.png"],
+                if (graphic == "moewe") 1.5 else 1.0,
+        ))
     }
     
     override fun toString(): String = "PieceImage@${Integer.toHexString(hashCode())}(content = $content)"
@@ -101,12 +99,7 @@ class BoardView: View() {
                     val oldPiece = pieces.remove(move.destination)
                     pieces[move.destination] = piece
                     val newHeight = state.board[move.destination]?.count ?: piece.height + (oldState?.board?.get(move.destination)?.count ?: 0)
-                    var heightDiff = newHeight - piece.height
-                    if (heightDiff < 0) {
-                        piece.setHeight(newHeight)
-                        heightDiff = 0
-                    }
-                    piece.move(transitionDuration, Point2D(move.delta.dx * gridSize, move.delta.dy * gridSize + heightDiff * piece.stackOffset)) {
+                    piece.move(transitionDuration, Point2D(move.delta.dx * gridSize, move.delta.dy * gridSize)) {
                         setOnFinished {
                             piece.translateX = 0.0
                             piece.translateY = 0.0
