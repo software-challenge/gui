@@ -91,22 +91,32 @@ class BoardView: View() {
         val listener = ChangeListener<GameState?> { _, oldState, state ->
             if (state == null)
                 return@ChangeListener
-            // TODO finish outstanding animations
+            // TODO finish pending animations
             logger.trace("New state for board: ${state.longString()}")
             val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reverse()).maxByOrNull { it.first?.turn ?: -1 }!!.second
             lastMove?.let { move ->
                 pieces.remove(move.start)?.let { piece ->
-                    val oldPiece = pieces.remove(move.destination)
-                    pieces[move.destination] = piece
-                    val newHeight = state.board[move.destination]?.count ?: piece.height + (oldState?.board?.get(move.destination)?.count ?: 0)
+                    val coveredPiece = pieces.remove(move.destination)
+                    val newHeight = state.board[move.destination]?.count
+                    if(newHeight != null) {
+                        pieces[move.destination] = piece
+                        if(newHeight < piece.height)
+                            piece.setHeight(newHeight)
+                    }
                     piece.move(transitionDuration, Point2D(move.delta.dx * gridSize, move.delta.dy * gridSize)) {
                         setOnFinished {
                             piece.translateX = 0.0
                             piece.translateY = 0.0
                             piece.gridpaneConstraints { columnRowIndex(move.destination.x, move.destination.y) }
                             logger.trace("Piece $piece finished animating to ${state.board[move.destination]}")
-                            piece.setHeight(newHeight)
-                            children.remove(oldPiece)
+                            children.remove(coveredPiece)
+                            if(newHeight == null) {
+                                piece.setHeight(0)
+                                piece.addChild("amber")
+                                removePiece(piece, 3.0)
+                            } else {
+                                piece.setHeight(newHeight)
+                            }
                         }
                     }
                 }
@@ -128,7 +138,6 @@ class BoardView: View() {
                 if (piece == null) {
                     removePiece(image)
                     iter.remove()
-                    // TODO animate amber
                 } else {
                     // TODO image.disableProperty().set(piece.team != state.currentTeam)
                     image.fade(transitionDuration, if (piece.team == state.currentTeam) 0.9 else 0.5)
@@ -148,8 +157,8 @@ class BoardView: View() {
         add(grid)
     }
     
-    private fun removePiece(piece: Node): FadeTransition =
-            piece.fade(transitionDuration, 0.0) {
+    private fun removePiece(piece: Node, durationMultiplier: Double = 1.0): FadeTransition =
+            piece.fade(transitionDuration.multiply(durationMultiplier), 0.0) {
                 setOnFinished {
                     grid.children.remove(piece)
                 }
