@@ -10,16 +10,13 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import javafx.scene.input.MouseButton
 import javafx.scene.layout.*
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
 import sc.gui.controller.GameController
-import sc.plugin2022.Coordinates
-import sc.plugin2022.GameState
-import sc.plugin2022.PieceType
-import sc.plugin2022.direction
+import sc.gui.controller.HumanMoveAction
+import sc.plugin2022.*
 import sc.plugin2022.util.Constants
 import tornadofx.*
 
@@ -68,7 +65,7 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
                 ResourceLookup(this)["/graphics/$graphic.png"],
                 if (moewe) 1.5 else 1.0,
         ).also {
-            if(moewe)
+            if (moewe)
                 it.scaleX = -1.0
         })
     }
@@ -101,14 +98,16 @@ class BoardView: View() {
             }
             // TODO finish pending animations
             logger.trace("New state for board: ${state.longString()}")
-            val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reverse()).maxByOrNull { it.first?.turn ?: -1 }!!.second
+            val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reverse()).maxByOrNull {
+                it.first?.turn ?: -1
+            }!!.second
             lastMove?.let { move ->
                 pieces.remove(move.start)?.let { piece ->
                     val coveredPiece = pieces.remove(move.destination)
                     val newHeight = state.board[move.destination]?.count
-                    if(newHeight != null) {
+                    if (newHeight != null) {
                         pieces[move.destination] = piece
-                        if(newHeight < piece.height)
+                        if (newHeight < piece.height)
                             piece.setHeight(newHeight)
                     }
                     piece.move(transitionDuration, Point2D(move.delta.dx * gridSize, move.delta.dy * gridSize)) {
@@ -118,7 +117,7 @@ class BoardView: View() {
                             piece.gridpaneConstraints { columnRowIndex(move.destination.x, move.destination.y) }
                             logger.trace("Piece $piece finished animating to ${state.board[move.destination]}")
                             children.remove(coveredPiece)
-                            if(newHeight == null) {
+                            if (newHeight == null) {
                                 piece.setHeight(0)
                                 piece.addChild("amber")
                                 removePiece(piece, 3.0)
@@ -131,7 +130,7 @@ class BoardView: View() {
             }
             state.board.forEach { (coords, piece) ->
                 pieces.computeIfAbsent(coords) {
-                    createPiece(coords, piece.type).also { pieceImage ->
+                    createPiece(piece.type).also { pieceImage ->
                         pieceImage.opacity = 0.0
                         pieceImage.setHeight(piece.count)
                         add(pieceImage, coords.x, coords.y)
@@ -147,7 +146,7 @@ class BoardView: View() {
                     iter.remove()
                 } else {
                     image.scaleX = piece.team.direction.toDouble()
-                    image.background = Background(BackgroundFill(c(if (piece.team.index == 0) "red" else "blue",0.5), CornerRadii.EMPTY, Insets.EMPTY))
+                    image.background = Background(BackgroundFill(c(if (piece.team.index == 0) "red" else "blue", 0.5), CornerRadii.EMPTY, Insets.EMPTY))
                     image.fade(transitionDuration, if (piece.team == state.currentTeam) 0.9 else 0.5)
                     // TODO image.disableProperty().set(piece.team != state.currentTeam)
                 }
@@ -173,38 +172,59 @@ class BoardView: View() {
                 }
             }
     
-    private fun createPiece(coordinates: Coordinates, type: PieceType): PieceImage =
+    var lockedTarget: Coordinates? = null
+    var targetFields = ArrayList<Node>()
+    
+    private fun createPiece(type: PieceType): PieceImage =
             PieceImage(calculatedBlockSize, type).apply {
+                fun coords() = Coordinates(GridPane.getColumnIndex(this), GridPane.getRowIndex(this))
                 setOnMouseEntered {
-                    addClass(AppStyle.hoverColor)
-                    it.consume()
+                    if (lockedTarget == null) {
+                        addClass(AppStyle.hoverColor)
+                        highlightTargets(coords())
+                        it.consume()
+                    } else if (lockedTarget != coords()) {
+                        addClass(AppStyle.softHoverColor)
+                    }
                 }
                 setOnMouseExited {
-                    removeClass(AppStyle.hoverColor)
+                    if (lockedTarget != coords())
+                        removeClass(AppStyle.hoverColor, AppStyle.softHoverColor)
                     it.consume()
                 }
-                setOnMouseClicked {
-                    if (it.button == MouseButton.PRIMARY) {
-                        logger.debug("Clicked on pane $coordinates")
-                        handleClick(coordinates)
-                        it.consume()
+                onLeftClick {
+                    val coords = coords()
+                    lockedTarget = if (lockedTarget == coords) {
+                        null
+                    } else {
+                        addClass(AppStyle.hoverColor)
+                        highlightTargets(coords)
+                        coords
                     }
                 }
             }
     
-    fun handleClick(coordinates: Coordinates) {
-        /* TODO human move actions
-        if(!game.atLatestTurn.value)
-            return
-        if (isHoverable(x, y, game.selectedCalculatedShape.get()) && isPlaceable(x, y, game.selectedCalculatedShape.get())) {
-            logger.debug("Set-Move from GUI at [$x,$y] seems valid")
-            val color = game.selectedColor.get()
-            
-            val move = SetMove(Piece(color, game.selectedShape.get(), game.selectedRotation.get(), game.selectedFlip.get(), Coordinates(x, y)))
-            GameRuleLogic.validateSetMove(board.get(), move)
-            fire(HumanMoveAction(move))
-        } else {
-            logger.debug("Set-Move from GUI at [$x,$y] seems invalid")
-        }*/
+    private fun clearTargets() {
+        lockedTarget?.let { pieces[it] }?.removeClass(AppStyle.hoverColor)
+        lockedTarget = null
+        grid.children.removeAll(targetFields)
+        targetFields.clear()
+    }
+    
+    private fun highlightTargets(position: Coordinates) {
+        clearTargets()
+        gameController.gameState.value?.board?.possibleMovesFrom(position)?.map {
+            val target = position + it
+            val node = Region().addClass(AppStyle.hoverColor).apply {
+                onLeftClick {
+                    if (gameController.isHumanTurn.value && gameController.gameState.value?.board?.get(position)?.team == gameController.gameState.value?.currentTeam) {
+                        clearTargets()
+                        fire(HumanMoveAction(Move(position, target).also { logger.debug("Human move: $it") }))
+                    }
+                }
+            }
+            grid.add(node, target.x, target.y)
+            node
+        }?.let { targetFields.addAll(it) }
     }
 }

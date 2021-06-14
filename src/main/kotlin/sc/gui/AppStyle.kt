@@ -33,17 +33,8 @@ class AppStyle: Stylesheet() {
         
         val statusLabel by cssclass()
         
-        val undeployedPiece by cssclass()
-        val fieldUnplaceable by cssclass()
-        val pieceUnselectable by cssclass()
         val hoverColor by cssclass()
-        
-        val colorRED by cssclass()
-        val placeableRED by cssclass()
-        val borderRED by cssclass()
-        val colorBLUE by cssclass()
-        val placeableBLUE by cssclass()
-        val borderBLUE by cssclass()
+        val softHoverColor by cssclass()
     }
     
     init {
@@ -103,39 +94,11 @@ class AppStyle: Stylesheet() {
             prefWidth = 100.percent
         }
         
-        undeployedPiece {
-            borderRadius = rounding
-            backgroundRadius = rounding
-            borderWidth = multi(box(2.px))
-            and(hover) {
-                Color.DARKGRAY
-            }
+        hoverColor {
+            backgroundColor += c("#2225")
         }
-        fieldUnplaceable {
-            backgroundColor += Color.BLACK
-        }
-        pieceUnselectable {
-            opacity = 0.6
-        }
-        
-        colorRED {
-            backgroundColor += red
-        }
-        placeableRED {
-            backgroundColor += placeableRed
-        }
-        borderRED {
-            borderColor += box(red)
-        }
-        
-        colorBLUE {
-            backgroundColor += blue
-        }
-        placeableBLUE {
-            backgroundColor += placeableBlue
-        }
-        borderBLUE {
-            borderColor += box(blue)
+        softHoverColor {
+            backgroundColor += c("#2222")
         }
     }
 }
