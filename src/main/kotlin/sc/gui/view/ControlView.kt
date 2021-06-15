@@ -63,8 +63,8 @@ class ControlView: View() {
                 }
                 button {
                     disableProperty().bind(
-                            gameController.atLatestTurn.booleanBinding(gameController.gameEnded) {
-                                it == true && gameController.gameEnded.value
+                            gameController.atLatestTurn.booleanBinding(gameController.gameEnded, gameController.isHumanTurn) {
+                                gameController.atLatestTurn.value && (gameController.isHumanTurn.value || gameController.gameEnded.value)
                             }
                     )
                     text = "⏭"
@@ -79,13 +79,21 @@ class ControlView: View() {
             if (it && gameControlState.value == START)
                 gameControlState.value = PAUSED
         }
-        arrayOf(gameController.atLatestTurn, gameController.gameEnded).forEach { observable ->
-            observable.onChange {
-                logger.debug { "updating control state on change of $observable" }
-                if (gameController.gameEnded.value && gameController.atLatestTurn.value)
-                    gameControlState.value = FINISHED
-            }
+        gameController.isHumanTurn.onChange {
+            if (it)
+                gameControlState.value = null
         }
+        arrayOf(gameController.atLatestTurn, gameController.gameEnded, gameController.isHumanTurn)
+                .forEach { observable ->
+                    observable.onChange {
+                        if (gameController.atLatestTurn.value) {
+                            if (gameController.gameEnded.value)
+                                gameControlState.value = FINISHED
+                            else if (gameController.isHumanTurn.value)
+                                gameControlState.value = null
+                        }
+                    }
+                }
         subscribe<GameReadyEvent> {
             gameControlState.value = START
         }

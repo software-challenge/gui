@@ -13,7 +13,7 @@ import kotlin.math.max
 class GameController: Controller() {
     val gameState = objectProperty<GameState?>(null)
     val gameResult = objectProperty<GameResult>()
-    val isHumanTurn = objectProperty(false)
+    val isHumanTurn = booleanProperty(false)
     
     val currentTurn = nonNullObjectBinding(gameState) { value?.turn ?: 0 }
     val currentRound = nonNullObjectBinding(gameState) { value?.round ?: 0 }
