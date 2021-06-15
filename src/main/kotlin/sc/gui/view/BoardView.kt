@@ -1,6 +1,7 @@
 package sc.gui.view
 
 import javafx.animation.FadeTransition
+import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ObservableDoubleValue
 import javafx.beans.value.ObservableValue
@@ -85,12 +86,16 @@ class BoardView: View() {
     
     val transitionDuration = Duration(500.0)
     
+    var lockedHighlight: Coordinates? = null
+    var targetHighlights = ArrayList<Node>()
+    
     val grid = gridpane {
         isGridLinesVisible = true
         paddingAll = AppStyle.spacing
         maxHeightProperty().bind(size)
         maxWidthProperty().bind(size)
         val listener = ChangeListener<GameState?> { _, oldState, state ->
+            clearTargetHighlights()
             if (state == null) {
                 children.removeAll(pieces.values)
                 pieces.clear()
@@ -148,12 +153,13 @@ class BoardView: View() {
                     image.scaleX = piece.team.direction.toDouble()
                     image.background = Background(BackgroundFill(c(if (piece.team.index == 0) "red" else "blue", 0.5), CornerRadii.EMPTY, Insets.EMPTY))
                     image.fade(transitionDuration, if (piece.team == state.currentTeam) 0.9 else 0.5)
-                    // TODO image.disableProperty().set(piece.team != state.currentTeam)
                 }
             }
         }
-        gameController.gameState.addListener(listener)
-        listener.changed(null, null, gameController.gameState.value)
+        Platform.runLater {
+            gameController.gameState.addListener(listener)
+            listener.changed(null, null, gameController.gameState.value)
+        }
         for (x in 0 until Constants.BOARD_SIZE) {
             constraintsForRow(x).percentHeight = 100.0 / Constants.BOARD_SIZE
             constraintsForColumn(x).percentWidth = 100.0 / Constants.BOARD_SIZE
@@ -172,29 +178,26 @@ class BoardView: View() {
                 }
             }
     
-    var lockedTarget: Coordinates? = null
-    var targetFields = ArrayList<Node>()
-    
     private fun createPiece(type: PieceType): PieceImage =
             PieceImage(calculatedBlockSize, type).apply {
                 fun coords() = Coordinates(GridPane.getColumnIndex(this), GridPane.getRowIndex(this))
                 setOnMouseEntered {
-                    if (lockedTarget == null) {
+                    if (lockedHighlight == null) {
                         addClass(AppStyle.hoverColor)
                         highlightTargets(coords())
                         it.consume()
-                    } else if (lockedTarget != coords()) {
+                    } else if (lockedHighlight != coords()) {
                         addClass(AppStyle.softHoverColor)
                     }
                 }
                 setOnMouseExited {
-                    if (lockedTarget != coords())
+                    if (lockedHighlight != coords())
                         removeClass(AppStyle.hoverColor, AppStyle.softHoverColor)
                     it.consume()
                 }
                 onLeftClick {
                     val coords = coords()
-                    lockedTarget = if (lockedTarget == coords) {
+                    lockedHighlight = if (lockedHighlight == coords) {
                         null
                     } else {
                         addClass(AppStyle.hoverColor)
@@ -204,27 +207,26 @@ class BoardView: View() {
                 }
             }
     
-    private fun clearTargets() {
-        lockedTarget?.let { pieces[it] }?.removeClass(AppStyle.hoverColor)
-        lockedTarget = null
-        grid.children.removeAll(targetFields)
-        targetFields.clear()
+    private fun clearTargetHighlights() {
+        lockedHighlight?.let { pieces[it] }?.removeClass(AppStyle.hoverColor)
+        lockedHighlight = null
+        grid.children.removeAll(targetHighlights)
+        targetHighlights.clear()
     }
     
     private fun highlightTargets(position: Coordinates) {
-        clearTargets()
+        clearTargetHighlights()
         gameController.gameState.value?.board?.possibleMovesFrom(position)?.map {
             val target = position + it
             val node = Region().addClass(AppStyle.hoverColor).apply {
                 onLeftClick {
                     if (gameController.isHumanTurn.value && gameController.gameState.value?.board?.get(position)?.team == gameController.gameState.value?.currentTeam) {
-                        clearTargets()
                         fire(HumanMoveAction(Move(position, target).also { logger.debug("Human move: $it") }))
                     }
                 }
             }
             grid.add(node, target.x, target.y)
             node
-        }?.let { targetFields.addAll(it) }
+        }?.let { targetHighlights.addAll(it) }
     }
 }
