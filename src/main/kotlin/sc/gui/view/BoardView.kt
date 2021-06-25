@@ -47,7 +47,7 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
         get() = children.size
     
     init {
-        addChild(content.toString().toLowerCase())
+        addChild(content.toString().lowercase())
     }
     
     fun setHeight(newHeight: Int) {
@@ -103,15 +103,15 @@ class BoardView: View() {
             }
             // TODO finish pending animations
             logger.trace("New state for board: ${state.longString()}")
-            val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reverse()).maxByOrNull {
+            val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reversed()).maxByOrNull {
                 it.first?.turn ?: -1
             }!!.second
             lastMove?.let { move ->
-                pieces.remove(move.start)?.let { piece ->
-                    val coveredPiece = pieces.remove(move.destination)
-                    val newHeight = state.board[move.destination]?.count
+                pieces.remove(move.from)?.let { piece ->
+                    val coveredPiece = pieces.remove(move.to)
+                    val newHeight = state.board[move.to]?.count
                     if (newHeight != null) {
-                        pieces[move.destination] = piece
+                        pieces[move.to] = piece
                         if (newHeight < piece.height)
                             piece.setHeight(newHeight)
                     }
@@ -119,8 +119,8 @@ class BoardView: View() {
                         setOnFinished {
                             piece.translateX = 0.0
                             piece.translateY = 0.0
-                            piece.gridpaneConstraints { columnRowIndex(move.destination.x, move.destination.y) }
-                            logger.trace("Piece $piece finished animating to ${state.board[move.destination]}")
+                            piece.gridpaneConstraints { columnRowIndex(move.to.x, move.to.y) }
+                            logger.trace("Piece $piece finished animating to ${state.board[move.to]}")
                             children.remove(coveredPiece)
                             if (newHeight == null) {
                                 piece.setHeight(0)
