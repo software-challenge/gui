@@ -60,15 +60,15 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     }
     
     fun addChild(graphic: String) {
-        val moewe = graphic == "moewe"
         children.add(0, ResizableImageView(
                 sizeProperty,
                 ResourceLookup(this)["/graphics/$graphic.png"],
-                if (moewe) 1.5 else 1.0,
-        ).also {
-            if (moewe)
-                it.scaleX = -1.0
-        })
+                when(graphic) {
+                    "moewe" -> 1.2
+                    "robbe" -> 1.4
+                    else -> 1.0
+                }
+        ))
     }
     
     override fun toString(): String = "PieceImage@${Integer.toHexString(hashCode())}(content = $content)"
