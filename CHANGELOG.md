@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See [the changelog of the backend](https://github.com/CAU-Kiel-Tech-Inf/backend/blob/master/CHANGELOG.md)
 for details on our versioning scheme.
 
+## [22.0.1](https://github.com/CAU-Kiel-Tech-Inf/backend/commits/22.0.1) - 2021-06-25
+- Proper Ostseeschach figures
+- Highlight possible moves on hover
+- Implement playing as human
+- Fix issues with game controls
+
+## [22.0.0](https://github.com/CAU-Kiel-Tech-Inf/backend/commits/22.0.0) - 2021-06-11
+- Major redesign of the layout
+- Implement Ostseeschach with basic animations and placeholder graphics
+
+## 2022 Game Ostseeschach - 2021-06-11
+
 ## [21.4.0](https://github.com/CAU-Kiel-Tech-Inf/gui/commits/21.4.0) - 2021-01-29
 - Automatically save replays & implement loading replays
 - Utilise TornadoFX ResourceLookup & EventStreams more extensively
