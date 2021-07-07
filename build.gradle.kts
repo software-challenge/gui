@@ -49,6 +49,7 @@ application {
 
 repositories {
     mavenCentral()
+    maven("https://dist.wso2.org/maven2")
     maven("https://oss.sonatype.org/content/repositories/snapshots")
 }
 
@@ -59,7 +60,8 @@ dependencies {
     implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT") { exclude("org.jetbrains.kotlin", "kotlin-reflect") }
     implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.4")
     
-    implementation(fileTree(backend.name + "/server/build/runnable") { include("**/*.jar") })
+    implementation("software-challenge", "server")
+    implementation("software-challenge", "plugin")
 }
 
 tasks {
