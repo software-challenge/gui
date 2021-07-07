@@ -4,6 +4,8 @@ import javafx.beans.value.WritableValue
 import mu.KLogging
 import sc.gui.GameReadyEvent
 import sc.gui.model.AppModel
+import sc.gui.model.PlayerType
+import sc.gui.model.TeamSettings
 import sc.gui.model.ViewType
 import sc.gui.model.ViewType.*
 import sc.gui.view.*
@@ -32,8 +34,7 @@ class AppController: Controller() {
 			changeViewTo(GAME)
 		}
 		subscribe<CreateGame> {
-			if(model.currentView.get() != GAME_CREATION)
-				changeViewTo(GAME_CREATION)
+			fire(StartGameRequest(TeamSettings("Mensch", PlayerType.HUMAN), TeamSettings("Computer", PlayerType.COMPUTER_FINAL)))
 		}
 		subscribe<TerminateGame> {
 			changeViewTo(GAME_CREATION)

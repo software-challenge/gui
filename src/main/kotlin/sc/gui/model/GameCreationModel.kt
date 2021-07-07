@@ -21,6 +21,11 @@ enum class PlayerType {
             return "eigener Computerspieler, von GUI gestartet"
         }
     },
+    COMPUTER_FINAL {
+        override fun toString(): String {
+            return "Finalgewinner"
+        }
+    },
     EXTERNAL {
         override fun toString(): String {
             return "eigener Computerspieler, manuell gestaret"
@@ -28,9 +33,9 @@ enum class PlayerType {
     };
 }
 
-class TeamSettings {
-    val name = objectProperty("Team")
-    val type = objectProperty(PlayerType.HUMAN)
+class TeamSettings(initialName: String = "Team", initialType: PlayerType = PlayerType.HUMAN) {
+    val name = objectProperty(initialName)
+    val type = objectProperty(initialType)
     val executable = objectProperty<File>()
 	
     val isHuman

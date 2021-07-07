@@ -23,6 +23,7 @@ class AppView : View("Software-Challenge Germany") {
     val controller: AppController by inject()
     private val gameFlowController: GameFlowController by inject()
     private val gameController: GameController by inject()
+    
     private val sochaIcon = resources.imageview("/icon.png")
 
     override val root = borderpane {
@@ -76,16 +77,13 @@ class AppView : View("Software-Challenge Germany") {
                         gameController.rotatePiece(Rotation.MIRROR)
                     }
                 }
-                item("Flippen", "R-Click oder CTRL").action {
+                item("Spiegeln", "R-Click oder CTRL").action {
                     gameController.flipPiece()
                 }
             }
             menu("Hilfe") {
                 item("Spielregeln", "Shortcut+S").action {
-                    "https://cau-kiel-tech-inf.github.io/socha-enduser-docs/spiele/blokus/regeln.html".browseUrl()
-                }
-                item("Dokumentation", "Shortcut+D").action {
-                    "https://cau-kiel-tech-inf.github.io/socha-enduser-docs/".browseUrl()
+                    "https://docs.software-challenge.de/spiele/blokus/regeln.html".browseUrl()
                 }
                 item("Webseite", "Shortcut+I").action {
                     "https://www.software-challenge.de".browseUrl()
@@ -118,15 +116,7 @@ class AppView : View("Software-Challenge Germany") {
         val gameTitle = "Blokus"
 		val version = resources.text("/version.txt")
         val sochaTitle = "Software-Challenge GUI $version"
-        titleProperty.bind(controller.model.currentView.stringBinding {
-            when(it) {
-                ViewType.START -> sochaTitle
-                ViewType.GAME_CREATION -> "Neues Spiel - $sochaTitle"
-                ViewType.GAME_LOADING -> "Starte Spiel $gameTitle - $sochaTitle"
-                ViewType.GAME -> "Spiele $gameTitle - $sochaTitle"
-                null -> throw NoWhenBranchMatchedException("Current view can't be null!")
-            }
-        })
+        title = "Spiele $gameTitle - $sochaTitle"
     
         controller.model.isDarkMode.listenImmediately { value ->
             if (value) {
@@ -137,6 +127,8 @@ class AppView : View("Software-Challenge Germany") {
                 root.addClass(AppStyle.lightColorSchema)
             }
         }
+        
+        fire(CreateGame)
     }
 }
 

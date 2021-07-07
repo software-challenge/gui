@@ -17,6 +17,7 @@ import sc.plugin2021.SkipMove
 import sc.plugin2021.util.GameRuleLogic
 import tornadofx.Controller
 import tornadofx.FXEvent
+import java.io.File
 import java.util.concurrent.CompletableFuture
 
 data class StartGameRequest(val playerOneSettings: TeamSettings, val playerTwoSettings: TeamSettings): FXEvent()
@@ -41,8 +42,22 @@ class ClientController: Controller() {
                 PlayerType.HUMAN -> GuiClient(host, port, type, ::humanMoveRequest)
                 PlayerType.COMPUTER_EXAMPLE -> GuiClient(host, port, type, ::getSimpleMove)
                 PlayerType.COMPUTER -> ExecClient(host, port, teamSettings.executable.get())
+                PlayerType.COMPUTER_FINAL -> ExecClient(host, port,
+                        File.createTempFile("software-challenge-gui-finalclient", null).apply {
+                            val osName = System.getProperty("os.name").toLowerCase()
+                            val os = when {
+                                osName.contains("win") -> "windows.exe"
+                                osName.contains("mac") -> "mac"
+                                else -> "linux"
+                            }
+                            
+                            val out = outputStream()
+                            resources.stream("/client/client-$os".also { println("starting $it from $this") })
+                                    .copyTo(out)
+                            setExecutable(true)
+                            out.close()
+                        })
                 PlayerType.EXTERNAL -> ExternalClient(host, port)
-                else -> throw IllegalArgumentException("Cannot create game: Invalid playerType $type")
             })
         }
         // TODO handle client start failures
