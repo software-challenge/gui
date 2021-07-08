@@ -94,7 +94,7 @@ class AppView : View("Software-Challenge Germany") {
             }
         }
     }
-
+    
     init {
         sochaIcon.fitHeight = 32.0
         sochaIcon.fitWidth = 32.0
@@ -103,7 +103,7 @@ class AppView : View("Software-Challenge Germany") {
             prefHeight = 700.0
             center(StartView::class)
         }
-
+        
         // responsive scaling
         val resizer = ChangeListener<Number> { _, _, _ ->
             if (controller.model.currentView.get() == ViewType.GAME) {
@@ -112,12 +112,11 @@ class AppView : View("Software-Challenge Germany") {
         }
         root.widthProperty().addListener(resizer)
         root.heightProperty().addListener(resizer)
-    
+        
         val gameTitle = "Blokus"
-		val version = resources.text("/version.txt")
-        val sochaTitle = "Software-Challenge GUI $version"
-        title = "Spiele $gameTitle - $sochaTitle"
-    
+        val version = resources.text("/version.txt")
+        title = "Spiele $gameTitle - Software-Challenge 2021"
+        
         controller.model.isDarkMode.listenImmediately { value ->
             if (value) {
                 root.removeClass(AppStyle.lightColorSchema)
