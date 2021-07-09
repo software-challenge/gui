@@ -1,11 +1,11 @@
-# <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><img width="64" src="https://raw.githubusercontent.com/CAU-Kiel-Tech-Inf/socha-gui/master/assets/build-resources/icon.png" alt="Software-Challenge Germany logo"></a> GUI für die Software-Challenge Germany ![.github/workflows/gradle.yml](https://github.com/CAU-Kiel-Tech-Inf/gui/workflows/.github/workflows/gradle.yml/badge.svg)
+# <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></a> Grafischer Spieleserver der Software-Challenge Germany ![.github/workflows/gradle.yml](https://github.com/software-challenge/gui/workflows/.github/workflows/gradle.yml/badge.svg)
 
 ## Getting Started
-- repository mit submodulen klonen:
+- repository mit Submodulen klonen:
   ```sh
-  git clone https://github.com/CAU-Kiel-Tech-Inf/gui.git --recurse-submodules --shallow-submodules
+  git clone https://github.com/software-challenge/gui.git --recurse-submodules --shallow-submodules
   ```
-- Java 11 wird benötigt (ggf. `org.gradle.java.home=/path/to/jdk` in `gradle.properties` setzen)
+- Mindestens Java 11 wird benötigt (ggf. `org.gradle.java.home=/path/to/jdk` in `gradle.properties` setzen)
 - `./gradlew run` ausführen
 
 ## Kollaboration
@@ -18,3 +18,4 @@ Um bei den Branches die Übersicht zu behalten, sollten diese ebenfalls nach der
 Branches werden normalerweise beim Mergen zu einem einzelnen Commit zusammengefügt (Squash-Merge), es sei denn, die einzelnen Commits des Branches haben jeweils eine alleinstehende Aussagekraft.
 
 Detaillierte Informationen zu unserem Kollaborations-Stil findet ihr in der [Kull Konvention](https://xerus2000.github.io/kull).
+
