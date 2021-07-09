@@ -64,7 +64,7 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
                 sizeProperty,
                 ResourceLookup(this)["/graphics/$graphic.png"],
                 when(graphic) {
-                    "moewe" -> 1.2
+                    "moewe" -> 1.1
                     "robbe" -> 1.4
                     else -> 1.0
                 }

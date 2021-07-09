@@ -21,9 +21,7 @@ import sc.protocol.room.MementoMessage
 import sc.server.Configuration
 import sc.shared.GameResult
 import sc.shared.SlotDescriptor
-import tornadofx.Controller
-import tornadofx.FXEvent
-import tornadofx.error
+import tornadofx.*
 import java.net.ConnectException
 import java.util.ArrayDeque
 import java.util.Queue
@@ -65,10 +63,14 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
                 }
             }
             is ErrorPacket -> {
-                Platform.runLater {
-                    error("Fehler in der Kommunikation mit dem Server", packet.toString())
-                }
                 logger.error("$packet")
+                // if (packet.originalRequest !is CancelRequest)
+                Platform.runLater {
+                    error("Fehler in der Kommunikation mit dem Server", packet.toString()).setOnCloseRequest {
+                        // TODO don't close connection from server
+                        Runtime.getRuntime().halt(1)
+                    }
+                }
             }
         }
     }
