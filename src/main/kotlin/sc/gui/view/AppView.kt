@@ -64,10 +64,10 @@ class AppView: View("Software-Challenge Germany") {
             }
             menu("Hilfe") {
                 item("Spielregeln", "Shortcut+S").action {
-                    "https://cau-kiel-tech-inf.github.io/socha-enduser-docs/spiele/blokus/regeln.html".browseUrl()
+                    "https://docs.software-challenge.de/spiele/aktuell/regeln.html".browseUrl()
                 }
                 item("Dokumentation", "Shortcut+D").action {
-                    "https://cau-kiel-tech-inf.github.io/socha-enduser-docs/".browseUrl()
+                    "https://docs.software-challenge.de".browseUrl()
                 }
                 item("Webseite", "Shortcut+I").action {
                     "https://www.software-challenge.de".browseUrl()
