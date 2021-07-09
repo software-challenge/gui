@@ -1,7 +1,6 @@
 package sc.gui.view
 
 import javafx.application.Platform
-import javafx.beans.value.ObservableValue
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
@@ -12,11 +11,11 @@ import sc.gui.controller.AppController
 import sc.gui.controller.CreateGame
 import sc.gui.controller.GameFlowController
 import sc.gui.model.ViewType
+import sc.util.browse
+import sc.util.browseUrl
+import sc.util.listenImmediately
 import tornadofx.*
-import java.awt.Desktop
-import java.awt.Desktop.Action
 import java.io.File
-import java.net.URI
 
 private val logger = KotlinLogging.logger {}
 
@@ -118,26 +117,4 @@ class AppView: View("Software-Challenge Germany") {
             }
         }
     }
-}
-
-fun <T> ObservableValue<T>.listenImmediately(listener: (newValue: T) -> Unit) {
-    listener(this.value)
-    addListener { _, _, new -> listener(new) }
-}
-
-fun String.browseUrl() {
-    URI(this).openDesktop(Action.BROWSE, Desktop::browse)
-}
-
-fun File.browse() {
-    openDesktop(Action.OPEN, Desktop::browseFileDirectory)
-}
-
-fun <T> T.openDesktop(action: Action, open: Desktop.(T) -> Unit) {
-    val desktop = Desktop.getDesktop()
-    logger.debug("Opening {} on {}", this, desktop)
-    if (desktop.isSupported(action))
-        open(desktop, this)
-    else
-        Runtime.getRuntime().exec("xdg-open $this")
 }

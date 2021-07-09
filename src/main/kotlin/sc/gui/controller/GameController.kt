@@ -1,5 +1,6 @@
 package sc.gui.controller
 
+import javafx.beans.value.ObservableValue
 import org.slf4j.LoggerFactory
 import sc.api.plugins.Team
 import sc.gui.GameOverEvent
@@ -7,6 +8,7 @@ import sc.gui.NewGameState
 import sc.gui.view.TerminateGame
 import sc.plugin2022.GameState
 import sc.shared.GameResult
+import sc.util.binding
 import tornadofx.*
 import kotlin.math.max
 
@@ -15,20 +17,21 @@ class GameController: Controller() {
     val gameResult = objectProperty<GameResult>()
     val isHumanTurn = booleanProperty(false)
     
-    val currentTurn = nonNullObjectBinding(gameState) { value?.turn ?: 0 }
-    val currentRound = nonNullObjectBinding(gameState) { value?.round ?: 0 }
+    val currentTurn = integerBinding(gameState) { value?.turn ?: 0 }
+    val currentRound = integerBinding(gameState) { value?.round ?: 0 }
     val currentTeam = nonNullObjectBinding(gameState) { value?.currentTeam ?: Team.ONE }
     val teamScores = gameState.objectBinding { state ->
         Team.values().map { state?.getPointsForTeam(it) }
     }
     
-    val availableTurns = objectProperty(0).also { avTurns ->
+    val availableTurns = intProperty(0).apply {
         currentTurn.addListener { _, _, turn ->
-            avTurns.set(max(turn, avTurns.value))
+            set(max(turn.toInt(), get()))
         }
     }
-    val atLatestTurn = booleanBinding(currentTurn, availableTurns)
-    { currentTurn.value == availableTurns.value }
+    val atLatestTurn =
+            arrayOf<ObservableValue<Number>>(currentTurn, availableTurns)
+                    .binding { (cur, av) -> cur == av }
     
     val gameStarted =
             booleanBinding(currentTurn, isHumanTurn)

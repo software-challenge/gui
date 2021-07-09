@@ -1,15 +1,13 @@
 package sc.gui.controller
 
-import javafx.beans.value.WritableValue
 import mu.KLogging
 import sc.gui.GameReadyEvent
 import sc.gui.model.AppModel
 import sc.gui.model.ViewType
 import sc.gui.model.ViewType.*
 import sc.gui.view.*
-import tornadofx.Controller
-import tornadofx.FXEvent
-import tornadofx.task
+import sc.util.toggle
+import tornadofx.*
 
 object NavigateBackEvent: FXEvent()
 object CreateGame: FXEvent()
@@ -57,10 +55,6 @@ class AppController: Controller() {
 	}
 	
 	companion object: KLogging()
-}
-
-fun WritableValue<Boolean>.toggle() {
-	value = !value
 }
 
 val ViewType.view

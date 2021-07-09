@@ -1,7 +1,7 @@
 package sc.gui.view
 
-import javafx.beans.binding.Bindings
 import javafx.beans.property.Property
+import javafx.beans.value.ObservableValue
 import javafx.geometry.Pos
 import mu.KotlinLogging
 import sc.gui.AppStyle
@@ -9,6 +9,9 @@ import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.controller.GameController
 import sc.gui.view.GameControlState.*
+import sc.util.binding
+import sc.util.listen
+import sc.util.listenImmediately
 import tornadofx.*
 
 sealed class GameControlEvent: FXEvent()
@@ -40,7 +43,7 @@ class ControlView: View() {
                 button {
                     prefWidth = AppStyle.fontSizeRegular.value * 15
                     gameControlState.listenImmediately { controlState ->
-                        logger.debug { "Updating $this to State $controlState" }
+                        logger.debug { "GameControlState $controlState" }
                         isDisable = controlState == null
                         controlState?.let { text = it.text }
                     }
@@ -59,46 +62,46 @@ class ControlView: View() {
                     }
                 }
                 label {
-                    textProperty().bind(Bindings.concat(gameController.currentTurn, " / ", gameController.availableTurns))
+                    alignment = Pos.CENTER
+                    prefWidth = AppStyle.fontSizeRegular.value * 7
+                    textProperty().bind(
+                            arrayOf<ObservableValue<Number>>(gameController.currentTurn, gameController.availableTurns).binding
+                            { (cur, all) -> "Zug " + if (cur != all || gameController.gameEnded.value) "$cur/$all" else cur }
+                    )
                 }
                 button {
                     disableProperty().bind(
-                            gameController.atLatestTurn.booleanBinding(gameController.gameEnded, gameController.isHumanTurn) {
-                                gameController.atLatestTurn.value && (gameController.isHumanTurn.value || gameController.gameEnded.value)
-                            }
+                            arrayOf(gameController.atLatestTurn, gameController.isHumanTurn, gameController.gameEnded).binding
+                            { (latest, human, end) -> logger.trace("latest: $latest, human: $human, end: $end"); latest && (human || end) }
                     )
                     text = "⏭"
                     setOnMouseClicked {
                         fire(StepGame(1))
+                        if (gameControlState.value == START)
+                            gameControlState.value = PAUSED
                     }
                 }
             }
     
     init {
-        gameController.gameStarted.onChange {
-            if (it && gameControlState.value == START)
-                gameControlState.value = PAUSED
-        }
-        gameController.isHumanTurn.onChange {
-            if (it)
-                gameControlState.value = null
-        }
-        arrayOf(gameController.atLatestTurn, gameController.gameEnded, gameController.isHumanTurn)
-                .forEach { observable ->
-                    observable.onChange {
-                        if (gameController.atLatestTurn.value) {
-                            if (gameController.gameEnded.value)
-                                gameControlState.value = FINISHED
-                            else if (gameController.isHumanTurn.value)
-                                gameControlState.value = null
-                        }
-                    }
-                }
         subscribe<GameReadyEvent> {
             gameControlState.value = START
         }
         subscribe<GamePausedEvent> { event ->
-            gameControlState.value = if (event.paused) PAUSED else PLAYING
+            gameControlState.value = when {
+                event.paused -> PAUSED
+                gameController.isHumanTurn.value -> null
+                else -> PLAYING
+            }
+        }
+        gameController.isHumanTurn.onChange {
+            if (it && gameControlState.value != PAUSED) {
+                gameControlState.value = PLAYING
+                gameControlState.value = null
+            }
+        }
+        arrayOf<ObservableValue<Boolean>>(gameController.atLatestTurn, gameController.gameEnded).listen { (latestTurn, end) ->
+            if (latestTurn && end) gameControlState.value = FINISHED
         }
     }
     
