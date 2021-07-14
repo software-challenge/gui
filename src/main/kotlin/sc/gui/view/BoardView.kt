@@ -23,6 +23,8 @@ import tornadofx.*
 
 private val logger = LoggerFactory.getLogger(BoardView::class.java)
 
+const val pieceOpacity = 0.9
+
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
 class ResizableImageView(sizeProperty: ObservableValue<Number>, resource: String, scaling: Double = 1.0): ImageView() {
@@ -152,7 +154,7 @@ class BoardView: View() {
                 } else {
                     image.scaleX = piece.team.direction.toDouble()
                     image.background = Background(BackgroundFill(c(if (piece.team.index == 0) "red" else "blue", 0.5), CornerRadii.EMPTY, Insets.EMPTY))
-                    image.fade(transitionDuration, if (piece.team == state.currentTeam) 0.9 else 0.5)
+                    image.fade(transitionDuration, if (piece.team == state.currentTeam) pieceOpacity else pieceOpacity / 2)
                 }
             }
         }
@@ -178,6 +180,10 @@ class BoardView: View() {
                 }
             }
     
+    /** Whether the piece at [coords] belongs to the Team whose turn it currently is. */
+    private fun isActive(coords: Coordinates) =
+            pieces[coords]?.opacity == pieceOpacity
+    
     private fun createPiece(type: PieceType): PieceImage =
             PieceImage(calculatedBlockSize, type).apply {
                 fun coords() = Coordinates(GridPane.getColumnIndex(this), GridPane.getRowIndex(this))
@@ -193,16 +199,14 @@ class BoardView: View() {
                 setOnMouseExited {
                     if (lockedHighlight != coords())
                         removeClass(AppStyle.hoverColor, AppStyle.softHoverColor)
+                    if (lockedHighlight == null && !isActive(coords()))
+                        clearTargetHighlights()
                     it.consume()
                 }
                 onLeftClick {
-                    val coords = coords()
-                    lockedHighlight = if (lockedHighlight == coords) {
-                        null
-                    } else {
+                    lockedHighlight = coords().takeUnless { it == lockedHighlight || !isActive(it) }?.also {
                         addClass(AppStyle.hoverColor)
-                        highlightTargets(coords)
-                        coords
+                        highlightTargets(it)
                     }
                 }
             }
