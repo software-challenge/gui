@@ -7,9 +7,10 @@ import mu.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
-import sc.gui.controller.GameController
+import sc.gui.model.GameModel
 import sc.gui.view.GameControlState.*
 import sc.util.binding
+import sc.util.booleanBinding
 import sc.util.listen
 import sc.util.listenImmediately
 import tornadofx.*
@@ -33,7 +34,7 @@ enum class GameControlState(val text: String, val action: FXEvent) {
 class ControlView: View() {
     private val logger = KotlinLogging.logger {}
     
-    private val gameController: GameController by inject()
+    private val gameModel: GameModel by inject()
     private val gameControlState: Property<GameControlState> = objectProperty(START)
     
     override val root =
@@ -53,10 +54,10 @@ class ControlView: View() {
                     }
                 }
                 button {
-                    disableWhen(gameController.currentTurn.isEqualTo(0))
+                    disableWhen(gameModel.currentTurn.isEqualTo(0))
                     text = "⏮"
                     setOnMouseClicked {
-                        if (gameController.atLatestTurn.value)
+                        if (gameModel.atLatestTurn.value)
                             fire(PauseGame(true))
                         fire(StepGame(-1))
                     }
@@ -65,13 +66,13 @@ class ControlView: View() {
                     alignment = Pos.CENTER
                     prefWidth = AppStyle.fontSizeRegular.value * 7
                     textProperty().bind(
-                            arrayOf<ObservableValue<Number>>(gameController.currentTurn, gameController.availableTurns).binding
-                            { (cur, all) -> "Zug " + if (cur != all || gameController.gameEnded.value) "$cur/$all" else cur }
+                            arrayOf<ObservableValue<Number>>(gameModel.currentTurn, gameModel.availableTurns).binding
+                            { (cur, all) -> "Zug " + if (cur != all || gameModel.gameEnded.value) "$cur/$all" else cur }
                     )
                 }
                 button {
                     disableProperty().bind(
-                            arrayOf(gameController.atLatestTurn, gameController.isHumanTurn, gameController.gameEnded).binding
+                            arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.isHumanTurn, gameModel.gameEnded).booleanBinding
                             { (latest, human, end) -> logger.trace("latest: $latest, human: $human, end: $end"); latest && (human || end) }
                     )
                     text = "⏭"
@@ -90,17 +91,17 @@ class ControlView: View() {
         subscribe<GamePausedEvent> { event ->
             gameControlState.value = when {
                 event.paused -> PAUSED
-                gameController.isHumanTurn.value -> null
+                gameModel.isHumanTurn.value -> null
                 else -> PLAYING
             }
         }
-        gameController.isHumanTurn.onChange {
+        gameModel.isHumanTurn.onChange {
             if (it && gameControlState.value != PAUSED) {
                 gameControlState.value = PLAYING
                 gameControlState.value = null
             }
         }
-        arrayOf<ObservableValue<Boolean>>(gameController.atLatestTurn, gameController.gameEnded).listen { (latestTurn, end) ->
+        arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.gameEnded).listen { (latestTurn, end) ->
             if (latestTurn && end) gameControlState.value = FINISHED
         }
     }

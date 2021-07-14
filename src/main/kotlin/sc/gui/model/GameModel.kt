@@ -1,25 +1,31 @@
-package sc.gui.controller
+package sc.gui.model
 
 import javafx.beans.value.ObservableValue
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import sc.api.plugins.Team
 import sc.gui.GameOverEvent
 import sc.gui.NewGameState
+import sc.gui.controller.HumanMoveAction
+import sc.gui.controller.HumanMoveRequest
 import sc.gui.view.TerminateGame
 import sc.plugin2022.GameState
 import sc.shared.GameResult
-import sc.util.binding
+import sc.util.booleanBinding
 import tornadofx.*
 import kotlin.math.max
 
-class GameController: Controller() {
+class GameModel: ViewModel() {
+    val playerNames: ObservableList<String> = FXCollections.observableArrayList()
+    
     val gameState = objectProperty<GameState?>(null)
     val gameResult = objectProperty<GameResult>()
     val isHumanTurn = booleanProperty(false)
     
     val currentTurn = integerBinding(gameState) { value?.turn ?: 0 }
     val currentRound = integerBinding(gameState) { value?.round ?: 0 }
-    val currentTeam = nonNullObjectBinding(gameState) { value?.currentTeam ?: Team.ONE }
+    val currentTeam = nonNullObjectBinding(gameState) { value?.currentTeam ?: sc.api.plugins.Team.ONE }
     val teamScores = gameState.objectBinding { state ->
         Team.values().map { state?.getPointsForTeam(it) }
     }
@@ -31,10 +37,10 @@ class GameController: Controller() {
     }
     val atLatestTurn =
             arrayOf<ObservableValue<Number>>(currentTurn, availableTurns)
-                    .binding { (cur, av) -> cur == av }
+                    .booleanBinding { (cur, av) -> cur == av }
     
     val gameStarted =
-            booleanBinding(currentTurn, isHumanTurn)
+            booleanBinding(availableTurns, isHumanTurn)
             { value > 0 || isHumanTurn.value }
     val gameEnded = gameResult.booleanBinding { it != null }
     
@@ -65,7 +71,7 @@ class GameController: Controller() {
     }
     
     private fun clearGame() {
-        logger.debug("Resetting GameController")
+        logger.debug("Resetting GameModel")
         gameState.set(null)
         gameResult.set(null)
         availableTurns.set(0)
@@ -73,6 +79,6 @@ class GameController: Controller() {
     }
     
     companion object {
-        private val logger = LoggerFactory.getLogger(GameController::class.java)
+        private val logger = LoggerFactory.getLogger(GameModel::class.java)
     }
 }

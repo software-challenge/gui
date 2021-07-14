@@ -7,6 +7,7 @@ import javafx.util.Duration
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.NewGameState
+import sc.gui.model.GameModel
 import sc.gui.view.PauseGame
 import sc.gui.view.StepGame
 import sc.gui.view.TerminateGame
@@ -18,7 +19,7 @@ import java.io.File
 import java.io.IOException
 
 class GameFlowController: Controller() {
-    private val gameController by inject<GameController>()
+    private val gameModel: GameModel by inject()
     private val interval = Timeline(KeyFrame(Duration.seconds(1.0), {
         fire(StepGame(1))
     })).apply {
@@ -40,15 +41,15 @@ class GameFlowController: Controller() {
             }
         }
         subscribe<StepGame> { event ->
-            val turn = gameController.currentTurn.value + event.steps
+            val turn = gameModel.currentTurn.value + event.steps
             val state: GameState? = history.firstOrNull { it.turn >= turn } ?: run {
                 controller?.step()
                 history.lastOrNull()
             }
             if(state != null)
-                gameController.gameState.set(state)
+                gameModel.gameState.set(state)
         }
-        gameController.gameEnded.onChange {
+        gameModel.gameEnded.onChange {
             if (it)
                 controller = null
         }
@@ -69,8 +70,8 @@ class GameFlowController: Controller() {
         if(history.isEmpty())
             throw IOException("")
         fire(GameReadyEvent())
-        gameController.availableTurns.set(history.last().turn)
-        gameController.gameResult.set(loader.result)
-        gameController.gameState.set(history.first())
+        gameModel.availableTurns.set(history.last().turn)
+        gameModel.gameResult.set(loader.result)
+        gameModel.gameState.set(history.first())
     }
 }

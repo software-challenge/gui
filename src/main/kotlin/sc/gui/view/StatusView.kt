@@ -3,23 +3,22 @@ package sc.gui.view
 import javafx.beans.binding.StringBinding
 import javafx.geometry.Pos
 import javafx.scene.control.Label
-import sc.api.plugins.Team
 import sc.gui.AppStyle
-import sc.gui.controller.GameController
+import sc.gui.model.GameModel
 import sc.shared.GameResult
 import sc.shared.ScoreCause
 import tornadofx.*
 
-class StatusBinding(private val game: GameController): StringBinding() {
+class StatusBinding(private val game: GameModel): StringBinding() {
     init {
-        bind(game.gameStarted, game.currentTeam, game.gameResult)
+        bind(game.gameStarted, game.currentTeam, game.gameResult, game.playerNames)
     }
     
-    fun winner(gameResult: GameResult): String = gameResult.winner?.let { player ->
-        "$player hat gewonnen!"
-    } ?: "Unentschieden!"
+    fun winner(gameResult: GameResult): String =
+            gameResult.winner?.let { player -> "$player hat gewonnen!" }
+            ?: "Unentschieden!"
     
-    fun irregularities(gameResult: GameResult): String =
+    fun irregularities(gameResult: GameResult): String? =
             gameResult.scores.values.firstNotNullOfOrNull { score ->
                 when (score.cause) {
                     ScoreCause.LEFT -> "Grund: Vorzeitiges Verlassen des Spiels"
@@ -29,37 +28,34 @@ class StatusBinding(private val game: GameController): StringBinding() {
                     ScoreCause.UNKNOWN -> "Grund: Kommunikationsfehler"
                     else -> null
                 }
-            }.orEmpty()
+            }
     
-    override fun computeValue(): String {
-        if (!game.gameStarted.value)
-            return Team.values().joinToString(" vs ")
-        return game.gameResult.get()?.let { gameResult ->
-            """
-                Spiel ist beendet
-                ${winner(gameResult)}
-                ${irregularities(gameResult)}
-            """.trimIndent()
-        } ?: "${game.currentTeam.value} ist dran"
-    }
+    override fun computeValue(): String =
+            if (game.gameStarted.value)
+                game.gameResult.get()?.let { gameResult ->
+                    """
+                    Spiel ist beendet
+                    ${winner(gameResult)}
+                    ${irregularities(gameResult).orEmpty()}
+                    """.trimIndent()
+                } ?: "${game.currentTeam.value.index.let { game.playerNames[it] ?: "Spieler ${it + 1}" }} ist dran"
+            else game.playerNames.joinToString(" vs ")
 }
 
-class ScoreBinding(private val game: GameController): StringBinding() {
+class ScoreBinding(private val game: GameModel): StringBinding() {
     init {
-        bind(game.currentRound)
-        bind(game.teamScores)
+        bind(game.gameStarted, game.teamScores)
     }
     
     override fun computeValue(): String =
-            if (game.currentRound.get() == 0)
-                "Drücke auf Start"
-            else
+            if (game.gameStarted.value)
                 "Runde ${game.currentRound.get()} - " +
                 game.teamScores.value?.joinToString(" : ")
+            else "Drücke auf Start"
 }
 
 class StatusView: View() {
-    private val game: GameController by inject()
+    private val game: GameModel by inject()
     private val scoreLabel = Label()
     private val statusLabel = Label()
     

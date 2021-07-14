@@ -15,8 +15,8 @@ import javafx.scene.layout.*
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import sc.gui.AppStyle
-import sc.gui.controller.GameController
 import sc.gui.controller.HumanMoveAction
+import sc.gui.model.GameModel
 import sc.plugin2022.*
 import sc.plugin2022.util.Constants
 import tornadofx.*
@@ -76,7 +76,7 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
 
 class BoardView: View() {
     
-    private val gameController: GameController by inject()
+    private val gameModel: GameModel by inject()
     val pieces = HashMap<Coordinates, PieceImage>()
     
     val size = doubleProperty(16.0)
@@ -94,7 +94,7 @@ class BoardView: View() {
         paddingAll = AppStyle.spacing
         maxHeightProperty().bind(size)
         maxWidthProperty().bind(size)
-        val listener = ChangeListener<GameState?> { _, oldState, state ->
+        val stateListener = ChangeListener<GameState?> { _, oldState, state ->
             clearTargetHighlights()
             if (state == null) {
                 children.removeAll(pieces.values)
@@ -157,8 +157,8 @@ class BoardView: View() {
             }
         }
         Platform.runLater {
-            gameController.gameState.addListener(listener)
-            listener.changed(null, null, gameController.gameState.value)
+            gameModel.gameState.addListener(stateListener)
+            stateListener.changed(null, null, gameModel.gameState.value)
         }
         for (x in 0 until Constants.BOARD_SIZE) {
             constraintsForRow(x).percentHeight = 100.0 / Constants.BOARD_SIZE
@@ -216,11 +216,11 @@ class BoardView: View() {
     
     private fun highlightTargets(position: Coordinates) {
         clearTargetHighlights()
-        gameController.gameState.value?.board?.possibleMovesFrom(position)?.map {
+        gameModel.gameState.value?.board?.possibleMovesFrom(position)?.map {
             val target = position + it
             val node = Region().addClass(AppStyle.hoverColor).apply {
                 onLeftClick {
-                    if (gameController.isHumanTurn.value && gameController.gameState.value?.board?.get(position)?.team == gameController.gameState.value?.currentTeam) {
+                    if (gameModel.isHumanTurn.value && gameModel.gameState.value?.board?.get(position)?.team == gameModel.gameState.value?.currentTeam) {
                         fire(HumanMoveAction(Move(position, target).also { logger.debug("Human move: $it") }))
                     }
                 }
