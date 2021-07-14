@@ -8,12 +8,14 @@ import javafx.beans.value.ObservableValue
 import javafx.geometry.Insets
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
+import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
+import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.GameModel
@@ -24,6 +26,7 @@ import tornadofx.*
 private val logger = LoggerFactory.getLogger(BoardView::class.java)
 
 const val pieceOpacity = 0.9
+val transitionDuration = Duration(500.0)
 
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
@@ -44,28 +47,34 @@ class ResizableImageView(sizeProperty: ObservableValue<Number>, resource: String
     override fun isResizable(): Boolean = true
 }
 
-class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: PieceType): StackPane() {
-    val height
-        get() = children.size
+class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: PieceType? = null): StackPane() {
+    var height = 0
+        private set
     
     init {
-        addChild(content.toString().lowercase())
+        content?.let { addChild(it.toString().lowercase()) }
     }
     
-    fun setHeight(newHeight: Int) {
+    fun updateHeight(newHeight: Int) {
         while (height < newHeight) {
             addChild("blank")
         }
         if (newHeight < height) {
-            children.remove(0, height - newHeight)
+            children.subList(0, height - newHeight).forEach { node ->
+                node.fade(transitionDuration, 0.0).setOnFinished {
+                    children.remove(node)
+                }
+            }
+            height = newHeight
         }
     }
     
     fun addChild(graphic: String) {
+        height++
         children.add(0, ResizableImageView(
                 sizeProperty,
                 ResourceLookup(this)["/graphics/$graphic.png"],
-                when(graphic) {
+                when (graphic) {
                     "moewe" -> 1.1
                     "robbe" -> 1.4
                     else -> 1.0
@@ -79,17 +88,14 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
 class BoardView: View() {
     
     private val gameModel: GameModel by inject()
-    val pieces = HashMap<Coordinates, PieceImage>()
+    private val pieces = HashMap<Coordinates, PieceImage>()
     
-    val size = doubleProperty(16.0)
-    val gridSize
+    private val size = doubleProperty(16.0)
+    private val gridSize
         get() = size.value / Constants.BOARD_SIZE
-    val calculatedBlockSize = size.doubleBinding { gridSize * 0.9 }
+    private val calculatedBlockSize = size.doubleBinding { gridSize * 0.9 }
     
-    val transitionDuration = Duration(500.0)
-    
-    var lockedHighlight: Coordinates? = null
-    var targetHighlights = ArrayList<Node>()
+    private val ambers = Team.values().associateWith { ArrayList<Node>() }
     
     val grid = gridpane {
         isGridLinesVisible = true
@@ -115,7 +121,7 @@ class BoardView: View() {
                     if (newHeight != null) {
                         pieces[move.to] = piece
                         if (newHeight < piece.height)
-                            piece.setHeight(newHeight)
+                            piece.updateHeight(newHeight)
                     }
                     piece.move(transitionDuration, Point2D(move.delta.dx * gridSize, move.delta.dy * gridSize)) {
                         setOnFinished {
@@ -125,11 +131,31 @@ class BoardView: View() {
                             logger.trace("Piece $piece finished animating to ${state.board[move.to]}")
                             children.remove(coveredPiece)
                             if (newHeight == null) {
-                                piece.setHeight(0)
-                                piece.addChild("amber")
-                                removePiece(piece, 3.0)
+                                Platform.runLater {
+                                    val bounds = piece.localToScene(piece.boundsInLocal)
+                                    val teamAmbers = ambers[state.otherTeam] ?: return@runLater
+                                    while (teamAmbers.size < state.getPointsForTeam(state.otherTeam))
+                                        Group(PieceImage(calculatedBlockSize).apply { addChild("amber") }).apply {
+                                            opacity = 0.0
+                                            (this@gridpane.scene.root as BorderPane).center.add(this)
+                                            val alignLeft = oldState?.board?.get(move.from)?.team == Team.ONE
+                                            StackPane.setAlignment(this, if (alignLeft) Pos.TOP_LEFT else Pos.TOP_RIGHT)
+                                            translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if (alignLeft) it else scene.width - it }
+                                            translateY = bounds.centerY - calculatedBlockSize.value * 0.75
+                                            val position = teamAmbers.size
+                                            teamAmbers.add(this)
+                                            fade(transitionDuration, pieceOpacity).setOnFinished {
+                                                val translateX = { size: Number -> (position * (size.toDouble() / 3) + AppStyle.spacing).let { if (alignLeft) it else -it } }
+                                                move(transitionDuration.multiply(2.0), Point2D(translateX(calculatedBlockSize.value), 0.0)).setOnFinished {
+                                                    translateXProperty().bind(calculatedBlockSize.doubleBinding { translateX(it!!) })
+                                                }
+                                            }
+                                        }
+                                }
+                                piece.updateHeight(0)
+                                removePiece(piece)
                             } else {
-                                piece.setHeight(newHeight)
+                                piece.updateHeight(newHeight)
                             }
                         }
                     }
@@ -139,7 +165,7 @@ class BoardView: View() {
                 pieces.computeIfAbsent(coords) {
                     createPiece(piece.type).also { pieceImage ->
                         pieceImage.opacity = 0.0
-                        pieceImage.setHeight(piece.count)
+                        pieceImage.updateHeight(piece.count)
                         add(pieceImage, coords.x, coords.y)
                     }
                 }
@@ -183,6 +209,9 @@ class BoardView: View() {
     /** Whether the piece at [coords] belongs to the Team whose turn it currently is. */
     private fun isActive(coords: Coordinates) =
             pieces[coords]?.opacity == pieceOpacity
+    
+    private var lockedHighlight: Coordinates? = null
+    private var targetHighlights = ArrayList<Node>()
     
     private fun createPiece(type: PieceType): PieceImage =
             PieceImage(calculatedBlockSize, type).apply {
