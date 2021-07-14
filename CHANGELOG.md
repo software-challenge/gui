@@ -5,20 +5,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See [the changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
-## [22.1.0](https://github.com/software-challenge/backend/commits/22.1.0) - 2021-09
+## [22.1.0](https://github.com/software-challenge/gui/commits/22.1.0) - 2021-09
 
-## [22.0.2](https://github.com/software-challenge/backend/commits/22.0.2) - 2021-07
+## [22.0.2](https://github.com/software-challenge/gui/commits/22.0.2) - 2021-07
 - Fix links to documentation
-- Make display easier to comprehend
+- Improve ease-of-use of game interface
 - Add little usage guide
 
-## [22.0.1](https://github.com/software-challenge/backend/commits/22.0.1) - 2021-06-25
+## [22.0.1](https://github.com/software-challenge/gui/commits/22.0.1) - 2021-06-25
 - Proper Ostseeschach figures
 - Highlight possible moves on hover
 - Implement playing as human
 - Fix issues with game controls
 
-## [22.0.0](https://github.com/software-challenge/backend/commits/22.0.0) - 2021-06-11
+## [22.0.0](https://github.com/software-challenge/gui/commits/22.0.0) - 2021-06-11
 - Major redesign of the layout
 - Implement Ostseeschach with basic animations and placeholder graphics
 
@@ -51,4 +51,5 @@ for details on our versioning scheme.
 - Improve internal verification & publishing mechanisms
 
 ## 21 - Game Blokus
-Replaced [Electron GUI](https://github.com/software-challenge/gui-electron) with new GUI based on [TornadoFX](https://github.com/edvin/tornadofx2).
+Replaced [Electron GUI](https://github.com/software-challenge/gui-electron)
+with new GUI based on [TornadoFX](https://github.com/edvin/tornadofx2).
