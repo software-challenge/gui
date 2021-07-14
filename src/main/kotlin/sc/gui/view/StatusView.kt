@@ -15,23 +15,21 @@ class StatusBinding(private val game: GameController): StringBinding() {
         bind(game.gameStarted, game.currentTeam, game.gameResult)
     }
     
-    fun winner(gameResult: GameResult): String = gameResult.winners?.firstOrNull()?.let { player ->
+    fun winner(gameResult: GameResult): String = gameResult.winner?.let { player ->
         "$player hat gewonnen!"
     } ?: "Unentschieden!"
     
-    fun irregularities(gameResult: GameResult): String {
-        loop@ for (score in gameResult.scores) {
-            when (score.cause) {
-                ScoreCause.REGULAR -> continue@loop
-                ScoreCause.LEFT -> return "Grund: Vorzeitiges Verlassen des Spiels"
-                ScoreCause.RULE_VIOLATION -> return "Grund: Regelverletzung"
-                ScoreCause.SOFT_TIMEOUT -> return "Grund: Überschreitung des Zeitlimits"
-                ScoreCause.HARD_TIMEOUT -> return "Grund: Keine Antwort auf Zuganfrage"
-                ScoreCause.UNKNOWN -> return "Grund: Kommunikationsfehler"
-            }
-        }
-        return ""
-    }
+    fun irregularities(gameResult: GameResult): String =
+            gameResult.scores.values.firstNotNullOfOrNull { score ->
+                when (score.cause) {
+                    ScoreCause.LEFT -> "Grund: Vorzeitiges Verlassen des Spiels"
+                    ScoreCause.RULE_VIOLATION -> "Grund: Regelverletzung"
+                    ScoreCause.SOFT_TIMEOUT -> "Grund: Überschreitung des Zeitlimits"
+                    ScoreCause.HARD_TIMEOUT -> "Grund: Keine Antwort auf Zuganfrage"
+                    ScoreCause.UNKNOWN -> "Grund: Kommunikationsfehler"
+                    else -> null
+                }
+            }.orEmpty()
     
     override fun computeValue(): String {
         if (!game.gameStarted.value)
