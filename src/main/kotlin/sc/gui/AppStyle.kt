@@ -18,7 +18,7 @@ class AppStyle: Stylesheet() {
         private val gotuRegular = Font.loadFont(ResourceLookup(this)["/fonts/NotoSans-Regular.ttf"], 16.0)
         private val rounding = multi(box(8.percent))
         
-        val spacing = 20.0
+        const val spacing = 20.0
         val formSpacing = spacing / 2
         
         val fontSizeRegular = 20.pt

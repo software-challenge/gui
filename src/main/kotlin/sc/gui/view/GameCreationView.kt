@@ -74,7 +74,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
     
     private fun updatePlayerType() {
         // TODO: work with proper binding of property
-        when (settings.type.value) {
+        when (settings.type.value as PlayerType) {
             PlayerType.COMPUTER -> {
                 root.center = hbox(AppStyle.spacing) {
                     button("Client wählen") {
@@ -111,7 +111,6 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
                 root.center = label("Ein von Hand gesteuerter Spieler")
                 root.bottom = label()
             }
-            else -> throw Exception("Unknown Player-Type")
         }
         (root.center as Region).paddingTop = AppStyle.formSpacing
     }

@@ -52,12 +52,12 @@ class ScoreBinding(private val game: GameController): StringBinding() {
         bind(game.teamScores)
     }
     
-    override fun computeValue(): String {
-        if (game.currentRound.get() == 0)
-            return "Drücke auf Start"
-        return "Runde ${game.currentRound.get()} - " +
-               game.teamScores.value?.joinToString(" : ")
-    }
+    override fun computeValue(): String =
+            if (game.currentRound.get() == 0)
+                "Drücke auf Start"
+            else
+                "Runde ${game.currentRound.get()} - " +
+                game.teamScores.value?.joinToString(" : ")
 }
 
 class StatusView: View() {
