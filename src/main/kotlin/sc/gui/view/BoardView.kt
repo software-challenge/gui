@@ -96,6 +96,8 @@ class BoardView: View() {
     private val calculatedBlockSize = size.doubleBinding { gridSize * 0.9 }
     
     private val ambers = Team.values().associateWith { ArrayList<Node>() }
+    private val rootStack: StackPane
+        get() = (grid.scene.root as BorderPane).center as StackPane
     
     val grid = gridpane {
         isGridLinesVisible = true
@@ -107,6 +109,8 @@ class BoardView: View() {
             if (state == null) {
                 children.removeAll(pieces.values)
                 pieces.clear()
+                ambers.values.flatten().forEach { rootStack.children.remove(it) }
+                ambers.values.forEach { it.clear() }
                 return@ChangeListener
             }
             // TODO finish pending animations
@@ -137,7 +141,7 @@ class BoardView: View() {
                                     while (teamAmbers.size < state.getPointsForTeam(state.otherTeam))
                                         Group(PieceImage(calculatedBlockSize).apply { addChild("amber") }).apply {
                                             opacity = 0.0
-                                            (this@gridpane.scene.root as BorderPane).center.add(this)
+                                            rootStack.add(this)
                                             val alignLeft = oldState?.board?.get(move.from)?.team == Team.ONE
                                             StackPane.setAlignment(this, if (alignLeft) Pos.TOP_LEFT else Pos.TOP_RIGHT)
                                             translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if (alignLeft) it else scene.width - it }
