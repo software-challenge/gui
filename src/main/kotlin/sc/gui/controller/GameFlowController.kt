@@ -20,6 +20,7 @@ import java.io.IOException
 
 class GameFlowController: Controller() {
     private val gameModel: GameModel by inject()
+    private var stepController = true
     private val interval = Timeline(KeyFrame(Duration.seconds(1.0), {
         fire(StepGame(1))
     })).apply {
@@ -31,20 +32,28 @@ class GameFlowController: Controller() {
     
     init {
         subscribe<PauseGame> { event ->
-            controller?.pause(event.pause) ?: run {
-                if (event.pause) {
-                    interval.pause()
-                } else {
-                    interval.play()
-                }
+            if(controller?.pause(event.pause) == null) {
                 fire(GamePausedEvent(event.pause))
+            } else {
+                stepController = false
+            }
+            if (event.pause) {
+                interval.pause()
+            } else {
+                interval.play()
             }
         }
         subscribe<StepGame> { event ->
             val turn = gameModel.currentTurn.value + event.steps
             val state: GameState? = history.firstOrNull { it.turn >= turn } ?: run {
-                controller?.step()
-                history.lastOrNull()
+                if(stepController) {
+                    controller?.step()
+                    history.lastOrNull()
+                } else {
+                    interval.pause()
+                    stepController = true
+                    null
+                }
             }
             if(state != null)
                 gameModel.gameState.set(state)

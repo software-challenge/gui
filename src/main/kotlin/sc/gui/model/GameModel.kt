@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import sc.api.plugins.Team
 import sc.gui.GameOverEvent
 import sc.gui.NewGameState
+import sc.gui.controller.CreateGame
 import sc.gui.controller.HumanMoveAction
 import sc.gui.controller.HumanMoveRequest
 import sc.gui.view.TerminateGame
@@ -65,9 +66,8 @@ class GameModel: ViewModel() {
         subscribe<GameOverEvent> { event ->
             gameResult.set(event.result)
         }
-        subscribe<TerminateGame> {
-            clearGame()
-        }
+        subscribe<TerminateGame> { clearGame() }
+        subscribe<CreateGame> { clearGame() }
     }
     
     private fun clearGame() {

@@ -253,7 +253,7 @@ class BoardView: View() {
             val target = position + it
             val node = Region().addClass(AppStyle.hoverColor).apply {
                 onLeftClick {
-                    if (gameModel.isHumanTurn.value && gameModel.gameState.value?.board?.get(position)?.team == gameModel.gameState.value?.currentTeam) {
+                    if (gameModel.atLatestTurn.value && gameModel.isHumanTurn.value && gameModel.gameState.value?.board?.get(position)?.team == gameModel.gameState.value?.currentTeam) {
                         fire(HumanMoveAction(Move(position, target).also { logger.debug("Human move: $it") }))
                     }
                 }
