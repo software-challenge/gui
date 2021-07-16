@@ -7,20 +7,21 @@ for details on our versioning scheme.
 
 ## [22.1.0](https://github.com/software-challenge/gui/commits/22.1.0) - 2021-09
 
-## [22.0.2](https://github.com/software-challenge/gui/commits/22.0.2) - 2021-07
-- Fix links to documentation
-- Improve ease-of-use of game interface
-- Add little usage guide
+## [22.0.2](https://github.com/software-challenge/gui/commits/22.0.2) - 2021-07-16
+- Fix help links & add little usage guide
+- Iron out game interface
+- Display amber count visually
+- Make example client a little smarter
 
 ## [22.0.1](https://github.com/software-challenge/gui/commits/22.0.1) - 2021-06-25
 - Proper Ostseeschach figures
 - Highlight possible moves on hover
-- Implement playing as human
+- Allow human players
 - Fix issues with game controls
 
 ## [22.0.0](https://github.com/software-challenge/gui/commits/22.0.0) - 2021-06-11
 - Major redesign of the layout
-- Implement Ostseeschach with basic animations and placeholder graphics
+- New Game Ostseeschach with basic animations and placeholder graphics
 
 ## 2022 Game Ostseeschach - 2021-06-11
 

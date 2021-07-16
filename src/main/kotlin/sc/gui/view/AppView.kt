@@ -1,6 +1,7 @@
 package sc.gui.view
 
 import javafx.application.Platform
+import javafx.scene.control.Alert
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
@@ -46,7 +47,7 @@ class AppView: View("Software-Challenge Germany") {
                         }
                     }
                 }
-                item("Dunkles Design umschalten").action {
+                item("Dunkles Design umschalten", "Shortcut+U").action {
                     controller.toggleDarkmode()
                 }
                 separator()
@@ -62,16 +63,23 @@ class AppView: View("Software-Challenge Germany") {
                 }
             }
             menu("Hilfe") {
-                item("Spielregeln", "Shortcut+S").action {
+                item("Bedienungsanleitung", "Shortcut+H").action {
+                    alert(Alert.AlertType.INFORMATION, "Bedienungsanleitung", """
+                        - Fahre über eine Figur, um ihre möglichen Züge zu sehen
+                        - Klicke eine Figur und dann das Zielfeld an, um sie zu bewegen
+                        - Durch ein erneutes Klicken auf die Figur kannst du sie wieder abwählen
+                    """.trimIndent(), title = "Hilfe")
+                }
+                item("↗ Spielregeln", "Shortcut+S").action {
                     "https://docs.software-challenge.de/spiele/aktuell/regeln.html".browseUrl()
                 }
-                item("Dokumentation", "Shortcut+D").action {
+                item("↗ Dokumentation", "Shortcut+D").action {
                     "https://docs.software-challenge.de".browseUrl()
                 }
-                item("Webseite", "Shortcut+I").action {
+                item("↗ Webseite", "Shortcut+I").action {
                     "https://www.software-challenge.de".browseUrl()
                 }
-                item("Wettbewerb", "Shortcut+W").action {
+                item("↗ Wettbewerb", "Shortcut+W").action {
                     "https://contest.software-challenge.de/saison/current".browseUrl()
                 }
             }
