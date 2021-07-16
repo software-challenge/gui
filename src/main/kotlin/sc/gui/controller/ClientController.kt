@@ -43,7 +43,6 @@ class ClientController: Controller() {
         }
         // TODO handle client start failures
         
-        // TODO cancel previous lobbyManager.game?.cancel()
         lobbyManager.startNewGame(players, players.none { it.client.type == PlayerType.HUMAN })
     }
     
@@ -60,6 +59,8 @@ class ClientController: Controller() {
         val possibleMoves = state.possibleMoves
         if (possibleMoves.isEmpty())
             throw GameLogicException("No possible Moves found!")
-        return CompletableFuture.completedFuture(possibleMoves.random())
+        return CompletableFuture.completedFuture(
+                possibleMoves.associateWith { state.board[it.to]?.count ?: 0 }
+                        .let { map -> map.filter { it.value == map.maxOf { it.value } }.keys.random() })
     }
 }
