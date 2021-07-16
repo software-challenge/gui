@@ -9,7 +9,7 @@ for details on our versioning scheme.
 
 ## [22.0.2](https://github.com/software-challenge/gui/commits/22.0.2) - 2021-07-16
 - Fix help links & add little usage guide
-- Iron out game interface
+- Polish game interface
 - Display amber count visually
 - Make example client a little smarter
 

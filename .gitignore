@@ -1,6 +1,7 @@
-# Ignore Gradle build directories
+# Ignore generated files
 .gradle
 build
+version.txt
 
 # Ignore local gradle config
 gradle.properties
