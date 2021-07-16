@@ -96,8 +96,7 @@ class BoardView: View() {
     private val calculatedBlockSize = size.doubleBinding { gridSize * 0.9 }
     
     private val ambers = Team.values().associateWith { ArrayList<Node>() }
-    private val rootStack: StackPane
-        get() = (grid.scene.root as BorderPane).center as StackPane
+    private val rootStack: StackPane by lazy { (grid.scene.root as BorderPane).center as StackPane }
     
     val grid = gridpane {
         isGridLinesVisible = true
@@ -107,10 +106,10 @@ class BoardView: View() {
         val stateListener = ChangeListener<GameState?> { _, oldState, state ->
             clearTargetHighlights()
             if (state == null) {
-                children.removeAll(pieces.values)
-                pieces.clear()
                 ambers.values.flatten().forEach { rootStack.children.remove(it) }
                 ambers.values.forEach { it.clear() }
+                children.removeAll(pieces.values)
+                pieces.clear()
                 return@ChangeListener
             }
             // TODO finish pending animations
@@ -184,7 +183,11 @@ class BoardView: View() {
                 } else {
                     image.scaleX = piece.team.direction.toDouble()
                     image.background = Background(BackgroundFill(c(if (piece.team.index == 0) "red" else "blue", 0.5), CornerRadii.EMPTY, Insets.EMPTY))
-                    image.fade(transitionDuration, if (piece.team == state.currentTeam) pieceOpacity else pieceOpacity / 2)
+                    image.fade(transitionDuration, pieceOpacity * when {
+                        piece.team != state.currentTeam -> 0.6
+                        gameModel.atLatestTurn.value -> 1.0
+                        else -> 0.8
+                    })
                 }
             }
         }
@@ -210,9 +213,9 @@ class BoardView: View() {
                 }
             }
     
-    /** Whether the piece at [coords] belongs to the Team whose turn it currently is. */
-    private fun isActive(coords: Coordinates) =
-            pieces[coords]?.opacity == pieceOpacity
+    /** Whether the piece at [coords] could be selected for a human move.. */
+    private fun isSelectable(coords: Coordinates) =
+            pieces[coords]?.opacity == pieceOpacity && gameModel.isHumanTurn.value
     
     private var lockedHighlight: Coordinates? = null
     private var targetHighlights = ArrayList<Node>()
@@ -232,12 +235,12 @@ class BoardView: View() {
                 setOnMouseExited {
                     if (lockedHighlight != coords())
                         removeClass(AppStyle.hoverColor, AppStyle.softHoverColor)
-                    if (lockedHighlight == null && !isActive(coords()))
+                    if (lockedHighlight == null && !isSelectable(coords()))
                         clearTargetHighlights()
                     it.consume()
                 }
                 onLeftClick {
-                    lockedHighlight = coords().takeUnless { it == lockedHighlight || !isActive(it) }?.also {
+                    lockedHighlight = coords().takeUnless { it == lockedHighlight || !isSelectable(it) }?.also {
                         addClass(AppStyle.hoverColor)
                         highlightTargets(it)
                     }
