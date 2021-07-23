@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+  <timestamp key="time" datePattern="MM-dd'T'HHmmss"/>
+
+  <appender name="FILE"
+            class="sc.util.TidyFileAppender">
+    <file>${LOG_DIRECTORY:-log}/game-server_${time}.log</file>
+    <maxHistory>20</maxHistory>
+    <threshold>5</threshold>
+
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <Pattern>%d{HH:mm:ss} %-5level %36logger{36} - %msg%n</Pattern>
+    </layout>
+  </appender>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <layout>
+      <pattern>%d{HH:mm:ss} %-5level %36logger{36} - %msg%n</pattern>
+    </layout>
+  </appender>
+
+  <logger name="sc" level="DEBUG" />
+  <logger name="sc.networking.clients.XStreamClient" level="INFO" />
+  <logger name="sc.gui" level="TRACE" />
+
+  <root level="INFO">
+    <appender-ref ref="FILE"/>
+    <appender-ref ref="STDOUT"/>
+  </root>
+
+</configuration>

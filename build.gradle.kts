@@ -69,8 +69,10 @@ tasks {
         options.release.set(minJavaVersion.majorVersion.toInt())
     }
     processResources {
-        doFirst {
-            sourceSets.main.get().resources.srcDirs.single().resolve("version.txt").writeText(version.toString())
+        if(version.toString().split('.')[1] != "0")
+            exclude("logback-test.xml")
+        doLast {
+            destinationDir.resolve("version.txt").writeText(version.toString())
         }
     }
     withType<KotlinCompile> {
