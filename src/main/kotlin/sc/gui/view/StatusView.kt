@@ -3,6 +3,7 @@ package sc.gui.view
 import javafx.beans.binding.StringBinding
 import javafx.geometry.Pos
 import javafx.scene.control.Label
+import sc.api.plugins.ITeam
 import sc.gui.AppStyle
 import sc.gui.model.GameModel
 import sc.shared.GameResult
@@ -15,7 +16,7 @@ class StatusBinding(private val game: GameModel): StringBinding() {
     }
     
     fun winner(gameResult: GameResult): String =
-            gameResult.winner?.let { player -> "$player hat gewonnen!" }
+            gameResult.winner?.let { "${it.displayName} hat gewonnen!" }
             ?: "Unentschieden!"
     
     fun irregularities(gameResult: GameResult): String? =
@@ -34,12 +35,14 @@ class StatusBinding(private val game: GameModel): StringBinding() {
             if (game.gameStarted.value)
                 game.gameResult.get()?.let { gameResult ->
                     """
-                    Spiel ist beendet
                     ${winner(gameResult)}
                     ${irregularities(gameResult).orEmpty()}
                     """.trimIndent()
-                } ?: "${game.currentTeam.value.index.let { game.playerNames[it] ?: "Spieler ${it + 1}" }} ist dran"
+                } ?: "${game.currentTeam.value.displayName} ist dran"
             else game.playerNames.joinToString(" vs ")
+    
+    val ITeam.displayName
+        get() = index.let { game.playerNames[it] ?: "Spieler ${it + 1}" }
 }
 
 class ScoreBinding(private val game: GameModel): StringBinding() {
