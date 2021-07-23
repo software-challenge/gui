@@ -108,8 +108,10 @@ class BoardView: View() {
             if (state == null) {
                 ambers.values.flatten().forEach { rootStack.children.remove(it) }
                 ambers.values.forEach { it.clear() }
-                children.removeAll(pieces.values)
+                isGridLinesVisible = false
+                children.clear()
                 pieces.clear()
+                isGridLinesVisible = true
                 return@ChangeListener
             }
             // TODO finish pending animations

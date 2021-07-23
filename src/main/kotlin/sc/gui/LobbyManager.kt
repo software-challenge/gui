@@ -85,7 +85,7 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
             logger.trace("New RoomMessage in {}: {}", roomId, msg)
             when (msg) {
                 is MementoMessage -> fire(NewGameState(msg.state as GameState))
-                is GameResult -> fire(GameOverEvent(msg))
+                is GameResult -> if(gameFlowController.controller != null) fire(GameOverEvent(msg))
                 is ErrorMessage -> logger.warn("Error in $roomId: $msg")
                 is GamePaused -> fire(GamePausedEvent(msg.paused))
             }

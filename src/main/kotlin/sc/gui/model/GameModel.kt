@@ -52,6 +52,7 @@ class GameModel: ViewModel() {
                 logger.warn("Received unknown state: $state")
                 return@subscribe
             }
+            gameResult.set(null)
             logger.debug("New state: $state")
             if (logger.isTraceEnabled)
                 logger.trace(state.longString())
