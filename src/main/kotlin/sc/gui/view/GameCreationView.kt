@@ -8,8 +8,7 @@ import javafx.scene.layout.Region
 import javafx.stage.FileChooser
 import sc.api.plugins.Team
 import sc.gui.AppStyle
-import sc.gui.controller.NavigateBackEvent
-import sc.gui.controller.StartGameRequest
+import sc.gui.controller.StartGame
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.model.TeamSettingsModel
@@ -51,14 +50,9 @@ class GameCreationView: View() {
             button("Erstellen") {
                 action {
                     playerSettingsModels.all { it.commit() }
-                    fire(StartGameRequest(playerSettingsModels.map { it.item }))
+                    fire(StartGame(playerSettingsModels.map { it.item }))
                 }
                 enableWhen(Bindings.and(playerSettingsModels[0].valid, playerSettingsModels[1].valid))
-            }
-            button("Zurück") {
-                action {
-                    fire(NavigateBackEvent)
-                }
             }
         }
     }

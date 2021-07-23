@@ -19,26 +19,16 @@ class AppController: Controller() {
     private val clientController: ClientController by inject()
     
     init {
-        subscribe<NavigateBackEvent> {
-            changeViewTo(model.previousView.get())
-        }
-        subscribe<StartGameRequest> { event ->
+        subscribe<CreateGame> { changeViewTo(GAME_CREATION) }
+        subscribe<StartGame> { event ->
             changeViewTo(GAME_LOADING)
             gameModel.playerNames.setAll(event.settings.map { it.name.value })
             task(daemon = true) {
                 clientController.startGame(event.settings)
             }
         }
-        subscribe<GameReadyEvent> {
-            changeViewTo(GAME)
-        }
-        subscribe<CreateGame> {
-            if (model.currentView.get() != GAME_CREATION)
-                changeViewTo(GAME_CREATION)
-        }
-        subscribe<TerminateGame> {
-            changeViewTo(GAME_CREATION)
-        }
+        subscribe<GameReadyEvent> { changeViewTo(GAME) }
+        subscribe<TerminateGame> { changeViewTo(GAME_CREATION) }
     }
     
     fun changeViewTo(newView: ViewType) {
@@ -49,7 +39,6 @@ class AppController: Controller() {
             return
         }
         find(current.view).replaceWith(newView.view)
-        model.previousView.set(current)
         model.currentView.set(newView)
     }
     

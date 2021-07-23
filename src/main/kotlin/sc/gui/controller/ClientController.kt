@@ -15,7 +15,7 @@ import sc.plugin2022.Move
 import tornadofx.*
 import java.util.concurrent.CompletableFuture
 
-data class StartGameRequest(val settings: List<TeamSettings>): FXEvent()
+data class StartGame(val settings: List<TeamSettings>): FXEvent()
 class HumanMoveRequest: FXEvent()
 /** Human making a move.
  * @param move the move */
