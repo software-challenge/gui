@@ -146,13 +146,13 @@ class BoardView: View() {
                                             val alignLeft = oldState?.board?.get(move.from)?.team == Team.ONE
                                             StackPane.setAlignment(this, if (alignLeft) Pos.TOP_LEFT else Pos.TOP_RIGHT)
                                             translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if (alignLeft) it else scene.width - it }
-                                            translateY = bounds.centerY - calculatedBlockSize.value * 0.75
+                                            translateY = bounds.centerY - calculatedBlockSize.value / 2 - 56
                                             val position = teamAmbers.size
                                             teamAmbers.add(this)
                                             fade(transitionDuration, pieceOpacity).setOnFinished {
-                                                val translateX = { size: Number -> (position * (size.toDouble() / 3) + AppStyle.spacing).let { if (alignLeft) it else -it } }
-                                                move(transitionDuration.multiply(2.0), Point2D(translateX(calculatedBlockSize.value), 0.0)).setOnFinished {
-                                                    translateXProperty().bind(calculatedBlockSize.doubleBinding { translateX(it!!) })
+                                                val xOffset = { size: Number -> (position * (size.toDouble() / 3) + AppStyle.spacing).let { if (alignLeft) it else -it } }
+                                                move(transitionDuration.multiply(2.0), Point2D(xOffset(calculatedBlockSize.value), 0.0)).setOnFinished {
+                                                    translateXProperty().bind(calculatedBlockSize.doubleBinding { xOffset(it!!) })
                                                 }
                                             }
                                         }
