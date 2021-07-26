@@ -64,7 +64,6 @@ class StatusView: View() {
     
     override val root = vbox(alignment = Pos.CENTER) {
         addClass(AppStyle.statusLabel)
-        prefHeight = AppStyle.fontSizeBig.value * 6
         add(scoreLabel)
         add(statusLabel)
     }

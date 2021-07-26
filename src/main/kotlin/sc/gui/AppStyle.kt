@@ -16,7 +16,6 @@ class AppStyle: Stylesheet() {
         private val placeableBlue = c("#31A2F2")
         
         private val gotuRegular = Font.loadFont(ResourceLookup(this)["/fonts/NotoSans-Regular.ttf"], 16.0)
-        private val rounding = multi(box(8.percent))
         
         const val spacing = 20.0
         val formSpacing = spacing / 2
@@ -32,7 +31,7 @@ class AppStyle: Stylesheet() {
         val darkColorSchema by cssclass()
         
         val statusLabel by cssclass()
-        
+    
         val hoverColor by cssclass()
         val softHoverColor by cssclass()
     }
@@ -51,6 +50,7 @@ class AppStyle: Stylesheet() {
         }
         statusLabel {
             fontSize = fontSizeBig
+            prefHeight = fontSizeBig.times(6)
         }
     
         lightColorSchema {
