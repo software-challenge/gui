@@ -34,9 +34,8 @@ version = try {
 println("Current version: $version (Java version: ${JavaVersion.current()})")
 
 application {
-    mainClassName = "sc.gui.GuiAppKt" // not migrating from legacy because of https://github.com/johnrengelman/shadow/issues/609 - waiting for 6.2 release
-    // these are required because of using JDK >8,
-    // see https://github.com/controlsfx/controlsfx/wiki/Using-ControlsFX-with-JDK-9-and-above
+    mainClassName = "sc.gui.GuiAppKt" // needs shadow-update which needs gradle update to 7.0
+    // these are required for Java since Jigsaw, see https://github.com/controlsfx/controlsfx/wiki/Using-ControlsFX-with-JDK-9-and-above
     applicationDefaultJvmArgs = listOf(
         // For accessing VirtualFlow field from the base class in GridViewSkin
         "--add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED",
@@ -105,13 +104,13 @@ tasks {
     }
     
     val release by creating {
-        dependsOn(check)
+        dependsOn(clean, check)
         group = "distribution"
         description = "Creates and pushes a tagged commit according to the backend version"
         doLast {
             val desc = project.properties["m"]?.toString()
                        ?: throw InvalidUserDataException("Das Argument -Pm=\"Beschreibung dieser Version\" wird benötigt")
-            exec { commandLine("git", "commit", "-a", "-m", "release: $versionFromBackend") }
+            exec { commandLine("git", "commit", "-m", "release: $versionFromBackend") }
             exec { commandLine("git", "tag", versionFromBackend, "-m", desc) }
             exec { commandLine("git", "push", "--follow-tags") }
         }

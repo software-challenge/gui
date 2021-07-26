@@ -7,6 +7,12 @@ for details on our versioning scheme.
 
 ## [22.1.0](https://github.com/software-challenge/gui/commits/22.1.0) - 2021-09
 
+## [22.0.3](https://github.com/software-challenge/gui/commits/22.0.3) - 2021-07-26
+- Fix annoying error when striking a figure in a human vs human match
+- Improve navigation & status display
+- Smoothen board interaction
+- Expand logging for beta version
+
 ## [22.0.2](https://github.com/software-challenge/gui/commits/22.0.2) - 2021-07-16
 - Fix help links & add little usage guide
 - Polish game interface
