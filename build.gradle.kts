@@ -110,6 +110,7 @@ tasks {
         doLast {
             val desc = project.properties["m"]?.toString()
                        ?: throw InvalidUserDataException("Das Argument -Pm=\"Beschreibung dieser Version\" wird benötigt")
+            exec { commandLine("git", "add", "CHANGELOG.md") }
             exec { commandLine("git", "commit", "-m", "release: $versionFromBackend") }
             exec { commandLine("git", "tag", versionFromBackend, "-m", desc) }
             exec { commandLine("git", "push", "--follow-tags") }

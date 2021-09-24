@@ -23,9 +23,7 @@ class GameFlowController: Controller() {
     private var stepController = true
     private val interval = Timeline(KeyFrame(Duration.seconds(1.0), {
         fire(StepGame(1))
-    })).apply {
-        cycleCount = Animation.INDEFINITE
-    }
+    })).apply { cycleCount = Animation.INDEFINITE }
     
     private val history = ArrayList<GameState>()
     var controller: IGameController? = null
