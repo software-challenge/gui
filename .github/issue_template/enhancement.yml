@@ -1,0 +1,21 @@
+name: Verbesserungsvorschlag
+description: Etwas könnte besser laufen
+labels: ["enhancement"]
+assignees:
+  - xeruf
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke, dass du dir Zeit nimmst, die Software-Challenge zu verbessern :)
+        Bitte prüfe zuerst, dass du die [neuste Version](https://github.com/software-challenge/gui/releases) nutzt.
+  - type: textarea
+    attributes:
+      label: Warum ist der aktuelle Stand nicht akzeptabel?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Was wäre dein Lösungsansatz?
+    validations:
+      required: true

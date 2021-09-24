@@ -1,0 +1,29 @@
+name: Fehlerbericht
+description: Etwas funktioniert nicht
+labels: ["bug"]
+assignees:
+  - xeruf
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke, dass du dir Zeit nimmst, die Software-Challenge zu verbessern :)
+        Bitte prüfe zuerst, dass du die [neuste Version](https://github.com/software-challenge/gui/releases) nutzt.
+  - type: textarea
+    attributes:
+      label: Was ist passiert?
+      description: Und was hast du eigentlich erwartet?
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Dein Betriebssystem?
+      options:
+        - Windows
+        - MacOS
+        - Linux
+        - Anderes
+  - type: textarea
+    attributes:
+      label: Logs
+      render: shell
