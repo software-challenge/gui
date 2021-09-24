@@ -48,9 +48,18 @@ class AppStyle: Stylesheet() {
             backgroundPosition += BackgroundPosition(Side.LEFT, .0, true, Side.TOP, -10.0, false)
             backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.NO_REPEAT
         }
+        
+        legend {
+            // label of GameCreationForm
+            fontSize = fontSizeBig
+        }
         statusLabel {
             fontSize = fontSizeBig
             prefHeight = fontSizeBig.times(6)
+        }
+        button {
+            backgroundRadius = multi((box(1.percent)))
+            borderRadius = multi((box(1.percent)))
         }
     
         lightColorSchema {
@@ -83,11 +92,6 @@ class AppStyle: Stylesheet() {
                 baseColor = Color.WHITE
                 textFill = c("#222")
             }
-        }
-        
-        button {
-            backgroundRadius = multi((box(1.percent)))
-            borderRadius = multi((box(1.percent)))
         }
         
         fullWidth {
