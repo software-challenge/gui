@@ -27,7 +27,8 @@ val versionFromBackend by lazy {
 
 group = "sc.gui"
 version = try {
-    Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags")).inputStream.reader().readText().trim().ifEmpty { null }
+    Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags"))
+            .inputStream.reader().readText().trim().ifEmpty { null }
 } catch (_: java.io.IOException) {
     null
 } ?: "${versionFromBackend}-custom"
@@ -35,15 +36,6 @@ println("Current version: $version (Java version: ${JavaVersion.current()})")
 
 application {
     mainClassName = "sc.gui.GuiAppKt" // needs shadow-update which needs gradle update to 7.0
-    // these are required for Java since Jigsaw, see https://github.com/controlsfx/controlsfx/wiki/Using-ControlsFX-with-JDK-9-and-above
-    applicationDefaultJvmArgs = listOf(
-        // For accessing VirtualFlow field from the base class in GridViewSkin
-        "--add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED",
-        "--add-opens=javafx.controls/javafx.scene.control=ALL-UNNAMED",
-        "--add-opens=javafx.graphics/javafx.scene=ALL-UNNAMED",
-        // For accessing InputMap used in RangeSliderBehavior
-        "--add-exports=javafx.controls/com.sun.javafx.scene.control.inputmap=ALL-UNNAMED"
-    )
 }
 
 repositories {
@@ -68,7 +60,7 @@ tasks {
         options.release.set(minJavaVersion.majorVersion.toInt())
     }
     processResources {
-        if(version.toString().split('.')[1] != "0")
+        if (version.toString().split('.')[1] != "0")
             exclude("logback-test.xml")
         doLast {
             destinationDir.resolve("version.txt").writeText(version.toString())
@@ -94,6 +86,18 @@ tasks {
     shadowJar {
         destinationDirectory.set(buildDir)
         archiveClassifier.set(OperatingSystem.current().familyName)
+        manifest {
+            attributes(
+                    "Add-Opens" to arrayOf(
+                            "javafx.controls/javafx.scene.control.skin",
+                            "javafx.controls/javafx.scene.control",
+                            "javafx.graphics/javafx.scene",
+                            // For accessing InputMap used in RangeSliderBehavior
+                            "javafx.controls/com.sun.javafx.scene.control.inputmap",
+                            // Expose list internals for xstream conversion: https://github.com/x-stream/xstream/issues/253
+                            "java.base/java.util").joinToString(" ")
+            )
+        }
     }
     
     run.configure {
