@@ -14,7 +14,7 @@ object NavigateBackEvent: FXEvent()
 object CreateGame: FXEvent()
 
 class AppController: Controller() {
-    val model = AppModel()
+    val model = AppModel
     private val gameModel: GameModel by inject()
     private val clientController: ClientController by inject()
     
@@ -43,7 +43,7 @@ class AppController: Controller() {
     }
     
     fun toggleDarkmode() {
-        model.isDarkMode.toggle()
+        model.darkMode.toggle()
     }
     
     companion object: KLogging()

@@ -115,7 +115,7 @@ class AppView: View("Software-Challenge Germany") {
             }
         })
         
-        controller.model.isDarkMode.listenImmediately { value ->
+        controller.model.darkMode.listenImmediately { value ->
             if (value) {
                 root.removeClass(AppStyle.lightColorSchema)
                 root.addClass(AppStyle.darkColorSchema)

@@ -7,6 +7,7 @@ import mu.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
+import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.gui.view.GameControlState.*
 import sc.util.binding
@@ -82,6 +83,7 @@ class ControlView: View() {
                             gameControlState.value = PAUSED
                     }
                 }
+                checkbox("Animationen", AppModel.animate)
             }
     
     init {

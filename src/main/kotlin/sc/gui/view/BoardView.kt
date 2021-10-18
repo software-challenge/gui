@@ -16,10 +16,11 @@ import javafx.scene.Node
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.util.Duration
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
+import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.plugin2022.*
 import sc.plugin2022.util.Constants
@@ -28,7 +29,7 @@ import tornadofx.*
 import java.lang.ref.WeakReference
 import kotlin.random.Random
 
-private val logger = LoggerFactory.getLogger(BoardView::class.java)
+private val logger = KotlinLogging.logger {  }
 
 const val pieceOpacity = 0.9
 val transitionDuration = Duration(500.0)
@@ -37,7 +38,7 @@ val animationInterval = Timeline(KeyFrame(Duration.seconds(0.1), {
     animationFunctions.removeIf {
         // Remove invalid WeakReferences
         it.get()?.let {
-            it(null)
+            it()
             false
         } ?: true
     }
@@ -45,7 +46,7 @@ val animationInterval = Timeline(KeyFrame(Duration.seconds(0.1), {
     cycleCount = Animation.INDEFINITE
     play()
 }
-private val animationFunctions = ArrayList<WeakReference<(Int?) -> Unit>>()
+private val animationFunctions = ArrayList<WeakReference<() -> Unit>>()
 
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
@@ -75,9 +76,11 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     
     val frameCount = if(content == "seestern" || content == "herzmuschel") 20 else 16
     var frame = Random.nextInt(0, frameCount)
-    fun nextFrame(forceFrame: Int?) {
+    fun nextFrame() {
+        if(frame == 0 && AppModel.animate.value == false)
+            return
         (children.firstOrNull() as? ResizableImageView)?.removePseudoClass("frame$frame")
-        frame = forceFrame ?: (frame + 1).mod(frameCount)
+        frame = (frame + 1).mod(frameCount)
         (children?.firstOrNull() as? ResizableImageView)?.addPseudoClass("frame$frame")
     }
     
@@ -97,11 +100,12 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     
     fun addChild(graphic: String) {
         height++
+        logger.trace { "$this: Adding $graphic for height $height" }
         children.add(0, ResizableImageView(sizeProperty).apply {
             addClass(graphic)
             if(graphic == "herzmuschel")
                 sizeProperty.listenImmediately {
-                    translateX = -it.toDouble() / 11
+                    translateX = -it.toDouble() / 8
                     translateY = -it.toDouble() / 3
                 }
             if(graphic == "robbe")
@@ -163,7 +167,7 @@ class BoardView: View() {
                             piece.translateY = 0.0
                             piece.gridpaneConstraints { columnRowIndex(move.to.x, move.to.y) }
                             logger.trace("Piece $piece finished animating to ${state.board[move.to]} at ${move.to}")
-                            println("Moving $piece while highlighting $currentHighlight onto $coveredPiece")
+                            println("Moving $piece onto $coveredPiece (highlight: $currentHighlight)")
                             if (currentHighlight != null && currentHighlight in arrayOf(piece, coveredPiece)) {
                                 highlightTargets(move.to)
                                 lockedHighlight = move.to
@@ -173,7 +177,7 @@ class BoardView: View() {
                                 lockedHighlight = null
                             if (newHeight == null) {
                                 Platform.runLater {
-                                    val bounds = piece.localToScene(piece.boundsInLocal)
+                                    val bounds = piece.localToScene(piece.layoutBounds)
                                     val teamAmbers = ambers[state.otherTeam] ?: return@runLater
                                     while (teamAmbers.size < state.getPointsForTeam(state.otherTeam))
                                         Group(PieceImage(calculatedBlockSize, "amber")).apply {
