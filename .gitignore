@@ -4,3 +4,11 @@ build
 
 # Ignore local gradle config
 gradle.properties
+
+*.svg
+*spriter*/
+**/keyframes/*
+!src/main/resources/graphics/cockle/keyframes/__olive_cockle*
+!src/main/resources/graphics/seagull/keyframes/__seagull*
+!src/main/resources/graphics/seal/keyframes/__cream_seal*
+!src/main/resources/graphics/starfish/keyframes/__tan_starfish_side_view_happy*

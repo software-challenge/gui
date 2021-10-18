@@ -5,6 +5,7 @@ import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
+import sc.plugin2022.PieceType
 import tornadofx.*
 
 class AppStyle: Stylesheet() {
@@ -23,20 +24,22 @@ class AppStyle: Stylesheet() {
         val fontSizeRegular = 20.pt
         val fontSizeBig = 24.pt
         val fontSizeHeader = 32.pt
-    
+        
         val background by cssclass()
-    
+        
         val fullWidth by cssclass()
         val lightColorSchema by cssclass()
         val darkColorSchema by cssclass()
         
         val statusLabel by cssclass()
-    
+        
         val hoverColor by cssclass()
         val softHoverColor by cssclass()
     }
     
     init {
+        val resources = ResourceLookup(this)
+        
         root {
             font = gotuRegular
             fontSize = fontSizeRegular
@@ -52,7 +55,7 @@ class AppStyle: Stylesheet() {
             fontSize = fontSizeBig
             prefHeight = fontSizeBig.times(6)
         }
-    
+        
         lightColorSchema {
             baseColor = c("#E0E0E0")
             backgroundColor += c("#EEE")
@@ -72,7 +75,7 @@ class AppStyle: Stylesheet() {
             accentColor = Color.MEDIUMPURPLE
             faintFocusColor = baseColor
             textFill = c("#EEE")
-    
+            
             menuBar {
                 backgroundColor = this@darkColorSchema.backgroundColor
             }
@@ -89,16 +92,40 @@ class AppStyle: Stylesheet() {
             backgroundRadius = multi((box(1.percent)))
             borderRadius = multi((box(1.percent)))
         }
-        
+    
         fullWidth {
             prefWidth = 100.percent
         }
-        
+    
         hoverColor {
             backgroundColor += c("#2225")
         }
         softHoverColor {
             backgroundColor += c("#2222")
+        }
+    
+        arrayOf("amber", "blank").forEach {
+            ".$it" { image = resources.url("/graphics/$it.png").toURI() }
+        }
+        PieceType.values().forEach { type ->
+            val keyframe = when(type) {
+                PieceType.Herzmuschel -> "cockle/keyframes/__olive_cockle_idle"
+                PieceType.Moewe -> "seagull/keyframes/__seagull_idle"
+                PieceType.Robbe -> "seal/keyframes/__cream_seal_idle_on_land_upright"
+                PieceType.Seestern -> "starfish/keyframes/__tan_starfish_side_view_happy_idle"
+            }
+            (0..19).forEach {
+                ".${type.name.lowercase()}:frame$it" {
+                    javaClass.getResource("/graphics/${keyframe}_${it.toString().padStart(3, '0')}.png")?.toURI()?.let {
+                        image = it
+                    }
+                    if(type != PieceType.Moewe) {
+                        val scale = if(type == PieceType.Robbe) 1.4 else 1.2
+                        scaleX = scale
+                        scaleY = if(type == PieceType.Herzmuschel) 1.3 else scale
+                    }
+                }
+            }
         }
     }
 }

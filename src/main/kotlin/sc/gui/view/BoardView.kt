@@ -1,6 +1,9 @@
 package sc.gui.view
 
+import javafx.animation.Animation
 import javafx.animation.FadeTransition
+import javafx.animation.KeyFrame
+import javafx.animation.Timeline
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ObservableDoubleValue
@@ -10,7 +13,6 @@ import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Group
 import javafx.scene.Node
-import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.util.Duration
@@ -21,38 +23,62 @@ import sc.gui.controller.HumanMoveAction
 import sc.gui.model.GameModel
 import sc.plugin2022.*
 import sc.plugin2022.util.Constants
+import sc.util.listenImmediately
 import tornadofx.*
+import java.lang.ref.WeakReference
+import kotlin.random.Random
 
 private val logger = LoggerFactory.getLogger(BoardView::class.java)
 
 const val pieceOpacity = 0.9
 val transitionDuration = Duration(500.0)
 
+val animationInterval = Timeline(KeyFrame(Duration.seconds(0.1), {
+    animationFunctions.removeIf {
+        // Remove invalid WeakReferences
+        it.get()?.let {
+            it(null)
+            false
+        } ?: true
+    }
+})).apply {
+    cycleCount = Animation.INDEFINITE
+    play()
+}
+private val animationFunctions = ArrayList<WeakReference<(Int?) -> Unit>>()
+
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
-class ResizableImageView(sizeProperty: ObservableValue<Number>, resource: String, scaling: Double = 1.0): ImageView() {
+class ResizableImageView(sizeProperty: ObservableValue<Number>): ImageView() {
     init {
-        imageProperty().bind(sizeProperty.objectBinding {
-            val size = it!!.toDouble()
-            val scaledSize = size * scaling
-            translateY = -size * (scaling - 1.0) / 5
-            Image(resource, scaledSize, scaledSize, true, true)
+        fitWidthProperty().bind(sizeProperty)
+        fitHeightProperty().bind(imageProperty().doubleBinding(sizeProperty) {
+            val size = sizeProperty.value.toDouble()
+            it?.let { it.height * size / it.width } ?: size
         })
     }
     
-    override fun prefHeight(width: Double): Double = image.height
     override fun minHeight(width: Double): Double = 16.0
-    override fun prefWidth(height: Double): Double = image.width
-    override fun minWidth(width: Double): Double = 16.0
+    override fun minWidth(height: Double): Double = 16.0
     override fun isResizable(): Boolean = true
 }
 
-class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: PieceType? = null): StackPane() {
+class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: String): StackPane() {
     var height = 0
         private set
+    private val animate = ::nextFrame
     
     init {
-        content?.let { addChild(it.toString().lowercase()) }
+        addChild(content)
+        animationFunctions.add(WeakReference(animate))
+    }
+    
+    val frameCount = if(content == "seestern" || content == "herzmuschel") 20 else 16
+    var frame = Random.nextInt(0, frameCount)
+    fun nextFrame(forceFrame: Int?) {
+        (children.firstOrNull() as? ResizableImageView)?.removePseudoClass("frame$frame")
+        frame = forceFrame ?: (frame + 1).mod(frameCount)
+        (children?.firstOrNull() as? ResizableImageView)?.addPseudoClass("frame$frame")
     }
     
     fun updateHeight(newHeight: Int) {
@@ -71,15 +97,18 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     
     fun addChild(graphic: String) {
         height++
-        children.add(0, ResizableImageView(
-                sizeProperty,
-                ResourceLookup(this)["/graphics/$graphic.png"],
-                when (graphic) {
-                    "moewe" -> 1.1
-                    "robbe" -> 1.4
-                    else -> 1.0
+        children.add(0, ResizableImageView(sizeProperty).apply {
+            addClass(graphic)
+            if(graphic == "herzmuschel")
+                sizeProperty.listenImmediately {
+                    translateX = -it.toDouble() / 11
+                    translateY = -it.toDouble() / 3
                 }
-        ))
+            if(graphic == "robbe")
+                sizeProperty.listenImmediately {
+                    translateX = it.toDouble() / 11
+                }
+        })
     }
     
     override fun toString(): String = "PieceImage@${Integer.toHexString(hashCode())}(content = $content)"
@@ -135,19 +164,19 @@ class BoardView: View() {
                             piece.gridpaneConstraints { columnRowIndex(move.to.x, move.to.y) }
                             logger.trace("Piece $piece finished animating to ${state.board[move.to]} at ${move.to}")
                             println("Moving $piece while highlighting $currentHighlight onto $coveredPiece")
-                            if(currentHighlight != null && currentHighlight in arrayOf(piece, coveredPiece)) {
+                            if (currentHighlight != null && currentHighlight in arrayOf(piece, coveredPiece)) {
                                 highlightTargets(move.to)
                                 lockedHighlight = move.to
                             }
                             children.remove(coveredPiece)
-                            if(lockedHighlight == move.to)
+                            if (lockedHighlight == move.to)
                                 lockedHighlight = null
                             if (newHeight == null) {
                                 Platform.runLater {
                                     val bounds = piece.localToScene(piece.boundsInLocal)
                                     val teamAmbers = ambers[state.otherTeam] ?: return@runLater
                                     while (teamAmbers.size < state.getPointsForTeam(state.otherTeam))
-                                        Group(PieceImage(calculatedBlockSize).apply { addChild("amber") }).apply {
+                                        Group(PieceImage(calculatedBlockSize, "amber")).apply {
                                             opacity = 0.0
                                             rootStack.add(this)
                                             val alignLeft = oldState?.board?.get(move.from)?.team == Team.ONE
@@ -231,7 +260,7 @@ class BoardView: View() {
     private var targetHighlights = ArrayList<Node>()
     
     private fun createPiece(type: PieceType): PieceImage =
-            PieceImage(calculatedBlockSize, type).apply {
+            PieceImage(calculatedBlockSize, type.name.lowercase()).apply {
                 setOnMouseEntered {
                     if (lockedHighlight == null) {
                         addClass(AppStyle.hoverColor)
