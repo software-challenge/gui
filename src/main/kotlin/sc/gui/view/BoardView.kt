@@ -75,13 +75,13 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     }
     
     val frameCount = if(content == "seestern" || content == "herzmuschel") 20 else 16
-    var frame = Random.nextInt(0, frameCount)
+    var frame = Random.nextInt(1, frameCount)
     fun nextFrame() {
         if(frame == 0 && AppModel.animate.value == false)
             return
-        (children.firstOrNull() as? ResizableImageView)?.removePseudoClass("frame$frame")
+        (children.lastOrNull() as? ResizableImageView)?.removePseudoClass("frame$frame")
         frame = (frame + 1).mod(frameCount)
-        (children?.firstOrNull() as? ResizableImageView)?.addPseudoClass("frame$frame")
+        (children?.lastOrNull() as? ResizableImageView)?.addPseudoClass("frame$frame")
     }
     
     fun updateHeight(newHeight: Int) {
@@ -96,6 +96,7 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
             }
             height = newHeight
         }
+        frame++
     }
     
     fun addChild(graphic: String) {
