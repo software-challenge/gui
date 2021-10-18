@@ -10,7 +10,7 @@ import sc.gui.NewGameState
 import sc.gui.controller.CreateGame
 import sc.gui.controller.HumanMoveAction
 import sc.gui.controller.HumanMoveRequest
-import sc.gui.view.TerminateGame
+import sc.gui.events.TerminateGame
 import sc.plugin2022.GameState
 import sc.shared.GameResult
 import sc.util.booleanBinding

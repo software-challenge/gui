@@ -7,30 +7,15 @@ import mu.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
+import sc.gui.events.*
 import sc.gui.model.AppModel
 import sc.gui.model.GameModel
-import sc.gui.view.GameControlState.*
+import sc.gui.view.ControlView.GameControlState.*
 import sc.util.binding
 import sc.util.booleanBinding
 import sc.util.listen
 import sc.util.listenImmediately
 import tornadofx.*
-
-sealed class GameControlEvent: FXEvent()
-data class PauseGame(val pause: Boolean): GameControlEvent()
-data class StepGame(val steps: Int): GameControlEvent()
-/** Signals that the current game should be terminated.
- * @param close whether to return to start screen */
-data class TerminateGame(val close: Boolean = true): GameControlEvent()
-
-/** Encapsulates the different actions of the GameControlButton.
- * @param action the event to fire when this state is invoked */
-enum class GameControlState(val text: String, val action: FXEvent) {
-    START("Start", PauseGame(false)),
-    PLAYING("Anhalten", PauseGame(true)),
-    PAUSED("Weiter", PauseGame(false)),
-    FINISHED("Spiel beenden", TerminateGame());
-}
 
 class ControlView: View() {
     private val logger = KotlinLogging.logger {}
@@ -108,4 +93,12 @@ class ControlView: View() {
         }
     }
     
+    /** Encapsulates the different actions of the GameControlButton.
+     * @param action the event to fire when this state is invoked */
+    enum class GameControlState(val text: String, val action: FXEvent) {
+        START("Start", PauseGame(false)),
+        PLAYING("Anhalten", PauseGame(true)),
+        PAUSED("Weiter", PauseGame(false)),
+        FINISHED("Spiel beenden", TerminateGame());
+    }
 }

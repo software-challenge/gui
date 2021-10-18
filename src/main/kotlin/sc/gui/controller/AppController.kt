@@ -2,6 +2,7 @@ package sc.gui.controller
 
 import mu.KLogging
 import sc.gui.GameReadyEvent
+import sc.gui.events.TerminateGame
 import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.gui.model.ViewType
