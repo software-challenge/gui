@@ -29,9 +29,9 @@ group = "sc.gui"
 version = try {
     Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags"))
             .inputStream.reader().readText().trim().ifEmpty { null }
-} catch (_: java.io.IOException) {
-    null
-} ?: "${versionFromBackend}-custom"
+} catch (e: java.io.IOException) {
+    println(e)
+} ?: "${versionFromBackend}-${System.getenv("GITHUB_SHA")?.takeUnless { it.isEmpty() } ?: "custom"}"
 println("Current version: $version (Java version: ${JavaVersion.current()})")
 
 application {
