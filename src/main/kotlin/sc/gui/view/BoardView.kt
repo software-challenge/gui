@@ -15,6 +15,7 @@ import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
+import javafx.scene.paint.Paint
 import javafx.util.Duration
 import mu.KotlinLogging
 import sc.api.plugins.Team
@@ -27,6 +28,7 @@ import sc.plugin2022.util.Constants
 import sc.util.listenImmediately
 import tornadofx.*
 import java.lang.ref.WeakReference
+import kotlin.math.pow
 import kotlin.random.Random
 
 private val logger = KotlinLogging.logger {  }
@@ -53,10 +55,7 @@ private val animationFunctions = ArrayList<WeakReference<() -> Unit>>()
 class ResizableImageView(sizeProperty: ObservableValue<Number>): ImageView() {
     init {
         fitWidthProperty().bind(sizeProperty)
-        fitHeightProperty().bind(imageProperty().doubleBinding(sizeProperty) {
-            val size = sizeProperty.value.toDouble()
-            it?.let { it.height * size / it.width } ?: size
-        })
+        isPreserveRatio = true
     }
     
     override fun minHeight(width: Double): Double = 16.0
@@ -67,18 +66,20 @@ class ResizableImageView(sizeProperty: ObservableValue<Number>): ImageView() {
 class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: String): StackPane() {
     var height = 0
         private set
-    private val animate = ::nextFrame
+    private val animateFn = ::animate
     
     init {
         addChild(content)
-        animationFunctions.add(WeakReference(animate))
+        animationFunctions.add(WeakReference(animateFn))
     }
     
     val frameCount = if(content == "seestern" || content == "herzmuschel") 20 else 16
     var frame = Random.nextInt(1, frameCount)
+    fun animate() {
+        if(AppModel.animate.value || frame > 0)
+            nextFrame()
+    }
     fun nextFrame() {
-        if(frame == 0 && AppModel.animate.value == false)
-            return
         (children.lastOrNull() as? ResizableImageView)?.removePseudoClass("frame$frame")
         frame = (frame + 1).mod(frameCount)
         (children?.lastOrNull() as? ResizableImageView)?.addPseudoClass("frame$frame")
@@ -96,7 +97,7 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
             }
             height = newHeight
         }
-        frame++
+        nextFrame()
     }
     
     fun addChild(graphic: String) {
@@ -268,9 +269,7 @@ class BoardView: View() {
             PieceImage(calculatedBlockSize, type.name.lowercase()).apply {
                 setOnMouseEntered {
                     if (lockedHighlight == null) {
-                        addClass(AppStyle.hoverColor)
-                        highlightTargets(gridCoordinates)
-                        currentHighlight = this
+                        highlight(this)
                         it.consume()
                     } else if (lockedHighlight != gridCoordinates) {
                         addClass(AppStyle.softHoverColor)
@@ -285,12 +284,17 @@ class BoardView: View() {
                     it.consume()
                 }
                 onLeftClick {
-                    lockedHighlight = gridCoordinates.takeUnless { it == lockedHighlight || !isSelectable(it) }?.also {
-                        addClass(AppStyle.hoverColor)
-                        highlightTargets(it)
-                    }
+                    lockedHighlight = gridCoordinates.takeUnless { it == lockedHighlight || !isSelectable(it) }
+                            ?.also { highlight(this) }
                 }
             }
+    
+    private fun highlight(node: Node) {
+        currentHighlight?.removeClass(AppStyle.hoverColor)
+        highlightTargets(node.gridCoordinates)
+        node.addClass(AppStyle.hoverColor)
+        currentHighlight = node
+    }
     
     private fun clearTargetHighlights() {
         lockedHighlight?.let { pieces[it] }?.removeClass(AppStyle.hoverColor)
