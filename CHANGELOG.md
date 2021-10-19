@@ -5,9 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See [the changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
-## [22.1.0](https://github.com/software-challenge/gui/commits/22.1.0) - 2021-11
+## [22.1.0](https://github.com/software-challenge/gui/commits/22.1.0) Fancying up- 2021-11
 - Ensure compatibility beyond Java 16
 - Figure animations
+- Persist Preferences
 
 ## [22.0.3](https://github.com/software-challenge/gui/commits/22.0.3) - 2021-07-26
 - Fix annoying error when striking a figure in a human vs human match
@@ -15,7 +16,7 @@ for details on our versioning scheme.
 - Smoothen board interaction
 - Expand logging for beta version
 
-## [22.0.2](https://github.com/software-challenge/gui/commits/22.0.2) - 2021-07-16
+## [22.0.2](https://github.com/software-challenge/gui/commits/22.0.2) Interface Polishing - 2021-07-16
 - Fix help links & add little usage guide
 - Polish game interface
 - Display amber count visually

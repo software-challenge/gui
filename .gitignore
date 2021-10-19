@@ -1,6 +1,8 @@
-# Ignore generated files
-.gradle
-build
+# Ignore generated directories
+.gradle/
+build/
+replays/
+log/
 
 # Ignore local gradle config
 gradle.properties
