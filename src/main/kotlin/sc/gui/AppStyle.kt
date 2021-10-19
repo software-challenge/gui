@@ -32,7 +32,6 @@ class AppStyle: Stylesheet() {
         val statusLabel by cssclass()
         
         val hoverColor by cssclass()
-        val softHoverColor by cssclass()
     }
     
     init {
@@ -95,14 +94,11 @@ class AppStyle: Stylesheet() {
             prefWidth = 100.percent
         }
         
+        // Game
         hoverColor {
             backgroundColor += c("#2225")
         }
-        softHoverColor {
-            backgroundColor += c("#2222")
-        }
-        
-        // Game
+    
         ".grid" {
             borderStyle += BorderStrokeStyle.DOTTED
             borderColor += box(colorSand.darker())

@@ -231,11 +231,45 @@ class BoardView: View() {
                 }
             }
         }
-        (0 until Constants.BOARD_SIZE).forEach {
-            constraintsForRow(it).percentHeight = 100.0 / Constants.BOARD_SIZE
-            constraintsForColumn(it).percentWidth = 100.0 / Constants.BOARD_SIZE
+        (0 until Constants.BOARD_SIZE).forEach { index ->
+            constraintsForRow(index).percentHeight = 100.0 / Constants.BOARD_SIZE
+            constraintsForColumn(index).percentWidth = 100.0 / Constants.BOARD_SIZE
             (0 until Constants.BOARD_SIZE).forEach { row ->
-                add(Pane().addClass("grid"), it, row)
+                add(Pane().addClass("grid").apply {
+                    viewOrder = -1.0
+                    setOnMouseEntered { event ->
+                        pieces[gridCoordinates]?.run {
+                            if(lockedHighlight == null) {
+                                highlight(this)
+                                event.consume()
+                            } else if(lockedHighlight != gridCoordinates) {
+                                addClass(AppStyle.hoverColor)
+                            }
+                        }
+                    }
+                    setOnMouseExited { event ->
+                        pieces[gridCoordinates]?.run {
+                            if(lockedHighlight == null) {
+                                if(!isSelectable(gridCoordinates)) {
+                                    clearTargetHighlights()
+                                    currentHighlight = null
+                                }
+                            } else if(lockedHighlight != gridCoordinates) {
+                                removeClass(AppStyle.hoverColor)
+                            }
+                            event.consume()
+                        }
+                    }
+                    onLeftClick {
+                        if(gridCoordinates == lockedHighlight) {
+                            pieces[gridCoordinates]?.let { highlight(it, false) }
+                        }
+                        lockedHighlight = gridCoordinates
+                                .takeUnless { it == lockedHighlight || !isSelectable(it) }
+                                ?.also { highlight(this) }
+                        logger.trace { "Clicked $gridCoordinates (lock at $lockedHighlight, current $currentHighlight)" }
+                    }
+                }, index, row)
             }
         }
         Platform.runLater {
@@ -265,32 +299,12 @@ class BoardView: View() {
     private var targetHighlights = ArrayList<Node>()
     
     private fun createPiece(type: PieceType): PieceImage =
-            PieceImage(calculatedBlockSize, type.name.lowercase()).apply {
-                setOnMouseEntered {
-                    if (lockedHighlight == null) {
-                        highlight(this)
-                        it.consume()
-                    } else if (lockedHighlight != gridCoordinates) {
-                        addClass(AppStyle.softHoverColor)
-                    }
-                }
-                setOnMouseExited {
-                    if (lockedHighlight != gridCoordinates)
-                        removeClass(AppStyle.hoverColor, AppStyle.softHoverColor)
-                    if (lockedHighlight == null && !isSelectable(gridCoordinates))
-                        clearTargetHighlights()
-                    currentHighlight = null
-                    it.consume()
-                }
-                onLeftClick {
-                    lockedHighlight = gridCoordinates.takeUnless { it == lockedHighlight || !isSelectable(it) }
-                            ?.also { highlight(this) }
-                }
-            }
+            PieceImage(calculatedBlockSize, type.name.lowercase())
     
-    private fun highlight(node: Node) {
+    private fun highlight(node: Node, highlightTargets: Boolean = true) {
         currentHighlight?.removeClass(AppStyle.hoverColor)
-        highlightTargets(node.gridCoordinates)
+        if(highlightTargets)
+            highlightTargets(node.gridCoordinates)
         node.addClass(AppStyle.hoverColor)
         currentHighlight = node
     }
