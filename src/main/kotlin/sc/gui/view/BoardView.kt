@@ -15,7 +15,6 @@ import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
-import javafx.scene.paint.Paint
 import javafx.util.Duration
 import mu.KotlinLogging
 import sc.api.plugins.Team
@@ -134,7 +133,6 @@ class BoardView: View() {
     private val rootStack: StackPane by lazy { (grid.scene.root as BorderPane).center as StackPane }
     
     val grid = gridpane {
-        isGridLinesVisible = true
         paddingAll = AppStyle.spacing
         maxHeightProperty().bind(size)
         maxWidthProperty().bind(size)
@@ -143,10 +141,8 @@ class BoardView: View() {
             if (state == null) {
                 ambers.values.flatten().forEach { rootStack.children.remove(it) }
                 ambers.values.forEach { it.clear() }
-                isGridLinesVisible = false
-                children.clear()
+                children.remove(Constants.BOARD_SIZE.toDouble().pow(2).toInt(), children.size)
                 pieces.clear()
-                isGridLinesVisible = true
                 return@ChangeListener
             }
             // TODO finish pending animations
@@ -235,13 +231,16 @@ class BoardView: View() {
                 }
             }
         }
+        (0 until Constants.BOARD_SIZE).forEach {
+            constraintsForRow(it).percentHeight = 100.0 / Constants.BOARD_SIZE
+            constraintsForColumn(it).percentWidth = 100.0 / Constants.BOARD_SIZE
+            (0 until Constants.BOARD_SIZE).forEach { row ->
+                add(Pane().addClass("grid"), it, row)
+            }
+        }
         Platform.runLater {
             gameModel.gameState.addListener(stateListener)
             stateListener.changed(null, null, gameModel.gameState.value)
-        }
-        for (x in 0 until Constants.BOARD_SIZE) {
-            constraintsForRow(x).percentHeight = 100.0 / Constants.BOARD_SIZE
-            constraintsForColumn(x).percentWidth = 100.0 / Constants.BOARD_SIZE
         }
     }
     override val root = vbox(alignment = Pos.CENTER) {
