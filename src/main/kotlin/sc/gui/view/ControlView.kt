@@ -43,7 +43,7 @@ class ControlView: View() {
                     disableWhen(gameModel.currentTurn.isEqualTo(0))
                     text = "⏮"
                     setOnMouseClicked {
-                        if (gameModel.atLatestTurn.value)
+                        if(gameModel.atLatestTurn.value)
                             fire(PauseGame(true))
                         fire(StepGame(-1))
                     }
@@ -53,7 +53,7 @@ class ControlView: View() {
                     prefWidth = AppStyle.fontSizeRegular.value * 7
                     textProperty().bind(
                             arrayOf<ObservableValue<Number>>(gameModel.currentTurn, gameModel.availableTurns).binding
-                            { (cur, all) -> "Zug " + if (cur != all || gameModel.gameEnded.value) "$cur/$all" else cur }
+                            { (cur, all) -> "Zug " + if(cur != all || gameModel.gameEnded.value) "$cur/$all" else cur }
                     )
                 }
                 button {
@@ -64,7 +64,7 @@ class ControlView: View() {
                     text = "⏭"
                     setOnMouseClicked {
                         fire(StepGame(1))
-                        if (gameControlState.value == START)
+                        if(gameControlState.value == START)
                             gameControlState.value = PAUSED
                     }
                 }
@@ -83,13 +83,13 @@ class ControlView: View() {
             }
         }
         gameModel.isHumanTurn.onChange {
-            if (it && gameControlState.value != PAUSED) {
+            if(it && gameControlState.value != PAUSED) {
                 gameControlState.value = PLAYING
                 gameControlState.value = null
             }
         }
         arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.gameEnded).listen { (latestTurn, end) ->
-            if (latestTurn && end) gameControlState.value = FINISHED
+            if(latestTurn && end) gameControlState.value = FINISHED
         }
     }
     

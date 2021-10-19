@@ -29,7 +29,7 @@ class GameCreationView: View() {
                 hgap = AppStyle.spacing
                 Team.values().forEach { team ->
                     val settings = playerSettingsModels[team.index]
-                    fieldset(if (team == Team.ONE) "Erster Spieler" else "Zweiter Spieler") {
+                    fieldset(if(team == Team.ONE) "Erster Spieler" else "Zweiter Spieler") {
                         alignment = Pos.TOP_CENTER
                         spacing = AppStyle.formSpacing
                         textfield(settings.name) {
@@ -68,7 +68,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
     
     private fun updatePlayerType() {
         // TODO: work with proper binding of property
-        when (settings.type.value as PlayerType) {
+        when(settings.type.value as PlayerType) {
             PlayerType.COMPUTER -> {
                 root.center = hbox(AppStyle.spacing) {
                     button("Client wählen") {
@@ -80,7 +80,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
                                             FileChooser.ExtensionFilter("jar", "*.jar")
                                     )
                             )
-                            if (selectedFile.isNotEmpty()) {
+                            if(selectedFile.isNotEmpty()) {
                                 println("Selected file $selectedFile")
                                 settings.executable.value = selectedFile.first()
                             }
@@ -128,7 +128,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
         
         val obs: ObservableValue<File?> = settings.executable
         settings.validationContext.addValidator(root.bottom, obs, ValidationTrigger.OnChange()) {
-            if (settings.type.value == PlayerType.COMPUTER && settings.executable.value == null) error("Bitte wähle eine ausführbare Datei aus") else null
+            if(settings.type.value == PlayerType.COMPUTER && settings.executable.value == null) error("Bitte wähle eine ausführbare Datei aus") else null
         }
         settings.validate()
     }
