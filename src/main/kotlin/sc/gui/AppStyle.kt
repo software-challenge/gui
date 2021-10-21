@@ -20,6 +20,8 @@ class AppStyle: Stylesheet() {
         
         private val gotuRegular = Font.loadFont(ResourceLookup(this)["/fonts/NotoSans-Regular.ttf"], 16.0)
     
+        const val pieceOpacity = 0.9
+        
         const val spacing = 20.0
         val formSpacing = spacing / 2
         
@@ -136,27 +138,70 @@ class AppStyle: Stylesheet() {
         }
         
         arrayOf("amber", "blank").forEach {
-            ".$it" { image = resources.url("/graphics/$it.png").toURI() }
+            select(CssRule.c(it)) { image = resources.url("/graphics/$it.png").toURI() }
         }
         PieceType.values().forEach { type ->
-            val keyframe = when(type) {
-                PieceType.Herzmuschel -> "cockle/keyframes/__olive_cockle_idle"
-                PieceType.Moewe -> "seagull/keyframes/__seagull_idle"
-                PieceType.Robbe -> "seal/keyframes/__cream_seal_idle_on_land_upright"
-                PieceType.Seestern -> "starfish/keyframes/__tan_starfish_side_view_happy_idle"
-            }
-            (0..19).forEach {
-                ".${type.name.lowercase()}:frame$it" {
-                    javaClass.getResource("/graphics/${keyframe}_${it.toString().padStart(3, '0')}.png")?.toURI()?.let {
-                        image = it
+            select(CssRule.c(type.name.lowercase())) {
+                if(type != PieceType.Moewe) {
+                    val scale = if(type == PieceType.Robbe) 1.4 else 1.2
+                    scaleX = scale
+                    scaleY = if(type == PieceType.Herzmuschel) 1.3 else scale
+                }
+                val frames = when(type) {
+                    PieceType.Herzmuschel -> PieceFrames("cockle", "olive_cockle", consume = chain("open_shell" to 4, "close_shell" to 4))
+                    PieceType.Moewe -> PieceFrames("seagull")
+                    PieceType.Robbe -> PieceFrames("seal", "cream_seal", "idle_on_land_upright",
+                            chain("transion_upright_laying_down" to 2, "move_on_land" to 3, "move_on_land_002" to 0, "move_on_land_002" to 0, "move_on_land_003" to 0, "move_on_land_004" to 0, "transion_ground_to_upright" to 3),
+                            chain("transion_upright_laying_down" to 2, "move_jumping_on_land" to 3, "move_jumping_on_land_002" to 0, "move_jumping_on_land_002" to 0, "move_jumping_on_land_003" to 0, "move_jumping_on_land_004" to 0, "transion_ground_to_upright" to 3))
+                    PieceType.Seestern -> PieceFrames("starfish", "tan_starfish_side_view_happy") { "jump_${it.padded}" }
+                }
+                (0..19).forEach { frame ->
+                    and(CssRule.pc("idle$frame")) {
+                        javaClass.getResource(frames.getIdle(frame))?.toURI()?.let { image = it }
                     }
-                    if(type != PieceType.Moewe) {
-                        val scale = if(type == PieceType.Robbe) 1.4 else 1.2
-                        scaleX = scale
-                        scaleY = if(type == PieceType.Herzmuschel) 1.3 else scale
+                    and(CssRule.pc("move$frame")) {
+                        javaClass.getResource(frames.getMove(frame))?.toURI()?.let {
+                            unsafe("-fx-image", raw(PropertyHolder.toCss(it) + " !important"))
+                        }
+                    }
+                    and(CssRule.pc("consume$frame")) {
+                        javaClass.getResource(frames.getConsume(frame))?.toURI()?.let {
+                            unsafe("-fx-image", raw(PropertyHolder.toCss(it) + " !important"))
+                        }
                     }
                 }
             }
         }
     }
+    
+    data class PieceFrames(
+            val type: String,
+            val prefix: String = type,
+            val idlePrefix: String = "idle",
+            private val move: ((Int) -> String) = { "move_${it.padded}" },
+            private val consume: ((Int) -> String) = move,
+    ) {
+        fun getIdle(frame: Int) = getFrame("${idlePrefix}_${frame.padded}")
+        fun getMove(frame: Int) = getFrame(move(frame))
+        fun getConsume(frame: Int) = getFrame(consume(frame))
+        private fun getFrame(suffix: String) = "/graphics/$type/keyframes/__${prefix}_$suffix.png"
+    }
+    
+    private fun chain(vararg frames: Pair<String, Int>): ((Int) -> String) = { frame ->
+        var count = frame
+        var index = -1
+        var frameCount: Int
+        do {
+            index++
+            frameCount = frames[index].second
+            val frameSub = frameCount.coerceAtLeast(1)
+            if(count < frameSub || index == frames.lastIndex)
+                break
+            count -= frameSub
+        } while(true)
+        frames[index].first + if(frameCount < 1) "" else ("_" + count.coerceAtMost(frameCount - 1).padded)
+    }
 }
+
+private val Int.padded
+    get() = toString().padStart(3, '0')
