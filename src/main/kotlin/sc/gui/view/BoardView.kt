@@ -8,7 +8,6 @@ import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ObservableDoubleValue
 import javafx.beans.value.ObservableValue
-import javafx.geometry.Insets
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Group
@@ -221,11 +220,10 @@ class BoardView: View() {
                     removePiece(image)
                     iter.remove()
                 } else {
-                    image.scaleX = piece.team.direction.toDouble()
-                    image.background = Background(BackgroundFill(c(if(piece.team.index == 0) "red" else "blue", 0.5), CornerRadii.EMPTY, Insets.EMPTY))
+                    image.addClass(piece.team.color)
                     image.fade(transitionDuration, pieceOpacity * when {
                         piece.team != state.currentTeam -> 0.6
-                        gameModel.atLatestTurn.value -> 1.0
+                        gameModel.atLatestTurn.value && gameModel.gameState.value?.isOver == false -> 1.0
                         else -> 0.8
                     })
                 }
@@ -236,14 +234,13 @@ class BoardView: View() {
             constraintsForColumn(index).percentWidth = 100.0 / Constants.BOARD_SIZE
             (0 until Constants.BOARD_SIZE).forEach { row ->
                 add(Pane().addClass("grid").apply {
-                    viewOrder = -1.0
                     setOnMouseEntered { event ->
                         pieces[gridCoordinates]?.run {
                             if(lockedHighlight == null) {
                                 highlight(this)
                                 event.consume()
                             } else if(lockedHighlight != gridCoordinates) {
-                                addClass(AppStyle.hoverColor)
+                                addClass(AppStyle.gridHover)
                             }
                         }
                     }
@@ -252,22 +249,25 @@ class BoardView: View() {
                             if(lockedHighlight == null) {
                                 if(!isSelectable(gridCoordinates)) {
                                     clearTargetHighlights()
+                                    removeClass(AppStyle.gridHover)
                                     currentHighlight = null
                                 }
                             } else if(lockedHighlight != gridCoordinates) {
-                                removeClass(AppStyle.hoverColor)
+                                removeClass(AppStyle.gridHover)
                             }
                             event.consume()
                         }
                     }
                     onLeftClick {
-                        if(gridCoordinates == lockedHighlight) {
-                            pieces[gridCoordinates]?.let { highlight(it, false) }
-                        }
-                        lockedHighlight = gridCoordinates
-                                .takeUnless { it == lockedHighlight || !isSelectable(it) }
-                                ?.also { highlight(this) }
-                        logger.trace { "Clicked $gridCoordinates (lock at $lockedHighlight, current $currentHighlight)" }
+                        val coords = gridCoordinates
+                        lockedHighlight =
+                                if(coords == lockedHighlight || !isSelectable(coords)) {
+                                    pieces[coords]?.let { highlight(it, lock = false, updateTargetHighlights = coords != lockedHighlight) }
+                                    null
+                                } else {
+                                    coords.also { pieces[coords]?.let { highlight(it, lock = true) } }
+                                }
+                        logger.trace { "Clicked $coords (lock at $lockedHighlight, current $currentHighlight)" }
                     }
                 }, index, row)
             }
@@ -300,17 +300,18 @@ class BoardView: View() {
     
     private fun createPiece(type: PieceType): PieceImage =
             PieceImage(calculatedBlockSize, type.name.lowercase())
+                    .apply { viewOrder = 1.0 }
     
-    private fun highlight(node: Node, highlightTargets: Boolean = true) {
-        currentHighlight?.removeClass(AppStyle.hoverColor)
-        if(highlightTargets)
+    private fun highlight(node: Node, lock: Boolean = false, updateTargetHighlights: Boolean = true) {
+        currentHighlight?.removeClass(AppStyle.gridHover, AppStyle.gridLock)
+        if(updateTargetHighlights)
             highlightTargets(node.gridCoordinates)
-        node.addClass(AppStyle.hoverColor)
+        node.addClass(if(lock) AppStyle.gridLock else AppStyle.gridHover)
         currentHighlight = node
     }
     
     private fun clearTargetHighlights() {
-        lockedHighlight?.let { pieces[it] }?.removeClass(AppStyle.hoverColor)
+        lockedHighlight?.let { pieces[it] }?.removeClass(AppStyle.gridHover)
         lockedHighlight = null
         grid.children.removeAll(targetHighlights)
         targetHighlights.clear()
@@ -320,7 +321,7 @@ class BoardView: View() {
         clearTargetHighlights()
         gameModel.gameState.value?.board?.possibleMovesFrom(position)?.map {
             val target = position + it
-            val node = Region().addClass(AppStyle.hoverColor).apply {
+            val node = Region().addClass(AppStyle.gridHover).apply {
                 onLeftClick {
                     if(gameModel.atLatestTurn.value && gameModel.isHumanTurn.value && gameModel.gameState.value?.board?.get(position)?.team == gameModel.gameState.value?.currentTeam) {
                         fire(HumanMoveAction(Move(position, target).also { logger.debug("Human move: $it") }))

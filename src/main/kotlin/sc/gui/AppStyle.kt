@@ -6,32 +6,38 @@ import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
+import sc.api.plugins.Team
 import sc.plugin2022.PieceType
+import sc.plugin2022.color
+import sc.plugin2022.direction
 import tornadofx.*
 
 class AppStyle: Stylesheet() {
     
     companion object {
+        // RESOURCES
         private val colorSand = c("#f2df8e")
         
         private val gotuRegular = Font.loadFont(ResourceLookup(this)["/fonts/NotoSans-Regular.ttf"], 16.0)
-        
+    
         const val spacing = 20.0
         val formSpacing = spacing / 2
         
         val fontSizeRegular = 20.pt
         val fontSizeBig = 24.pt
         val fontSizeHeader = 32.pt
-        
+    
+        // CLASSES
         val background by cssclass()
-        
+    
         val fullWidth by cssclass()
         val lightColorSchema by cssclass()
         val darkColorSchema by cssclass()
         
         val statusLabel by cssclass()
-        
-        val hoverColor by cssclass()
+    
+        val gridHover by csspseudoclass()
+        val gridLock by csspseudoclass()
     }
     
     init {
@@ -95,8 +101,28 @@ class AppStyle: Stylesheet() {
         }
         
         // Game
-        hoverColor {
-            backgroundColor += c("#2225")
+        gridHover {
+            backgroundColor += c("#222", 0.3)
+            and(hover) {
+                backgroundColor += c("#222", 0.5)
+            }
+        }
+        Team.values().forEach { team ->
+            ".${team.color}" {
+                val color = when(team.color) {
+                    "Rot" -> "red"
+                    "Blau" -> "blue"
+                    else -> throw NoWhenBranchMatchedException("Illegal color ${team.color}")
+                }
+                backgroundColor += c(color, 0.6).desaturate()
+                scaleX = team.direction
+                and(gridHover) {
+                    backgroundColor += c(color, 0.6)
+                }
+                and(gridLock) {
+                    backgroundColor += c(color, 0.8)
+                }
+            }
         }
     
         ".grid" {
