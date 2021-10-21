@@ -54,7 +54,7 @@ class GameFlowController: Controller() {
             if(state != null)
                 gameModel.gameState.set(state)
         }
-        gameModel.gameEnded.onChange {
+        gameModel.gameOver.onChange {
             if (it)
                 controller = null
         }

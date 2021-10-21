@@ -10,7 +10,7 @@ import sc.gui.NewGameState
 import sc.gui.controller.CreateGame
 import sc.gui.controller.HumanMoveAction
 import sc.gui.controller.HumanMoveRequest
-import sc.gui.events.TerminateGame
+import sc.gui.events.*
 import sc.plugin2022.GameState
 import sc.shared.GameResult
 import sc.util.booleanBinding
@@ -43,7 +43,7 @@ class GameModel: ViewModel() {
     val gameStarted =
             booleanBinding(availableTurns, isHumanTurn)
             { value > 0 || isHumanTurn.value }
-    val gameEnded = gameResult.booleanBinding { it != null }
+    val gameOver = gameResult.booleanBinding { it != null }
     
     init {
         subscribe<NewGameState> { event ->

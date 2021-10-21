@@ -53,13 +53,13 @@ class ControlView: View() {
                     prefWidth = AppStyle.fontSizeRegular.value * 7
                     textProperty().bind(
                             arrayOf<ObservableValue<Number>>(gameModel.currentTurn, gameModel.availableTurns).binding
-                            { (cur, all) -> "Zug " + if(cur != all || gameModel.gameEnded.value) "$cur/$all" else cur }
+                            { (cur, all) -> "Zug " + if(cur != all || gameModel.gameOver.value) "$cur/$all" else cur }
                     )
                 }
                 button {
                     disableProperty().bind(
-                            arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.isHumanTurn, gameModel.gameEnded).booleanBinding
-                            { (latest, human, end) -> logger.trace("latest: $latest, human: $human, end: $end"); latest && (human || end) }
+                            arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.isHumanTurn, gameModel.gameOver).booleanBinding
+                            { (latest, human, end) -> logger.trace { "latest: $latest, human: $human, end: $end" }; latest && (human || end) }
                     )
                     text = "⏭"
                     setOnMouseClicked {
@@ -88,7 +88,7 @@ class ControlView: View() {
                 gameControlState.value = null
             }
         }
-        arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.gameEnded).listen { (latestTurn, end) ->
+        arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.gameOver).listen { (latestTurn, end) ->
             if(latestTurn && end) gameControlState.value = FINISHED
         }
     }
