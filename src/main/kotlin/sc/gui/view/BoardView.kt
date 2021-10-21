@@ -57,6 +57,9 @@ class ResizableImageView(sizeProperty: ObservableValue<Number>): ImageView() {
     override fun minHeight(width: Double): Double = 16.0
     override fun minWidth(height: Double): Double = 16.0
     override fun isResizable(): Boolean = true
+    
+    override fun toString(): String =
+            styleClass.joinToString(".") + pseudoClassStates.joinToString("") { ":$it" }
 }
 
 class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: String): StackPane() {
@@ -117,7 +120,10 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
         })
     }
     
-    override fun toString(): String = "PieceImage@${Integer.toHexString(hashCode())}(content = $content)"
+    override fun toString(): String =
+            "$content@${Integer.toHexString(hashCode())}" +
+            pseudoClassStates.joinToString("") { ":$it" } +
+            children
 }
 
 class BoardView: View() {
@@ -151,6 +157,8 @@ class BoardView: View() {
             val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reversed()).maxByOrNull {
                 it.first?.turn ?: -1
             }!!.second
+            // TODO tornadofx: nested CSS, Color.derive with defaults, configProperty, CSS important, selectClass/Pseudo
+            // TODO sounds for figure movements
             lastMove?.let { move ->
                 pieces.remove(move.from)?.let { piece ->
                     val coveredPiece = pieces.remove(move.to)

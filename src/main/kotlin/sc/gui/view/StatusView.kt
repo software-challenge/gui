@@ -42,7 +42,7 @@ class StatusBinding(private val game: GameModel): StringBinding() {
             else game.playerNames.joinToString(" vs ")
     
     val ITeam.displayName
-        get() = index.let { game.playerNames[it] ?: "Spieler ${it + 1}" }
+        get() = index.let { game.playerNames.getOrNull(it) ?: "Spieler ${it + 1}" }
 }
 
 class ScoreBinding(private val game: GameModel): StringBinding() {

@@ -28,16 +28,16 @@ class AppStyle: Stylesheet() {
         val fontSizeRegular = 20.pt
         val fontSizeBig = 24.pt
         val fontSizeHeader = 32.pt
-    
+        
         // CLASSES
         val background by cssclass()
-    
+        
         val fullWidth by cssclass()
         val lightColorSchema by cssclass()
         val darkColorSchema by cssclass()
         
         val statusLabel by cssclass()
-    
+        
         val gridHover by csspseudoclass()
         val gridLock by csspseudoclass()
     }
@@ -62,8 +62,8 @@ class AppStyle: Stylesheet() {
         }
         
         lightColorSchema {
-            baseColor = c("#E0E0E0")
-            backgroundColor += c("#EEE")
+            baseColor = c("#CCC")
+            backgroundColor += c("#DDD")
             accentColor = Color.MEDIUMPURPLE
             faintFocusColor = baseColor
             
@@ -126,7 +126,7 @@ class AppStyle: Stylesheet() {
                 }
             }
         }
-    
+        
         ".grid" {
             borderStyle += BorderStrokeStyle.DOTTED
             borderColor += box(colorSand.darker())
