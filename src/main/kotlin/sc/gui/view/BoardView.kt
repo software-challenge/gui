@@ -175,24 +175,30 @@ class BoardView: View() {
                             if(newHeight == null) {
                                 Platform.runLater {
                                     val bounds = piece.localToScene(piece.layoutBounds)
-                                    val teamAmbers = ambers[state.otherTeam] ?: return@runLater
-                                    while(teamAmbers.size < state.getPointsForTeam(state.otherTeam))
+                                    val teamAmbers = oldState?.getPointsForTeam(state.otherTeam) ?: return@runLater
+                                    (teamAmbers until state.getPointsForTeam(state.otherTeam)).forEach { position ->
                                         Group(PieceImage(calculatedBlockSize, "amber")).apply {
                                             opacity = 0.0
                                             rootStack.add(this)
-                                            val alignLeft = oldState?.board?.get(move.from)?.team == Team.ONE
+                                            val alignLeft = oldState.board.get(move.from)?.team == Team.ONE
                                             StackPane.setAlignment(this, if(alignLeft) Pos.TOP_LEFT else Pos.TOP_RIGHT)
                                             translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if(alignLeft) it else scene.width - it }
                                             translateY = bounds.centerY - calculatedBlockSize.value / 2 - 56
-                                            val position = teamAmbers.size
-                                            teamAmbers.add(this)
                                             fade(transitionDuration, pieceOpacity).setOnFinished {
                                                 val xOffset = { size: Number -> (position * (size.toDouble() / 3) + AppStyle.spacing).let { if(alignLeft) it else -it } }
-                                                move(transitionDuration.multiply(2.0), Point2D(xOffset(calculatedBlockSize.value), 0.0)).setOnFinished {
-                                                    translateXProperty().bind(calculatedBlockSize.doubleBinding { xOffset(it!!) })
+                                                ambers[state.otherTeam]?.takeIf { it.size <= position }?.let { ambers ->
+                                                    ambers.add(this)
+                                                    move(transitionDuration.multiply(2.0), Point2D(xOffset(calculatedBlockSize.value), 0.0)).setOnFinished {
+                                                        translateXProperty().bind(calculatedBlockSize.doubleBinding { xOffset(it!!) })
+                                                    }
+                                                } ?: run {
+                                                    fade(transitionDuration, 0).setOnFinished {
+                                                        rootStack.children.remove(this)
+                                                    }
                                                 }
                                             }
                                         }
+                                    }
                                 }
                                 piece.updateHeight(0)
                                 removePiece(piece)
