@@ -24,7 +24,7 @@ class AppView: View("Software-Challenge Germany") {
     val controller: AppController by inject()
     private val gameFlowController: GameFlowController by inject()
     private val sochaIcon = resources.imageview("/icon.png")
-    
+
     override val root = borderpane {
         addClass(AppStyle.lightColorSchema)
         top = menubar {
@@ -84,9 +84,9 @@ class AppView: View("Software-Challenge Germany") {
                 }
             }
         }
-        
+
     }
-    
+
     init {
         sochaIcon.fitHeight = 32.0
         sochaIcon.fitWidth = 32.0
@@ -101,8 +101,8 @@ class AppView: View("Software-Challenge Germany") {
                     }
             ).apply { add(StartView::class) }
         }
-        
-        val gameTitle = "Blokus"
+
+        val gameTitle = "Ostseeschach"
         val version = resources.text("/version.txt")
         val sochaTitle = "Software-Challenge GUI $version"
         titleProperty.bind(controller.model.currentView.stringBinding {
@@ -114,7 +114,7 @@ class AppView: View("Software-Challenge Germany") {
                 null -> throw NoWhenBranchMatchedException("Current view can't be null!")
             }
         })
-        
+
         controller.model.isDarkMode.listenImmediately { value ->
             if (value) {
                 root.removeClass(AppStyle.lightColorSchema)
