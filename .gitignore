@@ -12,5 +12,9 @@ gradle.properties
 **/keyframes/*
 !src/main/resources/graphics/cockle/keyframes/__olive_cockle*
 !src/main/resources/graphics/seagull/keyframes/__seagull*
-!src/main/resources/graphics/seal/keyframes/__cream_seal*
-!src/main/resources/graphics/starfish/keyframes/__tan_starfish_side_view_happy*
+!src/main/resources/graphics/seal/keyframes/__cream_seal_idle_on_land_upright_0*
+!src/main/resources/graphics/seal/keyframes/__cream_seal_move*
+!src/main/resources/graphics/seal/keyframes/__cream_seal_transion*
+!src/main/resources/graphics/starfish/keyframes/__tan_starfish_side_view_happy_idle*
+!src/main/resources/graphics/starfish/keyframes/__tan_starfish_side_view_happy_move*
+!src/main/resources/graphics/starfish/keyframes/__tan_starfish_side_view_happy_jump*
