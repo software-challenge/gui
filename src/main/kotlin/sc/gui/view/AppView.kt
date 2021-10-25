@@ -11,6 +11,7 @@ import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.CreateGame
 import sc.gui.controller.GameFlowController
+import sc.gui.events.TerminateGame
 import sc.gui.model.ViewType
 import sc.util.browse
 import sc.util.browseUrl
@@ -37,7 +38,7 @@ class AppView: View("Software-Challenge Germany") {
                     enableWhen(controller.model.currentView.isNotEqualTo(ViewType.GAME_CREATION))
                     action {
                         logger.debug("New Game!")
-                        if (controller.model.currentView.get() == ViewType.GAME) {
+                        if(controller.model.currentView.get() == ViewType.GAME) {
                             confirm(
                                     header = "Neues Spiel anfangen",
                                     content = "Willst du wirklich dein aktuelles Spiel verwerfen und ein neues anfangen?",
@@ -53,7 +54,7 @@ class AppView: View("Software-Challenge Germany") {
                 separator()
                 item("Replay laden", "Shortcut+R").action {
                     chooseFile("Replay laden", arrayOf(FileChooser.ExtensionFilter("XML", "*.xml", "*.xml.gz")), File("replays")).forEach {
-                        if (controller.model.currentView.get() == ViewType.GAME)
+                        if(controller.model.currentView.get() == ViewType.GAME)
                             fire(TerminateGame())
                         gameFlowController.loadReplay(it)
                     }
@@ -106,7 +107,7 @@ class AppView: View("Software-Challenge Germany") {
         val version = resources.text("/version.txt")
         val sochaTitle = "Software-Challenge GUI $version"
         titleProperty.bind(controller.model.currentView.stringBinding {
-            when (it) {
+            when(it) {
                 ViewType.START -> sochaTitle
                 ViewType.GAME_CREATION -> "Neues Spiel - $sochaTitle"
                 ViewType.GAME_LOADING -> "Starte Spiel $gameTitle - $sochaTitle"
@@ -115,8 +116,8 @@ class AppView: View("Software-Challenge Germany") {
             }
         })
         
-        controller.model.isDarkMode.listenImmediately { value ->
-            if (value) {
+        controller.model.darkMode.listenImmediately { value ->
+            if(value) {
                 root.removeClass(AppStyle.lightColorSchema)
                 root.addClass(AppStyle.darkColorSchema)
             } else {

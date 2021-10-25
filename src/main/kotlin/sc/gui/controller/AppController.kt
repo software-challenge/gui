@@ -2,6 +2,7 @@ package sc.gui.controller
 
 import mu.KLogging
 import sc.gui.GameReadyEvent
+import sc.gui.events.TerminateGame
 import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.gui.model.ViewType
@@ -14,7 +15,7 @@ object NavigateBackEvent: FXEvent()
 object CreateGame: FXEvent()
 
 class AppController: Controller() {
-    val model = AppModel()
+    val model = AppModel
     private val gameModel: GameModel by inject()
     private val clientController: ClientController by inject()
     
@@ -43,7 +44,7 @@ class AppController: Controller() {
     }
     
     fun toggleDarkmode() {
-        model.isDarkMode.toggle()
+        model.darkMode.toggle()
     }
     
     companion object: KLogging()

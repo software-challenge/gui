@@ -21,7 +21,7 @@ class StatusBinding(private val game: GameModel): StringBinding() {
     
     fun irregularities(gameResult: GameResult): String? =
             gameResult.scores.values.firstNotNullOfOrNull { score ->
-                when (score.cause) {
+                when(score.cause) {
                     ScoreCause.LEFT -> "Grund: Vorzeitiges Verlassen des Spiels"
                     ScoreCause.RULE_VIOLATION -> "Grund: Regelverletzung"
                     ScoreCause.SOFT_TIMEOUT -> "Grund: Überschreitung des Zeitlimits"
@@ -32,7 +32,7 @@ class StatusBinding(private val game: GameModel): StringBinding() {
             }
     
     override fun computeValue(): String =
-            if (game.gameStarted.value)
+            if(game.gameStarted.value)
                 game.gameResult.get()?.let { gameResult ->
                     """
                     ${winner(gameResult)}
@@ -42,7 +42,7 @@ class StatusBinding(private val game: GameModel): StringBinding() {
             else game.playerNames.joinToString(" vs ")
     
     val ITeam.displayName
-        get() = index.let { game.playerNames[it] ?: "Spieler ${it + 1}" }
+        get() = index.let { game.playerNames.getOrNull(it) ?: "Spieler ${it + 1}" }
 }
 
 class ScoreBinding(private val game: GameModel): StringBinding() {
@@ -51,7 +51,7 @@ class ScoreBinding(private val game: GameModel): StringBinding() {
     }
     
     override fun computeValue(): String =
-            if (game.gameStarted.value)
+            if(game.gameStarted.value)
                 "Runde ${game.currentRound.get()} - " +
                 game.teamScores.value?.joinToString(" : ")
             else "Drücke auf Start"

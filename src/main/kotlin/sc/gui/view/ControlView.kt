@@ -7,29 +7,15 @@ import mu.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
+import sc.gui.events.*
+import sc.gui.model.AppModel
 import sc.gui.model.GameModel
-import sc.gui.view.GameControlState.*
+import sc.gui.view.ControlView.GameControlState.*
 import sc.util.binding
 import sc.util.booleanBinding
 import sc.util.listen
 import sc.util.listenImmediately
 import tornadofx.*
-
-sealed class GameControlEvent: FXEvent()
-data class PauseGame(val pause: Boolean): GameControlEvent()
-data class StepGame(val steps: Int): GameControlEvent()
-/** Signals that the current game should be terminated.
- * @param close whether to return to start screen */
-data class TerminateGame(val close: Boolean = true): GameControlEvent()
-
-/** Encapsulates the different actions of the GameControlButton.
- * @param action the event to fire when this state is invoked */
-enum class GameControlState(val text: String, val action: FXEvent) {
-    START("Start", PauseGame(false)),
-    PLAYING("Anhalten", PauseGame(true)),
-    PAUSED("Weiter", PauseGame(false)),
-    FINISHED("Spiel beenden", TerminateGame());
-}
 
 class ControlView: View() {
     private val logger = KotlinLogging.logger {}
@@ -57,7 +43,7 @@ class ControlView: View() {
                     disableWhen(gameModel.currentTurn.isEqualTo(0))
                     text = "⏮"
                     setOnMouseClicked {
-                        if (gameModel.atLatestTurn.value)
+                        if(gameModel.atLatestTurn.value)
                             fire(PauseGame(true))
                         fire(StepGame(-1))
                     }
@@ -67,21 +53,22 @@ class ControlView: View() {
                     prefWidth = AppStyle.fontSizeRegular.value * 7
                     textProperty().bind(
                             arrayOf<ObservableValue<Number>>(gameModel.currentTurn, gameModel.availableTurns).binding
-                            { (cur, all) -> "Zug " + if (cur != all || gameModel.gameEnded.value) "$cur/$all" else cur }
+                            { (cur, all) -> "Zug " + if(cur != all || gameModel.gameOver.value) "$cur/$all" else cur }
                     )
                 }
                 button {
                     disableProperty().bind(
-                            arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.isHumanTurn, gameModel.gameEnded).booleanBinding
-                            { (latest, human, end) -> logger.trace("latest: $latest, human: $human, end: $end"); latest && (human || end) }
+                            arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.isHumanTurn, gameModel.gameOver).booleanBinding
+                            { (latest, human, end) -> logger.trace { "latest: $latest, human: $human, end: $end" }; latest && (human || end) }
                     )
                     text = "⏭"
                     setOnMouseClicked {
                         fire(StepGame(1))
-                        if (gameControlState.value == START)
+                        if(gameControlState.value == START)
                             gameControlState.value = PAUSED
                     }
                 }
+                checkbox("Animationen", AppModel.animate)
             }
     
     init {
@@ -96,14 +83,22 @@ class ControlView: View() {
             }
         }
         gameModel.isHumanTurn.onChange {
-            if (it && gameControlState.value != PAUSED) {
+            if(it && gameControlState.value != PAUSED) {
                 gameControlState.value = PLAYING
                 gameControlState.value = null
             }
         }
-        arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.gameEnded).listen { (latestTurn, end) ->
-            if (latestTurn && end) gameControlState.value = FINISHED
+        arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.gameOver).listen { (latestTurn, end) ->
+            if(latestTurn && end) gameControlState.value = FINISHED
         }
     }
     
+    /** Encapsulates the different actions of the GameControlButton.
+     * @param action the event to fire when this state is invoked */
+    enum class GameControlState(val text: String, val action: FXEvent) {
+        START("Start", PauseGame(false)),
+        PLAYING("Anhalten", PauseGame(true)),
+        PAUSED("Weiter", PauseGame(false)),
+        FINISHED("Spiel beenden", TerminateGame());
+    }
 }

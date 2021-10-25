@@ -1,65 +1,98 @@
 package sc.gui.view
 
+import javafx.animation.Animation
 import javafx.animation.FadeTransition
+import javafx.animation.KeyFrame
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ObservableDoubleValue
 import javafx.beans.value.ObservableValue
-import javafx.geometry.Insets
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Group
 import javafx.scene.Node
-import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.util.Duration
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
+import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.plugin2022.*
 import sc.plugin2022.util.Constants
+import sc.util.listenImmediately
 import tornadofx.*
+import java.lang.ref.WeakReference
+import kotlin.math.pow
+import kotlin.random.Random
 
-private val logger = LoggerFactory.getLogger(BoardView::class.java)
+private val logger = KotlinLogging.logger { }
 
-const val pieceOpacity = 0.9
-val transitionDuration = Duration(500.0)
+val animationDuration = Duration.seconds(0.1)
+val transitionDuration = animationDuration.multiply(8.0)
+val animationInterval = timeline {
+    cycleCount = Animation.INDEFINITE
+    this += KeyFrame(animationDuration, {
+        animationFunctions.removeIf {
+            // Remove invalid WeakReferences
+            it.get()?.let {
+                it()
+                false
+            } ?: true
+        }
+    })
+}
+private val animationFunctions = ArrayList<WeakReference<() -> Unit>>()
 
 // this custom class is required to be able to shrink upsized images back to smaller sizes
 // see: https://stackoverflow.com/a/35202191/9127322
-class ResizableImageView(sizeProperty: ObservableValue<Number>, resource: String, scaling: Double = 1.0): ImageView() {
+class ResizableImageView(sizeProperty: ObservableValue<Number>): ImageView() {
     init {
-        imageProperty().bind(sizeProperty.objectBinding {
-            val size = it!!.toDouble()
-            val scaledSize = size * scaling
-            translateY = -size * (scaling - 1.0) / 5
-            Image(resource, scaledSize, scaledSize, true, true)
-        })
+        fitWidthProperty().bind(sizeProperty)
+        isPreserveRatio = true
     }
     
-    override fun prefHeight(width: Double): Double = image.height
     override fun minHeight(width: Double): Double = 16.0
-    override fun prefWidth(height: Double): Double = image.width
-    override fun minWidth(width: Double): Double = 16.0
+    override fun minWidth(height: Double): Double = 16.0
     override fun isResizable(): Boolean = true
+    
+    override fun toString(): String =
+            styleClass.joinToString(".") + pseudoClassStates.joinToString("") { ":$it" }
 }
 
-class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: PieceType? = null): StackPane() {
+class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: String): StackPane() {
     var height = 0
         private set
+    private val animateFn = ::animate
     
     init {
-        content?.let { addChild(it.toString().lowercase()) }
+        addChild(content)
+        animationFunctions.add(WeakReference(animateFn))
+    }
+    
+    val frameCount = if(content == "seestern" || content == "herzmuschel") 20 else 16
+    var frame = Random.nextInt(1, frameCount)
+    fun animate() {
+        if(AppModel.animate.value || frame > 0)
+            frame = nextFrame()
+    }
+    
+    fun nextFrame(prefix: String = "idle", oldFrame: Int = frame, randomize: Boolean = true, remove: Boolean = false): Int {
+        (children.lastOrNull() as? ResizableImageView)?.removePseudoClass("$prefix$oldFrame")
+        return if(!remove)
+            (oldFrame.inc() + if(randomize) Random.nextInt(1, 5).div(5) else 0).mod(frameCount).also { newFrame ->
+                (children.lastOrNull() as? ResizableImageView)?.addPseudoClass("$prefix$newFrame")
+            }
+        else -1
     }
     
     fun updateHeight(newHeight: Int) {
-        while (height < newHeight) {
+        while(height < newHeight) {
             addChild("blank")
         }
-        if (newHeight < height) {
+        if(newHeight < height) {
             children.subList(0, height - newHeight).forEach { node ->
                 node.fade(transitionDuration, 0.0).setOnFinished {
                     children.remove(node)
@@ -67,22 +100,30 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
             }
             height = newHeight
         }
+        nextFrame()
     }
     
     fun addChild(graphic: String) {
         height++
-        children.add(0, ResizableImageView(
-                sizeProperty,
-                ResourceLookup(this)["/graphics/$graphic.png"],
-                when (graphic) {
-                    "moewe" -> 1.1
-                    "robbe" -> 1.4
-                    else -> 1.0
+        logger.trace { "$this: Adding $graphic for height $height" }
+        children.add(0, ResizableImageView(sizeProperty).apply {
+            addClass(graphic)
+            if(graphic == "herzmuschel")
+                sizeProperty.listenImmediately {
+                    translateX = -it.toDouble() / 8
+                    translateY = -it.toDouble() / 3
                 }
-        ))
+            if(graphic == "robbe")
+                sizeProperty.listenImmediately {
+                    translateX = it.toDouble() / 11
+                }
+        })
     }
     
-    override fun toString(): String = "PieceImage@${Integer.toHexString(hashCode())}(content = $content)"
+    override fun toString(): String =
+            "$content@${Integer.toHexString(hashCode())}" +
+            pseudoClassStates.joinToString("") { ":$it" } +
+            children
 }
 
 class BoardView: View() {
@@ -99,75 +140,92 @@ class BoardView: View() {
     private val rootStack: StackPane by lazy { (grid.scene.root as BorderPane).center as StackPane }
     
     val grid = gridpane {
-        isGridLinesVisible = true
         paddingAll = AppStyle.spacing
         maxHeightProperty().bind(size)
         maxWidthProperty().bind(size)
         val stateListener = ChangeListener<GameState?> { _, oldState, state ->
             clearTargetHighlights()
-            if (state == null) {
+            if(state == null) {
                 ambers.values.flatten().forEach { rootStack.children.remove(it) }
                 ambers.values.forEach { it.clear() }
-                isGridLinesVisible = false
-                children.clear()
+                children.remove(Constants.BOARD_SIZE.toDouble().pow(2).toInt(), children.size)
                 pieces.clear()
-                isGridLinesVisible = true
                 return@ChangeListener
             }
-            // TODO finish pending animations
+            // TODO finish pending movements
             logger.trace("New state for board: ${state.longString()}")
             val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reversed()).maxByOrNull {
                 it.first?.turn ?: -1
             }!!.second
+            // TODO tornadofx: nested CSS, Color.derive with defaults, configProperty, CSS important, selectClass/Pseudo
+            // TODO sounds for figure movements
             lastMove?.let { move ->
                 pieces.remove(move.from)?.let { piece ->
                     val coveredPiece = pieces.remove(move.to)
                     val newHeight = state.board[move.to]?.count
-                    if (newHeight != null) {
+                    if(newHeight != null) {
                         pieces[move.to] = piece
-                        if (newHeight < piece.height)
+                        if(newHeight < piece.height)
                             piece.updateHeight(newHeight)
                     }
-                    piece.move(transitionDuration, Point2D(move.delta.dx * gridSize, move.delta.dy * gridSize)) {
-                        setOnFinished {
-                            piece.translateX = 0.0
-                            piece.translateY = 0.0
-                            piece.gridpaneConstraints { columnRowIndex(move.to.x, move.to.y) }
-                            logger.trace("Piece $piece finished animating to ${state.board[move.to]} at ${move.to}")
-                            println("Moving $piece while highlighting $currentHighlight onto $coveredPiece")
-                            if(currentHighlight != null && currentHighlight in arrayOf(piece, coveredPiece)) {
-                                highlightTargets(move.to)
-                                lockedHighlight = move.to
-                            }
-                            children.remove(coveredPiece)
-                            if(lockedHighlight == move.to)
-                                lockedHighlight = null
-                            if (newHeight == null) {
-                                Platform.runLater {
-                                    val bounds = piece.localToScene(piece.boundsInLocal)
-                                    val teamAmbers = ambers[state.otherTeam] ?: return@runLater
-                                    while (teamAmbers.size < state.getPointsForTeam(state.otherTeam))
-                                        Group(PieceImage(calculatedBlockSize).apply { addChild("amber") }).apply {
-                                            opacity = 0.0
-                                            rootStack.add(this)
-                                            val alignLeft = oldState?.board?.get(move.from)?.team == Team.ONE
-                                            StackPane.setAlignment(this, if (alignLeft) Pos.TOP_LEFT else Pos.TOP_RIGHT)
-                                            translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if (alignLeft) it else scene.width - it }
-                                            translateY = bounds.centerY - calculatedBlockSize.value / 2 - 56
-                                            val position = teamAmbers.size
-                                            teamAmbers.add(this)
-                                            fade(transitionDuration, pieceOpacity).setOnFinished {
-                                                val xOffset = { size: Number -> (position * (size.toDouble() / 3) + AppStyle.spacing).let { if (alignLeft) it else -it } }
-                                                move(transitionDuration.multiply(2.0), Point2D(xOffset(calculatedBlockSize.value), 0.0)).setOnFinished {
-                                                    translateXProperty().bind(calculatedBlockSize.doubleBinding { xOffset(it!!) })
+                    val robbe = oldState?.board?.get(move.from)?.type == PieceType.Robbe
+                    parallelTransition {
+                        var cur = -1
+                        val moveType = if(coveredPiece != null) "consume" else "move"
+                        timeline {
+                            cycleCount = if(robbe) 12 else 8
+                            this += KeyFrame(animationDuration, {
+                                cur = piece.nextFrame(moveType, cur, randomize = false)
+                            })
+                        }.apply { setOnFinished { piece.nextFrame(moveType, cur, remove = true) } }
+                        children += piece.move(transitionDuration - animationDuration.multiply(2.0), Point2D(move.delta.dx * gridSize, move.delta.dy * gridSize), play = false) {
+                            delay = animationDuration.multiply(if(robbe) 4.0 else 1.0)
+                            setOnFinished {
+                                piece.translateX = 0.0
+                                piece.translateY = 0.0
+                                piece.gridpaneConstraints { columnRowIndex(move.to.x, move.to.y) }
+                                logger.trace("Tile $piece finished transition to ${state.board[move.to]} covering $coveredPiece at ${move.to} (highlight: $currentHighlight)")
+                                if(currentHighlight != null && currentHighlight in arrayOf(piece, coveredPiece)) {
+                                    highlightTargets(move.to)
+                                    lockedHighlight = move.to
+                                }
+                                this@gridpane.children.remove(coveredPiece)
+                                if(lockedHighlight == move.to)
+                                    lockedHighlight = null
+                                if(newHeight == null) {
+                                    Platform.runLater {
+                                        val bounds = piece.localToScene(piece.layoutBounds)
+                                        val teamAmbers = oldState?.getPointsForTeam(state.otherTeam) ?: return@runLater
+                                        (teamAmbers until state.getPointsForTeam(state.otherTeam)).forEach { position ->
+                                            Group(PieceImage(calculatedBlockSize, "amber")).apply {
+                                                opacity = 0.0
+                                                rootStack.add(this)
+                                                val alignLeft = oldState.board.get(move.from)?.team == Team.ONE
+                                                StackPane.setAlignment(this, if(alignLeft) Pos.TOP_LEFT else Pos.TOP_RIGHT)
+                                                translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if(alignLeft) it else scene.width - it }
+                                                translateY = bounds.centerY - calculatedBlockSize.value / 2 - 56
+                                                fade(transitionDuration, AppStyle.pieceOpacity).setOnFinished {
+                                                    val xOffset = { size: Number -> (position * (size.toDouble() / 3) + AppStyle.spacing).let { if(alignLeft) it else -it } }
+                                                    ambers[state.otherTeam]?.takeIf { it.size <= position }
+                                                            ?.let { ambers ->
+                                                                ambers.add(this)
+                                                                move(transitionDuration.multiply(2.0), Point2D(xOffset(calculatedBlockSize.value), 0.0)).setOnFinished {
+                                                                    translateXProperty().bind(calculatedBlockSize.doubleBinding { xOffset(it!!) })
+                                                                }
+                                                            } ?: run {
+                                                        fade(transitionDuration, 0).setOnFinished {
+                                                            rootStack.children.remove(this)
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
+                                    }
+                                    piece.updateHeight(0)
+                                    removePiece(piece)
+                                } else {
+                                    piece.updateHeight(newHeight)
                                 }
-                                piece.updateHeight(0)
-                                removePiece(piece)
-                            } else {
-                                piece.updateHeight(newHeight)
                             }
                         }
                     }
@@ -183,30 +241,68 @@ class BoardView: View() {
                 }
             }
             val iter = pieces.iterator()
-            while (iter.hasNext()) {
+            while(iter.hasNext()) {
                 val (c, image) = iter.next()
                 val piece = state.board[c]
-                if (piece == null) {
+                if(piece == null) {
                     removePiece(image)
                     iter.remove()
                 } else {
-                    image.scaleX = piece.team.direction.toDouble()
-                    image.background = Background(BackgroundFill(c(if (piece.team.index == 0) "red" else "blue", 0.5), CornerRadii.EMPTY, Insets.EMPTY))
-                    image.fade(transitionDuration, pieceOpacity * when {
+                    image.addClass(piece.team.color)
+                    image.fade(transitionDuration, AppStyle.pieceOpacity * when {
                         piece.team != state.currentTeam -> 0.6
-                        gameModel.atLatestTurn.value -> 1.0
+                        gameModel.atLatestTurn.value && gameModel.gameState.value?.isOver == false -> 1.0
                         else -> 0.8
                     })
                 }
             }
         }
+        (0 until Constants.BOARD_SIZE).forEach { index ->
+            constraintsForRow(index).percentHeight = 100.0 / Constants.BOARD_SIZE
+            constraintsForColumn(index).percentWidth = 100.0 / Constants.BOARD_SIZE
+            (0 until Constants.BOARD_SIZE).forEach { row ->
+                add(Pane().addClass("grid").apply {
+                    setOnMouseEntered { event ->
+                        pieces[gridCoordinates]?.run {
+                            if(lockedHighlight == null) {
+                                highlight(this)
+                                event.consume()
+                            } else if(lockedHighlight != gridCoordinates) {
+                                addClass(AppStyle.gridHover)
+                            }
+                        }
+                    }
+                    setOnMouseExited { event ->
+                        pieces[gridCoordinates]?.run {
+                            if(lockedHighlight == null) {
+                                if(!isSelectable(gridCoordinates)) {
+                                    clearTargetHighlights()
+                                    removeClass(AppStyle.gridHover)
+                                    currentHighlight = null
+                                }
+                            } else if(lockedHighlight != gridCoordinates) {
+                                removeClass(AppStyle.gridHover)
+                            }
+                            event.consume()
+                        }
+                    }
+                    onLeftClick {
+                        val coords = gridCoordinates
+                        lockedHighlight =
+                                if(coords == lockedHighlight || !isSelectable(coords)) {
+                                    pieces[coords]?.let { highlight(it, lock = false, updateTargetHighlights = coords != lockedHighlight) }
+                                    null
+                                } else {
+                                    coords.also { pieces[coords]?.let { highlight(it, lock = true) } }
+                                }
+                        logger.trace { "Clicked $coords (lock at $lockedHighlight, current $currentHighlight)" }
+                    }
+                }, index, row)
+            }
+        }
         Platform.runLater {
             gameModel.gameState.addListener(stateListener)
             stateListener.changed(null, null, gameModel.gameState.value)
-        }
-        for (x in 0 until Constants.BOARD_SIZE) {
-            constraintsForRow(x).percentHeight = 100.0 / Constants.BOARD_SIZE
-            constraintsForColumn(x).percentWidth = 100.0 / Constants.BOARD_SIZE
         }
     }
     override val root = vbox(alignment = Pos.CENTER) {
@@ -224,42 +320,26 @@ class BoardView: View() {
     
     /** Whether the piece at [coords] could be selected for a human move.. */
     private fun isSelectable(coords: Coordinates) =
-            pieces[coords]?.opacity == pieceOpacity && gameModel.isHumanTurn.value
+            pieces[coords]?.opacity == AppStyle.pieceOpacity && gameModel.isHumanTurn.value
     
     private var lockedHighlight: Coordinates? = null
     private var currentHighlight: Node? = null
     private var targetHighlights = ArrayList<Node>()
     
     private fun createPiece(type: PieceType): PieceImage =
-            PieceImage(calculatedBlockSize, type).apply {
-                setOnMouseEntered {
-                    if (lockedHighlight == null) {
-                        addClass(AppStyle.hoverColor)
-                        highlightTargets(gridCoordinates)
-                        currentHighlight = this
-                        it.consume()
-                    } else if (lockedHighlight != gridCoordinates) {
-                        addClass(AppStyle.softHoverColor)
-                    }
-                }
-                setOnMouseExited {
-                    if (lockedHighlight != gridCoordinates)
-                        removeClass(AppStyle.hoverColor, AppStyle.softHoverColor)
-                    if (lockedHighlight == null && !isSelectable(gridCoordinates))
-                        clearTargetHighlights()
-                    currentHighlight = null
-                    it.consume()
-                }
-                onLeftClick {
-                    lockedHighlight = gridCoordinates.takeUnless { it == lockedHighlight || !isSelectable(it) }?.also {
-                        addClass(AppStyle.hoverColor)
-                        highlightTargets(it)
-                    }
-                }
-            }
+            PieceImage(calculatedBlockSize, type.name.lowercase())
+                    .apply { viewOrder = 1.0 }
+    
+    private fun highlight(node: Node, lock: Boolean = false, updateTargetHighlights: Boolean = true) {
+        currentHighlight?.removeClass(AppStyle.gridHover, AppStyle.gridLock)
+        if(updateTargetHighlights)
+            highlightTargets(node.gridCoordinates)
+        node.addClass(if(lock) AppStyle.gridLock else AppStyle.gridHover)
+        currentHighlight = node
+    }
     
     private fun clearTargetHighlights() {
-        lockedHighlight?.let { pieces[it] }?.removeClass(AppStyle.hoverColor)
+        lockedHighlight?.let { pieces[it] }?.removeClass(AppStyle.gridHover)
         lockedHighlight = null
         grid.children.removeAll(targetHighlights)
         targetHighlights.clear()
@@ -269,9 +349,9 @@ class BoardView: View() {
         clearTargetHighlights()
         gameModel.gameState.value?.board?.possibleMovesFrom(position)?.map {
             val target = position + it
-            val node = Region().addClass(AppStyle.hoverColor).apply {
+            val node = Region().addClass(AppStyle.gridHover).apply {
                 onLeftClick {
-                    if (gameModel.atLatestTurn.value && gameModel.isHumanTurn.value && gameModel.gameState.value?.board?.get(position)?.team == gameModel.gameState.value?.currentTeam) {
+                    if(gameModel.atLatestTurn.value && gameModel.isHumanTurn.value && gameModel.gameState.value?.board?.get(position)?.team == gameModel.gameState.value?.currentTeam) {
                         fire(HumanMoveAction(Move(position, target).also { logger.debug("Human move: $it") }))
                     }
                 }

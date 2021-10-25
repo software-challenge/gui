@@ -8,9 +8,7 @@ import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.NewGameState
 import sc.gui.model.GameModel
-import sc.gui.view.PauseGame
-import sc.gui.view.StepGame
-import sc.gui.view.TerminateGame
+import sc.gui.events.*
 import sc.networking.clients.GameLoaderClient
 import sc.networking.clients.IGameController
 import sc.plugin2022.GameState
@@ -56,7 +54,7 @@ class GameFlowController: Controller() {
             if(state != null)
                 gameModel.gameState.set(state)
         }
-        gameModel.gameEnded.onChange {
+        gameModel.gameOver.onChange {
             if (it)
                 controller = null
         }
