@@ -11,7 +11,7 @@ import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.CreateGame
 import sc.gui.controller.GameFlowController
-import sc.gui.events.TerminateGame
+import sc.gui.events.*
 import sc.gui.model.ViewType
 import sc.util.browse
 import sc.util.browseUrl
@@ -22,7 +22,7 @@ import java.io.File
 private val logger = KotlinLogging.logger {}
 
 class AppView: View("Software-Challenge Germany") {
-    val controller: AppController by inject()
+    private val controller: AppController by inject()
     private val gameFlowController: GameFlowController by inject()
     private val sochaIcon = resources.imageview("/icon.png")
 
@@ -60,7 +60,7 @@ class AppView: View("Software-Challenge Germany") {
                     }
                 }
                 item("Logs öffnen", "Shortcut+L").action {
-                    File("log").absoluteFile.browse()
+                    browse(File("log").absoluteFile)
                 }
             }
             menu("Hilfe") {
@@ -72,16 +72,16 @@ class AppView: View("Software-Challenge Germany") {
                     """.trimIndent(), title = "Hilfe")
                 }
                 item("↗ Spielregeln", "Shortcut+S").action {
-                    "https://docs.software-challenge.de/spiele/aktuell/regeln.html".browseUrl()
+                    browseUrl("https://docs.software-challenge.de/spiele/aktuell/regeln.html")
                 }
                 item("↗ Dokumentation", "Shortcut+D").action {
-                    "https://docs.software-challenge.de".browseUrl()
+                    browseUrl("https://docs.software-challenge.de")
                 }
                 item("↗ Webseite", "Shortcut+I").action {
-                    "https://www.software-challenge.de".browseUrl()
+                    browseUrl("https://www.software-challenge.de")
                 }
                 item("↗ Wettbewerb", "Shortcut+W").action {
-                    "https://contest.software-challenge.de/saison/current".browseUrl()
+                    browseUrl("https://contest.software-challenge.de/saison/current")
                 }
             }
         }
