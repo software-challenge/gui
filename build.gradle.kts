@@ -110,7 +110,7 @@ tasks {
     val release by creating {
         dependsOn(clean, check)
         group = "distribution"
-        description = "Creates and pushes a tagged commit according to the backend version"
+        description = "Create and push a tagged commit matching the backend version"
         doLast {
             val desc = project.properties["m"]?.toString()
                        ?: throw InvalidUserDataException("Das Argument -Pm=\"Beschreibung dieser Version\" wird benötigt")
