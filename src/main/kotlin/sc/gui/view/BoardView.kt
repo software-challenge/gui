@@ -59,7 +59,7 @@ class ResizableImageView(sizeProperty: ObservableValue<Number>): ImageView() {
     override fun isResizable(): Boolean = true
     
     override fun toString(): String =
-            styleClass.joinToString(".") + pseudoClassStates.joinToString("") { ":$it" }
+            "${styleClass.joinToString(".")}@${Integer.toHexString(hashCode())}${pseudoClassStates.joinToString("") { ":$it" }}"
 }
 
 class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: String): StackPane() {
@@ -80,11 +80,14 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     }
     
     fun nextFrame(prefix: String = "idle", oldFrame: Int = frame, randomize: Boolean = true, remove: Boolean = false): Int {
-        (children.lastOrNull() as? ResizableImageView)?.removePseudoClass("$prefix$oldFrame")
+        val img = children.lastOrNull() as? ResizableImageView
+        img?.removePseudoClass("$prefix$oldFrame")
+        logger.trace { "New frame: $prefix$oldFrame to $remove on $img" }
         return if(!remove)
-            (oldFrame.inc() + if(randomize) Random.nextInt(1, 5).div(5) else 0).mod(frameCount).also { newFrame ->
-                (children.lastOrNull() as? ResizableImageView)?.addPseudoClass("$prefix$newFrame")
-            }
+            (oldFrame.inc() + if(randomize) Random.nextInt(1, 5).div(5) else 0)
+                    .mod(frameCount).also { newFrame ->
+                        img?.addPseudoClass("$prefix$newFrame")
+                    }
         else -1
     }
     
@@ -100,7 +103,7 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
             }
             height = newHeight
         }
-        nextFrame()
+        animate()
     }
     
     fun addChild(graphic: String) {
