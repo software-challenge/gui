@@ -11,7 +11,7 @@ plugins {
     
     application
     kotlin("jvm") version "1.5.20"
-    id("org.openjfx.javafxplugin") version "0.0.9"
+    id("org.openjfx.javafxplugin") version "0.0.11"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     
     id("com.github.ben-manes.versions") version "0.36.0"
@@ -79,7 +79,7 @@ tasks {
     }
     
     javafx {
-        version = "13"
+        version = "17"
         modules("javafx.controls", "javafx.fxml", "javafx.base", "javafx.graphics")
     }
     
