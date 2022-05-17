@@ -12,7 +12,7 @@ import tornadofx.*
 
 class StatusBinding(private val game: GameModel): StringBinding() {
     init {
-        bind(game.gameStarted, game.currentTeam, game.gameResult, game.playerNames)
+        bind(game.gameStarted, game.currentTeam, game.gameResult, game.playerNames, game.atLatestTurn)
     }
     
     fun winner(gameResult: GameResult): String =
@@ -32,7 +32,7 @@ class StatusBinding(private val game: GameModel): StringBinding() {
             }
     
     override fun computeValue(): String =
-            if(game.gameStarted.value)
+            if(game.gameStarted.value && game.atLatestTurn.value)
                 game.gameResult.get()?.let { gameResult ->
                     """
                     ${winner(gameResult)}
@@ -64,8 +64,8 @@ class StatusView: View() {
     
     override val root = vbox(alignment = Pos.CENTER) {
         addClass(AppStyle.statusLabel)
-        add(scoreLabel)
         add(statusLabel)
+        add(scoreLabel)
     }
     
     init {

@@ -1,5 +1,6 @@
 package sc.gui
 
+import javafx.stage.Stage
 import mu.KLogging
 import sc.gui.controller.ServerController
 import sc.gui.model.AppModel
@@ -23,12 +24,17 @@ class GuiApp : App(AppView::class, AppStyle::class) {
         addStageIcon(resources.image("/icon.png"))
     }
     
+    override fun start(stage: Stage) {
+        super.start(stage)
+        if(parameters.unnamed.contains("--kiosk")) {
+            AppModel.kiosk.set(true)
+        }
+    }
+    
     companion object: KLogging()
 }
 
 fun main(args: Array<String>) {
     logbackFromPWD()
-    //if(args.contains("--kiosk"))
-    // TODO: handle arguments like --kiosk or --dev
     launch<GuiApp>(args)
 }

@@ -105,6 +105,7 @@ tasks {
         doFirst {
             workingDir.mkdirs()
         }
+        args = System.getProperty("args", "").split(" ")
     }
     
     val release by creating {

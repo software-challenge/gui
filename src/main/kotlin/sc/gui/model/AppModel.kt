@@ -14,6 +14,7 @@ enum class ViewType {
 }
 
 object AppModel: Component() {
+    val kiosk = booleanProperty(false)
     val currentView = objectProperty(ViewType.START)
     
     val darkMode = configurableBooleanProperty("dark", true)
