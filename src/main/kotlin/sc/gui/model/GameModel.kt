@@ -20,6 +20,8 @@ import kotlin.math.max
 class GameModel: ViewModel() {
     val playerNames: ObservableList<String> = FXCollections.observableArrayList()
     
+    val stepSpeed = objectProperty(5.0)
+    
     val gameState = objectProperty<GameState?>(null)
     val gameResult = objectProperty<GameResult>()
     val isHumanTurn = booleanProperty(false)

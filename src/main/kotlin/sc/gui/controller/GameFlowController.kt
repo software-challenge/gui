@@ -4,11 +4,12 @@ import javafx.animation.Animation
 import javafx.animation.KeyFrame
 import javafx.animation.Timeline
 import javafx.util.Duration
+import mu.KotlinLogging
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.NewGameState
-import sc.gui.model.GameModel
 import sc.gui.events.*
+import sc.gui.model.GameModel
 import sc.networking.clients.GameLoaderClient
 import sc.networking.clients.IGameController
 import sc.plugin2022.GameState
@@ -17,11 +18,16 @@ import java.io.File
 import java.io.IOException
 
 class GameFlowController: Controller() {
+    private val logger = KotlinLogging.logger {}
+    
     private val gameModel: GameModel by inject()
     private var stepController = true
-    private val interval = Timeline(KeyFrame(Duration.seconds(1.0), {
+    private val interval = Timeline(KeyFrame(Duration.seconds(gameModel.stepSpeed.value), {
         fire(StepGame(1))
-    })).apply { cycleCount = Animation.INDEFINITE }
+    })).apply {
+        cycleCount = Animation.INDEFINITE
+        rateProperty().bind(gameModel.stepSpeed)
+    }
     
     private val history = ArrayList<GameState>()
     var controller: IGameController? = null
