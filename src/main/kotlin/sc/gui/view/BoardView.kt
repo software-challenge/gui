@@ -70,6 +70,7 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     init {
         addChild(content)
         animationFunctions.add(WeakReference(animateFn))
+        viewOrder = 1.0
     }
     
     val frameCount = if(content == "seestern" || content == "herzmuschel") 20 else 16
@@ -330,7 +331,6 @@ class BoardView: View() {
     
     private fun createPiece(type: PieceType): PieceImage =
             PieceImage(calculatedBlockSize, type.name.lowercase())
-                    .apply { viewOrder = 1.0 }
     
     private fun highlight(node: Node, lock: Boolean = false, updateTargetHighlights: Boolean = true) {
         currentHighlight?.removeClass(AppStyle.gridHover, AppStyle.gridLock)
