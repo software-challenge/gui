@@ -23,7 +23,7 @@ class GameLoadingView: View() {
                     fontStyle = FontPosture.ITALIC
                     fontSize = 24.px
                 }
-                text = "Bitte verbinde manuell gestartete Clients auf $serverAddress:$serverPort"
+                text = "Bitte verbinde gestartete Spieler auf $serverAddress:$serverPort"
             }
         }
     }

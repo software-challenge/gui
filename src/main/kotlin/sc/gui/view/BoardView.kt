@@ -82,7 +82,6 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     fun nextFrame(prefix: String = "idle", oldFrame: Int = frame, randomize: Boolean = true, remove: Boolean = false): Int {
         val img = children.lastOrNull() as? ResizableImageView
         img?.removePseudoClass("$prefix$oldFrame")
-        logger.trace { "New frame: $prefix$oldFrame to $remove on $img" }
         return if(!remove)
             (oldFrame.inc() + if(randomize) Random.nextInt(1, 5).div(5) else 0)
                     .mod(frameCount).also { newFrame ->
