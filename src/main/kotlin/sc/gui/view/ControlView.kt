@@ -3,6 +3,7 @@ package sc.gui.view
 import javafx.beans.property.Property
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Pos
+import javafx.scene.input.MouseEvent
 import mu.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.GamePausedEvent
@@ -22,6 +23,13 @@ class ControlView: View() {
     
     private val gameModel: GameModel by inject()
     private val gameControlState: Property<GameControlState> = objectProperty(START)
+    
+    private val MouseEvent.modifierMultiplicator
+        get() = when {
+            isControlDown -> 100
+            isShiftDown -> 10
+            else -> 1
+        }
     
     override val root =
             hbox {
@@ -45,7 +53,7 @@ class ControlView: View() {
                     setOnMouseClicked {
                         if(gameModel.atLatestTurn.value)
                             fire(PauseGame(true))
-                        fire(StepGame(-1))
+                        fire(StepGame(-1 * it.modifierMultiplicator))
                     }
                 }
                 label {
@@ -63,7 +71,7 @@ class ControlView: View() {
                     )
                     text = "⏭"
                     setOnMouseClicked {
-                        fire(StepGame(1))
+                        fire(StepGame(it.modifierMultiplicator))
                         if(gameControlState.value == START)
                             gameControlState.value = PAUSED
                     }
