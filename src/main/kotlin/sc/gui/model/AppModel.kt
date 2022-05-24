@@ -13,8 +13,8 @@ enum class ViewType {
     GAME,
 }
 
+// TODO this shouldn't be global, only for GuiApp
 object AppModel: Component() {
-    val kiosk = booleanProperty(false)
     val currentView = objectProperty(ViewType.START)
     
     val darkMode = configurableBooleanProperty("dark", true)

@@ -130,7 +130,6 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
 }
 
 class BoardView: View() {
-    
     private val gameModel: GameModel by inject()
     private val pieces = HashMap<Coordinates, PieceImage>()
     
