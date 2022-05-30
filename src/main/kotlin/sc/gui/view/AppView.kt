@@ -13,6 +13,7 @@ import sc.gui.controller.CreateGame
 import sc.gui.controller.GameFlowController
 import sc.gui.events.*
 import sc.gui.model.ViewType
+import sc.networking.clients.GameLoaderClient
 import sc.util.browse
 import sc.util.browseUrl
 import sc.util.listenImmediately
@@ -56,7 +57,7 @@ class AppView: View("Software-Challenge Germany") {
                     chooseFile("Replay laden", arrayOf(FileChooser.ExtensionFilter("XML", "*.xml", "*.xml.gz")), File("replays")).forEach {
                         if(controller.model.currentView.get() == ViewType.GAME)
                             fire(TerminateGame())
-                        gameFlowController.loadReplay(it)
+                        gameFlowController.loadReplay(GameLoaderClient(it))
                     }
                 }
                 item("Logs öffnen", "Shortcut+L").action {

@@ -14,7 +14,6 @@ import sc.networking.clients.GameLoaderClient
 import sc.networking.clients.IGameController
 import sc.plugin2022.GameState
 import tornadofx.*
-import java.io.File
 import java.io.IOException
 
 class GameFlowController: Controller() {
@@ -75,11 +74,11 @@ class GameFlowController: Controller() {
         }
     }
     
-    fun loadReplay(file: File) {
-        val loader = GameLoaderClient(file)
+    @Throws(IOException::class)
+    fun loadReplay(loader: GameLoaderClient) {
         history.addAll(loader.getHistory().filterIsInstance<GameState>())
         if(history.isEmpty())
-            throw IOException("")
+            throw IOException("Replay history from $loader is empty")
         fire(GameReadyEvent())
         gameModel.availableTurns.set(history.last().turn)
         gameModel.gameResult.set(loader.result)
