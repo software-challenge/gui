@@ -54,10 +54,17 @@ class AppView: View("Software-Challenge Germany") {
                 }
                 separator()
                 item("Replay laden", "Shortcut+R").action {
-                    chooseFile("Replay laden", arrayOf(FileChooser.ExtensionFilter("XML", "*.xml", "*.xml.gz")), File("replays")).forEach {
+                    chooseFile("Replay laden",
+                        arrayOf(FileChooser.ExtensionFilter("XML", "*.xml", "*.xml.gz")),
+                        File("replays").takeIf { it.exists() }
+                    ).forEach {
                         if(controller.model.currentView.get() == ViewType.GAME)
                             fire(TerminateGame())
-                        gameFlowController.loadReplay(GameLoaderClient(it))
+                        try {
+                            gameFlowController.loadReplay(GameLoaderClient(it))
+                        } catch(e: Exception) {
+                            warning("Replay laden fehlgeschlagen", "Das Replay $it konnte nicht geladen werden:\n" + e.stackTraceToString())
+                        }
                     }
                 }
                 item("Logs öffnen", "Shortcut+L").action {
