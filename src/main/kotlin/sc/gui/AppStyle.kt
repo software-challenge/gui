@@ -1,9 +1,7 @@
 package sc.gui
 
 import javafx.geometry.Side
-import javafx.scene.layout.BackgroundPosition
-import javafx.scene.layout.BackgroundRepeat
-import javafx.scene.layout.BorderStrokeStyle
+import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import sc.api.plugins.Team
@@ -40,6 +38,15 @@ class AppStyle: Stylesheet() {
         
         val gridHover by csspseudoclass()
         val gridLock by csspseudoclass()
+    
+        fun background() =
+            StackPane(
+                Region().apply {
+                    hgrow = Priority.ALWAYS
+                    vgrow = Priority.ALWAYS
+                    addClass(AppStyle.background)
+                }
+            )
     }
     
     init {

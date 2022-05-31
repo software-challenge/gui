@@ -102,13 +102,7 @@ class AppView: View("Software-Challenge Germany") {
         with(root) {
             prefWidth = 1100.0
             prefHeight = 700.0
-            center = StackPane(
-                    Region().apply {
-                        hgrow = Priority.ALWAYS
-                        vgrow = Priority.ALWAYS
-                        addClass(AppStyle.background)
-                    }
-            ).apply { add(StartView::class) }
+            center = AppStyle.background().apply { add(StartView::class) }
         }
 
         val gameTitle = "Ostseeschach"
