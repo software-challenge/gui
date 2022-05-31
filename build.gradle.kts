@@ -11,11 +11,11 @@ plugins {
     
     application
     kotlin("jvm") version "1.5.20"
-    id("org.openjfx.javafxplugin") version "0.0.11"
+    id("org.openjfx.javafxplugin") version "0.0.13"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     
-    id("com.github.ben-manes.versions") version "0.36.0"
-    id("se.patrikerdes.use-latest-versions") version "0.2.15"
+    id("com.github.ben-manes.versions") version "0.42.0"
+    id("se.patrikerdes.use-latest-versions") version "0.2.18"
 }
 
 val backend = gradle.includedBuilds.last()
@@ -49,7 +49,7 @@ dependencies {
     
     implementation(kotlin("reflect"))
     implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT") { exclude("org.jetbrains.kotlin", "kotlin-reflect") }
-    implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.4")
+    implementation("io.github.microutils", "kotlin-logging-jvm", "2.1.23")
     
     implementation("software-challenge", "server")
     implementation("software-challenge", "plugin")
