@@ -29,7 +29,7 @@ class AppController: Controller() {
             }
         }
         subscribe<GameReadyEvent> { changeViewTo(GAME) }
-        subscribe<TerminateGame> { changeViewTo(GAME_CREATION) }
+        subscribe<TerminateGame> { if(it.close) changeViewTo(GAME_CREATION) }
     }
     
     fun changeViewTo(newView: ViewType) {

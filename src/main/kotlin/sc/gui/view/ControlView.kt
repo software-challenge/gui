@@ -120,6 +120,6 @@ class ControlView: View() {
         START("Start", PauseGame(false)),
         PLAYING("Anhalten", PauseGame(true)),
         PAUSED("Weiter", PauseGame(false)),
-        FINISHED("Spiel beenden", TerminateGame());
+        FINISHED("Spiel beenden", TerminateGame(true));
     }
 }
