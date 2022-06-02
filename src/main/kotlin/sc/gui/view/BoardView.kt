@@ -139,7 +139,7 @@ class BoardView: View() {
     private val calculatedBlockSize = size.doubleBinding { gridSize * 0.9 }
     
     private val ambers = Team.values().associateWith { ArrayList<Node>() }
-    private val rootStack: StackPane by lazy { (grid.scene.root as BorderPane).center as StackPane }
+    private val rootStack: Pane by lazy { root.parent.run { if(parent != null) parent else this } as Pane }
     
     val grid = gridpane {
         paddingAll = AppStyle.spacing
@@ -204,7 +204,7 @@ class BoardView: View() {
                                                 rootStack.add(this)
                                                 val alignLeft = oldState.board.get(move.from)?.team == Team.ONE
                                                 StackPane.setAlignment(this, if(alignLeft) Pos.TOP_LEFT else Pos.TOP_RIGHT)
-                                                translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if(alignLeft) it else scene.width - it }
+                                                translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if(alignLeft) it else rootStack.width - it }
                                                 translateY = bounds.centerY - calculatedBlockSize.value / 2 - 56
                                                 fade(transitionDuration, AppStyle.pieceOpacity).setOnFinished {
                                                     val xOffset = { size: Number -> (position * (size.toDouble() / 3) + AppStyle.spacing).let { if(alignLeft) it else -it } }
@@ -307,9 +307,9 @@ class BoardView: View() {
             stateListener.changed(null, null, gameModel.gameState.value)
         }
     }
-    override val root = vbox(alignment = Pos.CENTER) {
+    override val root = stackpane {
+        alignment = Pos.CENTER
         size.bind(Bindings.min(widthProperty(), heightProperty()))
-        grid.vgrow = Priority.ALWAYS
         add(grid)
     }
     
@@ -353,7 +353,7 @@ class BoardView: View() {
             val node = Region().addClass(AppStyle.gridHover).apply {
                 onLeftClick {
                     if(gameModel.atLatestTurn.value && gameModel.isHumanTurn.value && gameModel.gameState.value?.board?.get(position)?.team == gameModel.gameState.value?.currentTeam) {
-                        fire(HumanMoveAction(Move(position, target).also { logger.debug("Human move: $it") }))
+                        fire(HumanMoveAction(Move(position, target).also { logger.debug("Human Move: $it") }))
                     }
                 }
             }
