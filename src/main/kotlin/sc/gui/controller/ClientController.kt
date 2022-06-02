@@ -46,7 +46,7 @@ class ClientController: Controller() {
         lobbyManager.startNewGame(players, players.none { it.client.type == PlayerType.HUMAN })
     }
     
-    fun humanMoveRequest(state: GameState): CompletableFuture<Move> {
+    fun humanMoveRequest(@Suppress("UNUSED_PARAMETER") state: GameState): CompletableFuture<Move> {
         val future = CompletableFuture<Move>()
         subscribe<HumanMoveAction>(1) {
             future.complete(it.move)

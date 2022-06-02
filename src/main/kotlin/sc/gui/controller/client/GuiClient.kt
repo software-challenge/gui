@@ -36,8 +36,8 @@ class InternalGameHandler(
             currentState?.let(moveRequestHandler)?.get()
             ?: throw IllegalStateException("Received move request before GameState!")
     
-    override fun onUpdate(gamestate: IGameState) {
-        currentState = gamestate as GameState
+    override fun onUpdate(gameState: IGameState) {
+        currentState = gameState as GameState
     }
     
     override fun onGameOver(data: GameResult) {
