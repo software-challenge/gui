@@ -74,14 +74,19 @@ class GameFlowController: Controller() {
         }
     }
     
-    @Throws(IOException::class)
+    @Throws(ReplayLoaderException::class)
     fun loadReplay(loader: GameLoaderClient) {
+        if(history.isNotEmpty())
+            throw ReplayLoaderException("Trying to load replay into a running game")
         history.addAll(loader.getHistory().filterIsInstance<GameState>())
+        logger.debug("Loaded ${history.size} states from $loader")
         if(history.isEmpty())
-            throw IOException("Replay history from $loader is empty")
+            throw ReplayLoaderException("Replay history from $loader is empty")
         fire(GameReadyEvent())
         gameModel.availableTurns.set(history.last().turn)
         gameModel.gameResult.set(loader.result)
         gameModel.gameState.set(history.first())
     }
 }
+
+class ReplayLoaderException(message: String): IOException(message)
