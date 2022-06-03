@@ -43,7 +43,7 @@ class AppView: View("Software-Challenge Germany") {
                             confirm(
                                     header = "Neues Spiel anfangen",
                                     content = "Willst du wirklich dein aktuelles Spiel verwerfen und ein neues anfangen?",
-                            ) { fire(TerminateGame()) }
+                            ) { fire(TerminateGame(true)) }
                         } else {
                             fire(CreateGame)
                         }
