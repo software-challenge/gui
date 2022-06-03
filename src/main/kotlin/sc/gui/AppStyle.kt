@@ -1,9 +1,11 @@
 package sc.gui
 
 import javafx.geometry.Side
+import javafx.scene.effect.DropShadow
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
+import javafx.scene.text.FontPosture
 import sc.api.plugins.Team
 import sc.plugin2022.PieceType
 import sc.plugin2022.color
@@ -13,19 +15,22 @@ import tornadofx.*
 class AppStyle: Stylesheet() {
     
     companion object {
-        // RESOURCES
+        private val resources = ResourceLookup(this)
+        
         private val colorSand = c("#f2df8e")
         
-        private val gotuRegular = Font.loadFont(ResourceLookup(this)["/fonts/NotoSans-Regular.ttf"], 16.0)
-    
+        // TODO load italics & bold
+        private val gotuRegular = Font.loadFont(resources["/fonts/NotoSans-Regular.ttf"], 16.0)
+        
         const val pieceOpacity = 0.9
         
         const val spacing = 20.0
         val formSpacing = spacing / 2
         
-        val fontSizeRegular = 20.pt
-        val fontSizeBig = 24.pt
-        val fontSizeHeader = 32.pt
+        // TODO scale with screen
+        val fontSizeRegular = 30.px
+        val fontSizeBig = fontSizeRegular * 1.2
+        val fontSizeHeader = fontSizeRegular * 2
         
         // CLASSES
         val background by cssclass()
@@ -34,11 +39,12 @@ class AppStyle: Stylesheet() {
         val lightColorSchema by cssclass()
         val darkColorSchema by cssclass()
         
+        val heading by cssclass()
         val statusLabel by cssclass()
         
         val gridHover by csspseudoclass()
         val gridLock by csspseudoclass()
-    
+        
         fun background() =
             StackPane(
                 Region().apply {
@@ -49,66 +55,81 @@ class AppStyle: Stylesheet() {
             )
     }
     
+    fun themed(block: CssSelectionBlock.(theme: Theme) -> Unit) {
+        lightColorSchema {
+            block(Theme(false, c("#CCC"), c("#DDD")))
+        }
+        darkColorSchema {
+            block(Theme(true, c("#444"), c("#222")))
+        }
+    }
+    
+    data class Theme(val isDark: Boolean, val base: Color, val background: Color)
+    
+    fun Selectable.theme(block: CssSelectionBlock.(theme: Theme) -> Unit) {
+        val inner = this
+        themed { theme ->
+            inner {
+                block(theme)
+            }
+        }
+    }
+    
     init {
-        val resources = ResourceLookup(this)
+        themed {
+            baseColor = it.base
+            backgroundColor += it.background
+            faintFocusColor = it.base
+        }
+        menuBar.theme {
+            backgroundColor += it.background
+        }
+        contextMenu.theme {
+            backgroundColor += it.base
+        }
+        themed {
+            textFill = it.background.invert()
+            textField {
+                textFill = it.background.invert()
+                backgroundColor += it.background
+            }
+        }
         
         root {
             font = gotuRegular
             fontSize = fontSizeRegular
+            accentColor = Color.MEDIUMPURPLE
         }
         background {
             opacity = 0.8
             backgroundColor += colorSand
-            backgroundImage += ResourceLookup(this).url("/graphics/sea_beach.png").toURI()
+            backgroundImage += resources.url("/graphics/sea_beach.png").toURI()
             backgroundPosition += BackgroundPosition(Side.LEFT, .0, true, Side.TOP, -10.0, false)
             backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.NO_REPEAT
         }
         
+        // Generic Components
+        button {
+            backgroundRadius = multi((box(fontSizeRegular)))
+            borderRadius = backgroundRadius
+        }
+        label.theme { theme ->
+            effect = DropShadow(AppStyle.spacing, theme.base)
+        }
+        heading {
+            fontSize = fontSizeHeader
+        }
+        
+        // Special Components
         legend {
             // label of GameCreationForm
             fontSize = fontSizeBig
+            fontStyle = FontPosture.ITALIC
         }
         statusLabel {
             fontSize = fontSizeBig
             prefHeight = fontSizeBig.times(6)
         }
-        button {
-            backgroundRadius = multi((box(1.percent)))
-            borderRadius = multi((box(1.percent)))
-        }
-    
-        lightColorSchema {
-            baseColor = c("#CCC")
-            backgroundColor += c("#DDD")
-            accentColor = Color.MEDIUMPURPLE
-            faintFocusColor = baseColor
-            
-            menuBar {
-                backgroundColor = this@lightColorSchema.backgroundColor
-            }
-            contextMenu {
-                backgroundColor += this@lightColorSchema.baseColor
-            }
-        }
-        darkColorSchema {
-            baseColor = c("#444")
-            backgroundColor += c("#222")
-            accentColor = Color.MEDIUMPURPLE
-            faintFocusColor = baseColor
-            textFill = c("#EEE")
-            
-            menuBar {
-                backgroundColor = this@darkColorSchema.backgroundColor
-            }
-            contextMenu {
-                backgroundColor += this@darkColorSchema.baseColor
-            }
-            textField {
-                baseColor = Color.WHITE
-                textFill = c("#222")
-            }
-        }
-        
         fullWidth {
             prefWidth = 100.percent
         }
@@ -138,14 +159,9 @@ class AppStyle: Stylesheet() {
             }
         }
         
-        ".grid" {
+        CssRule.c("grid").theme {
             borderStyle += BorderStrokeStyle.DOTTED
-            borderColor += box(colorSand.darker())
-        }
-        darkColorSchema {
-            ".grid" {
-                borderColor += box(colorSand.brighter())
-            }
+            borderColor += box(if(it.isDark) colorSand.brighter() else colorSand.darker())
         }
         
         arrayOf("amber", "blank").forEach {

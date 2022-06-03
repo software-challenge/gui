@@ -10,9 +10,7 @@ class StartView: View() {
     override val root = vbox(AppStyle.spacing, Pos.CENTER) {
         paddingAll = AppStyle.spacing
         label("Willkommen bei der Software-Challenge!") {
-            style {
-                fontSize = AppStyle.fontSizeHeader
-            }
+            addClass(AppStyle.heading)
             isWrapText = true
             textAlignment = TextAlignment.CENTER
         }

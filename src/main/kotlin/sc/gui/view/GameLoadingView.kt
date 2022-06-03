@@ -1,10 +1,11 @@
 package sc.gui.view
 
 import javafx.geometry.Pos
-import javafx.scene.text.FontPosture
+import sc.gui.AppStyle
 import sc.gui.serverAddress
 import sc.gui.serverPort
 import tornadofx.*
+import tornadofx.Stylesheet.Companion.legend
 
 class GameLoadingView: View() {
     override val root = vbox {
@@ -13,16 +14,11 @@ class GameLoadingView: View() {
         vbox {
             alignment = Pos.TOP_CENTER
             label {
-                style {
-                    fontSize = 32.px
-                }
+                addClass(AppStyle.heading)
                 text = "Das Spiel startet..."
             }
             label {
-                style {
-                    fontStyle = FontPosture.ITALIC
-                    fontSize = 24.px
-                }
+                addClass(legend)
                 text = "Bitte verbinde gestartete Spieler auf $serverAddress:$serverPort"
             }
         }
