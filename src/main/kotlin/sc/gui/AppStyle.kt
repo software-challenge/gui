@@ -24,12 +24,12 @@ class AppStyle: Stylesheet() {
         private val gotuRegular = Font.loadFont(resources["/fonts/NotoSans-Regular.ttf"], 16.0)
         
         const val pieceOpacity = 0.9
-        
+    
+        // TODO scale to fontsize using em
         const val spacing = 20.0
         val formSpacing = spacing / 2
         
-        // TODO scale with screen
-        val fontSizeRegular = 30.px
+        val fontSizeRegular = Font.getDefault().size.pt
         val fontSizeBig = fontSizeRegular * 1.2
         val fontSizeHeader = fontSizeRegular * 2
         
