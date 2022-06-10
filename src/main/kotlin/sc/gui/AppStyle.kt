@@ -2,6 +2,7 @@ package sc.gui
 
 import javafx.geometry.Side
 import javafx.scene.effect.DropShadow
+import javafx.scene.effect.Effect
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
@@ -41,6 +42,7 @@ class AppStyle: Stylesheet() {
         
         val heading by cssclass()
         val statusLabel by cssclass()
+        val plainLabel by cssclass()
         
         val gridHover by csspseudoclass()
         val gridLock by csspseudoclass()
@@ -55,7 +57,7 @@ class AppStyle: Stylesheet() {
             )
     }
     
-    fun themed(block: CssSelectionBlock.(theme: Theme) -> Unit) {
+    private fun themed(block: CssSelectionBlock.(theme: Theme) -> Unit) {
         lightColorSchema {
             block(Theme(false, c("#CCC"), c("#DDD")))
         }
@@ -66,7 +68,7 @@ class AppStyle: Stylesheet() {
     
     data class Theme(val isDark: Boolean, val base: Color, val background: Color)
     
-    fun Selectable.theme(block: CssSelectionBlock.(theme: Theme) -> Unit) {
+    private fun Selectable.theme(block: CssSelectionBlock.(theme: Theme) -> Unit) {
         val inner = this
         themed { theme ->
             inner {
@@ -115,6 +117,11 @@ class AppStyle: Stylesheet() {
         }
         label.theme { theme ->
             effect = DropShadow(AppStyle.spacing, theme.base)
+        }
+        label {
+            and(plainLabel) {
+                "-fx-effect".force("null")
+            }
         }
         heading {
             fontSize = fontSizeHeader
@@ -175,12 +182,37 @@ class AppStyle: Stylesheet() {
                     scaleY = if(type == PieceType.Herzmuschel) 1.3 else scale
                 }
                 val frames = when(type) {
-                    PieceType.Herzmuschel -> PieceFrames("cockle", "olive_cockle", consume = chain("open_shell" to 4, "close_shell" to 4))
+                    PieceType.Herzmuschel -> PieceFrames(
+                        "cockle",
+                        "olive_cockle",
+                        consume = chain("open_shell" to 4, "close_shell" to 4)
+                    )
                     PieceType.Moewe -> PieceFrames("seagull")
-                    PieceType.Robbe -> PieceFrames("seal", "cream_seal", "idle_on_land_upright",
-                            chain("transion_upright_laying_down" to 2, "move_on_land" to 3, "move_on_land_002" to 0, "move_on_land_002" to 0, "move_on_land_003" to 0, "move_on_land_004" to 0, "transion_ground_to_upright" to 3),
-                            chain("transion_upright_laying_down" to 2, "move_jumping_on_land" to 3, "move_jumping_on_land_002" to 0, "move_jumping_on_land_002" to 0, "move_jumping_on_land_003" to 0, "move_jumping_on_land_004" to 0, "transion_ground_to_upright" to 3))
-                    PieceType.Seestern -> PieceFrames("starfish", "tan_starfish_side_view_happy") { "jump_${it.padded}" }
+                    PieceType.Robbe -> PieceFrames(
+                        "seal", "cream_seal", "idle_on_land_upright",
+                        chain(
+                            "transion_upright_laying_down" to 2,
+                            "move_on_land" to 3,
+                            "move_on_land_002" to 0,
+                            "move_on_land_002" to 0,
+                            "move_on_land_003" to 0,
+                            "move_on_land_004" to 0,
+                            "transion_ground_to_upright" to 3
+                        ),
+                        chain(
+                            "transion_upright_laying_down" to 2,
+                            "move_jumping_on_land" to 3,
+                            "move_jumping_on_land_002" to 0,
+                            "move_jumping_on_land_002" to 0,
+                            "move_jumping_on_land_003" to 0,
+                            "move_jumping_on_land_004" to 0,
+                            "transion_ground_to_upright" to 3
+                        )
+                    )
+                    PieceType.Seestern -> PieceFrames(
+                        "starfish",
+                        "tan_starfish_side_view_happy"
+                    ) { "jump_${it.padded}" }
                 }
                 (0..19).forEach { frame ->
                     and(CssRule.pc("idle$frame")) {
@@ -202,11 +234,11 @@ class AppStyle: Stylesheet() {
     }
     
     data class PieceFrames(
-            val type: String,
-            val prefix: String = type,
-            val idlePrefix: String = "idle",
-            private val move: ((Int) -> String) = { "move_${it.padded}" },
-            private val consume: ((Int) -> String) = move,
+        val type: String,
+        val prefix: String = type,
+        val idlePrefix: String = "idle",
+        private val move: ((Int) -> String) = { "move_${it.padded}" },
+        private val consume: ((Int) -> String) = move,
     ) {
         fun getIdle(frame: Int) = getFrame("${idlePrefix}_${frame.padded}")
         fun getMove(frame: Int) = getFrame(move(frame))
