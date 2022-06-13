@@ -2,11 +2,11 @@ package sc.gui
 
 import javafx.geometry.Side
 import javafx.scene.effect.DropShadow
-import javafx.scene.effect.Effect
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontPosture
+import javafx.scene.text.TextAlignment
 import sc.api.plugins.Team
 import sc.plugin2022.PieceType
 import sc.plugin2022.color
@@ -125,6 +125,8 @@ class AppStyle: Stylesheet() {
         }
         heading {
             fontSize = fontSizeHeader
+            wrapText = true
+            textAlignment = TextAlignment.CENTER
         }
         
         // Special Components
