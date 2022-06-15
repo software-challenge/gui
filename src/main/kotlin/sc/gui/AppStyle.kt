@@ -24,14 +24,14 @@ class AppStyle: Stylesheet() {
         private val gotuRegular = Font.loadFont(resources["/fonts/NotoSans-Regular.ttf"], 16.0)
         
         const val pieceOpacity = 0.9
-    
-        // TODO scale to fontsize using em
-        const val spacing = 20.0
-        val formSpacing = spacing / 2
         
         val fontSizeRegular = Font.getDefault().size.pt
         val fontSizeBig = fontSizeRegular * 1.2
         val fontSizeHeader = fontSizeRegular * 2
+    
+        // TODO scale to fontsize using em
+        val spacing = fontSizeRegular.value
+        val formSpacing = spacing / 2
         
         // CLASSES
         val background by cssclass()
@@ -158,7 +158,6 @@ class AppStyle: Stylesheet() {
                     else -> throw NoWhenBranchMatchedException("Illegal color ${team.color}")
                 }
                 backgroundColor += c(color, 0.6).desaturate()
-                scaleX = team.direction
                 and(gridHover) {
                     backgroundColor += c(color, 0.6)
                 }

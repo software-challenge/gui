@@ -13,6 +13,8 @@ import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
+import javafx.scene.transform.Rotate
+import javafx.scene.transform.Transform
 import javafx.util.Duration
 import mu.KotlinLogging
 import sc.api.plugins.Team
@@ -154,6 +156,8 @@ class BoardView: View() {
                 pieces.clear()
                 return@ChangeListener
             }
+            rotate = state.startTeam.index * 180.0
+            rotationAxis = Rotate.Y_AXIS
             // TODO finish pending movements
             logger.trace("New state for board: ${state.longString()}")
             val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reversed()).maxByOrNull {
@@ -202,7 +206,7 @@ class BoardView: View() {
                                             Group(PieceImage(calculatedBlockSize, "amber")).apply {
                                                 opacity = 0.0
                                                 rootStack.add(this)
-                                                val alignLeft = oldState.board.get(move.from)?.team == Team.ONE
+                                                val alignLeft = oldState.board[move.from]?.team == Team.ONE
                                                 StackPane.setAlignment(this, if(alignLeft) Pos.TOP_LEFT else Pos.TOP_RIGHT)
                                                 translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if(alignLeft) it else rootStack.width - it }
                                                 translateY = bounds.centerY - calculatedBlockSize.value / 2 - 56
@@ -251,6 +255,7 @@ class BoardView: View() {
                     iter.remove()
                 } else {
                     image.addClass(piece.team.color)
+                    image.scaleX = -(piece.team.index.xor(state.startTeam.index) * 2 - 1.0)
                     image.fade(transitionDuration, AppStyle.pieceOpacity * when {
                         piece.team != state.currentTeam -> 0.6
                         gameModel.atLatestTurn.value && gameModel.gameState.value?.isOver == false -> 1.0

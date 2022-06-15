@@ -85,7 +85,7 @@ class GameFlowController: Controller() {
         fire(GameReadyEvent())
         gameModel.availableTurns.set(history.last().turn)
         gameModel.gameResult.set(loader.result)
-        gameModel.playerNames.setAll(loader.result?.scores?.map { it.key.displayName }.orEmpty())
+        gameModel.playerNames.setAll(loader.result?.scores?.map { it.key }?.sortedBy { it.team.index }?.map { it.displayName }.orEmpty())
         gameModel.gameState.set(history.first())
     }
 }

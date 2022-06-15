@@ -19,19 +19,19 @@ import kotlin.math.max
 
 class GameModel: ViewModel() {
     val playerNames: ObservableList<String> = FXCollections.observableArrayList()
+    val gameState = objectProperty<GameState?>(null)
+    val gameResult = objectProperty<GameResult>()
     
     val stepSpeed = objectProperty(5.0)
     
-    val gameState = objectProperty<GameState?>(null)
-    val gameResult = objectProperty<GameResult>()
-    val isHumanTurn = booleanProperty(false)
-    
     val currentTurn = integerBinding(gameState) { value?.turn ?: 0 }
     val currentRound = integerBinding(gameState) { value?.round ?: 0 }
-    val currentTeam = nonNullObjectBinding(gameState) { value?.currentTeam ?: sc.api.plugins.Team.ONE }
+    val currentTeam = nonNullObjectBinding(gameState) { value?.currentTeam ?: Team.ONE }
     val teamScores = gameState.objectBinding { state ->
         Team.values().map { state?.getPointsForTeam(it) }
     }
+    
+    val isHumanTurn = booleanProperty(false)
     
     val availableTurns = intProperty(0).apply {
         currentTurn.addListener { _, _, turn ->
