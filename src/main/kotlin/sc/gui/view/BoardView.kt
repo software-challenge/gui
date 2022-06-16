@@ -14,7 +14,6 @@ import javafx.scene.Node
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.scene.transform.Rotate
-import javafx.scene.transform.Transform
 import javafx.util.Duration
 import mu.KotlinLogging
 import sc.api.plugins.Team
@@ -209,7 +208,7 @@ class BoardView: View() {
                                                 val alignLeft = oldState.board[move.from]?.team == Team.ONE
                                                 StackPane.setAlignment(this, if(alignLeft) Pos.TOP_LEFT else Pos.TOP_RIGHT)
                                                 translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if(alignLeft) it else rootStack.width - it }
-                                                translateY = bounds.centerY - calculatedBlockSize.value / 2 - 56
+                                                translateY = bounds.centerY - calculatedBlockSize.value / 2
                                                 fade(transitionDuration, AppStyle.pieceOpacity).setOnFinished {
                                                     val xOffset = { size: Number -> (position * (size.toDouble() / 3) + AppStyle.spacing).let { if(alignLeft) it else -it } }
                                                     ambers[state.otherTeam]?.takeIf { it.size <= position }
