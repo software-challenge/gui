@@ -8,6 +8,7 @@ import javafx.scene.text.Font
 import javafx.scene.text.FontPosture
 import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
+import org.slf4j.LoggerFactory
 import sc.api.plugins.Team
 import sc.plugin2022.PieceType
 import sc.plugin2022.color
@@ -16,6 +17,8 @@ import tornadofx.*
 class AppStyle: Stylesheet() {
     
     companion object {
+        private val logger = LoggerFactory.getLogger(LobbyManager::class.java)
+        
         private val resources = ResourceLookup(this)
         
         private val colorSand = c("#f2df8e")
@@ -25,11 +28,10 @@ class AppStyle: Stylesheet() {
         
         const val pieceOpacity = 0.9
         
-        val fontSizeRegular = Font.getDefault().size.pt
+        val fontSizeRegular = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt * 2
         val fontSizeBig = fontSizeRegular * 1.2
         val fontSizeHeader = fontSizeRegular * 2
         
-        // TODO scale to fontsize using em
         val spacing = fontSizeRegular.value
         val formSpacing = spacing / 2
         
