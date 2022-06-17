@@ -210,7 +210,7 @@ class BoardView: View() {
                                                 translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if(alignLeft) it else rootStack.width - it }
                                                 translateY = bounds.centerY - calculatedBlockSize.value / 2
                                                 fade(transitionDuration, AppStyle.pieceOpacity).setOnFinished {
-                                                    val xOffset = { size: Number -> (position * (size.toDouble() / 3) + AppStyle.spacing).let { if(alignLeft) it else -it } }
+                                                    val xOffset = { size: Number -> (size.toDouble() / 2 + position * size.toDouble() / 3).let { if(alignLeft) it else -it } }
                                                     ambers[state.otherTeam]?.takeIf { it.size <= position }
                                                             ?.let { ambers ->
                                                                 ambers.add(this)

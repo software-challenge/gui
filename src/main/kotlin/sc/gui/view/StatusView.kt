@@ -59,17 +59,10 @@ class ScoreBinding(private val game: GameModel): StringBinding() {
 
 class StatusView: View() {
     private val game: GameModel by inject()
-    private val scoreLabel = Label()
-    private val statusLabel = Label()
     
     override val root = vbox(alignment = Pos.CENTER) {
         addClass(AppStyle.statusLabel)
-        add(statusLabel)
-        add(scoreLabel)
-    }
-    
-    init {
-        statusLabel.bind(StatusBinding(game))
-        scoreLabel.bind(ScoreBinding(game))
+        label(StatusBinding(game))
+        label(ScoreBinding(game))
     }
 }

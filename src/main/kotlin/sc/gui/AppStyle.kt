@@ -6,11 +6,11 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontPosture
+import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
 import sc.api.plugins.Team
 import sc.plugin2022.PieceType
 import sc.plugin2022.color
-import sc.plugin2022.direction
 import tornadofx.*
 
 class AppStyle: Stylesheet() {
@@ -28,7 +28,7 @@ class AppStyle: Stylesheet() {
         val fontSizeRegular = Font.getDefault().size.pt
         val fontSizeBig = fontSizeRegular * 1.2
         val fontSizeHeader = fontSizeRegular * 2
-    
+        
         // TODO scale to fontsize using em
         val spacing = fontSizeRegular.value
         val formSpacing = spacing / 2
@@ -127,6 +127,7 @@ class AppStyle: Stylesheet() {
             fontSize = fontSizeHeader
             wrapText = true
             textAlignment = TextAlignment.CENTER
+            fontWeight = FontWeight.BOLD
         }
         
         // Special Components
