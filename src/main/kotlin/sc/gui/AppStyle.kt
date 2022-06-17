@@ -140,7 +140,6 @@ class AppStyle: Stylesheet() {
         }
         statusLabel {
             fontSize = fontSizeBig
-            prefHeight = fontSizeBig.times(6)
         }
         fullWidth {
             prefWidth = 100.percent
