@@ -40,7 +40,7 @@ application {
 
 repositories {
     mavenCentral()
-    maven("https://dist.wso2.org/maven2")
+    maven("http://maven.wso2.org/nexus/content/groups/wso2-public/")
     maven("https://oss.sonatype.org/content/repositories/snapshots")
 }
 
