@@ -1,5 +1,15 @@
 # <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></a> Grafischer Spieleserver der Software-Challenge Germany ![.github/workflows/gradle.yml](https://github.com/software-challenge/gui/workflows/.github/workflows/gradle.yml/badge.svg)
 
+Dies ist die Grafische Oberfläche für die Software-Challenge Germany.
+Nutzerdokumentation findet sich in https://docs.software-challenge.de/server.html
+
+> Hinweis: Wenn als erster Parameter des Programms eine Zahl mitgegeben wird,
+wird der Server auf diesem Port Verbindungen von Spielern erwarten.
+
+TODO: Verbindung zu bestehendem Server herstellen?
+
+# Für Entwickler
+
 ## Erste Schritte
 
 - zuerst das Projekt lokal mit Submodulen klonen:

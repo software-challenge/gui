@@ -4,6 +4,7 @@ import mu.KLogging
 import sc.gui.controller.ServerController
 import sc.gui.model.AppModel
 import sc.gui.view.AppView
+import sc.server.Configuration
 import sc.server.logbackFromPWD
 import tornadofx.*
 import kotlin.reflect.KClass
@@ -18,6 +19,7 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
     }
     
     init {
+        //dumpStylesheets()
         reloadStylesheetsOnFocus()
         server.startServer()
         addStageIcon(resources.image("/icon.png"))
@@ -35,5 +37,6 @@ class GuiApp : ServerApp(AppView::class) {
 
 fun main(args: Array<String>) {
     logbackFromPWD()
+    Configuration.setIfNotNull(Configuration.PORT_KEY, args.firstOrNull()?.toIntOrNull()?.toString())
     launch<GuiApp>(args)
 }
