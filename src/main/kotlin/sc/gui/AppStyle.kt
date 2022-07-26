@@ -23,11 +23,6 @@ class AppStyle: Stylesheet() {
         
         private val colorSand = c("#f2df8e")
         
-        // TODO load italics & bold
-        private val fontRegular = Font.loadFont(resources["/fonts/Raleway-Regular.ttf"], 16.0)
-        private val fontBold = Font.loadFont(resources["/fonts/Raleway-Bold.ttf"], 16.0)
-        private val fontItalic = Font.loadFont(resources["/fonts/Raleway-Italic.ttf"], 16.0)
-        
         const val pieceOpacity = 0.9
         
         val fontSizeRegular = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt * 2
@@ -59,6 +54,12 @@ class AppStyle: Stylesheet() {
                     addClass(AppStyle.background)
                 }
             )
+        
+        init {
+            arrayOf("Regular", "Bold", "Italic", "BoldItalic").forEach {
+                Font.loadFont(resources["/fonts/Raleway-$it.ttf"], 0.0)
+            }
+        }
     }
     
     private fun themed(block: CssSelectionBlock.(theme: Theme) -> Unit) {
@@ -102,7 +103,7 @@ class AppStyle: Stylesheet() {
         }
         
         root {
-            font = fontRegular
+            fontFamily = "Raleway"
             fontSize = fontSizeRegular
             accentColor = Color.MEDIUMPURPLE
         }
@@ -128,7 +129,6 @@ class AppStyle: Stylesheet() {
             }
         }
         heading {
-            font = fontBold
             fontSize = fontSizeHeader
             wrapText = true
             textAlignment = TextAlignment.CENTER
@@ -138,7 +138,6 @@ class AppStyle: Stylesheet() {
         // Special Components
         legend {
             // label of GameCreationForm
-            font = fontItalic
             fontSize = fontSizeBig
             fontStyle = FontPosture.ITALIC
         }
