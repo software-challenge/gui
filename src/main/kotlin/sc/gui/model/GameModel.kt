@@ -11,7 +11,7 @@ import sc.gui.controller.CreateGame
 import sc.gui.controller.HumanMoveAction
 import sc.gui.controller.HumanMoveRequest
 import sc.gui.events.*
-import sc.plugin2022.GameState
+import sc.plugin2023.GameState
 import sc.shared.GameResult
 import sc.util.booleanBinding
 import tornadofx.*

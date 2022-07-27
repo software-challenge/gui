@@ -10,8 +10,8 @@ import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.serverAddress
 import sc.gui.serverPort
-import sc.plugin2022.GameState
-import sc.plugin2022.Move
+import sc.plugin2023.GameState
+import sc.plugin2023.Move
 import tornadofx.*
 import java.util.concurrent.CompletableFuture
 
@@ -56,11 +56,11 @@ class ClientController: Controller() {
     }
     
     fun getSimpleMove(state: GameState): CompletableFuture<Move> {
-        val possibleMoves = state.possibleMoves
+        val possibleMoves = state.getPossibleMoves()
         if (possibleMoves.isEmpty())
             throw GameLogicException("No possible Moves found!")
         return CompletableFuture.completedFuture(
-                possibleMoves.associateWith { state.board[it.to]?.count ?: 0 }
+                possibleMoves.associateWith { state.board[it.to]?.isEmpty }
                         .let { map -> map.filter { it.value == map.maxOf { it.value } }.keys.random() })
     }
 }

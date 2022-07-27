@@ -12,7 +12,7 @@ import sc.gui.events.*
 import sc.gui.model.GameModel
 import sc.networking.clients.GameLoaderClient
 import sc.networking.clients.IGameController
-import sc.plugin2022.GameState
+import sc.plugin2023.GameState
 import tornadofx.*
 import java.io.IOException
 

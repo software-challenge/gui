@@ -10,8 +10,6 @@ import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
 import org.slf4j.LoggerFactory
 import sc.api.plugins.Team
-import sc.plugin2022.PieceType
-import sc.plugin2022.color
 import tornadofx.*
 
 class AppStyle: Stylesheet() {
@@ -180,59 +178,22 @@ class AppStyle: Stylesheet() {
         arrayOf("amber", "blank").forEach {
             select(CssRule.c(it)) { image = resources.url("/graphics/$it.png").toURI() }
         }
-        PieceType.values().forEach { type ->
-            select(CssRule.c(type.name.lowercase())) {
-                if(type != PieceType.Moewe) {
-                    val scale = if(type == PieceType.Robbe) 1.4 else 1.2
-                    scaleX = scale
-                    scaleY = if(type == PieceType.Herzmuschel) 1.3 else scale
+        
+        select(CssRule.c("penguin")) {
+            // val frames = PieceFrames("", "", consume = chain("open_shell" to 4, "close_shell" to 4))
+            val frames = PieceFrames("seagull") // TODO: Add new frames for penguin
+            (0..19).forEach { frame ->
+                and(CssRule.pc("idle$frame")) {
+                    javaClass.getResource(frames.getIdle(frame))?.toURI()?.let { image = it }
                 }
-                val frames = when(type) {
-                    PieceType.Herzmuschel -> PieceFrames(
-                        "cockle",
-                        "olive_cockle",
-                        consume = chain("open_shell" to 4, "close_shell" to 4)
-                    )
-                    PieceType.Moewe -> PieceFrames("seagull")
-                    PieceType.Robbe -> PieceFrames(
-                        "seal", "cream_seal", "idle_on_land_upright",
-                        chain(
-                            "transion_upright_laying_down" to 2,
-                            "move_on_land" to 3,
-                            "move_on_land_002" to 0,
-                            "move_on_land_002" to 0,
-                            "move_on_land_003" to 0,
-                            "move_on_land_004" to 0,
-                            "transion_ground_to_upright" to 3
-                        ),
-                        chain(
-                            "transion_upright_laying_down" to 2,
-                            "move_jumping_on_land" to 3,
-                            "move_jumping_on_land_002" to 0,
-                            "move_jumping_on_land_002" to 0,
-                            "move_jumping_on_land_003" to 0,
-                            "move_jumping_on_land_004" to 0,
-                            "transion_ground_to_upright" to 3
-                        )
-                    )
-                    PieceType.Seestern -> PieceFrames(
-                        "starfish",
-                        "tan_starfish_side_view_happy"
-                    ) { "jump_${it.padded}" }
+                and(CssRule.pc("move$frame")) {
+                    javaClass.getResource(frames.getMove(frame))?.toURI()?.let {
+                        unsafe("-fx-image", raw(PropertyHolder.toCss(it) + " !important"))
+                    }
                 }
-                (0..19).forEach { frame ->
-                    and(CssRule.pc("idle$frame")) {
-                        javaClass.getResource(frames.getIdle(frame))?.toURI()?.let { image = it }
-                    }
-                    and(CssRule.pc("move$frame")) {
-                        javaClass.getResource(frames.getMove(frame))?.toURI()?.let {
-                            unsafe("-fx-image", raw(PropertyHolder.toCss(it) + " !important"))
-                        }
-                    }
-                    and(CssRule.pc("consume$frame")) {
-                        javaClass.getResource(frames.getConsume(frame))?.toURI()?.let {
-                            unsafe("-fx-image", raw(PropertyHolder.toCss(it) + " !important"))
-                        }
+                and(CssRule.pc("consume$frame")) {
+                    javaClass.getResource(frames.getConsume(frame))?.toURI()?.let {
+                        unsafe("-fx-image", raw(PropertyHolder.toCss(it) + " !important"))
                     }
                 }
             }

@@ -5,8 +5,8 @@ import sc.api.plugins.IMove
 import sc.gui.model.PlayerType
 import sc.networking.clients.LobbyClient
 import sc.player.IGameHandler
-import sc.plugin2022.GameState
-import sc.plugin2022.Move
+import sc.plugin2023.GameState
+import sc.plugin2023.Move
 import sc.shared.GameResult
 import java.util.concurrent.CompletableFuture
 

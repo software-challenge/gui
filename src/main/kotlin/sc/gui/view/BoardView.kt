@@ -16,13 +16,14 @@ import javafx.scene.layout.*
 import javafx.scene.transform.Rotate
 import javafx.util.Duration
 import mu.KotlinLogging
+import sc.api.plugins.Coordinates
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.AppModel
 import sc.gui.model.GameModel
-import sc.plugin2022.*
-import sc.plugin2022.util.Constants
+import sc.plugin2023.*
+import sc.plugin2023.util.PluginConstants
 import sc.util.listenImmediately
 import tornadofx.*
 import java.lang.ref.WeakReference
@@ -136,7 +137,7 @@ class BoardView: View() {
     
     private val size = doubleProperty(16.0)
     private val gridSize
-        get() = size.value / Constants.BOARD_SIZE
+        get() = size.value / PluginConstants.BOARD_SIZE
     private val calculatedBlockSize = size.doubleBinding { gridSize * 0.9 }
     
     private val ambers = Team.values().associateWith { ArrayList<Node>() }
@@ -151,7 +152,7 @@ class BoardView: View() {
             if(state == null) {
                 ambers.values.flatten().forEach { rootStack.children.remove(it) }
                 ambers.values.forEach { it.clear() }
-                children.remove(Constants.BOARD_SIZE.toDouble().pow(2).toInt(), children.size)
+                children.remove(PluginConstants.BOARD_SIZE.toDouble().pow(2).toInt(), children.size)
                 pieces.clear()
                 return@ChangeListener
             }

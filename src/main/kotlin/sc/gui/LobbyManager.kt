@@ -4,13 +4,14 @@ import javafx.application.Platform
 import org.slf4j.LoggerFactory
 import sc.api.plugins.IGamePlugin
 import sc.api.plugins.IGameState
+import sc.framework.plugins.AbstractGame
 import sc.gui.controller.GameFlowController
 import sc.gui.controller.Player
 import sc.gui.controller.client.ClientInterface
 import sc.gui.model.PlayerType
 import sc.networking.clients.AdminClient
 import sc.networking.clients.LobbyClient
-import sc.plugin2022.GameState
+import sc.plugin2023.GameState
 import sc.protocol.ResponsePacket
 import sc.protocol.requests.PrepareGameRequest
 import sc.protocol.responses.ErrorPacket

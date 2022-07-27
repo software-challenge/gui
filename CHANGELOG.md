@@ -32,7 +32,7 @@ for details on our versioning scheme.
 - Major redesign of the layout
 - New Game Ostseeschach with basic animations and placeholder graphics
 
-## 2022 Game Ostseeschach - 2021-06-11
+## 2023 Game Ostseeschach - 2021-06-11
 
 ## [21.4.0](https://github.com/software-challenge/gui/commits/21.4.0) - 2021-01-29
 - Automatically save replays & implement loading replays
