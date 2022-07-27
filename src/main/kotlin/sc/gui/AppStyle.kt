@@ -23,9 +23,6 @@ class AppStyle: Stylesheet() {
         
         private val colorSand = c("#f2df8e")
         
-        // TODO load italics & bold
-        private val gotuRegular = Font.loadFont(resources["/fonts/NotoSans-Regular.ttf"], 16.0)
-        
         const val pieceOpacity = 0.9
         
         val fontSizeRegular = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt * 2
@@ -57,6 +54,12 @@ class AppStyle: Stylesheet() {
                     addClass(AppStyle.background)
                 }
             )
+        
+        init {
+            arrayOf("Regular", "Bold", "Italic", "BoldItalic").forEach {
+                Font.loadFont(resources["/fonts/Raleway-$it.ttf"], 0.0)
+            }
+        }
     }
     
     private fun themed(block: CssSelectionBlock.(theme: Theme) -> Unit) {
@@ -100,7 +103,7 @@ class AppStyle: Stylesheet() {
         }
         
         root {
-            font = gotuRegular
+            fontFamily = "Raleway"
             fontSize = fontSizeRegular
             accentColor = Color.MEDIUMPURPLE
         }
