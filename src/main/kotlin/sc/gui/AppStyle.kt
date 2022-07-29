@@ -19,7 +19,7 @@ class AppStyle: Stylesheet() {
         
         private val resources = ResourceLookup(this)
         
-        private val colorSand = c("#f2df8e")
+        private val colorBackground = c("#0ec9ff")
         
         const val pieceOpacity = 0.9
         
@@ -107,9 +107,10 @@ class AppStyle: Stylesheet() {
         }
         background {
             opacity = 0.8
-            backgroundColor += colorSand
-            backgroundImage += resources.url("/graphics/sea_beach.png").toURI()
-            backgroundPosition += BackgroundPosition(Side.LEFT, .0, true, Side.TOP, -10.0, false)
+            backgroundColor += colorBackground
+            backgroundImage += resources.url("/graphics/background.png").toURI()
+            backgroundSize += BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)
+            //backgroundPosition += BackgroundPosition(Side.LEFT, .0, true, Side.TOP, -10.0, false)
             backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.NO_REPEAT
         }
         
@@ -172,16 +173,16 @@ class AppStyle: Stylesheet() {
         
         CssRule.c("grid").theme {
             borderStyle += BorderStrokeStyle.DOTTED
-            borderColor += box(if(it.isDark) colorSand.brighter() else colorSand.darker())
+            borderColor += box(if(it.isDark) colorBackground.brighter() else colorBackground.darker())
         }
         
-        arrayOf("amber", "blank").forEach {
+        arrayOf("fish").forEach {
             select(CssRule.c(it)) { image = resources.url("/graphics/$it.png").toURI() }
         }
         
         select(CssRule.c("penguin")) {
             // val frames = PieceFrames("", "", consume = chain("open_shell" to 4, "close_shell" to 4))
-            val frames = PieceFrames("seagull") // TODO: Add new frames for penguin
+            val frames = PieceFrames("penuin_3") { "jump_${it.padded}" } // TODO: Add new frames for penguin
             (0..19).forEach { frame ->
                 and(CssRule.pc("idle$frame")) {
                     javaClass.getResource(frames.getIdle(frame))?.toURI()?.let { image = it }
@@ -204,13 +205,13 @@ class AppStyle: Stylesheet() {
         val type: String,
         val prefix: String = type,
         val idlePrefix: String = "idle",
-        private val move: ((Int) -> String) = { "move_${it.padded}" },
+        private val move: ((Int) -> String) = { "walk_${it.padded}" },
         private val consume: ((Int) -> String) = move,
     ) {
         fun getIdle(frame: Int) = getFrame("${idlePrefix}_${frame.padded}")
         fun getMove(frame: Int) = getFrame(move(frame))
         fun getConsume(frame: Int) = getFrame(consume(frame))
-        private fun getFrame(suffix: String) = "/graphics/$type/keyframes/__${prefix}_$suffix.png"
+        private fun getFrame(suffix: String) = "/graphics/$type/__${prefix}_$suffix.png"
     }
     
     private fun chain(vararg frames: Pair<String, Int>): ((Int) -> String) = { frame ->

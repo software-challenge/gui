@@ -53,7 +53,7 @@ class ScoreBinding(private val game: GameModel): StringBinding() {
     override fun computeValue(): String =
             if(game.gameStarted.value)
                 "Runde ${game.currentRound.get()} - " +
-                game.teamScores.value?.joinToString(" : ")
+                game.teamScores.value?.joinToString(" : ") { it?.first().toString() }
             else "Drücke auf Start"
 }
 

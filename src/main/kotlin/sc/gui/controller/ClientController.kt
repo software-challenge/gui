@@ -60,7 +60,10 @@ class ClientController: Controller() {
         if (possibleMoves.isEmpty())
             throw GameLogicException("No possible Moves found!")
         return CompletableFuture.completedFuture(
-                possibleMoves.associateWith { state.board[it.to]?.isEmpty }
-                        .let { map -> map.filter { it.value == map.maxOf { it.value } }.keys.random() })
+                possibleMoves.associateWith { state.board[it.to].fish }
+                        .let { map ->
+                            val maxFish = map.maxOf { it.value }
+                            map.filter { it.value == maxFish }.keys.random()
+                        })
     }
 }

@@ -23,6 +23,7 @@ import sc.gui.controller.HumanMoveAction
 import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.plugin2023.*
+import sc.plugin2023.Field
 import sc.plugin2023.util.PluginConstants
 import sc.util.listenImmediately
 import tornadofx.*
@@ -65,8 +66,6 @@ class ResizableImageView(sizeProperty: ObservableValue<Number>): ImageView() {
 }
 
 class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: String): StackPane() {
-    var height = 0
-        private set
     private val animateFn = ::animate
     
     init {
@@ -91,21 +90,6 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
                         img?.addPseudoClass("$prefix$newFrame")
                     }
         else -1
-    }
-    
-    fun updateHeight(newHeight: Int) {
-        while(height < newHeight) {
-            addChild("blank")
-        }
-        if(newHeight < height) {
-            children.subList(0, height - newHeight).forEach { node ->
-                node.fade(transitionDuration, 0.0).setOnFinished {
-                    children.remove(node)
-                }
-            }
-            height = newHeight
-        }
-        animate()
     }
     
     fun addChild(graphic: String) {
@@ -136,12 +120,12 @@ class BoardView: View() {
     private val pieces = HashMap<Coordinates, PieceImage>()
     
     private val size = doubleProperty(16.0)
+    private val boardSize = PluginConstants.BOARD_SIZE
     private val gridSize
-        get() = size.value / PluginConstants.BOARD_SIZE
+        get() = size.value / boardSize
     private val calculatedBlockSize = size.doubleBinding { gridSize * 0.9 }
     
-    private val ambers = Team.values().associateWith { ArrayList<Node>() }
-    private val rootStack: Pane by lazy { root.parent.run { if(parent != null) parent else this } as Pane }
+    //private val rootStack: Pane by lazy { root.parent.run { if(parent != null) parent else this } as Pane }
     
     val grid = gridpane {
         paddingAll = AppStyle.spacing
@@ -150,8 +134,6 @@ class BoardView: View() {
         val stateListener = ChangeListener<GameState?> { _, oldState, state ->
             clearTargetHighlights()
             if(state == null) {
-                ambers.values.flatten().forEach { rootStack.children.remove(it) }
-                ambers.values.forEach { it.clear() }
                 children.remove(PluginConstants.BOARD_SIZE.toDouble().pow(2).toInt(), children.size)
                 pieces.clear()
                 return@ChangeListener
@@ -165,27 +147,21 @@ class BoardView: View() {
             }!!.second
             // TODO tornadofx: nested CSS, Color.derive with defaults, configProperty, CSS important, selectClass/Pseudo
             // TODO sounds for figure movements
-            lastMove?.let { move ->
+            /*lastMove?.let { move ->
                 pieces.remove(move.from)?.let { piece ->
                     val coveredPiece = pieces.remove(move.to)
-                    val newHeight = state.board[move.to]?.count
-                    if(newHeight != null) {
-                        pieces[move.to] = piece
-                        if(newHeight < piece.height)
-                            piece.updateHeight(newHeight)
-                    }
-                    val robbe = oldState?.board?.get(move.from)?.type == PieceType.Robbe
+                    pieces[move.to] = piece
                     parallelTransition {
                         var cur = -1
                         val moveType = if(coveredPiece != null) "consume" else "move"
                         timeline {
-                            cycleCount = if(robbe) 12 else 8
+                            cycleCount = 8
                             this += KeyFrame(animationDuration, {
                                 cur = piece.nextFrame(moveType, cur, randomize = false)
                             })
                         }.apply { setOnFinished { piece.nextFrame(moveType, cur, remove = true) } }
                         children += piece.move(transitionDuration - animationDuration.multiply(2.0), Point2D(move.delta.dx * gridSize, move.delta.dy * gridSize), play = false) {
-                            delay = animationDuration.multiply(if(robbe) 4.0 else 1.0)
+                            delay = animationDuration.multiply(1.0)
                             setOnFinished {
                                 piece.translateX = 0.0
                                 piece.translateY = 0.0
@@ -236,38 +212,38 @@ class BoardView: View() {
                         }
                     }
                 }
-            }
-            state.board.forEach { (coords, piece) ->
+            }*/
+            state.board.forEach<Coordinates, Field> { (hexCoords, piece) ->
+                val coords = hexCoords.fromDoubledHex()
                 pieces.computeIfAbsent(coords) {
-                    createPiece(piece.type).also { pieceImage ->
+                    createPiece("penguin").also { pieceImage ->
                         pieceImage.opacity = 0.0
-                        pieceImage.updateHeight(piece.count)
-                        add(pieceImage, coords.x, coords.y)
+                        addPiece(pieceImage, coords)
                     }
                 }
             }
             val iter = pieces.iterator()
             while(iter.hasNext()) {
                 val (c, image) = iter.next()
-                val piece = state.board[c]
+                val piece = state.board[c].penguin
                 if(piece == null) {
                     removePiece(image)
                     iter.remove()
                 } else {
-                    image.addClass(piece.team.color)
-                    image.scaleX = -(piece.team.index.xor(state.startTeam.index) * 2 - 1.0)
+                    image.addClass(piece.color)
+                    image.scaleX = -(piece.index.xor(state.startTeam.index) * 2 - 1.0)
                     image.fade(transitionDuration, AppStyle.pieceOpacity * when {
-                        piece.team != state.currentTeam -> 0.6
+                        piece != state.currentTeam -> 0.6
                         gameModel.atLatestTurn.value && gameModel.gameState.value?.isOver == false -> 1.0
                         else -> 0.8
                     })
                 }
             }
         }
-        (0 until Constants.BOARD_SIZE).forEach { index ->
-            constraintsForRow(index).percentHeight = 100.0 / Constants.BOARD_SIZE
-            constraintsForColumn(index).percentWidth = 100.0 / Constants.BOARD_SIZE
-            (0 until Constants.BOARD_SIZE).forEach { row ->
+        (0 until boardSize).forEach { index ->
+            constraintsForRow(index).percentHeight = 100.0 / boardSize
+            constraintsForColumn(index).percentWidth = 100.0 / boardSize
+            (0 until boardSize).forEach { row ->
                 add(Pane().addClass("grid").apply {
                     setOnMouseEntered { event ->
                         pieces[gridCoordinates]?.run {
@@ -333,8 +309,8 @@ class BoardView: View() {
     private var currentHighlight: Node? = null
     private var targetHighlights = ArrayList<Node>()
     
-    private fun createPiece(type: PieceType): PieceImage =
-            PieceImage(calculatedBlockSize, type.name.lowercase())
+    private fun createPiece(type: String): PieceImage =
+            PieceImage(calculatedBlockSize, type)
     
     private fun highlight(node: Node, lock: Boolean = false, updateTargetHighlights: Boolean = true) {
         currentHighlight?.removeClass(AppStyle.gridHover, AppStyle.gridLock)
@@ -353,11 +329,11 @@ class BoardView: View() {
     
     private fun highlightTargets(position: Coordinates) {
         clearTargetHighlights()
-        gameModel.gameState.value?.board?.possibleMovesFrom(position)?.map {
-            val target = position + it
+        gameModel.gameState.value?.board?.possibleMovesFrom(position)?.map { move ->
+            val target = move.to
             val node = Region().addClass(AppStyle.gridHover).apply {
                 onLeftClick {
-                    if(gameModel.atLatestTurn.value && gameModel.isHumanTurn.value && gameModel.gameState.value?.board?.get(position)?.team == gameModel.gameState.value?.currentTeam) {
+                    if(gameModel.atLatestTurn.value && gameModel.isHumanTurn.value && gameModel.gameState.value?.board?.get(position)?.penguin == gameModel.gameState.value?.currentTeam) {
                         fire(HumanMoveAction(Move(position, target).also { logger.debug("Human Move: $it") }))
                     }
                 }
@@ -365,6 +341,11 @@ class BoardView: View() {
             grid.add(node, target.x, target.y)
             node
         }?.let { targetHighlights.addAll(it) }
+    }
+    
+    fun addPiece(node: Region, coords: Coordinates) {
+        val straightCoords = coords
+        grid.add(node, straightCoords.x, straightCoords.y)
     }
 }
 
