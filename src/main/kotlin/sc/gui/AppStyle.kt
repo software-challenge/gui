@@ -1,6 +1,5 @@
 package sc.gui
 
-import javafx.geometry.Side
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
@@ -176,13 +175,13 @@ class AppStyle: Stylesheet() {
             borderColor += box(if(it.isDark) colorBackground.brighter() else colorBackground.darker())
         }
         
-        arrayOf("fish").forEach {
+        arrayOf("fish", "ice").forEach {
             select(CssRule.c(it)) { image = resources.url("/graphics/$it.png").toURI() }
         }
         
         select(CssRule.c("penguin")) {
-            // val frames = PieceFrames("", "", consume = chain("open_shell" to 4, "close_shell" to 4))
-            val frames = PieceFrames("penuin_3") { "jump_${it.padded}" } // TODO: Add new frames for penguin
+            focusColor = colorBackground
+            val frames = PieceFrames("penguin", "penuin_3") { "jump_${it.padded}" }
             (0..19).forEach { frame ->
                 and(CssRule.pc("idle$frame")) {
                     javaClass.getResource(frames.getIdle(frame))?.toURI()?.let { image = it }
