@@ -7,6 +7,7 @@ import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ObservableDoubleValue
 import javafx.beans.value.ObservableValue
+import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.ImageView
@@ -17,13 +18,13 @@ import javafx.scene.transform.Rotate
 import javafx.util.Duration
 import mu.KotlinLogging
 import sc.api.plugins.Coordinates
+import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.AppModel
 import sc.gui.model.GameModel
+import sc.plugin2023.*
 import sc.plugin2023.Field
-import sc.plugin2023.GameState
-import sc.plugin2023.Move
 import sc.plugin2023.util.PluginConstants
 import sc.util.listenImmediately
 import tornadofx.*
@@ -115,18 +116,16 @@ class BoardView: View() {
     private val pieces = HashMap<Coordinates, PieceImage>()
     
     private val size = doubleProperty(16.0)
-    private val boardSize = PluginConstants.BOARD_SIZE
+    private val boardSize = PluginConstants.BOARD_SIZE * 2
     private val gridSize
-        get() = size.value / boardSize
-    private val calculatedBlockSize = size.doubleBinding { gridSize * 0.9 }
+        get() = size.value / boardSize * 0.8
+    private val calculatedBlockSize = size.doubleBinding { gridSize * 1.9 }
     
-    override val root = stackpane {
-        size.bind(Bindings.min(widthProperty(), heightProperty()))
+    override val root = hbox {
+        this.alignment = Pos.CENTER
+        size.bind(Bindings.min(widthProperty(), heightProperty().multiply(1.6)))
         anchorpane {
-            alignment = Pos.CENTER
-            paddingAll = AppStyle.spacing
-            maxHeightProperty().bind(size)
-            maxWidthProperty().bind(size)
+            this.paddingAll = AppStyle.spacing
             val stateListener = ChangeListener<GameState?> { _, oldState, state ->
                 clearTargetHighlights()
                 if(state == null) {
@@ -143,72 +142,38 @@ class BoardView: View() {
                 }!!.second
                 // TODO tornadofx: nested CSS, Color.derive with defaults, configProperty, CSS important, selectClass/Pseudo
                 // TODO sounds for figure movements
-                /*lastMove?.let { move ->
+                lastMove?.let { move ->
                     pieces.remove(move.from)?.let { piece ->
                         val coveredPiece = pieces.remove(move.to)
                         pieces[move.to] = piece
                         parallelTransition {
                             var cur = -1
-                            val moveType = if(coveredPiece != null) "consume" else "move"
+                            val moveType = if((oldState?.board?.getOrEmpty(move.to)?.fish ?: 0) > 1) "consume" else "move"
                             timeline {
                                 cycleCount = 8
                                 this += KeyFrame(animationDuration, {
                                     cur = piece.nextFrame(moveType, cur, randomize = false)
                                 })
                             }.apply { setOnFinished { piece.nextFrame(moveType, cur, remove = true) } }
-                            children += piece.move(transitionDuration - animationDuration.multiply(2.0), Point2D(move.delta.dx * gridSize, move.delta.dy * gridSize), play = false) {
+                            children += piece.move(transitionDuration - animationDuration.multiply(2.0), Point2D(move.delta!!.dx * gridSize, move.delta!!.dy * gridSize), play = false) {
                                 delay = animationDuration.multiply(1.0)
                                 setOnFinished {
                                     piece.translateX = 0.0
                                     piece.translateY = 0.0
-                                    piece.gridpaneConstraints { columnRowIndex(move.to.x, move.to.y) }
+                                    addPiece(piece, move.to)
                                     logger.trace("Tile $piece finished transition to ${state.board[move.to]} covering $coveredPiece at ${move.to} (highlight: $currentHighlight)")
                                     if(currentHighlight != null && currentHighlight in arrayOf(piece, coveredPiece)) {
                                         highlightTargets(move.to)
                                         lockedHighlight = move.to
                                     }
-                                    this@gridpane.children.remove(coveredPiece)
+                                    grid.children.remove(coveredPiece)
                                     if(lockedHighlight == move.to)
                                         lockedHighlight = null
-                                    if(newHeight == null) {
-                                        Platform.runLater {
-                                            val bounds = piece.localToScene(piece.layoutBounds)
-                                            val teamAmbers = oldState?.getPointsForTeam(state.otherTeam) ?: return@runLater
-                                            (teamAmbers until state.getPointsForTeam(state.otherTeam)).forEach { position ->
-                                                Group(PieceImage(calculatedBlockSize, "amber")).apply {
-                                                    opacity = 0.0
-                                                    rootStack.add(this)
-                                                    val alignLeft = oldState.board[move.from]?.team == Team.ONE
-                                                    StackPane.setAlignment(this, if(alignLeft) Pos.TOP_LEFT else Pos.TOP_RIGHT)
-                                                    translateX = bounds.centerX - (calculatedBlockSize.value * 0.5).let { if(alignLeft) it else rootStack.width - it }
-                                                    translateY = bounds.centerY - calculatedBlockSize.value / 2
-                                                    fade(transitionDuration, AppStyle.pieceOpacity).setOnFinished {
-                                                        val xOffset = { size: Number -> (size.toDouble() / 2 + position * size.toDouble() / 3).let { if(alignLeft) it else -it } }
-                                                        ambers[state.otherTeam]?.takeIf { it.size <= position }
-                                                                ?.let { ambers ->
-                                                                    ambers.add(this)
-                                                                    move(transitionDuration.multiply(2.0), Point2D(xOffset(calculatedBlockSize.value), 0.0)).setOnFinished {
-                                                                        translateXProperty().bind(calculatedBlockSize.doubleBinding { xOffset(it!!) })
-                                                                    }
-                                                                } ?: run {
-                                                            fade(transitionDuration, 0).setOnFinished {
-                                                                rootStack.children.remove(this)
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        piece.updateHeight(0)
-                                        removePiece(piece)
-                                    } else {
-                                        piece.updateHeight(newHeight)
-                                    }
                                 }
                             }
                         }
                     }
-                }*/
+                }
                 state.board.forEach<Coordinates, Field> { (hexCoords, piece) ->
                     if(piece.isEmpty)
                         return@forEach
@@ -219,7 +184,7 @@ class BoardView: View() {
                                 label(piece.fish.toString())
                             }
                             addPiece(this, coordinates)
-    
+                            
                             setOnMouseExited { event ->
                                 if(lockedHighlight == null) {
                                     if(!isSelectable(coordinates)) {
@@ -253,7 +218,7 @@ class BoardView: View() {
                                 gameModel.atLatestTurn.value && gameModel.gameState.value?.isOver == false -> 1.0
                                 else -> 0.8
                             })
-    
+                            
                             image.setOnMouseEntered { event ->
                                 if(lockedHighlight == null) {
                                     highlight(image, updateTargetHighlights = coordinates)
@@ -265,16 +230,23 @@ class BoardView: View() {
                             image.onLeftClick {
                                 lockedHighlight =
                                         if(coordinates == lockedHighlight || !isSelectable(coordinates)) {
-                                            pieces[coordinates]?.let { highlight(it, lock = false, updateTargetHighlights = coordinates) }
+                                            pieces[coordinates]?.let { highlight(it, false, coordinates) }
                                             null
                                         } else {
-                                            coordinates.also { pieces[coordinates]?.let { highlight(it, lock = true) } }
+                                            coordinates.also { pieces[coordinates]?.let { highlight(it, true, coordinates) } }
                                         }
                                 logger.trace { "Clicked $coordinates (lock at $lockedHighlight, current $currentHighlight)" }
                             }
                         }
                         field.fish > 0 -> {
-                            // TODO only relevant when going back
+                            if(!image.children.last().hasClass("fish")) {
+                                image.children.remove(1, image.children.size)
+                                image.addChild("fish")
+                                image.label(field.fish.toString())
+                                Team.values().forEach { image.removeClass(it.color, true) }
+                                image.opacity = 1.0
+                                image.scaleX = 1.0
+                            }
                             image.setOnMouseEntered { event ->
                                 if(lockedHighlight == null) {
                                     highlight(image)
@@ -303,7 +275,7 @@ class BoardView: View() {
         }
     }
     
-    val grid = root.children.first() as Pane
+    val grid: Pane = root.children.first() as Pane
     
     private fun removePiece(piece: Node, durationMultiplier: Double = 1.0): FadeTransition =
             piece.fade(transitionDuration.multiply(durationMultiplier), 0.0) {
@@ -343,7 +315,9 @@ class BoardView: View() {
         clearTargetHighlights()
         
         gameModel.gameState.value?.let { state ->
-            state.board.possibleMovesFrom(position).also { logger.debug { "highlighting possible moves from $position: $it" } }.mapNotNull { move ->
+            state.board.possibleMovesFrom(position)
+                    .also { logger.debug { "highlighting possible moves from $position: $it" } }
+                    .mapNotNull { move ->
                 pieces[move.to]?.apply {
                     addClass(AppStyle.gridHover)
                     if(state.board[position].penguin == state.currentTeam && state.penguinsPlaced) {
@@ -363,12 +337,15 @@ class BoardView: View() {
     }
     
     fun addPiece(node: Region, coordinates: Coordinates) {
-        grid.add(node)
-        calculatedBlockSize.listenImmediately {
+        if(grid.children.contains(node))
+            logger.warn("Attempting to add duplicate grid child at $coordinates: $node")
+        else
+            grid.add(node)
+        size.listenImmediately {
             //logger.trace("$node at $coordinates block size: $it")
             node.anchorpaneConstraints {
-                leftAnchor = coordinates.x * it.toDouble() / 2
-                bottomAnchor = (PluginConstants.BOARD_SIZE - coordinates.y) * it.toDouble() / 2
+                leftAnchor = coordinates.x * gridSize
+                bottomAnchor = (PluginConstants.BOARD_SIZE - coordinates.y) * gridSize
             }
         }
     }
