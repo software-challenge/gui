@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+### [23.0.1](https://github.com/software-challenge/backend/commits/23.0.1) Rough Penguins - 2022-08-06
+- add new graphics and animations for Penguins
+- handle modifier keys (SHIFT/CTRL) when jumping turns (ebf5436)
+#### Minor Improvements
+- use Raleway Font (#83)
+- don't crash when loading an erroneous replay (13e9a28)
+- rotate board depending on startTeam parameter
+#### Under the hood
+- use OpenJFX 17 (fafae89)
+- remove kiosk mode stub
+- add debug startup option for use with ScenicView
+
 ## 2023 Game Hey, Danke für den Fisch (Penguins) - 2022-08
 
 ### [22.1.0](https://github.com/software-challenge/gui/commits/22.1.0) Fancying up - 2021-11
