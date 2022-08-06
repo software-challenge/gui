@@ -7,10 +7,12 @@ import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ObservableDoubleValue
 import javafx.beans.value.ObservableValue
+import javafx.geometry.Orientation
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.ImageView
+import javafx.scene.layout.FlowPane
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
@@ -160,6 +162,8 @@ class BoardView: View() {
                                 setOnFinished {
                                     piece.translateX = 0.0
                                     piece.translateY = 0.0
+                                    // TODO hack to fix ordering
+                                    grid.children.remove(piece)
                                     addPiece(piece, move.to)
                                     logger.trace("Tile $piece finished transition to ${state.board[move.to]} covering $coveredPiece at ${move.to} (highlight: $currentHighlight)")
                                     if(currentHighlight != null && currentHighlight in arrayOf(piece, coveredPiece)) {
@@ -180,8 +184,19 @@ class BoardView: View() {
                     pieces.computeIfAbsent(hexCoords) { coordinates ->
                         createPiece("ice").apply {
                             if(piece.fish > 0) {
-                                addChild("fish")
-                                label(piece.fish.toString())
+                                children.add(FlowPane(Orientation.HORIZONTAL, *(0 until piece.fish).map {
+                                    ResizableImageView(calculatedBlockSize.div(2)).addClass("fish")
+                                }.toTypedArray()).apply {
+                                    this.alignment = Pos.CENTER
+                                    this.maxWidthProperty().bind(calculatedBlockSize.div(1))
+                                    this.translateYProperty().bind(calculatedBlockSize.divide(-10))
+                                    /* TODO why do they turn into lines?
+                                    findings:
+                                    - has to do with incretasing y position
+                                    - reducing the image width makes the issue much worse
+                                    - unrelated to minHeight/minWidth of ImageView as well as "managed" property
+                                    */
+                                })
                             }
                             addPiece(this, coordinates)
                             
@@ -205,6 +220,7 @@ class BoardView: View() {
                     val (coordinates, image) = iter.next()
                     val field = state.board[coordinates]
                     val piece = field.penguin
+                    image.viewOrder = PluginConstants.BOARD_SIZE - coordinates.y.toDouble()
                     when {
                         piece != null -> {
                             if(!image.children.last().hasClass("penguin")) {
@@ -239,7 +255,7 @@ class BoardView: View() {
                             }
                         }
                         field.fish > 0 -> {
-                            if(!image.children.last().hasClass("fish")) {
+                            if(image.children.last().hasClass("penguin")) {
                                 image.children.remove(1, image.children.size)
                                 image.addChild("fish")
                                 image.label(field.fish.toString())
@@ -318,15 +334,15 @@ class BoardView: View() {
             state.board.possibleMovesFrom(position)
                     .also { logger.debug { "highlighting possible moves from $position: $it" } }
                     .mapNotNull { move ->
-                pieces[move.to]?.apply {
-                    addClass(AppStyle.gridHover)
-                    if(state.board[position].penguin == state.currentTeam && state.penguinsPlaced) {
-                        onLeftClick {
-                            humanMove(move)
+                        pieces[move.to]?.apply {
+                            addClass(AppStyle.gridHover)
+                            if(state.board[position].penguin == state.currentTeam && state.penguinsPlaced) {
+                                onLeftClick {
+                                    humanMove(move)
+                                }
+                            }
                         }
-                    }
-                }
-            }.let { targetHighlights.addAll(it) }
+                    }.let { targetHighlights.addAll(it) }
         }
     }
     
