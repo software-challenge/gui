@@ -44,6 +44,8 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots")
 }
 
+val debug = project.hasProperty("debug")
+
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     
@@ -53,6 +55,9 @@ dependencies {
     
     implementation("software-challenge", "server")
     implementation("software-challenge", "plugin")
+    
+    if(debug)
+        implementation("com.tangorabox", "component-inspector-fx", "1.1.0")
 }
 
 tasks {
@@ -80,7 +85,10 @@ tasks {
     
     javafx {
         version = "17"
-        modules("javafx.controls", "javafx.fxml", "javafx.base", "javafx.graphics")
+        val mods = mutableListOf("javafx.base", "javafx.controls", "javafx.fxml")
+        if(debug)
+            mods.addAll(listOf("javafx.swing"))
+        modules = mods
     }
     
     shadowJar {

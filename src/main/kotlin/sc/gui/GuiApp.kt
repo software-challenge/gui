@@ -1,5 +1,6 @@
 package sc.gui
 
+import javafx.stage.Stage
 import mu.KLogging
 import sc.gui.controller.ServerController
 import sc.gui.model.AppModel
@@ -11,6 +12,16 @@ import kotlin.reflect.KClass
 
 open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, AppStyle::class) {
     private val server: ServerController by inject()
+    override fun start(stage: Stage) {
+        super.start(stage)
+        
+        try {
+            Class.forName("com.tangorabox.componentinspector.fx.FXComponentInspectorHandler")
+                    .getDeclaredMethod("handleAll").invoke(null)
+            dumpStylesheets()
+        } catch(_: ClassNotFoundException) {
+        }
+    }
     
     override fun stop() {
         super.stop()
@@ -19,7 +30,6 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
     }
     
     init {
-        //dumpStylesheets()
         reloadStylesheetsOnFocus()
         server.startServer()
         addStageIcon(resources.image("/icon.png"))
