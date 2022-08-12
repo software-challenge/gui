@@ -84,7 +84,7 @@ tasks {
     }
     
     javafx {
-        version = "17"
+        version = "18"
         val mods = mutableListOf("javafx.base", "javafx.controls", "javafx.fxml")
         if(debug)
             mods.addAll(listOf("javafx.swing"))
