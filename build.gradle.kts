@@ -65,7 +65,7 @@ tasks {
         options.release.set(minJavaVersion.majorVersion.toInt())
     }
     processResources {
-        if (version.toString().split('.')[1] != "0")
+        if (version.toString().split('.').getOrNull(1) != "0")
             exclude("logback-test.xml")
         doLast {
             destinationDir.resolve("version.txt").writeText(version.toString())

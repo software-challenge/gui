@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+### [23.0.2](https://github.com/software-challenge/backend/commits/23.0.2) Pretty Penguins - 2022-08-21
+- Overhaul of the game display
+
 ### [23.0.1](https://github.com/software-challenge/backend/commits/23.0.1) Rough Penguins - 2022-08-06
 - add new graphics and animations for Penguins
 - handle modifier keys (SHIFT/CTRL) when jumping turns (ebf5436)

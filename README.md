@@ -32,9 +32,11 @@ Um bei den Branches die Übersicht zu behalten,
 sollten diese ebenfalls nach der Konvention benannt werden,
 z. B. könnte ein Branch mit einem Release-Fix für Gradle `chore/gradle/release-fix` heißen
 und ein Branch, der ein neues Login-Feature zur GUI hinzufügt, `feat/gui-login`.
-Branches werden normalerweise beim mergen zu einem einzelnen Commit zusammengefügt (squash merge),
-es sei denn, die einzelnen Commits des Branches haben jeweils eine alleinstehende Aussagekraft.
+
+Wenn die einzelnen Commits eines Pull Requests eigenständig funktionieren,
+sollte ein rebase merge durchgeführt werden,
+ansonsten (gerade bei experimentier-Branches) ein squash merge,
+wobei der Titel des Pull Requests der Commit-Message entsprechen sollte.
 
 Detaillierte Informationen zu unserem Kollaborations-Stil
-findet ihr in der [Kull Konvention](https://xerus2000.github.io/kull).
-
+findet ihr in der [Kull Konvention](https://kull.jfischer.org).
