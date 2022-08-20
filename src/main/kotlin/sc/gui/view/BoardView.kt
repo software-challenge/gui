@@ -1,7 +1,6 @@
 package sc.gui.view
 
 import javafx.animation.Animation
-import javafx.animation.FadeTransition
 import javafx.animation.KeyFrame
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
@@ -11,6 +10,8 @@ import javafx.geometry.Orientation
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
+import javafx.scene.effect.ColorAdjust
+import javafx.scene.effect.Glow
 import javafx.scene.image.ImageView
 import javafx.scene.layout.FlowPane
 import javafx.scene.layout.Pane
@@ -25,13 +26,13 @@ import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.AppModel
 import sc.gui.model.GameModel
-import sc.plugin2023.*
 import sc.plugin2023.Field
+import sc.plugin2023.GameState
+import sc.plugin2023.Move
 import sc.plugin2023.util.PluginConstants
 import sc.util.listenImmediately
 import tornadofx.*
 import java.lang.ref.WeakReference
-import kotlin.math.pow
 import kotlin.random.Random
 
 private val logger = KotlinLogging.logger { }
@@ -86,7 +87,7 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     }
     
     fun nextFrame(prefix: String = "idle", oldFrame: Int = frame, randomize: Boolean = true, remove: Boolean = false): Int {
-        val img = children.lastOrNull() as? ResizableImageView
+        val img = children.lastOrNull()
         img?.removePseudoClass("$prefix$oldFrame")
         return if(!remove)
             (oldFrame.inc() + if(randomize) Random.nextInt(1, 5).div(5) else 0)
@@ -115,7 +116,9 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
 
 class BoardView: View() {
     private val gameModel: GameModel by inject()
+    
     private val pieces = HashMap<Coordinates, PieceImage>()
+    private val ice = HashMap<Coordinates, PieceImage>()
     
     private val size = doubleProperty(16.0)
     private val boardSize = PluginConstants.BOARD_SIZE * 2
@@ -131,8 +134,10 @@ class BoardView: View() {
             val stateListener = ChangeListener<GameState?> { _, oldState, state ->
                 clearTargetHighlights()
                 if(state == null) {
-                    children.remove(PluginConstants.BOARD_SIZE.toDouble().pow(2).toInt(), children.size)
+                    //children.remove(PluginConstants.BOARD_SIZE.toDouble().pow(2).toInt(), children.size)
+                    grid.children.clear()
                     pieces.clear()
+                    ice.clear()
                     return@ChangeListener
                 }
                 rotate = state.startTeam.index * 180.0
@@ -150,7 +155,9 @@ class BoardView: View() {
                         pieces[move.to] = piece
                         parallelTransition {
                             var cur = -1
-                            val moveType = if((oldState?.board?.getOrEmpty(move.to)?.fish ?: 0) > 1) "consume" else "move"
+                            val moveType =
+                                    if((oldState?.board?.getOrEmpty(move.to)?.fish ?: 0) > 1) "consume"
+                                    else "move"
                             timeline {
                                 cycleCount = 8
                                 this += KeyFrame(animationDuration, {
@@ -163,6 +170,7 @@ class BoardView: View() {
                                     piece.translateX = 0.0
                                     piece.translateY = 0.0
                                     // TODO hack to fix ordering
+                                    // set viewOrder in transition
                                     grid.children.remove(piece)
                                     addPiece(piece, move.to)
                                     logger.trace("Tile $piece finished transition to ${state.board[move.to]} covering $coveredPiece at ${move.to} (highlight: $currentHighlight)")
@@ -178,72 +186,78 @@ class BoardView: View() {
                         }
                     }
                 }
-                state.board.forEach<Coordinates, Field> { (hexCoords, piece) ->
-                    if(piece.isEmpty)
-                        return@forEach
-                    pieces.computeIfAbsent(hexCoords) { coordinates ->
-                        createPiece("ice").apply {
-                            if(piece.fish > 0) {
-                                children.add(FlowPane(Orientation.HORIZONTAL, *(0 until piece.fish).map {
+                state.board.forEach<Coordinates, Field> { (coordinates, field) ->
+                    if(field.isEmpty) {
+                        removePiece(pieces.remove(coordinates))
+                        removePiece(ice.remove(coordinates))
+                    } else {
+                        val ice = ice.getOrPut(coordinates) {
+                            createPiece("ice").also { addPiece(it, coordinates) }
+                        }
+                        val piece = field.penguin
+                        if(field.fish > 0) {
+                            removePiece(pieces.remove(coordinates))
+                            if(ice.children.size < 2) {
+                                ice.children.add(FlowPane(Orientation.HORIZONTAL, *(0 until field.fish).map {
                                     ResizableImageView(calculatedBlockSize.div(2)).addClass("fish")
                                 }.toTypedArray()).apply {
                                     this.alignment = Pos.CENTER
                                     this.maxWidthProperty().bind(calculatedBlockSize.div(1))
                                     this.translateYProperty().bind(calculatedBlockSize.divide(-10))
                                     /* TODO why do they turn into lines?
-                                    findings:
-                                    - has to do with incretasing y position
-                                    - reducing the image width makes the issue much worse
-                                    - unrelated to minHeight/minWidth of ImageView as well as "managed" property
+                                       findings:
+                                       - has to do with increasing y position
+                                       - reducing the image width makes the issue much worse
+                                       - unrelated to minHeight/minWidth of ImageView as well as "managed" property
                                     */
                                 })
                             }
-                            addPiece(this, coordinates)
-                            
-                            setOnMouseExited { event ->
-                                if(lockedHighlight == null) {
-                                    if(!isSelectable(coordinates)) {
-                                        clearTargetHighlights()
-                                        removeClass(AppStyle.gridHover)
-                                        currentHighlight = null
-                                    }
-                                } else if(lockedHighlight != coordinates) {
-                                    removeClass(AppStyle.gridHover)
+                            ice.onLeftClick {
+                                if(gameModel.gameState.value?.canPlacePenguin(coordinates) == true)
+                                    humanMove(Move.set(coordinates))
+                                else currentHighlightCoords?.let {
+                                    if(state.board[it].penguin == state.currentTeam &&
+                                       state.penguinsPlaced && targetHighlights.contains(ice))
+                                        humanMove(Move(it, coordinates))
                                 }
-                                event.consume()
                             }
-                        }
-                    }
-                }
-                val iter = pieces.iterator()
-                while(iter.hasNext()) {
-                    val (coordinates, image) = iter.next()
-                    val field = state.board[coordinates]
-                    val piece = field.penguin
-                    image.viewOrder = PluginConstants.BOARD_SIZE - coordinates.y.toDouble()
-                    when {
-                        piece != null -> {
-                            if(!image.children.last().hasClass("penguin")) {
-                                image.children.remove(1, image.children.size)
-                                image.addChild("penguin")
+                            ice.setOnMouseEntered {
+                                if(gameModel.gameState.value?.canPlacePenguin(coordinates) == true)
+                                    ice.addHover(teamIndex = gameModel.gameState.value?.currentTeam?.index)
+                                (ice.effect as? ColorAdjust ?: ColorAdjust()).run {
+                                    ice.effect = this
+                                    brightness = -0.2
+                                }
                             }
-                            image.addClass(piece.color)
-                            image.scaleX = -(piece.index.xor(state.startTeam.index) * 2 - 1.0)
-                            image.fade(transitionDuration, AppStyle.pieceOpacity * when {
-                                piece != state.currentTeam -> 0.6
+                            ice.setOnMouseExited {
+                                (ice.effect as? ColorAdjust)?.takeIf { ice in targetHighlights }?.run {
+                                    brightness = 0.0
+                                } ?: ice.removeHover()
+                            }
+                            Team.values().forEach { ice.children.first().effect = null }
+                        } else if(piece != null) {
+                            if(ice.children.size > 1)
+                                removePiece(ice.children.last(), parent = ice)
+                            ice.children.first().effect = ColorAdjust(piece.index - 0.5, 0.0, 0.0, 0.0)
+                            val penguin = pieces.getOrPut(coordinates) {
+                                addPiece(createPiece("penguin"), coordinates)
+                            }
+                            penguin.scaleX = -(piece.index.xor(state.startTeam.index) * 2 - 1.0)
+                            penguin.fade(transitionDuration, AppStyle.pieceOpacity * when {
+                                piece != state.currentTeam -> 0.7
                                 gameModel.atLatestTurn.value && gameModel.gameState.value?.isOver == false -> 1.0
-                                else -> 0.8
+                                else -> 0.9
                             })
                             
-                            image.setOnMouseEntered { event ->
+                            penguin.setOnMouseEntered { event ->
                                 if(lockedHighlight == null) {
-                                    highlight(image, updateTargetHighlights = coordinates)
+                                    highlight(penguin, updateTargetHighlights = coordinates)
                                     event.consume()
                                 } else if(lockedHighlight != coordinates) {
-                                    image.addClass(AppStyle.gridHover)
+                                    penguin.addHover()
                                 }
                             }
-                            image.onLeftClick {
+                            penguin.onLeftClick {
                                 lockedHighlight =
                                         if(coordinates == lockedHighlight || !isSelectable(coordinates)) {
                                             pieces[coordinates]?.let { highlight(it, false, coordinates) }
@@ -253,35 +267,23 @@ class BoardView: View() {
                                         }
                                 logger.trace { "Clicked $coordinates (lock at $lockedHighlight, current $currentHighlight)" }
                             }
-                        }
-                        field.fish > 0 -> {
-                            if(image.children.last().hasClass("penguin")) {
-                                image.children.remove(1, image.children.size)
-                                image.addChild("fish")
-                                image.label(field.fish.toString())
-                                Team.values().forEach { image.removeClass(it.color, true) }
-                                image.opacity = 1.0
-                                image.scaleX = 1.0
-                            }
-                            image.setOnMouseEntered { event ->
+                            penguin.setOnMouseExited { event ->
                                 if(lockedHighlight == null) {
-                                    highlight(image)
-                                    event.consume()
+                                    if(!isSelectable(coordinates)) {
+                                        clearTargetHighlights()
+                                        penguin.removeHover()
+                                        currentHighlight = null
+                                    }
                                 } else if(lockedHighlight != coordinates) {
-                                    image.addClass(AppStyle.gridHover)
+                                    penguin.removeHover()
                                 }
+                                event.consume()
                             }
-                            if(state.canPlacePenguin(coordinates)) {
-                                image.onLeftClick {
-                                    humanMove(Move.set(coordinates))
-                                }
-                            }
-                        }
-                        else -> {
-                            removePiece(image)
-                            iter.remove()
+                        } else {
+                            logger.error("Invalid State!")
                         }
                     }
+                    //image.viewOrder = PluginConstants.BOARD_SIZE - coordinates.y.toDouble()
                 }
             }
             Platform.runLater {
@@ -293,10 +295,10 @@ class BoardView: View() {
     
     val grid: Pane = root.children.first() as Pane
     
-    private fun removePiece(piece: Node, durationMultiplier: Double = 1.0): FadeTransition =
-            piece.fade(transitionDuration.multiply(durationMultiplier), 0.0) {
+    private fun removePiece(piece: Node?, durationMultiplier: Double = 1.0, parent: Pane = grid) =
+            piece?.fade(transitionDuration.multiply(durationMultiplier), 0.0) {
                 setOnFinished {
-                    grid.children.remove(piece)
+                    parent.children.remove(piece)
                 }
             }
     
@@ -306,43 +308,51 @@ class BoardView: View() {
     
     private var lockedHighlight: Coordinates? = null
     private var currentHighlight: Node? = null
+    private var currentHighlightCoords: Coordinates? = null
     private var targetHighlights = ArrayList<Node>()
     
     private fun createPiece(type: String): PieceImage =
             PieceImage(calculatedBlockSize, type)
     
     private fun highlight(node: PieceImage, lock: Boolean = false, updateTargetHighlights: Coordinates? = null) {
-        currentHighlight?.removeClass(AppStyle.gridHover, AppStyle.gridLock)
+        currentHighlight?.removeHover()
         updateTargetHighlights?.takeIf { it != lockedHighlight }?.let { highlightTargets(it) }
-        node.addClass(if(lock) AppStyle.gridLock else AppStyle.gridHover)
+        node.addHover(lock)
         currentHighlight = node
     }
     
+    private fun Node.removeHover() {
+        //removeClass(AppStyle.gridHover, AppStyle.gridLock)
+        effect = null
+    }
+    
+    private fun Node.addHover(lock: Boolean = false, teamIndex: Int? = null): Node {
+        //addClass(if(lock) AppStyle.gridLock else AppStyle.gridHover)
+        effect =
+                if(teamIndex == null) Glow(if(lock) 0.7 else 0.4)
+                else ColorAdjust(teamIndex - 0.5, -0.6, 0.0, 0.0)
+        return this
+    }
+    
     private fun clearTargetHighlights() {
-        lockedHighlight?.let { pieces[it] }?.removeClass(AppStyle.gridHover)
+        currentHighlightCoords = null
+        lockedHighlight?.let { pieces[it] }?.removeHover()
         lockedHighlight = null
-        targetHighlights.forEach {
-            it.removeClass(AppStyle.gridHover)
-        }
+        targetHighlights.forEach { it.removeHover() }
         targetHighlights.clear()
     }
     
     private fun highlightTargets(position: Coordinates) {
         clearTargetHighlights()
+        currentHighlightCoords = position
         
         gameModel.gameState.value?.let { state ->
-            state.board.possibleMovesFrom(position)
-                    .also { logger.debug { "highlighting possible moves from $position: $it" } }
-                    .mapNotNull { move ->
-                        pieces[move.to]?.apply {
-                            addClass(AppStyle.gridHover)
-                            if(state.board[position].penguin == state.currentTeam && state.penguinsPlaced) {
-                                onLeftClick {
-                                    humanMove(move)
-                                }
-                            }
-                        }
-                    }.let { targetHighlights.addAll(it) }
+            targetHighlights.addAll(
+                    state.board.possibleMovesFrom(position)
+                            .also { logger.debug { "highlighting possible moves from $position: $it" } }
+                            .mapNotNull { move ->
+                                ice[move.to]?.addHover(teamIndex = state.board[position].penguin?.index)
+                            })
         }
     }
     
@@ -352,7 +362,7 @@ class BoardView: View() {
         }
     }
     
-    fun addPiece(node: Region, coordinates: Coordinates) {
+    private fun <T: Region> addPiece(node: T, coordinates: Coordinates): T {
         if(grid.children.contains(node))
             logger.warn("Attempting to add duplicate grid child at $coordinates: $node")
         else
@@ -364,5 +374,6 @@ class BoardView: View() {
                 bottomAnchor = (PluginConstants.BOARD_SIZE - coordinates.y) * gridSize
             }
         }
+        return node
     }
 }
