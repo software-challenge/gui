@@ -223,7 +223,7 @@ class BoardView: View() {
                             }
                             ice.setOnMouseEntered {
                                 if(gameModel.gameState.value?.canPlacePenguin(coordinates) == true)
-                                    ice.addHover(teamIndex = gameModel.gameState.value?.currentTeam?.index)
+                                    ice.addHover(team = gameModel.gameState.value?.currentTeam)
                                 (ice.effect as? ColorAdjust ?: ColorAdjust()).run {
                                     ice.effect = this
                                     brightness = -0.2
@@ -238,7 +238,7 @@ class BoardView: View() {
                         } else if(piece != null) {
                             if(ice.children.size > 1)
                                 removePiece(ice.children.last(), parent = ice)
-                            ice.children.first().effect = ColorAdjust(piece.index - 0.5, 0.0, 0.0, 0.0)
+                            ice.children.first().effect = ColorAdjust(piece.colorAdjust, 0.0, 0.0, 0.0)
                             val penguin = pieces.getOrPut(coordinates) {
                                 addPiece(createPiece("penguin"), coordinates)
                             }
@@ -328,11 +328,11 @@ class BoardView: View() {
         effect = null
     }
     
-    private fun Node.addHover(lock: Boolean = false, teamIndex: Int? = null): Node {
+    private fun Node.addHover(lock: Boolean = false, team: Team? = null): Node {
         //addClass(if(lock) AppStyle.gridLock else AppStyle.gridHover)
         effect =
-                if(teamIndex == null) Glow(if(lock) 0.7 else 0.4)
-                else ColorAdjust(teamIndex - 0.5, -0.6, 0.0, 0.0)
+                if(team == null) Glow(if(lock) 0.7 else 0.4)
+                else ColorAdjust(team.colorAdjust, -0.6, 0.0, 0.0)
         return this
     }
     
@@ -354,7 +354,7 @@ class BoardView: View() {
                     state.board.possibleMovesFrom(position)
                             .also { logger.debug { "highlighting possible moves from $position: $it" } }
                             .mapNotNull { move ->
-                                ice[move.to]?.addHover(teamIndex = state.board[position].penguin?.index)
+                                ice[move.to]?.addHover(team = state.board[position].penguin)
                             })
         }
     }
@@ -383,3 +383,6 @@ class BoardView: View() {
 
 private fun Node.setClass(className: String, add: Boolean = true) =
         if(add) addClass(className) else removeClass(className)
+
+private val Team.colorAdjust
+    get() = index - 0.4
