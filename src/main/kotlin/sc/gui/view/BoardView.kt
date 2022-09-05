@@ -82,7 +82,7 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
     val frameCount = 20
     var frame = Random.nextInt(1, frameCount)
     fun animate() {
-        if(AppModel.animate.value || frame > 0)
+        if((AppModel.animate.value || frame > 0) && !hasClass("inactive"))
             frame = nextFrame()
     }
     
@@ -248,6 +248,8 @@ class BoardView: View() {
                                 gameModel.atLatestTurn.value && gameModel.gameState.value?.isOver == false -> 1.0
                                 else -> 0.9
                             })
+                            penguin.nextFrame()
+                            penguin.setClass("inactive", piece != state.currentTeam)
                             
                             penguin.setOnMouseEntered { event ->
                                 if(lockedHighlight == null) {
@@ -336,6 +338,7 @@ class BoardView: View() {
     
     private fun clearTargetHighlights() {
         currentHighlightCoords = null
+        currentHighlight?.removeHover()
         lockedHighlight?.let { pieces[it] }?.removeHover()
         lockedHighlight = null
         targetHighlights.forEach { it.removeHover() }
@@ -377,3 +380,6 @@ class BoardView: View() {
         return node
     }
 }
+
+private fun Node.setClass(className: String, add: Boolean = true) =
+        if(add) addClass(className) else removeClass(className)

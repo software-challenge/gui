@@ -20,7 +20,7 @@ class AppStyle: Stylesheet() {
         
         private val colorBackground = c("#0ec9ff")
         
-        const val pieceOpacity = 0.9
+        const val pieceOpacity = 1.0
         
         val fontSizeRegular = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt * 2
         val fontSizeBig = fontSizeRegular * 1.2
