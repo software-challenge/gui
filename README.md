@@ -22,7 +22,7 @@ TODO: Verbindung zu bestehendem Server herstellen?
 ## Kollaboration
 
 Unsere Commit-Messages folgen dem Muster `type(scope): summary`
-(siehe [Karma Runner Konvention](http://karma-runner.github.io/latest/dev/git-commit-msg.html)),
+(siehe [Karma Runner Konvention](http://karma-runner.github.io/6.2/dev/git-commit-msg.html)),
 wobei die gängigen Scopes in [.dev/scopes.txt](.dev/scopes.txt) definiert werden.
 Nach dem Klonen mit git sollte dazu der hook aktiviert werden:
 
