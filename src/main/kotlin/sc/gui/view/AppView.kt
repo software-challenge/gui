@@ -80,7 +80,7 @@ class AppView: View("Software-Challenge Germany") {
                     """.trimIndent(), title = "Hilfe")
                 }
                 item("↗ Spielregeln", "Shortcut+S").action {
-                    browseUrl("https://docs.software-challenge.de/spiele/aktuell/regeln.html")
+                    browseUrl("https://docs.software-challenge.de/spiele/aktuell/regeln")
                 }
                 item("↗ Dokumentation", "Shortcut+D").action {
                     browseUrl("https://docs.software-challenge.de")
@@ -89,11 +89,10 @@ class AppView: View("Software-Challenge Germany") {
                     browseUrl("https://www.software-challenge.de")
                 }
                 item("↗ Wettbewerb", "Shortcut+W").action {
-                    browseUrl("https://contest.software-challenge.de/saison/current")
+                    browseUrl("https://contest.software-challenge.de")
                 }
             }
         }
-
     }
 
     init {
