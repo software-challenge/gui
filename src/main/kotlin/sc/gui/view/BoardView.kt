@@ -384,5 +384,5 @@ class BoardView: View() {
 private fun Node.setClass(className: String, add: Boolean = true) =
         if(add) addClass(className) else removeClass(className)
 
-private val Team.colorAdjust
+val Team.colorAdjust
     get() = index - 0.4
