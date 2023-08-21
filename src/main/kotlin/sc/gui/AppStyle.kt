@@ -24,7 +24,7 @@ class AppStyle: Stylesheet() {
         
         val fontSizeRegular = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt * 2.5
         val fontSizeBig = fontSizeRegular * 1.2
-        val fontSizeHeader = fontSizeRegular * 2
+        val fontSizeHeader = fontSizeBig * 1.5
         
         val spacing = fontSizeRegular.value
         val formSpacing = spacing / 2

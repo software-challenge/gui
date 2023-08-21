@@ -6,8 +6,6 @@ Nutzerdokumentation findet sich in https://docs.software-challenge.de/server.htm
 > Hinweis: Wenn als erster Parameter des Programms eine Zahl mitgegeben wird,
 wird der Server auf diesem Port Verbindungen von Spielern erwarten.
 
-TODO: Verbindung zu bestehendem Server herstellen?
-
 # Für Entwickler
 
 ## Erste Schritte
