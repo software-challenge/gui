@@ -4,6 +4,7 @@ import javafx.animation.Animation
 import javafx.animation.KeyFrame
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
+import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableDoubleValue
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Orientation
@@ -21,6 +22,7 @@ import javafx.scene.transform.Rotate
 import javafx.util.Duration
 import mu.KotlinLogging
 import sc.api.plugins.Coordinates
+import sc.api.plugins.IGameState
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
@@ -116,6 +118,8 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, private val co
 
 class BoardView: View() {
     private val gameModel: GameModel by inject()
+    private val gameState: GameState?
+        get() = gameModel.gameState.value as? GameState
     
     private val pieces = HashMap<Coordinates, PieceImage>()
     private val ice = HashMap<Coordinates, PieceImage>()
@@ -173,7 +177,7 @@ class BoardView: View() {
                                     // set viewOrder in transition
                                     grid.children.remove(piece)
                                     addPiece(piece, move.to)
-                                    logger.trace("Tile $piece finished transition to ${state.board[move.to]} covering $coveredPiece at ${move.to} (highlight: $currentHighlight)")
+                                    logger.trace { "Tile $piece finished transition to ${state.board[move.to]} covering $coveredPiece at ${move.to} (highlight: $currentHighlight)" }
                                     if(currentHighlight != null && currentHighlight in arrayOf(piece, coveredPiece)) {
                                         highlightTargets(move.to)
                                         lockedHighlight = move.to
@@ -213,7 +217,7 @@ class BoardView: View() {
                                 })
                             }
                             ice.onLeftClick {
-                                if(gameModel.gameState.value?.canPlacePenguin(coordinates) == true)
+                                if(gameState?.canPlacePenguin(coordinates) == true)
                                     humanMove(Move.set(coordinates))
                                 else currentHighlightCoords?.let {
                                     if(state.board[it].penguin == state.currentTeam &&
@@ -222,8 +226,8 @@ class BoardView: View() {
                                 }
                             }
                             ice.setOnMouseEntered {
-                                if(gameModel.gameState.value?.canPlacePenguin(coordinates) == true)
-                                    ice.addHover(team = gameModel.gameState.value?.currentTeam)
+                                if(gameState?.canPlacePenguin(coordinates) == true)
+                                    ice.addHover(team = gameState?.currentTeam)
                                 (ice.effect as? ColorAdjust ?: ColorAdjust()).run {
                                     ice.effect = this
                                     brightness = -0.2
@@ -245,7 +249,7 @@ class BoardView: View() {
                             penguin.scaleX = -(piece.index.xor(state.startTeam.index) * 2 - 1.0)
                             penguin.fade(transitionDuration, AppStyle.pieceOpacity * when {
                                 piece != state.currentTeam -> 0.7
-                                gameModel.atLatestTurn.value && gameModel.gameState.value?.isOver == false -> 1.0
+                                gameModel.atLatestTurn.value && gameState?.isOver == false -> 1.0
                                 else -> 0.9
                             })
                             penguin.nextFrame()
@@ -289,7 +293,8 @@ class BoardView: View() {
                 }
             }
             Platform.runLater {
-                gameModel.gameState.addListener(stateListener)
+                @Suppress("UNCHECKED_CAST")
+                gameModel.gameState.addListener(stateListener as ChangeListener<in IGameState?>)
                 stateListener.changed(null, null, gameModel.gameState.value)
             }
         }
@@ -306,7 +311,7 @@ class BoardView: View() {
     
     /** Whether the piece at [coords] could be selected for a human move.. */
     private fun isSelectable(coords: Coordinates) =
-            pieces[coords]?.opacity == AppStyle.pieceOpacity && gameModel.isHumanTurn.value && gameModel.gameState.value?.penguinsPlaced == true
+            pieces[coords]?.opacity == AppStyle.pieceOpacity && gameModel.isHumanTurn.value && gameState?.penguinsPlaced == true
     
     private var lockedHighlight: Coordinates? = null
     private var currentHighlight: Node? = null
@@ -349,7 +354,7 @@ class BoardView: View() {
         clearTargetHighlights()
         currentHighlightCoords = position
         
-        gameModel.gameState.value?.let { state ->
+        gameState?.let { state ->
             targetHighlights.addAll(
                     state.board.possibleMovesFrom(position)
                             .also { logger.debug { "highlighting possible moves from $position: $it" } }

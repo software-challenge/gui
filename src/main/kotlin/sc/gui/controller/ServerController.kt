@@ -17,6 +17,7 @@ class ServerController : Controller() {
 
         Configuration.loadServerProperties()
         Configuration.set(Configuration.SAVE_REPLAY, true)
+        
         server.start()
         // TODO get address & port from server
         // TODO do we have to communicate via network at all?

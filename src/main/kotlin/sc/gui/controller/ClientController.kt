@@ -1,5 +1,8 @@
 package sc.gui.controller
 
+import sc.api.plugins.IGameState
+import sc.api.plugins.IMove
+import sc.api.plugins.TwoPlayerGameState
 import sc.api.plugins.exceptions.GameLogicException
 import sc.gui.LobbyManager
 import sc.gui.controller.client.ClientInterface
@@ -10,8 +13,6 @@ import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.serverAddress
 import sc.gui.serverPort
-import sc.plugin2023.GameState
-import sc.plugin2023.Move
 import tornadofx.*
 import java.util.concurrent.CompletableFuture
 
@@ -19,7 +20,7 @@ data class StartGame(val settings: List<TeamSettings>): FXEvent()
 class HumanMoveRequest: FXEvent()
 /** Human making a move.
  * @param move the move */
-data class HumanMoveAction(val move: Move): FXEvent()
+data class HumanMoveAction(val move: IMove): FXEvent()
 
 data class Player(val name: String, val client: ClientInterface)
 
@@ -46,8 +47,8 @@ class ClientController: Controller() {
         lobbyManager.startNewGame(players, players.none { it.client.type == PlayerType.HUMAN })
     }
     
-    fun humanMoveRequest(@Suppress("UNUSED_PARAMETER") state: GameState): CompletableFuture<Move> {
-        val future = CompletableFuture<Move>()
+    fun humanMoveRequest(@Suppress("UNUSED_PARAMETER") state: IGameState): CompletableFuture<IMove> {
+        val future = CompletableFuture<IMove>()
         subscribe<HumanMoveAction>(1) {
             future.complete(it.move)
         }
@@ -55,15 +56,24 @@ class ClientController: Controller() {
         return future
     }
     
-    fun getSimpleMove(state: GameState): CompletableFuture<Move> {
-        val possibleMoves = state.getPossibleMoves()
-        if (possibleMoves.isEmpty())
+    fun getSimpleMove(state: IGameState): CompletableFuture<IMove> {
+        val possibleMoves = state.getAllMoves()
+        if (!possibleMoves.hasNext())
             throw GameLogicException("No possible Moves found!")
-        return CompletableFuture.completedFuture(
-                possibleMoves.associateWith { state.board[it.to].fish }
-                        .let { map ->
-                            val maxFish = map.maxOf { it.value }
-                            map.filter { it.value == maxFish }.keys.random()
-                        })
+        val best = ArrayList<IMove>()
+        var bestValue = Integer.MIN_VALUE
+        var count = 0
+        while(possibleMoves.hasNext() && count < 100) {
+            val next = possibleMoves.next()
+            val points = @Suppress("UNCHECKED_CAST") (state as TwoPlayerGameState<IMove>).performMove(next).getPointsForTeam(state.currentTeam).first()
+            if(points >= bestValue) {
+                if(points > bestValue)
+                    best.clear()
+                best.add(next)
+                bestValue = points
+            }
+            count++
+        }
+        return CompletableFuture.completedFuture(best.random())
     }
 }

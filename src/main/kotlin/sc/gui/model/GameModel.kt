@@ -4,6 +4,7 @@ import javafx.beans.value.ObservableValue
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import sc.api.plugins.IGameState
 import sc.api.plugins.Team
 import sc.gui.GameOverEvent
 import sc.gui.NewGameState
@@ -11,7 +12,6 @@ import sc.gui.controller.CreateGame
 import sc.gui.controller.HumanMoveAction
 import sc.gui.controller.HumanMoveRequest
 import sc.gui.events.*
-import sc.plugin2023.GameState
 import sc.shared.GameResult
 import sc.util.booleanBinding
 import tornadofx.*
@@ -19,7 +19,7 @@ import kotlin.math.max
 
 class GameModel: ViewModel() {
     val playerNames: ObservableList<String> = FXCollections.observableArrayList()
-    val gameState = objectProperty<GameState?>(null)
+    val gameState = objectProperty<IGameState?>(null)
     val gameResult = objectProperty<GameResult>()
     
     val stepSpeed = objectProperty(5.0)
@@ -50,14 +50,8 @@ class GameModel: ViewModel() {
     init {
         subscribe<NewGameState> { event ->
             val state = event.gameState
-            if (state !is GameState) {
-                logger.warn("Received unknown state: $state")
-                return@subscribe
-            }
             gameResult.set(null)
-            logger.debug("New state: $state")
-            if (logger.isTraceEnabled)
-                logger.trace(state.longString())
+            logger.debug("New state: {}", state)
             gameState.set(state)
         }
         subscribe<HumanMoveRequest> {

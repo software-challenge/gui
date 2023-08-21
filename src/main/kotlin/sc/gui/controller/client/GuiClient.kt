@@ -5,8 +5,6 @@ import sc.api.plugins.IMove
 import sc.gui.model.PlayerType
 import sc.networking.clients.LobbyClient
 import sc.player.IGameHandler
-import sc.plugin2023.GameState
-import sc.plugin2023.Move
 import sc.shared.GameResult
 import java.util.concurrent.CompletableFuture
 
@@ -15,7 +13,7 @@ class GuiClient(
         host: String,
         port: Int,
         override val type: PlayerType,
-        moveRequestHandler: (state: GameState) -> CompletableFuture<Move>,
+        moveRequestHandler: (state: IGameState) -> CompletableFuture<IMove>,
 ): ClientInterface {
     val player = LobbyClient(host, port).asPlayer(InternalGameHandler(moveRequestHandler))
     
@@ -28,16 +26,16 @@ class GuiClient(
 
 /** Handles communication with the server for a player whose moves are supplied by [moveRequestHandler]. */
 class InternalGameHandler(
-        private val moveRequestHandler: (state: GameState) -> CompletableFuture<Move>,
+        private val moveRequestHandler: (state: IGameState) -> CompletableFuture<IMove>,
 ): IGameHandler {
-    private var currentState: GameState? = null
+    private var currentState: IGameState? = null
     
     override fun calculateMove(): IMove =
             currentState?.let(moveRequestHandler)?.get()
             ?: throw IllegalStateException("Received move request before GameState!")
     
     override fun onUpdate(gameState: IGameState) {
-        currentState = gameState as GameState
+        currentState = gameState
     }
     
     override fun onGameOver(data: GameResult) {

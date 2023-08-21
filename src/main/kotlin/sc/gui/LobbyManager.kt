@@ -11,7 +11,6 @@ import sc.gui.controller.client.ClientInterface
 import sc.gui.model.PlayerType
 import sc.networking.clients.AdminClient
 import sc.networking.clients.LobbyClient
-import sc.plugin2023.GameState
 import sc.protocol.ResponsePacket
 import sc.protocol.requests.PrepareGameRequest
 import sc.protocol.responses.ErrorPacket
@@ -85,7 +84,7 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
         client.observe(roomId) { msg ->
             logger.trace("New RoomMessage in {}: {}", roomId, msg)
             when (msg) {
-                is MementoMessage -> fire(NewGameState(msg.state as GameState))
+                is MementoMessage -> fire(NewGameState(msg.state))
                 is GameResult -> if(gameFlowController.controller != null) fire(GameOverEvent(msg))
                 is ErrorMessage -> logger.warn("Error in $roomId: $msg")
                 is GamePaused -> fire(GamePausedEvent(msg.paused))

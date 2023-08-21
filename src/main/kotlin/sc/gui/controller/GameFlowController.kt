@@ -5,6 +5,7 @@ import javafx.animation.KeyFrame
 import javafx.animation.Timeline
 import javafx.util.Duration
 import mu.KotlinLogging
+import sc.api.plugins.IGameState
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.NewGameState
@@ -12,7 +13,6 @@ import sc.gui.events.*
 import sc.gui.model.GameModel
 import sc.networking.clients.GameLoaderClient
 import sc.networking.clients.IGameController
-import sc.plugin2023.GameState
 import tornadofx.*
 import java.io.IOException
 
@@ -28,7 +28,7 @@ class GameFlowController: Controller() {
         rateProperty().bind(gameModel.stepSpeed)
     }
     
-    private val history = ArrayList<GameState>()
+    private val history = ArrayList<IGameState>()
     var controller: IGameController? = null
     
     init {
@@ -46,7 +46,7 @@ class GameFlowController: Controller() {
         }
         subscribe<StepGame> { event ->
             val turn = gameModel.currentTurn.value + event.steps
-            val state: GameState? = history.firstOrNull { it.turn >= turn } ?: run {
+            val state: IGameState? = history.firstOrNull { it.turn >= turn } ?: run {
                 if(stepController) {
                     controller?.step()
                     history.lastOrNull()
@@ -70,7 +70,7 @@ class GameFlowController: Controller() {
             controller = null
         }
         subscribe<NewGameState> { event ->
-            history.add(event.gameState as GameState)
+            history.add(event.gameState)
         }
     }
     
@@ -78,8 +78,8 @@ class GameFlowController: Controller() {
     fun loadReplay(loader: GameLoaderClient) {
         if(history.isNotEmpty())
             throw ReplayLoaderException("Trying to load replay into a running game")
-        history.addAll(loader.getHistory().filterIsInstance<GameState>())
-        logger.debug("Loaded ${history.size} states from $loader")
+        history.addAll(loader.getHistory())
+        logger.debug("Loaded {} states from {}", history.size, loader)
         if(history.isEmpty())
             throw ReplayLoaderException("Replay history from $loader is empty")
         fire(GameReadyEvent())
