@@ -36,7 +36,7 @@ class MississippiBoard: View() {
         get() = gameModel.gameState.value as? GameState
     
     private val gridSize: Double
-        get() = gameState?.board?.rectangleSize?.let { minOf(root.width.minus(AppStyle.spacing * 2) / it.x, root.height.times(0.7) / it.y) } ?: 20.0
+        get() = gameState?.board?.rectangleSize?.let { minOf(root.width.minus(AppStyle.spacing * 2) / it.x, root.height / it.y) } ?: 20.0
     
     val grid: Pane = AnchorPane().apply { this.paddingAll = AppStyle.spacing }
     
@@ -131,7 +131,7 @@ class MississippiBoard: View() {
             }
             state.ships.forEach { ship ->
                 createPiece("ship").also {
-                    
+                    it.rotate = ship.direction.angle.toDouble()
                     addPiece(it, ship.position)
                 }
             }
@@ -203,7 +203,7 @@ class MississippiBoard: View() {
             val size = it.toDouble()
             node.anchorpaneConstraints {
                 leftAnchor = (coordinates.x / 2.0 + 2) * size
-                bottomAnchor = ((gameState?.board?.bounds?.second?.second ?: 2) - coordinates.r) * size * 0.862
+                topAnchor = (coordinates.r - (gameState?.board?.bounds?.second?.first ?: -2) + 2) * size * 0.862
             }
         }
         return node
