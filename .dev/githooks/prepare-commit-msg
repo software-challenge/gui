@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This hook adds guidance about the commit message format
 # on top of the default commit message.

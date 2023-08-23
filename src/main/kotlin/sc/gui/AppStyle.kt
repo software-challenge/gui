@@ -175,6 +175,11 @@ class AppStyle: Stylesheet() {
             borderColor += box(if(it.isDark) colorBackground.brighter() else colorBackground.darker())
         }
         
+        (Array(12) { "passenger${it % 6}${it / 6}" } + arrayOf("island", "water", "goal", "ship")).forEach {
+            select(CssRule.c(it)) { image = resources.url("/graphics/$it.png").toURI() }
+        }
+        
+        /*
         arrayOf("fish", "ice").forEach {
             select(CssRule.c(it)) { image = resources.url("/graphics/$it.png").toURI() }
         }
@@ -198,6 +203,7 @@ class AppStyle: Stylesheet() {
                 }
             }
         }
+         */
     }
     
     data class PieceFrames(

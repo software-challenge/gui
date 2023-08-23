@@ -7,7 +7,7 @@ class GameView: View() {
     override val root = borderpane {
         paddingAll = AppStyle.spacing
         top(StatusView::class)
-        center(BoardView::class)
+        center(MississippiBoard::class)
         bottom(ControlView::class)
     }
 }

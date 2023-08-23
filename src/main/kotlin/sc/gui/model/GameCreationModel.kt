@@ -10,6 +10,10 @@ enum class PlayerType(val description: String) {
     COMPUTER("Eigener Computerspieler, von GUI gestartet"),
     EXTERNAL("Eigener Computerspieler, manuell gestartet");
     override fun toString() = description
+    companion object {
+        /** Helper to disable human player until ready. */
+        fun allowedValues() = values().takeLast(3)
+    }
 }
 
 class TeamSettings(name: String? = "Team", type: PlayerType = PlayerType.HUMAN) {

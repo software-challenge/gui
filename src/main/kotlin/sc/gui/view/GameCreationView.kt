@@ -18,7 +18,7 @@ import java.io.File
 class GameCreationView: View() {
     private val playerSettingsModels =
             arrayOf(TeamSettings("Spieler 1", PlayerType.COMPUTER_EXAMPLE),
-                    TeamSettings("Spieler 2", PlayerType.HUMAN))
+                    TeamSettings("Spieler 2", PlayerType.allowedValues().first()))
                     .map { TeamSettingsModel(it) }
     
     override val root = borderpane {
@@ -61,7 +61,7 @@ class GameCreationView: View() {
 class PlayerFileSelectFragment(private val team: Team, private val settings: TeamSettingsModel): Fragment() {
     override val root = borderpane {
         prefHeight = AppStyle.fontSizeRegular.value * 9
-        top = combobox(settings.type, PlayerType.values().toList()) {
+        top = combobox(settings.type, PlayerType.allowedValues().toList()) {
             maxWidth = Double.MAX_VALUE
         }
     }
