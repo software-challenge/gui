@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+### 24.0.5 Simple Viewer - 2023-08-23
+- Can view computer players playing (no human moves yet)
+- Preliminary Graphics
+
+## 2024 Game Mississippi Queen - 2023-08
+
 ### [23.0.2](https://github.com/software-challenge/backend/commits/23.0.2) Pretty Penguins - 2022-08-21
 - Overhaul of the game display
 
