@@ -255,8 +255,9 @@ class MississippiBoard: View() {
             //logger.trace("$node at $coordinates block size: $it")
             val size = it.toDouble()
             node.anchorpaneConstraints {
-                leftAnchor = (coordinates.x / 2.0 + 2) * size
-                topAnchor = (coordinates.r - (gameState?.board?.bounds?.second?.first ?: -2) + 2) * size * 0.862
+                val bounds = gameState?.board?.bounds
+                leftAnchor = (coordinates.x / 2.0 - (bounds?.first?.first ?: -2)) * size
+                topAnchor = (coordinates.r - (bounds?.second?.first ?: -2)) * size * 0.862
             }
         }
         return node
