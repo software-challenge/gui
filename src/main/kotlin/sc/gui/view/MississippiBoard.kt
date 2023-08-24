@@ -36,7 +36,7 @@ class MississippiBoard: View() {
         get() = gameModel.gameState.value as? GameState
     
     private val gridSize: Double
-        get() = gameState?.board?.rectangleSize?.let { minOf(root.width.minus(AppStyle.spacing * 2) / it.x, root.height / it.y) } ?: 20.0
+        get() = gameState?.board?.rectangleSize?.let { minOf(root.width / (it.x + 1), root.height / it.y) } ?: 20.0
     
     val grid: Pane = AnchorPane().apply { this.paddingAll = AppStyle.spacing }
     

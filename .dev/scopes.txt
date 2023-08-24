@@ -11,3 +11,6 @@ model
 network
 controller
 clients
+
+mq
+penguins
