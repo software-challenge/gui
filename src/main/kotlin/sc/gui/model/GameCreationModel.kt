@@ -12,7 +12,7 @@ enum class PlayerType(val description: String) {
     override fun toString() = description
     companion object {
         /** Helper to disable human player until ready. */
-        fun allowedValues() = values().takeLast(3)
+        fun allowedValues() = values() //.takeLast(3)
     }
 }
 

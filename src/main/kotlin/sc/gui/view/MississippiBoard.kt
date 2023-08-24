@@ -1,32 +1,26 @@
 package sc.gui.view
 
-import javafx.animation.KeyFrame
-import javafx.application.Application
 import javafx.application.Platform
-import javafx.beans.binding.Bindings
 import javafx.beans.value.ChangeListener
-import javafx.event.EventHandler
-import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.Scene
-import javafx.scene.effect.ColorAdjust
-import javafx.scene.effect.Glow
-import javafx.scene.input.MouseEvent
+import javafx.scene.control.Alert
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.*
-import javafx.scene.paint.Color
-import javafx.scene.shape.Polygon
-import javafx.scene.transform.Rotate
-import javafx.stage.Stage
 import mu.KotlinLogging
 import sc.api.plugins.*
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.GameModel
+import sc.plugin2024.Action
 import sc.plugin2024.GameState
+import sc.plugin2024.Move
+import sc.plugin2024.actions.Accelerate
+import sc.plugin2024.actions.Advance
+import sc.plugin2024.actions.Push
+import sc.plugin2024.actions.Turn
 import sc.util.listenImmediately
 import tornadofx.*
-import kotlin.math.sqrt
 
 private val logger = KotlinLogging.logger { }
 
@@ -36,7 +30,7 @@ class MississippiBoard: View() {
         get() = gameModel.gameState.value as? GameState
     
     private val gridSize: Double
-        get() = gameState?.board?.rectangleSize?.let { minOf(root.width / (it.x + 1), root.height / it.y) } ?: 20.0
+        get() = gameState?.board?.rectangleSize?.let { minOf(root.width - AppStyle.spacing / (it.x + 1), root.height / it.y) } ?: 20.0
     
     val grid: Pane = AnchorPane().apply { this.paddingAll = AppStyle.spacing }
     
@@ -46,6 +40,9 @@ class MississippiBoard: View() {
     }
     
     private val calculatedBlockSize = gameModel.gameState.doubleBinding(grid.widthProperty(), grid.heightProperty()) { gridSize }
+    
+    private var originalState: GameState? = null
+    private val humanMove = ArrayList<Action>()
     
     init {
         val stateListener = ChangeListener<GameState?> { _, oldState, state ->
@@ -140,6 +137,62 @@ class MississippiBoard: View() {
             @Suppress("UNCHECKED_CAST")
             gameModel.gameState.addListener(stateListener as ChangeListener<in IGameState?>)
             stateListener.changed(null, null, gameModel.gameState.value)
+            
+            root.scene.setOnKeyPressed { keyEvent ->
+                gameState?.let { state ->
+                    if(humanMove.isEmpty())
+                        originalState = gameState
+                    val action: Action? = when(keyEvent.code) {
+                        KeyCode.UP, KeyCode.W -> Advance(1)
+                        KeyCode.LEFT, KeyCode.A -> Turn(state.currentShip.direction - 1)
+                        KeyCode.RIGHT, KeyCode.D -> Turn(state.currentShip.direction + 1)
+                        KeyCode.BACK_SPACE, KeyCode.C -> {
+                            humanMove.clear()
+                            gameModel.gameState.set(originalState)
+                            null
+                        }
+                        KeyCode.ACCEPT, KeyCode.ENTER, KeyCode.S, KeyCode.SPACE -> {
+                            keyEvent.consume()
+                            if(humanMove.isEmpty()) {
+                                alert(Alert.AlertType.ERROR, "Unvollständiger Zug!")
+                            } else {
+                                if(state.currentShip.movement != 0) {
+                                    humanMove.add(0, Accelerate(-state.currentShip.movement))
+                                }
+                                fire(HumanMoveAction(Move(ArrayList(humanMove))))
+                                humanMove.clear()
+                                originalState = null
+                            }
+                            null
+                        }
+                        else -> {
+                            keyEvent.text.toIntOrNull()?.let {
+                                if(it < CubeDirection.values().size)
+                                    Push(CubeDirection.values()[it])
+                                else null
+                            }
+                        }
+                    }
+                    logger.debug("Adding Human Action {}", action)
+                    if(action != null) {
+                        keyEvent.consume()
+                        val newState = state.clone()
+                        newState.currentShip.movement += 10
+                        action.perform(newState)?.let {
+                            alert(Alert.AlertType.ERROR, it.message)
+                        } ?: run {
+                            newState.currentShip.movement -= 10
+                            if(humanMove.lastOrNull() is Advance &&
+                               action is Advance &&
+                               newState.board.doesFieldHaveCurrent(newState.currentShip.position) &&
+                                    state.board.doesFieldHaveCurrent(state.currentShip.position))
+                                newState.currentShip.movement++
+                            humanMove.add(action)
+                            gameModel.gameState.set(newState)
+                        }
+                    }
+                }
+            }
         }
     }
     
