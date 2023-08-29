@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+### 24.0.7 Enhanced Visual Feedback - 2023-08-29
+- Eliminate lots of edge cases with human moves
+- Show current ship attributes
+- Show more details on game over
+- More Sizing Fixes
+
 ### 24.0.6 Human Keyboard Moves - 2023-08-24
 - Fix Board width issue on long straight as well as heavily bent boards
 - Enable Human Moves via Keyboard:

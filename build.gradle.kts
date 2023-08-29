@@ -126,7 +126,7 @@ tasks {
             exec { commandLine("git", "add", "CHANGELOG.md") }
             exec { commandLine("git", "commit", "-m", "release: v$versionFromBackend") }
             exec { commandLine("git", "tag", versionFromBackend, "-m", desc) }
-            exec { commandLine("git", "push", "--follow-tags") }
+            exec { commandLine("git", "push", "--follow-tags", "--recurse-submodules=on-demand") }
         }
     }
 }
