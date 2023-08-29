@@ -5,6 +5,7 @@ import javafx.beans.value.ChangeListener
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Alert
+import javafx.scene.control.Label
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.*
 import mu.KotlinLogging
@@ -48,6 +49,8 @@ class MississippiBoard: View() {
         val stateListener = ChangeListener<GameState?> { _, oldState, state ->
             clearTargetHighlights()
             grid.children.clear()
+            if(state?.lastMove != oldState?.lastMove)
+                humanMove.clear()
             if(state == null) {
                 return@ChangeListener
             }
@@ -142,15 +145,26 @@ class MississippiBoard: View() {
                 gameState?.let { state ->
                     if(humanMove.isEmpty())
                         originalState = gameState
+                    val ship = state.currentShip
                     val action: Action? = when(keyEvent.code) {
-                        KeyCode.UP, KeyCode.W -> Advance(1)
-                        KeyCode.LEFT, KeyCode.A -> Turn(state.currentShip.direction - 1)
-                        KeyCode.RIGHT, KeyCode.D -> Turn(state.currentShip.direction + 1)
+                        KeyCode.UP, KeyCode.W ->
+                            Advance(1).takeIf {
+                                ship.coal + ship.movement + ship.freeAcc > 0 &&
+                                ship.speed - ship.movement < 6
+                            }
+                        
+                        KeyCode.LEFT, KeyCode.A ->
+                            Turn(state.currentShip.direction - 1)
+                        
+                        KeyCode.RIGHT, KeyCode.D ->
+                            Turn(state.currentShip.direction + 1)
+                        
                         KeyCode.BACK_SPACE, KeyCode.C -> {
                             humanMove.clear()
                             gameModel.gameState.set(originalState)
                             null
                         }
+                        
                         KeyCode.ACCEPT, KeyCode.ENTER, KeyCode.S, KeyCode.SPACE -> {
                             keyEvent.consume()
                             if(humanMove.isEmpty()) {
@@ -159,12 +173,14 @@ class MississippiBoard: View() {
                                 if(state.currentShip.movement != 0) {
                                     humanMove.add(0, Accelerate(-state.currentShip.movement))
                                 }
-                                fire(HumanMoveAction(Move(ArrayList(humanMove))))
+                                if(!humanMove(Move(ArrayList(humanMove))))
+                                    gameModel.gameState.set(originalState)
                                 humanMove.clear()
                                 originalState = null
                             }
                             null
                         }
+                        
                         else -> {
                             keyEvent.text.toIntOrNull()?.let {
                                 if(it < CubeDirection.values().size)
@@ -185,7 +201,7 @@ class MississippiBoard: View() {
                             if(humanMove.lastOrNull() is Advance &&
                                action is Advance &&
                                newState.board.doesFieldHaveCurrent(newState.currentShip.position) &&
-                                    state.board.doesFieldHaveCurrent(state.currentShip.position))
+                               state.board.doesFieldHaveCurrent(state.currentShip.position))
                                 newState.currentShip.movement++
                             humanMove.add(action)
                             gameModel.gameState.set(newState)
@@ -210,6 +226,14 @@ class MississippiBoard: View() {
     
     private fun createPiece(type: String): PieceImage =
             PieceImage(calculatedBlockSize, type)
+    
+    private fun humanMove(move: Move): Boolean {
+        if(gameModel.atLatestTurn.value && gameModel.isHumanTurn.value) {
+            fire(HumanMoveAction(move.also { logger.debug("Human Move: $it") }))
+            return true
+        }
+        return false
+    }
     
     private fun highlight(node: PieceImage, lock: Boolean = false, updateTargetHighlights: Coordinates? = null) {
         currentHighlight?.removeHover()
