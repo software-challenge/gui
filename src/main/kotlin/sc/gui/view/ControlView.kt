@@ -87,7 +87,7 @@ class ControlView: View() {
                 }
                 spinner(min = 0.0, initialValue = gameModel.stepSpeed.value, amountToStepBy = 2.0, editable = true) {
                     gameModel.stepSpeed.bind(valueProperty())
-                    this.prefWidth = 120.0
+                    prefWidth = AppStyle.fontSizeRegular.value * 5
                 }
                 checkbox("Animationen", AppModel.animate)
             }
