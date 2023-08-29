@@ -20,6 +20,7 @@ class GameFlowController: Controller() {
     private val logger = KotlinLogging.logger {}
     
     private val gameModel: GameModel by inject()
+    /** Whether to request a new Move when stepping forward. */
     private var stepController = true
     private val interval = Timeline(KeyFrame(Duration.seconds(gameModel.stepSpeed.value), {
         fire(StepGame(1))
@@ -29,16 +30,16 @@ class GameFlowController: Controller() {
     }
     
     private val history = ArrayList<IGameState>()
+    /** Used to control running Game - is null for completed Game/Replay. */
     var controller: IGameController? = null
     
     init {
         subscribe<PauseGame> { event ->
-            if(controller?.pause(event.pause) == null) {
-                fire(GamePausedEvent(event.pause))
-            } else {
+            controller?.let {
+                it.pause(event.pause)
                 stepController = false
-            }
-            if (event.pause) {
+            } ?: fire(GamePausedEvent(event.pause))
+            if(event.pause) {
                 interval.pause()
             } else {
                 interval.play()
@@ -66,7 +67,7 @@ class GameFlowController: Controller() {
                 gameModel.gameState.set(state)
         }
         gameModel.gameOver.onChange {
-            if (it)
+            if(it)
                 controller = null
         }
         subscribe<TerminateGame> {
@@ -91,7 +92,10 @@ class GameFlowController: Controller() {
         fire(GameReadyEvent())
         gameModel.availableTurns.set(history.last().turn)
         gameModel.gameResult.set(loader.result)
-        gameModel.playerNames.setAll(loader.result?.scores?.map { it.key }?.sortedBy { it.team.index }?.map { it.displayName }.orEmpty())
+        gameModel.playerNames.setAll(
+                loader.result?.scores?.keys
+                        ?.sortedBy { it.team.index }
+                        ?.map { it.displayName }.orEmpty())
         gameModel.gameState.set(history.first())
     }
 }
