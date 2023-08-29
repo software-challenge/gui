@@ -46,16 +46,22 @@ class GameFlowController: Controller() {
         }
         subscribe<StepGame> { event ->
             val turn = gameModel.currentTurn.value + event.steps
-            val state: IGameState? = history.firstOrNull { it.turn >= turn } ?: run {
-                if(stepController) {
-                    controller?.step()
-                    history.lastOrNull()
-                } else {
-                    interval.pause()
-                    stepController = true
-                    null
-                }
-            }
+            val state: IGameState? =
+                    if(event.steps > 0)
+                        history.firstOrNull { it.turn >= turn } ?: run {
+                            if(stepController) {
+                                // At latest available turn
+                                controller?.step()
+                                history.lastOrNull()
+                            } else {
+                                // First Step after PauseGame Event
+                                interval.pause()
+                                stepController = true
+                                null
+                            }
+                        }
+                    else
+                        history.lastOrNull { it.turn <= turn } ?: history.first()
             if(state != null)
                 gameModel.gameState.set(state)
         }
