@@ -2,7 +2,7 @@ package sc.gui.view
 
 import javafx.beans.binding.StringBinding
 import javafx.geometry.Pos
-import javafx.scene.control.Label
+import javafx.scene.text.TextAlignment
 import sc.api.plugins.ITeam
 import sc.gui.AppStyle
 import sc.gui.model.GameModel
@@ -37,7 +37,8 @@ class StatusBinding(private val game: GameModel): StringBinding() {
                     """
                     ${winner(gameResult)}
                     ${irregularities(gameResult).orEmpty()}
-                    """.trimIndent()
+                    ${gameResult.scores.values.joinToString("") { it.reason }}
+                    """.trimIndent().trim('\n')
                 } ?: "${game.currentTeam.value.displayName} ist dran"
             else game.playerNames.joinToString(" vs ")
     
@@ -62,7 +63,10 @@ class StatusView: View() {
     
     override val root = vbox(alignment = Pos.CENTER) {
         addClass(AppStyle.statusLabel)
-        label(StatusBinding(game))
+        label(StatusBinding(game)) {
+            textAlignment = TextAlignment.CENTER
+            isWrapText = true
+        }
         label(ScoreBinding(game))
     }
 }
