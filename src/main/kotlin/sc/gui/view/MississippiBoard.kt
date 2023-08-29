@@ -31,7 +31,12 @@ class MississippiBoard: View() {
         get() = gameModel.gameState.value as? GameState
     
     private val gridSize: Double
-        get() = gameState?.board?.rectangleSize?.let { minOf((root.width - AppStyle.spacing) / (it.x + 1), root.height / it.y) } ?: 1.0
+        get() = gameState?.board?.rectangleSize?.let {
+            minOf(
+                    (root.width - AppStyle.spacing) / (it.x + 1),
+                    (root.height - AppStyle.spacing * (if(gameModel.gameOver.value == true) 4 else 2)) / it.y
+            )
+        } ?: 10.0
     
     val grid: Pane = AnchorPane().apply { this.paddingAll = AppStyle.spacing }
     
@@ -40,7 +45,8 @@ class MississippiBoard: View() {
         children.add(grid)
     }
     
-    private val calculatedBlockSize = gameModel.gameState.doubleBinding(grid.widthProperty(), grid.heightProperty()) { gridSize }
+    private val calculatedBlockSize = gameModel.gameState.doubleBinding(gameModel.gameResult, grid.widthProperty(), grid.heightProperty()) { gridSize }
+    private val fontSizeBinding = calculatedBlockSize.stringBinding { "-fx-font-size: ${it?.toDouble()?.times(0.3)}" }
     
     private var originalState: GameState? = null
     private val humanMove = ArrayList<Action>()
@@ -133,6 +139,10 @@ class MississippiBoard: View() {
                 createPiece("ship").also {
                     it.rotate = ship.direction.angle.toDouble()
                     addPiece(it, ship.position)
+                    addPiece(Label("C${ship.coal}\nS${ship.speed}" +
+                                   "\nM${ship.movement}".takeIf { state.currentTeam == ship.team && humanMove.isNotEmpty() }.orEmpty()).apply {
+                        styleProperty().bind(fontSizeBinding)
+                    }, ship.position)
                 }
             }
         }
