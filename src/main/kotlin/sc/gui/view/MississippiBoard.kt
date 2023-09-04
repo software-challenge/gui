@@ -168,7 +168,8 @@ class MississippiBoard: View() {
                     KeyCode.UP, KeyCode.W ->
                         Advance(1).takeIf {
                             ship.coal + ship.movement + ship.freeAcc > 0 &&
-                            ship.speed - ship.movement < 6
+                            // negative movement points are turned into acceleration
+                            ship.speed - ship.movement < PluginConstants.MAX_SPEED
                         }
                     
                     KeyCode.LEFT, KeyCode.A ->
@@ -185,7 +186,7 @@ class MississippiBoard: View() {
                     
                     KeyCode.ACCEPT, KeyCode.ENTER, KeyCode.S, KeyCode.SPACE -> {
                         keyEvent.consume()
-                        if(humanMove.isEmpty()) {
+                        if(humanMove.isEmpty() || state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal) {
                             alert(Alert.AlertType.ERROR, "Unvollständiger Zug!")
                         } else {
                             if(state.currentShip.movement != 0) {
@@ -208,26 +209,28 @@ class MississippiBoard: View() {
                     }
                 }
                 logger.debug("Adding Human Action {}", action)
-                if(action != null) {
-                    keyEvent.consume()
-                    if(state.mustPush && action !is Push) {
-                        alert(Alert.AlertType.ERROR, "Abdrängaktion mit Richtung 0 (Rechts) - 5 (Oben Rechts) festlegen!")
-                        return@setOnKeyPressed
-                    }
-                    val newState = state.clone()
-                    newState.currentShip.movement += PluginConstants.MAX_SPEED
-                    action.perform(newState)?.let {
-                        alert(Alert.AlertType.ERROR, it.message)
-                    } ?: run {
-                        newState.currentShip.movement -= PluginConstants.MAX_SPEED
-                        if(humanMove.lastOrNull() is Advance &&
-                           action is Advance &&
-                           newState.board.doesFieldHaveCurrent(newState.currentShip.position) &&
-                           state.board.doesFieldHaveCurrent(state.currentShip.position))
-                            newState.currentShip.movement++
-                        humanMove.add(action)
-                        gameModel.gameState.set(newState)
-                    }
+                if(action == null) return@setOnKeyPressed
+                
+                keyEvent.consume()
+                if(state.mustPush && action !is Push) {
+                    alert(Alert.AlertType.ERROR, "Abdrängaktion mit Richtung 0 (Rechts) - 5 (Oben Rechts) festlegen!")
+                    return@setOnKeyPressed
+                }
+                val extraMovement = (ship.coal + ship.freeAcc).coerceAtMost(PluginConstants.MAX_SPEED - ship.speed)
+                val newState = state.clone()
+                val newShip = newState.currentShip
+                val currentAdvance = humanMove.lastOrNull() is Advance && action is Advance && state.isCurrentShipOnCurrent()
+                if(currentAdvance)
+                    newShip.movement++
+                newShip.movement += extraMovement
+                action.perform(newState)?.let {
+                    alert(Alert.AlertType.ERROR, it.message)
+                } ?: run {
+                    if(currentAdvance && !newState.isCurrentShipOnCurrent())
+                        newShip.movement--
+                    newShip.movement -= extraMovement
+                    humanMove.add(action)
+                    gameModel.gameState.set(newState)
                 }
             }
         }

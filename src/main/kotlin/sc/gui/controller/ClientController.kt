@@ -63,7 +63,7 @@ class ClientController: Controller() {
         val best = ArrayList<IMove>()
         var bestValue = Integer.MIN_VALUE
         var count = 0
-        while(possibleMoves.hasNext() && count < 100) {
+        while(possibleMoves.hasNext() && count < 64) {
             val next = possibleMoves.next()
             val newState = (state as TwoPlayerGameState<IMove>).performMove(next)
             val points = @Suppress("UNCHECKED_CAST") newState.getPointsForTeam(state.currentTeam).sum()
