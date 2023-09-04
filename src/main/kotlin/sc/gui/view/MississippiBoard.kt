@@ -7,9 +7,14 @@ import javafx.scene.Node
 import javafx.scene.control.Alert
 import javafx.scene.control.Label
 import javafx.scene.input.KeyCode
-import javafx.scene.layout.*
+import javafx.scene.layout.AnchorPane
+import javafx.scene.layout.Pane
+import javafx.scene.layout.Region
 import mu.KotlinLogging
-import sc.api.plugins.*
+import sc.api.plugins.Coordinates
+import sc.api.plugins.CubeCoordinates
+import sc.api.plugins.CubeDirection
+import sc.api.plugins.IGameState
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.GameModel
@@ -20,6 +25,7 @@ import sc.plugin2024.actions.Accelerate
 import sc.plugin2024.actions.Advance
 import sc.plugin2024.actions.Push
 import sc.plugin2024.actions.Turn
+import sc.plugin2024.util.PluginConstants
 import sc.util.listenImmediately
 import tornadofx.*
 
@@ -34,7 +40,7 @@ class MississippiBoard: View() {
         get() = gameState?.board?.rectangleSize?.let {
             minOf(
                     (root.width - AppStyle.spacing) / (it.x + 1),
-                    (root.height - AppStyle.spacing * (if(gameModel.gameOver.value == true) 4 else 2)) / it.y
+                    (root.height - AppStyle.spacing * (if(gameModel.gameOver.value && gameModel.atLatestTurn.value) 4 else 2)) / it.y
             )
         } ?: 10.0
     
@@ -45,7 +51,7 @@ class MississippiBoard: View() {
         children.add(grid)
     }
     
-    private val calculatedBlockSize = gameModel.gameState.doubleBinding(gameModel.gameResult, grid.widthProperty(), grid.heightProperty()) { gridSize }
+    private val calculatedBlockSize = gameModel.gameState.doubleBinding(gameModel.gameResult, gameModel.atLatestTurn, grid.widthProperty(), grid.heightProperty()) { gridSize }
     private val fontSizeBinding = calculatedBlockSize.stringBinding { "-fx-font-size: ${it?.toDouble()?.times(0.3)}" }
     
     private var originalState: GameState? = null
@@ -140,7 +146,9 @@ class MississippiBoard: View() {
                     it.rotate = ship.direction.angle.toDouble()
                     addPiece(it, ship.position)
                     addPiece(Label("C${ship.coal}\nS${ship.speed}" +
-                                   "\nM${ship.movement}".takeIf { state.currentTeam == ship.team && humanMove.isNotEmpty() }.orEmpty()).apply {
+                                   "\nM${ship.movement}"
+                                           .takeIf { state.currentTeam == ship.team && humanMove.isNotEmpty() }
+                                           .orEmpty()).apply {
                         styleProperty().bind(fontSizeBinding)
                     }, ship.position)
                 }
@@ -152,70 +160,73 @@ class MississippiBoard: View() {
             stateListener.changed(null, null, gameModel.gameState.value)
             
             root.scene.setOnKeyPressed { keyEvent ->
-                gameState?.let { state ->
-                    if(humanMove.isEmpty())
-                        originalState = gameState
-                    val ship = state.currentShip
-                    val action: Action? = when(keyEvent.code) {
-                        KeyCode.UP, KeyCode.W ->
-                            Advance(1).takeIf {
-                                ship.coal + ship.movement + ship.freeAcc > 0 &&
-                                ship.speed - ship.movement < 6
+                val state = gameState ?: return@setOnKeyPressed
+                if(humanMove.isEmpty())
+                    originalState = state
+                val ship = state.currentShip
+                val action: Action? = when(keyEvent.code) {
+                    KeyCode.UP, KeyCode.W ->
+                        Advance(1).takeIf {
+                            ship.coal + ship.movement + ship.freeAcc > 0 &&
+                            ship.speed - ship.movement < 6
+                        }
+                    
+                    KeyCode.LEFT, KeyCode.A ->
+                        Turn(state.currentShip.direction - 1)
+                    
+                    KeyCode.RIGHT, KeyCode.D ->
+                        Turn(state.currentShip.direction + 1)
+                    
+                    KeyCode.BACK_SPACE, KeyCode.C -> {
+                        humanMove.clear()
+                        gameModel.gameState.set(originalState)
+                        null
+                    }
+                    
+                    KeyCode.ACCEPT, KeyCode.ENTER, KeyCode.S, KeyCode.SPACE -> {
+                        keyEvent.consume()
+                        if(humanMove.isEmpty()) {
+                            alert(Alert.AlertType.ERROR, "Unvollständiger Zug!")
+                        } else {
+                            if(state.currentShip.movement != 0) {
+                                humanMove.add(0, Accelerate(-state.currentShip.movement))
                             }
-                        
-                        KeyCode.LEFT, KeyCode.A ->
-                            Turn(state.currentShip.direction - 1)
-                        
-                        KeyCode.RIGHT, KeyCode.D ->
-                            Turn(state.currentShip.direction + 1)
-                        
-                        KeyCode.BACK_SPACE, KeyCode.C -> {
+                            if(!humanMove(Move(ArrayList(humanMove))))
+                                gameModel.gameState.set(originalState)
                             humanMove.clear()
-                            gameModel.gameState.set(originalState)
-                            null
+                            originalState = null
                         }
-                        
-                        KeyCode.ACCEPT, KeyCode.ENTER, KeyCode.S, KeyCode.SPACE -> {
-                            keyEvent.consume()
-                            if(humanMove.isEmpty()) {
-                                alert(Alert.AlertType.ERROR, "Unvollständiger Zug!")
-                            } else {
-                                if(state.currentShip.movement != 0) {
-                                    humanMove.add(0, Accelerate(-state.currentShip.movement))
-                                }
-                                if(!humanMove(Move(ArrayList(humanMove))))
-                                    gameModel.gameState.set(originalState)
-                                humanMove.clear()
-                                originalState = null
-                            }
-                            null
-                        }
-                        
-                        else -> {
-                            keyEvent.text.toIntOrNull()?.let {
-                                if(it < CubeDirection.values().size)
-                                    Push(CubeDirection.values()[it])
-                                else null
-                            }
+                        null
+                    }
+                    
+                    else -> {
+                        keyEvent.text.toIntOrNull()?.let {
+                            if(it < CubeDirection.values().size)
+                                Push(CubeDirection.values()[it])
+                            else null
                         }
                     }
-                    logger.debug("Adding Human Action {}", action)
-                    if(action != null) {
-                        keyEvent.consume()
-                        val newState = state.clone()
-                        newState.currentShip.movement += 10
-                        action.perform(newState)?.let {
-                            alert(Alert.AlertType.ERROR, it.message)
-                        } ?: run {
-                            newState.currentShip.movement -= 10
-                            if(humanMove.lastOrNull() is Advance &&
-                               action is Advance &&
-                               newState.board.doesFieldHaveCurrent(newState.currentShip.position) &&
-                               state.board.doesFieldHaveCurrent(state.currentShip.position))
-                                newState.currentShip.movement++
-                            humanMove.add(action)
-                            gameModel.gameState.set(newState)
-                        }
+                }
+                logger.debug("Adding Human Action {}", action)
+                if(action != null) {
+                    keyEvent.consume()
+                    if(state.mustPush && action !is Push) {
+                        alert(Alert.AlertType.ERROR, "Abdrängaktion mit Richtung 0 (Rechts) - 5 (Oben Rechts) festlegen!")
+                        return@setOnKeyPressed
+                    }
+                    val newState = state.clone()
+                    newState.currentShip.movement += PluginConstants.MAX_SPEED
+                    action.perform(newState)?.let {
+                        alert(Alert.AlertType.ERROR, it.message)
+                    } ?: run {
+                        newState.currentShip.movement -= PluginConstants.MAX_SPEED
+                        if(humanMove.lastOrNull() is Advance &&
+                           action is Advance &&
+                           newState.board.doesFieldHaveCurrent(newState.currentShip.position) &&
+                           state.board.doesFieldHaveCurrent(state.currentShip.position))
+                            newState.currentShip.movement++
+                        humanMove.add(action)
+                        gameModel.gameState.set(newState)
                     }
                 }
             }
@@ -239,7 +250,7 @@ class MississippiBoard: View() {
     
     private fun humanMove(move: Move): Boolean {
         if(gameModel.atLatestTurn.value && gameModel.isHumanTurn.value) {
-            fire(HumanMoveAction(move.also { logger.debug("Human Move: $it") }))
+            fire(HumanMoveAction(move.also { logger.debug("Human Move: {}", it) }))
             return true
         }
         return false
