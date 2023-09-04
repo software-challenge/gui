@@ -19,8 +19,8 @@
     </layout>
   </appender>
 
-  <logger name="sc" level="DEBUG" />
-  <logger name="sc.gui" level="TRACe" />
+  <logger name="sc" level="INFO" />
+  <logger name="sc.gui" level="DEBUG" />
 
   <logger name="sc.networking.clients.XStreamClient" level="INFO" />
   <root level="INFO">

@@ -29,7 +29,7 @@ group = "sc.gui"
 version = try {
     Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags"))
             .inputStream.reader().readText().trim().ifEmpty { null }
-} catch (e: java.io.IOException) {
+} catch(e: java.io.IOException) {
     println(e)
 } ?: "${versionFromBackend}-${System.getenv("GITHUB_SHA")?.takeUnless { it.isEmpty() } ?: "custom"}"
 println("Current version: $version (Java version: ${JavaVersion.current()})")
@@ -65,7 +65,7 @@ tasks {
         options.release.set(minJavaVersion.majorVersion.toInt())
     }
     processResources {
-        if (version.toString().split('.').getOrNull(1) != "0")
+        if(!debug)
             exclude("logback-test.xml")
         doLast {
             destinationDir.resolve("version.txt").writeText(version.toString())

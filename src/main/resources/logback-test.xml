@@ -20,9 +20,9 @@
   </appender>
 
   <logger name="sc" level="DEBUG" />
-  <logger name="sc.networking.clients.XStreamClient" level="INFO" />
   <logger name="sc.gui" level="TRACE" />
 
+  <logger name="sc.networking.clients.XStreamClient" level="INFO" />
   <root level="INFO">
     <appender-ref ref="FILE"/>
     <appender-ref ref="STDOUT"/>
