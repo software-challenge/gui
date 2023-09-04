@@ -57,7 +57,7 @@ class ClientController: Controller() {
     }
     
     fun getSimpleMove(state: IGameState): CompletableFuture<IMove> {
-        val possibleMoves = state.getAllMoves()
+        val possibleMoves = state.moveIterator()
         if (!possibleMoves.hasNext())
             throw GameLogicException("No possible Moves found!")
         val best = ArrayList<IMove>()

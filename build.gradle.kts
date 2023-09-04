@@ -10,11 +10,11 @@ plugins {
     }
     
     application
-    kotlin("jvm") version "1.5.20"
-    id("org.openjfx.javafxplugin") version "0.0.13"
+    kotlin("jvm") version "1.9.10"
+    id("org.openjfx.javafxplugin") version "0.0.14"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     
-    id("com.github.ben-manes.versions") version "0.42.0"
+    id("com.github.ben-manes.versions") version "0.47.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.18"
 }
 
@@ -51,7 +51,8 @@ dependencies {
     
     implementation(kotlin("reflect"))
     implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT") { exclude("org.jetbrains.kotlin", "kotlin-reflect") }
-    implementation("io.github.microutils", "kotlin-logging-jvm", "2.1.23")
+    implementation("ch.qos.logback", "logback-classic", "1.4.11")
+    implementation("io.github.microutils", "kotlin-logging-jvm", "3.0.5")
     
     implementation("software-challenge", "server")
     implementation("software-challenge", "plugin")
