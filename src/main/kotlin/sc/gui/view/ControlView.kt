@@ -48,13 +48,17 @@ class ControlView: View() {
                         fire(gameControlState.value.action)
                     }
                 }
-                button {
+                val prev = button {
                     disableWhen(gameModel.currentTurn.isEqualTo(0))
-                    text = "⏮"
+                    text = "◀" //"⏮"
                     setOnMouseClicked {
                         if(gameModel.atLatestTurn.value)
                             fire(PauseGame(true))
                         fire(StepGame(-1 * it.modifierMultiplicator))
+                        it.consume()
+                    }
+                    setOnAction {
+                        fire(StepGame(1))
                     }
                 }
                 label {
@@ -68,13 +72,22 @@ class ControlView: View() {
                 button {
                     disableProperty().bind(
                             arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.isHumanTurn, gameModel.gameOver).booleanBinding
-                            { (latest, human, end) -> logger.trace { "latest: $latest, human: $human, end: $end" }; latest && (human || end) }
+                            { (latest, human, end) ->
+                                logger.trace { "latest: $latest, human: $human, end: $end" }
+                                (latest && (human || end)).also {
+                                    if(it && isFocused)
+                                        prev.requestFocus()
+                                }
+                            }
                     )
-                    text = "⏭"
+                    text = "▶" //"⏭"
                     setOnMouseClicked {
                         fire(StepGame(it.modifierMultiplicator))
-                        if(gameControlState.value == START)
-                            gameControlState.value = PAUSED
+                        if(gameControlState.value == START) gameControlState.value = PAUSED
+                        //it.consume()
+                    }
+                    setOnAction {
+                        fire(StepGame(1))
                     }
                 }
                 group {
@@ -85,9 +98,17 @@ class ControlView: View() {
                     }
                     this.hboxConstraints { this.hGrow = Priority.NEVER }
                 }
-                spinner(min = 0.0, initialValue = gameModel.stepSpeed.value, amountToStepBy = 2.0, editable = true) {
-                    gameModel.stepSpeed.bind(valueProperty())
-                    prefWidth = AppStyle.fontSizeRegular.value * 5
+                spinner(
+                        min = 0.0,
+                        max = 99.0,
+                        initialValue = gameModel.stepSpeed.value,
+                        amountToStepBy = 2.0,
+                        editable = true,
+                        property = gameModel.stepSpeed,
+                        enableScroll = true,
+                ) {
+                    // TODO unfocus on normal character typed
+                    prefWidth = AppStyle.fontSizeRegular.value * 6
                 }
                 checkbox("Animationen", AppModel.animate)
             }
