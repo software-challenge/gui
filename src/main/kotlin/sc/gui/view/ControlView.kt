@@ -1,5 +1,6 @@
 package sc.gui.view
 
+import javafx.application.Platform
 import javafx.beans.property.Property
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Pos
@@ -58,15 +59,15 @@ class ControlView: View() {
                         it.consume()
                     }
                     setOnAction {
-                        fire(StepGame(1))
+                        fire(StepGame(-1))
                     }
                 }
                 label {
                     alignment = Pos.CENTER
                     prefWidth = AppStyle.fontSizeRegular.value * 7
                     textProperty().bind(
-                            arrayOf<ObservableValue<Number>>(gameModel.currentTurn, gameModel.availableTurns).binding
-                            { (cur, all) -> "Zug " + if(cur != all || gameModel.gameOver.value) "$cur/$all" else cur }
+                            arrayOf<ObservableValue<Number>>(gameModel.currentTurn, gameModel.availableTurns)
+                                    .binding { (cur, all) -> "Zug " + if(cur != all || gameModel.gameOver.value) "$cur/$all" else cur }
                     )
                 }
                 button {
@@ -76,7 +77,7 @@ class ControlView: View() {
                                 logger.trace { "latest: $latest, human: $human, end: $end" }
                                 (latest && (human || end)).also {
                                     if(it && isFocused)
-                                        prev.requestFocus()
+                                        Platform.runLater { prev.requestFocus() }
                                 }
                             }
                     )
