@@ -4,12 +4,13 @@ import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.geometry.Pos
 import javafx.scene.Node
+import javafx.scene.Parent
 import javafx.scene.control.Alert
-import javafx.scene.control.Label
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Region
+import javafx.scene.layout.VBox
 import mu.KotlinLogging
 import sc.api.plugins.Coordinates
 import sc.api.plugins.CubeCoordinates
@@ -21,6 +22,7 @@ import sc.gui.model.GameModel
 import sc.plugin2024.Action
 import sc.plugin2024.GameState
 import sc.plugin2024.Move
+import sc.plugin2024.Ship
 import sc.plugin2024.actions.Accelerate
 import sc.plugin2024.actions.Advance
 import sc.plugin2024.actions.Push
@@ -56,101 +58,43 @@ class MississippiBoard: View() {
     
     private var originalState: GameState? = null
     private val humanMove = ArrayList<Action>()
+    private var currentShip: Parent? = null
+    
+    private fun Ship.canAdvance() =
+            coal + movement + freeAcc > 0 &&
+            // negative movement points are turned into acceleration
+            speed - movement < PluginConstants.MAX_SPEED
     
     init {
         val stateListener = ChangeListener<GameState?> { _, oldState, state ->
-            clearTargetHighlights()
-            grid.children.clear()
-            if(state?.lastMove != oldState?.lastMove)
-                humanMove.clear()
             if(state == null) {
                 return@ChangeListener
+            }
+            clearTargetHighlights()
+            grid.children.clear()
+            if(state.lastMove != oldState?.lastMove) {
+                humanMove.clear()
+                originalState = state
             }
             logger.trace("New state for board: ${state.longString()}")
             state.board.forEachField { cubeCoordinates, field ->
                 createPiece(field.toString().lowercase()).also { addPiece(it, cubeCoordinates) }
-                /*
-                ice.onLeftClick {
-                    if(gameState?.canPlacePenguin(coordinates) == true)
-                        humanMove(Move.set(coordinates))
-                    else currentHighlightCoords?.let {
-                        if(state.board[it].penguin == state.currentTeam &&
-                           state.penguinsPlaced && targetHighlights.contains(ice))
-                            humanMove(Move(it, coordinates))
-                    }
-                }
-                ice.setOnMouseEntered {
-                    if(gameState?.canPlacePenguin(coordinates) == true)
-                        ice.addHover(team = gameState?.currentTeam)
-                    (ice.effect as? ColorAdjust ?: ColorAdjust()).run {
-                        ice.effect = this
-                        brightness = -0.2
-                    }
-                }
-                ice.setOnMouseExited {
-                    (ice.effect as? ColorAdjust)?.takeIf { ice in targetHighlights }?.run {
-                        brightness = 0.0
-                    } ?: ice.removeHover()
-                }
-                Team.values().forEach { ice.children.first().effect = null }
-            } else if(piece != null) {
-                if(ice.children.size > 1)
-                    removePiece(ice.children.last(), parent = ice)
-                ice.children.first().effect = ColorAdjust(piece.colorAdjust, 0.0, 0.0, 0.0)
-                val penguin = pieces.getOrPut(coordinates) {
-                    addPiece(createPiece("penguin"), coordinates)
-                }
-                penguin.scaleX = -(piece.index.xor(state.startTeam.index) * 2 - 1.0)
-                penguin.fade(transitionDuration, AppStyle.pieceOpacity * when {
-                    piece != state.currentTeam -> 0.7
-                    gameModel.atLatestTurn.value && gameState?.isOver == false -> 1.0
-                    else -> 0.9
-                })
-                penguin.nextFrame()
-                penguin.setClass("inactive", piece != state.currentTeam)
-                
-                penguin.setOnMouseEntered { event ->
-                    if(lockedHighlight == null) {
-                        highlight(penguin, updateTargetHighlights = coordinates)
-                        event.consume()
-                    } else if(lockedHighlight != coordinates) {
-                        penguin.addHover()
-                    }
-                }
-                penguin.onLeftClick {
-                    lockedHighlight =
-                            if(coordinates == lockedHighlight || !isSelectable(coordinates)) {
-                                pieces[coordinates]?.let { highlight(it, false, coordinates) }
-                                null
-                            } else {
-                                coordinates.also { pieces[coordinates]?.let { highlight(it, true, coordinates) } }
-                            }
-                    logger.trace { "Clicked $coordinates (lock at $lockedHighlight, current $currentHighlight)" }
-                }
-                penguin.setOnMouseExited { event ->
-                    if(lockedHighlight == null) {
-                        if(!isSelectable(coordinates)) {
-                            clearTargetHighlights()
-                            penguin.removeHover()
-                            currentHighlight = null
-                        }
-                    } else if(lockedHighlight != coordinates) {
-                        penguin.removeHover()
-                    }
-                    event.consume()
-                }
-                */
             }
             state.ships.forEach { ship ->
-                createPiece("ship").also {
-                    it.rotate = ship.direction.angle.toDouble()
-                    addPiece(it, ship.position)
-                    addPiece(Label("C${ship.coal}\nS${ship.speed}" +
-                                   "\nM${ship.movement}"
-                                           .takeIf { state.currentTeam == ship.team && humanMove.isNotEmpty() }
-                                           .orEmpty()).apply {
-                        styleProperty().bind(fontSizeBinding)
-                    }, ship.position)
+                val shipPiece = createPiece("ship_${ship.team.name.lowercase()}")
+                shipPiece.addChild("coal${ship.coal}")
+                shipPiece.addChild("passenger")
+                shipPiece.rotate = ship.direction.angle.toDouble()
+                /*addPiece(Label("C${ship.coal}\nS${ship.speed}" +
+                               "\nM${ship.movement}"
+                                       .takeIf { state.currentTeam == ship.team && humanMove.isNotEmpty() }
+                                       .orEmpty()).apply {
+                    styleProperty().bind(fontSizeBinding)
+                }, ship.position)*/
+                addPiece(shipPiece, ship.position)
+                if(ship.team == state.currentTeam) {
+                    currentShip = shipPiece
+                    renderHumanControls()
                 }
             }
         }
@@ -158,19 +102,13 @@ class MississippiBoard: View() {
             @Suppress("UNCHECKED_CAST")
             gameModel.gameState.addListener(stateListener as ChangeListener<in IGameState?>)
             stateListener.changed(null, null, gameModel.gameState.value)
+            gameModel.isHumanTurn.addListener { _ -> renderHumanControls() }
             
             root.scene.setOnKeyPressed { keyEvent ->
                 val state = gameState ?: return@setOnKeyPressed
-                if(humanMove.isEmpty())
-                    originalState = state
-                val ship = state.currentShip
                 val action: Action? = when(keyEvent.code) {
                     KeyCode.UP, KeyCode.W ->
-                        Advance(1).takeIf {
-                            ship.coal + ship.movement + ship.freeAcc > 0 &&
-                            // negative movement points are turned into acceleration
-                            ship.speed - ship.movement < PluginConstants.MAX_SPEED
-                        }
+                        Advance(1)
                     
                     KeyCode.LEFT, KeyCode.A ->
                         Turn(state.currentShip.direction - 1)
@@ -179,24 +117,14 @@ class MississippiBoard: View() {
                         Turn(state.currentShip.direction + 1)
                     
                     KeyCode.BACK_SPACE, KeyCode.C -> {
-                        humanMove.clear()
-                        gameModel.gameState.set(originalState)
+                        keyEvent.consume()
+                        cancelHumanMove()
                         null
                     }
                     
                     KeyCode.ACCEPT, KeyCode.ENTER, KeyCode.S, KeyCode.SPACE -> {
                         keyEvent.consume()
-                        if(humanMove.isEmpty() || state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal) {
-                            alert(Alert.AlertType.ERROR, "Unvollständiger Zug!")
-                        } else {
-                            if(state.currentShip.movement != 0) {
-                                humanMove.add(0, Accelerate(-state.currentShip.movement))
-                            }
-                            if(!humanMove(Move(ArrayList(humanMove))))
-                                gameModel.gameState.set(originalState)
-                            humanMove.clear()
-                            originalState = null
-                        }
+                        confirmHumanMove()
                         null
                     }
                     
@@ -212,27 +140,69 @@ class MississippiBoard: View() {
                 if(action == null) return@setOnKeyPressed
                 
                 keyEvent.consume()
-                if(state.mustPush && action !is Push) {
-                    alert(Alert.AlertType.ERROR, "Abdrängaktion mit Richtung 0 (Rechts) - 5 (Oben Rechts) festlegen!")
-                    return@setOnKeyPressed
-                }
-                val extraMovement = (ship.coal + ship.freeAcc).coerceAtMost(PluginConstants.MAX_SPEED - ship.speed)
-                val newState = state.clone()
-                val newShip = newState.currentShip
-                val currentAdvance = humanMove.lastOrNull() is Advance && action is Advance && state.isCurrentShipOnCurrent()
-                if(currentAdvance)
-                    newShip.movement++
-                newShip.movement += extraMovement
-                action.perform(newState)?.let {
-                    alert(Alert.AlertType.ERROR, it.message)
-                } ?: run {
-                    if(currentAdvance && !newState.isCurrentShipOnCurrent())
-                        newShip.movement--
-                    newShip.movement -= extraMovement
-                    humanMove.add(action)
-                    gameModel.gameState.set(newState)
-                }
+                addHumanAction(action)
             }
+        }
+    }
+    
+    private fun renderHumanControls() {
+        if(awaitingHumanMove()) {
+            val ship = gameState?.currentShip ?: return
+            currentShip?.vbox {
+                translateX = gridSize
+                if(ship.canTurn())
+                    button("↺ A") { action { addHumanAction(Turn(ship.direction - 1)) } }
+                if(ship.canAdvance())
+                    button("→ W") { action { addHumanAction(Advance(1)) } }
+                if(ship.canTurn())
+                    button("↻ D") { action { addHumanAction(Turn(ship.direction + 1)) } }
+            }
+            addPiece(VBox().apply {
+            }, ship.position)
+        }
+    }
+    
+    private fun addHumanAction(action: Action) {
+        val state = gameState ?: return
+        if(state.mustPush && action !is Push) {
+            alert(Alert.AlertType.ERROR, "Abdrängaktion mit Richtung 0 (Rechts) - 5 (Oben Rechts) festlegen!")
+            return
+        }
+        
+        val newState = state.clone()
+        val ship = newState.currentShip
+        val extraMovement = (ship.coal + ship.freeAcc).coerceAtMost(PluginConstants.MAX_SPEED - ship.speed)
+        val currentAdvance = humanMove.lastOrNull() is Advance && action is Advance && state.isCurrentShipOnCurrent()
+        if(currentAdvance)
+            ship.movement++
+        ship.movement += extraMovement
+        action.perform(newState)?.let {
+            alert(Alert.AlertType.ERROR, it.message)
+        } ?: run {
+            if(currentAdvance && !newState.isCurrentShipOnCurrent())
+                ship.movement--
+            ship.movement -= extraMovement
+            humanMove.add(action)
+            gameModel.gameState.set(newState)
+        }
+    }
+    
+    private fun cancelHumanMove() {
+        humanMove.clear()
+        gameModel.gameState.set(originalState)
+    }
+    
+    private fun confirmHumanMove() {
+        val state = gameState ?: return
+        if(!awaitingHumanMove() || humanMove.isEmpty() || state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal) {
+            alert(Alert.AlertType.ERROR, "Unvollständiger Zug!")
+        } else {
+            if(state.currentShip.movement != 0) {
+                humanMove.add(0, Accelerate(-state.currentShip.movement))
+            }
+            if(!humanMove(Move(ArrayList(humanMove))))
+                gameModel.gameState.set(originalState)
+            humanMove.clear()
         }
     }
     
@@ -251,8 +221,11 @@ class MississippiBoard: View() {
     private fun createPiece(type: String): PieceImage =
             PieceImage(calculatedBlockSize, type)
     
+    private fun awaitingHumanMove() =
+            gameModel.atLatestTurn.value && gameModel.isHumanTurn.value
+    
     private fun humanMove(move: Move): Boolean {
-        if(gameModel.atLatestTurn.value && gameModel.isHumanTurn.value) {
+        if(awaitingHumanMove()) {
             fire(HumanMoveAction(move.also { logger.debug("Human Move: {}", it) }))
             return true
         }
@@ -305,7 +278,7 @@ class MississippiBoard: View() {
             node.anchorpaneConstraints {
                 val bounds = gameState?.board?.bounds
                 leftAnchor = (coordinates.x / 2.0 - (bounds?.first?.first ?: -2)) * size
-                topAnchor = (coordinates.r - (bounds?.second?.first ?: -2)) * size * 0.862
+                topAnchor = (coordinates.r - (bounds?.second?.first ?: -2)) * size * 0.88
             }
         }
         return node
