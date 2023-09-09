@@ -19,10 +19,7 @@ import sc.api.plugins.IGameState
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.GameModel
-import sc.plugin2024.Action
-import sc.plugin2024.GameState
-import sc.plugin2024.Move
-import sc.plugin2024.Ship
+import sc.plugin2024.*
 import sc.plugin2024.actions.Accelerate
 import sc.plugin2024.actions.Advance
 import sc.plugin2024.actions.Push
@@ -58,7 +55,7 @@ class MississippiBoard: View() {
     
     private var originalState: GameState? = null
     private val humanMove = ArrayList<Action>()
-    private var currentShip: Parent? = null
+    private var currentShip: PieceImage? = null
     
     private fun Ship.canAdvance() =
             coal + movement + freeAcc > 0 &&
@@ -72,7 +69,7 @@ class MississippiBoard: View() {
             }
             clearTargetHighlights()
             grid.children.clear()
-            if(state.lastMove != oldState?.lastMove) {
+            if(state.turn != oldState?.turn) {
                 humanMove.clear()
                 originalState = state
             }
@@ -81,9 +78,12 @@ class MississippiBoard: View() {
                 createPiece(field.toString().lowercase()).also { addPiece(it, cubeCoordinates) }
             }
             state.ships.forEach { ship ->
-                val shipPiece = createPiece("ship_${ship.team.name.lowercase()}")
+                val shipName = "ship_${ship.team.name.lowercase()}"
+                val shipPiece = createPiece(shipName)
                 shipPiece.addChild("coal${ship.coal}")
-                shipPiece.addChild("passenger")
+                (1..ship.passengers).forEach {
+                    shipPiece.addChild("${shipName}passenger$it")
+                }
                 shipPiece.rotate = ship.direction.angle.toDouble()
                 /*addPiece(Label("C${ship.coal}\nS${ship.speed}" +
                                "\nM${ship.movement}"
@@ -149,15 +149,15 @@ class MississippiBoard: View() {
         if(awaitingHumanMove()) {
             val ship = gameState?.currentShip ?: return
             currentShip?.vbox {
-                translateX = gridSize
+            }
+            addPiece(VBox().apply {
+                translateX = -(AppStyle.spacing * 5)
                 if(ship.canTurn())
                     button("↺ A") { action { addHumanAction(Turn(ship.direction - 1)) } }
                 if(ship.canAdvance())
                     button("→ W") { action { addHumanAction(Advance(1)) } }
                 if(ship.canTurn())
                     button("↻ D") { action { addHumanAction(Turn(ship.direction + 1)) } }
-            }
-            addPiece(VBox().apply {
             }, ship.position)
         }
     }
@@ -194,7 +194,7 @@ class MississippiBoard: View() {
     
     private fun confirmHumanMove() {
         val state = gameState ?: return
-        if(!awaitingHumanMove() || humanMove.isEmpty() || state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal) {
+        if(awaitingHumanMove() && (humanMove.isEmpty() || state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal)) {
             alert(Alert.AlertType.ERROR, "Unvollständiger Zug!")
         } else {
             if(state.currentShip.movement != 0) {
@@ -276,7 +276,7 @@ class MississippiBoard: View() {
             //logger.trace("$node at $coordinates block size: $it")
             val size = it.toDouble()
             node.anchorpaneConstraints {
-                val bounds = gameState?.board?.bounds
+                val bounds = gameState?.board?.segments?.takeLast(4)?.bounds
                 leftAnchor = (coordinates.x / 2.0 - (bounds?.first?.first ?: -2)) * size
                 topAnchor = (coordinates.r - (bounds?.second?.first ?: -2)) * size * 0.88
             }

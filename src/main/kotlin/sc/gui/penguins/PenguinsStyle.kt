@@ -1,5 +1,9 @@
 package sc.gui.penguins
 
+import javafx.geometry.Side
+import javafx.scene.layout.BackgroundPosition
+import javafx.scene.layout.BackgroundSize
+import sc.gui.AppStyle.Companion.background
 import tornadofx.*
 
 class PenguinsStyle: Stylesheet() {
@@ -9,8 +13,14 @@ class PenguinsStyle: Stylesheet() {
     private val colorBackground = c("#0ec9ff")
     
     init {
+        background {
+            backgroundImage += resources.url("/penguins/background.jpg").toURI()
+            backgroundSize += BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)
+            backgroundPosition += BackgroundPosition(Side.LEFT, .0, true, Side.TOP, -10.0, false)
+        }
+
         arrayOf("fish", "ice").forEach {
-            select(CssRule.c(it)) { image = resources.url("/graphics/$it.png").toURI() }
+            select(CssRule.c(it)) { image = resources.url("/penguins/$it.png").toURI() }
         }
         
         select(CssRule.c("penguin")) {

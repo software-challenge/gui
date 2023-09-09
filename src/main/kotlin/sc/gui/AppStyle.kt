@@ -44,13 +44,13 @@ class AppStyle: Stylesheet() {
         val gridLock by csspseudoclass()
         
         fun background() =
-            StackPane(
-                Region().apply {
-                    hgrow = Priority.ALWAYS
-                    vgrow = Priority.ALWAYS
-                    addClass(AppStyle.background)
-                }
-            )
+                StackPane(
+                        Region().apply {
+                            hgrow = Priority.ALWAYS
+                            vgrow = Priority.ALWAYS
+                            addClass(AppStyle.background)
+                        }
+                )
         
         init {
             arrayOf("Regular", "Bold", "Italic", "BoldItalic").forEach {
@@ -107,10 +107,6 @@ class AppStyle: Stylesheet() {
         background {
             opacity = 0.8
             backgroundColor += colorBackground
-            backgroundImage += resources.url("/graphics/background.jpg").toURI()
-            //backgroundSize += BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)
-            //backgroundPosition += BackgroundPosition(Side.LEFT, .0, true, Side.TOP, -10.0, false)
-            backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
         }
         
         // Generic Components
@@ -175,14 +171,25 @@ class AppStyle: Stylesheet() {
     }
     
     fun mqStyles() {
-        (Array(12) { "passenger${it % 6}${it / 6}" } + arrayOf("island", "water", "goal", "ship_one", "ship_two")).forEach {
-            select(CssRule.c(it)) { image = resources.url("/graphics/$it.png").toURI() }
+        background {
+            backgroundImage += resources.url("/background.jpg").toURI()
+            backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
+        }
+        
+        (Array(12) { "passenger${it % 6}${it / 6}" } + arrayOf("island", "water", "goal")).forEach {
+            select(CssRule.c(it)) { image = resources.url("/mq/fields/$it.png").toURI() }
+        }
+        arrayOf("ship_one", "ship_two").forEach {
+            select(CssRule.c(it)) { image = resources.url("/mq/boats/$it.png").toURI() }
+            select(CssRule.c(it + "passenger1")) {
+                image = resources.url("/mq/passengers/HUMAN_A_$it.png").toURI()
+            }
+            select(CssRule.c(it + "passenger2")) {
+                image = resources.url("/mq/passengers/HUMAN_B_$it.png").toURI()
+            }
         }
         (1..6).forEach {
-            select(CssRule.c("coal$it")) { image = resources.url("/graphics/coal/COAL_$it.png").toURI() }
-        }
-        ".passenger" {
-            //image = resources.url("/graphics/passengers/HUMAN_A.png").toURI()
+            select(CssRule.c("coal$it")) { image = resources.url("/mq/coal/COAL_$it.png").toURI() }
         }
     }
 }
