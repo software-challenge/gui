@@ -176,20 +176,34 @@ class AppStyle: Stylesheet() {
             backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
         }
         
-        (Array(12) { "passenger${it % 6}${it / 6}" } + arrayOf("island", "water", "goal")).forEach {
-            select(CssRule.c(it)) { image = resources.url("/mq/fields/$it.png").toURI() }
+        
+        (0 until 12).forEach {
+            ".passenger${it % 6}${it / 6}" {
+                image = resources.url("/mq/fields/islands/passenger_island_${(97 + (it % 6)).toChar()}_${it / 6}.png").toURI()
+            }
+        }
+        ".island" {
+            image = resources.url("/mq/fields/islands/empty_island_A.png").toURI()
+        }
+        ".goal" {
+            image = resources.url("/mq/fields/goal.png").toURI()
+        }
+        ".water" {
+            image = resources.url("/mq/fields/water_textures/water_A.png").toURI()
+        }
+        ".stream" {
+            image = resources.url("/mq/fields/stream_A.png").toURI()
         }
         arrayOf("ship_one", "ship_two").forEach {
             select(CssRule.c(it)) { image = resources.url("/mq/boats/$it.png").toURI() }
-            select(CssRule.c(it + "passenger1")) {
-                image = resources.url("/mq/passengers/HUMAN_A_$it.png").toURI()
-            }
-            select(CssRule.c(it + "passenger2")) {
-                image = resources.url("/mq/passengers/HUMAN_B_$it.png").toURI()
+            "ab".forEach { ch ->
+                select(CssRule.c(it + "_passenger_$ch")) {
+                    image = resources.url("/mq/boats/passengers/passenger_${ch}_$it.png").toURI()
+                }
             }
         }
         (1..6).forEach {
-            select(CssRule.c("coal$it")) { image = resources.url("/mq/coal/COAL_$it.png").toURI() }
+            select(CssRule.c("coal$it")) { image = resources.url("/mq/boats/coal/coal_$it.png").toURI() }
         }
     }
 }

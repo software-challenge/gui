@@ -40,7 +40,7 @@ class MississippiBoard: View() {
             minOf(
                     (root.width - AppStyle.spacing) / (it.x + 1),
                     (root.height - AppStyle.spacing * (if(gameModel.gameOver.value && gameModel.atLatestTurn.value) 4 else 2)) / it.y
-            )
+            ) * 1.3
         } ?: 10.0
     
     val grid: Pane = AnchorPane().apply { this.paddingAll = AppStyle.spacing }
@@ -75,14 +75,23 @@ class MississippiBoard: View() {
             }
             logger.trace("New state for board: ${state.longString()}")
             state.board.forEachField { cubeCoordinates, field ->
-                createPiece(field.toString().lowercase()).also { addPiece(it, cubeCoordinates) }
+                state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
+                    createPiece("stream").also {
+                        addPiece(it, cubeCoordinates)
+                        it.rotate = dir.angle.toDouble()
+                    }
+                } ?: createPiece(field.toString().lowercase()).also {
+                    if(!field.isEmpty)
+                        it.translateZ++
+                    addPiece(it, cubeCoordinates)
+                }
             }
             state.ships.forEach { ship ->
                 val shipName = "ship_${ship.team.name.lowercase()}"
                 val shipPiece = createPiece(shipName)
                 shipPiece.addChild("coal${ship.coal}")
                 (1..ship.passengers).forEach {
-                    shipPiece.addChild("${shipName}passenger$it")
+                    shipPiece.addChild("${shipName}_passenger_${(96 + it).toChar()}")
                 }
                 shipPiece.rotate = ship.direction.angle.toDouble()
                 /*addPiece(Label("C${ship.coal}\nS${ship.speed}" +
@@ -277,8 +286,8 @@ class MississippiBoard: View() {
             val size = it.toDouble()
             node.anchorpaneConstraints {
                 val bounds = gameState?.board?.segments?.takeLast(4)?.bounds
-                leftAnchor = (coordinates.x / 2.0 - (bounds?.first?.first ?: -2)) * size
-                topAnchor = (coordinates.r - (bounds?.second?.first ?: -2)) * size * 0.88
+                leftAnchor = (coordinates.x / 2.0 - (bounds?.first?.first ?: -2)) * size * .774
+                topAnchor = (coordinates.r - (bounds?.second?.first ?: -2)) * size * .668
             }
         }
         return node
