@@ -4,7 +4,6 @@ import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.Parent
 import javafx.scene.control.Alert
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.AnchorPane
@@ -125,7 +124,7 @@ class MississippiBoard: View() {
                     KeyCode.RIGHT, KeyCode.D ->
                         Turn(state.currentShip.direction + 1)
                     
-                    KeyCode.BACK_SPACE, KeyCode.C -> {
+                    KeyCode.BACK_SPACE, KeyCode.C, KeyCode.X -> {
                         keyEvent.consume()
                         cancelHumanMove()
                         null
@@ -157,8 +156,6 @@ class MississippiBoard: View() {
     private fun renderHumanControls() {
         if(awaitingHumanMove()) {
             val ship = gameState?.currentShip ?: return
-            currentShip?.vbox {
-            }
             addPiece(VBox().apply {
                 translateX = -(AppStyle.spacing * 5)
                 if(ship.canTurn())
@@ -167,6 +164,10 @@ class MississippiBoard: View() {
                     button("→ W") { action { addHumanAction(Advance(1)) } }
                 if(ship.canTurn())
                     button("↻ D") { action { addHumanAction(Turn(ship.direction + 1)) } }
+                if(!isHumanMoveIncomplete())
+                    button("✓ S") { action { confirmHumanMove() } }
+                if(humanMove.isNotEmpty())
+                    button("╳ C") { action { cancelHumanMove() } }
             }, ship.position)
         }
     }
@@ -201,11 +202,14 @@ class MississippiBoard: View() {
         gameModel.gameState.set(originalState)
     }
     
+    private fun isHumanMoveIncomplete() =
+        humanMove.isEmpty() || gameState?.let { state -> state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal } ?: true
+    
     private fun confirmHumanMove() {
-        val state = gameState ?: return
-        if(awaitingHumanMove() && (humanMove.isEmpty() || state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal)) {
+        if(awaitingHumanMove() && isHumanMoveIncomplete()) {
             alert(Alert.AlertType.ERROR, "Unvollständiger Zug!")
         } else {
+            val state = gameState ?: return
             if(state.currentShip.movement != 0) {
                 humanMove.add(0, Accelerate(-state.currentShip.movement))
             }
