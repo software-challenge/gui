@@ -5,6 +5,7 @@ import javafx.beans.value.ChangeListener
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Alert
+import javafx.scene.control.Label
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
@@ -66,23 +67,33 @@ class MississippiBoard: View() {
             if(state == null) {
                 return@ChangeListener
             }
-            clearTargetHighlights()
             grid.children.clear()
             if(state.turn != oldState?.turn) {
                 humanMove.clear()
                 originalState = state
             }
             logger.trace("New state for board: ${state.longString()}")
+            
+            state.currentShip.movement += state.currentShip.maxAcc
+            val pushes = state.getPossiblePushs()
+            state.currentShip.movement -= state.currentShip.maxAcc
+            logger.trace("Available Pushes: {}", pushes)
+            
             state.board.forEachField { cubeCoordinates, field ->
-                state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
-                    createPiece("stream").also {
-                        addPiece(it, cubeCoordinates)
-                        it.rotate = dir.angle.toDouble()
+                // TODO overlay current and goal flag
+                (state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
+                    createPiece("stream").also { it.rotate = dir.angle.toDouble() }
+                } ?: createPiece(field.toString().lowercase())).also { piece ->
+                    if(field.isEmpty) {
+                        piece.viewOrder++
+                        val push = pushes.firstOrNull { state.currentShip.position + it.direction.vector == cubeCoordinates }
+                        if(push != null) {
+                            logger.debug("Registering '{}' for {}", push, piece)
+                            piece.addClass(AppStyle.gridHover) // TODO not yet working
+                            piece.onLeftClick { addHumanAction(push) }
+                        }
                     }
-                } ?: createPiece(field.toString().lowercase()).also {
-                    if(!field.isEmpty)
-                        it.translateZ++
-                    addPiece(it, cubeCoordinates)
+                    addPiece(piece, cubeCoordinates)
                 }
             }
             state.ships.forEach { ship ->
@@ -93,12 +104,12 @@ class MississippiBoard: View() {
                     shipPiece.addChild("${shipName}_passenger_${(96 + it).toChar()}")
                 }
                 shipPiece.rotate = ship.direction.angle.toDouble()
-                /*addPiece(Label("C${ship.coal}\nS${ship.speed}" +
+                addPiece(Label("S${ship.speed}" +
                                "\nM${ship.movement}"
                                        .takeIf { state.currentTeam == ship.team && humanMove.isNotEmpty() }
                                        .orEmpty()).apply {
                     styleProperty().bind(fontSizeBinding)
-                }, ship.position)*/
+                }, ship.position)
                 addPiece(shipPiece, ship.position)
                 if(ship.team == state.currentTeam) {
                     currentShip = shipPiece
@@ -181,7 +192,7 @@ class MississippiBoard: View() {
         
         val newState = state.clone()
         val ship = newState.currentShip
-        val extraMovement = (ship.coal + ship.freeAcc).coerceAtMost(PluginConstants.MAX_SPEED - ship.speed)
+        val extraMovement = ship.maxAcc
         val currentAdvance = humanMove.lastOrNull() is Advance && action is Advance && state.isCurrentShipOnCurrent()
         if(currentAdvance)
             ship.movement++
@@ -203,7 +214,7 @@ class MississippiBoard: View() {
     }
     
     private fun isHumanMoveIncomplete() =
-        humanMove.isEmpty() || gameState?.let { state -> state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal } ?: true
+        humanMove.isEmpty() || gameState?.let { state -> state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal || state.mustPush } ?: true
     
     private fun confirmHumanMove() {
         if(awaitingHumanMove() && isHumanMoveIncomplete()) {
@@ -243,41 +254,6 @@ class MississippiBoard: View() {
             return true
         }
         return false
-    }
-    
-    private fun highlight(node: PieceImage, lock: Boolean = false, updateTargetHighlights: Coordinates? = null) {
-        currentHighlight?.removeHover()
-        updateTargetHighlights?.takeIf { it != lockedHighlight }?.let { highlightTargets(it) }
-        //node.addHover(lock)
-        currentHighlight = node
-    }
-    
-    private fun Node.removeHover() {
-        //removeClass(AppStyle.gridHover, AppStyle.gridLock)
-        effect = null
-    }
-    
-    private fun clearTargetHighlights() {
-        currentHighlightCoords = null
-        currentHighlight?.removeHover()
-        lockedHighlight = null
-        targetHighlights.forEach { it.removeHover() }
-        targetHighlights.clear()
-    }
-    
-    private fun highlightTargets(position: Coordinates) {
-        clearTargetHighlights()
-        currentHighlightCoords = position
-        
-        gameState?.let { state ->
-            /*
-            targetHighlights.addAll(
-                    state.board.possibleMovesFrom(position)
-                            .also { logger.debug { "highlighting possible moves from $position: $it" } }
-                            .mapNotNull { move ->
-                                ice[move.to]?.addHover(team = state.board[position].penguin)
-                            })*/
-        }
     }
     
     private fun <T: Region> addPiece(node: T, coordinates: CubeCoordinates): T {
