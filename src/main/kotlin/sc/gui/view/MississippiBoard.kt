@@ -15,7 +15,6 @@ import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import mu.KotlinLogging
-import sc.api.plugins.Coordinates
 import sc.api.plugins.CubeCoordinates
 import sc.api.plugins.CubeDirection
 import sc.api.plugins.IGameState
@@ -41,9 +40,6 @@ class MississippiBoard: View() {
     private val gameState: GameState?
         get() = gameModel.gameState.value as? GameState
     
-    // TODO prevent unnecessary cutoff left
-    // TODO layout when launching game
-    
     private val viewHeight: Double
         get() = (root.parent as Region).height.coerceAtMost(root.scene.height - AppStyle.fontSizeBig.value * 12)
     private val gridSize: Double
@@ -52,15 +48,15 @@ class MississippiBoard: View() {
                     root.scene.width / (it.x + 1),
                     viewHeight / (it.y + 2) * 1.1
             ) * 1.3
-        } ?: 10.0
+        } ?: 100.0
     
     private val grid: Pane = AnchorPane().apply {
         paddingAll = 0.0
         Platform.runLater {
             clipProperty().bind(
                     Bindings.createObjectBinding({
-                        Rectangle(-AppStyle.spacing, -gridSize, scene.width * 2, viewHeight)
-                    }, gameModel.gameState, parentProperty(), (root as Region).heightProperty(), scene.widthProperty(), scene.heightProperty())
+                        Rectangle(width - root.width, -gridSize, root.width, viewHeight)
+                    }, gameModel.gameState, parentProperty(), root.heightProperty(), root.widthProperty(), scene.widthProperty(), scene.heightProperty(), scene.onMouseEnteredProperty())
             )
         }
     }
@@ -110,7 +106,7 @@ class MississippiBoard: View() {
             logger.trace("Available Pushes: {}", pushes)
             
             state.board.forEachField { cubeCoordinates, field ->
-                // TODO overlay current and goal flag
+                // TODO overlay current indicator and goal flag
                 (state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
                     createPiece("stream").also { it.rotate = dir.angle.toDouble() }
                 } ?: createPiece(field.toString().lowercase())).also { piece ->
@@ -134,13 +130,14 @@ class MississippiBoard: View() {
                     shipPiece.addChild("${shipName}_passenger_${(96 + it).toChar()}")
                 }
                 shipPiece.rotate = ship.direction.angle.toDouble()
+                addPiece(shipPiece, ship.position)
                 addPiece(Label("S${ship.speed}" +
                                "\nM${ship.movement}"
                                        .takeIf { state.currentTeam == ship.team && humanMove.isNotEmpty() }
                                        .orEmpty()).apply {
                     styleProperty().bind(fontSizeBinding)
+                    translateY = gridSize / 10
                 }, ship.position)
-                addPiece(shipPiece, ship.position)
                 if(ship.team == state.currentTeam) {
                     currentShip = shipPiece
                     renderHumanControls()
@@ -199,6 +196,7 @@ class MississippiBoard: View() {
             val ship = gameState?.currentShip ?: return
             addPiece(VBox().apply {
                 translateX = -(AppStyle.spacing * 5)
+                translateY = gridSize / 10
                 if(ship.canTurn())
                     button("↺ A") { action { addHumanAction(Turn(ship.direction - 1)) } }
                 if(ship.canAdvance())
@@ -260,18 +258,6 @@ class MississippiBoard: View() {
         }
     }
     
-    private fun removePiece(piece: Node?, durationMultiplier: Double = 1.0, parent: Pane = grid) =
-            piece?.fade(transitionDuration.multiply(durationMultiplier), 0.0) {
-                setOnFinished {
-                    parent.children.remove(piece)
-                }
-            }
-    
-    private var lockedHighlight: Coordinates? = null
-    private var currentHighlight: Node? = null
-    private var currentHighlightCoords: Coordinates? = null
-    private var targetHighlights = ArrayList<Node>()
-    
     private fun createPiece(type: String): PieceImage =
             PieceImage(calculatedBlockSize, type)
     
@@ -286,7 +272,7 @@ class MississippiBoard: View() {
         return false
     }
     
-    private fun <T: Region> addPiece(node: T, coordinates: CubeCoordinates): T {
+    private fun <T: Node> addPiece(node: T, coordinates: CubeCoordinates): T {
         if(grid.children.contains(node))
             logger.warn("Attempting to add duplicate grid child at $coordinates: $node")
         else
@@ -297,10 +283,9 @@ class MississippiBoard: View() {
             node.anchorpaneConstraints {
                 val state = gameState ?: return@anchorpaneConstraints
                 val bounds = state.board.visiblePart.bounds
-                // TODO switch to rightAnchor
-                leftAnchor = (coordinates.x / 2.0 - bounds.first.first) * size * .774
+                leftAnchor = (coordinates.x / 2.0 - bounds.first.second) * size * .774
                 topAnchor = (coordinates.r - bounds.second.first) * size * .668
-                //println("$node at $leftAnchor,$topAnchor within $bounds")
+                println("$node at $rightAnchor,$topAnchor within $bounds")
             }
         }
         return node
