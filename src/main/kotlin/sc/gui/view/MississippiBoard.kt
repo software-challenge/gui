@@ -1,6 +1,8 @@
 package sc.gui.view
 
 import javafx.application.Platform
+import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.value.ChangeListener
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -11,6 +13,7 @@ import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
+import javafx.scene.shape.Rectangle
 import mu.KotlinLogging
 import sc.api.plugins.Coordinates
 import sc.api.plugins.CubeCoordinates
@@ -30,27 +33,51 @@ import tornadofx.*
 
 private val logger = KotlinLogging.logger { }
 
+private val Board.visiblePart
+    get() = segments.takeLast(5)
+
 class MississippiBoard: View() {
     private val gameModel: GameModel by inject()
     private val gameState: GameState?
         get() = gameModel.gameState.value as? GameState
     
+    // TODO prevent unnecessary cutoff left
+    // TODO layout when launching game
+    
+    private val viewHeight: Double
+        get() = (root.parent as Region).height.coerceAtMost(root.scene.height - AppStyle.fontSizeBig.value * 12)
     private val gridSize: Double
-        get() = gameState?.board?.rectangleSize?.let {
+        get() = gameState?.board?.visiblePart?.rectangleSize?.let {
             minOf(
-                    (root.width - AppStyle.spacing) / (it.x + 1),
-                    (root.height - AppStyle.spacing * (if(gameModel.gameOver.value && gameModel.atLatestTurn.value) 4 else 2)) / it.y
+                    root.scene.width / (it.x + 1),
+                    viewHeight / (it.y + 2) * 1.1
             ) * 1.3
         } ?: 10.0
     
-    val grid: Pane = AnchorPane().apply { this.paddingAll = AppStyle.spacing }
-    
-    override val root = vbox {
-        alignment = Pos.CENTER
-        children.add(grid)
+    private val grid: Pane = AnchorPane().apply {
+        paddingAll = 0.0
+        Platform.runLater {
+            clipProperty().bind(
+                    Bindings.createObjectBinding({
+                        Rectangle(-AppStyle.spacing, -gridSize, scene.width * 2, viewHeight)
+                    }, gameModel.gameState, parentProperty(), (root as Region).heightProperty(), scene.widthProperty(), scene.heightProperty())
+            )
+        }
     }
     
-    private val calculatedBlockSize = gameModel.gameState.doubleBinding(gameModel.gameResult, gameModel.atLatestTurn, grid.widthProperty(), grid.heightProperty()) { gridSize }
+    override val root = hbox {
+        viewOrder = 3.0
+        alignment = Pos.CENTER
+        vbox {
+            alignment = Pos.CENTER
+            paddingAll = 0.0
+            group(listOf(grid)) {
+                paddingAll = 0.0
+            }
+        }
+    }
+    
+    private val calculatedBlockSize = SimpleDoubleProperty(10.0)
     private val fontSizeBinding = calculatedBlockSize.stringBinding { "-fx-font-size: ${it?.toDouble()?.times(0.3)}" }
     
     private var originalState: GameState? = null
@@ -63,6 +90,9 @@ class MississippiBoard: View() {
             speed - movement < PluginConstants.MAX_SPEED
     
     init {
+        Platform.runLater {
+            calculatedBlockSize.bind(gameModel.gameState.doubleBinding(gameModel.gameResult, gameModel.atLatestTurn, root.scene.widthProperty(), root.scene.heightProperty()) { gridSize })
+        }
         val stateListener = ChangeListener<GameState?> { _, oldState, state ->
             if(state == null) {
                 return@ChangeListener
@@ -214,7 +244,7 @@ class MississippiBoard: View() {
     }
     
     private fun isHumanMoveIncomplete() =
-        humanMove.isEmpty() || gameState?.let { state -> state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal || state.mustPush } ?: true
+            humanMove.none { it is Advance } || gameState?.let { state -> state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal || state.mustPush } ?: true
     
     private fun confirmHumanMove() {
         if(awaitingHumanMove() && isHumanMoveIncomplete()) {
@@ -265,9 +295,12 @@ class MississippiBoard: View() {
             //logger.trace("$node at $coordinates block size: $it")
             val size = it.toDouble()
             node.anchorpaneConstraints {
-                val bounds = gameState?.board?.segments?.takeLast(4)?.bounds
-                leftAnchor = (coordinates.x / 2.0 - (bounds?.first?.first ?: -2)) * size * .774
-                topAnchor = (coordinates.r - (bounds?.second?.first ?: -2)) * size * .668
+                val state = gameState ?: return@anchorpaneConstraints
+                val bounds = state.board.visiblePart.bounds
+                // TODO switch to rightAnchor
+                leftAnchor = (coordinates.x / 2.0 - bounds.first.first) * size * .774
+                topAnchor = (coordinates.r - bounds.second.first) * size * .668
+                //println("$node at $leftAnchor,$topAnchor within $bounds")
             }
         }
         return node

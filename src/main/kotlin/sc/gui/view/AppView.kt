@@ -2,9 +2,6 @@ package sc.gui.view
 
 import javafx.application.Platform
 import javafx.scene.control.Alert
-import javafx.scene.layout.Priority
-import javafx.scene.layout.Region
-import javafx.scene.layout.StackPane
 import javafx.stage.FileChooser
 import mu.KotlinLogging
 import sc.gui.AppStyle
@@ -72,6 +69,7 @@ class AppView: View("Software-Challenge Germany") {
                 }
             }
             menu("Hilfe") {
+                viewOrder = -9.0
                 item("Bedienungsanleitung", "Shortcut+H").action {
                     alert(Alert.AlertType.INFORMATION, "Bedienungsanleitung", """
                         - Fahre über eine Figur, um ihre möglichen Züge zu sehen

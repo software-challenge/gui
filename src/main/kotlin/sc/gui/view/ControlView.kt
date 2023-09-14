@@ -59,6 +59,8 @@ class ControlView: View() {
                         it.consume()
                     }
                     setOnAction {
+                        if(gameModel.atLatestTurn.value)
+                            fire(PauseGame(true))
                         fire(StepGame(-1))
                     }
                 }
