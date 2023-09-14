@@ -100,6 +100,7 @@ class AppView: View("Software-Challenge Germany") {
             prefWidth = 1100.0
             prefHeight = 700.0
             center = AppStyle.background().apply { add(StartView::class) }
+            // DEBUG Platform.runLater { scene.addEventHandler(EventType.ROOT) { logger.trace("EVENT: {}", it) } }
         }
 
         val gameTitle = "Ostseeschach"

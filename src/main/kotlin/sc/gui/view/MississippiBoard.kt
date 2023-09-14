@@ -52,13 +52,6 @@ class MississippiBoard: View() {
     
     private val grid: Pane = AnchorPane().apply {
         paddingAll = 0.0
-        Platform.runLater {
-            clipProperty().bind(
-                    Bindings.createObjectBinding({
-                        Rectangle(width - root.width, -gridSize, root.width, viewHeight)
-                    }, gameModel.gameState, parentProperty(), root.heightProperty(), root.widthProperty(), scene.widthProperty(), scene.heightProperty(), scene.onMouseEnteredProperty())
-            )
-        }
     }
     
     override val root = hbox {
@@ -87,7 +80,15 @@ class MississippiBoard: View() {
     
     init {
         Platform.runLater {
-            calculatedBlockSize.bind(gameModel.gameState.doubleBinding(gameModel.gameResult, gameModel.atLatestTurn, root.scene.widthProperty(), root.scene.heightProperty()) { gridSize })
+            calculatedBlockSize.bind(
+                    gameModel.gameState.doubleBinding(gameModel.gameResult, gameModel.atLatestTurn, grid.parentProperty(), root.widthProperty(), root.heightProperty(), grid.widthProperty(), grid.heightProperty()) { gridSize })
+            grid.apply {
+                clipProperty().bind(
+                        Bindings.createObjectBinding({
+                            Rectangle(width - root.width, -gridSize, root.width, viewHeight)
+                        }, gameModel.gameState, widthProperty(), parentProperty(), root.widthProperty(), root.heightProperty())
+                )
+            }
         }
         val stateListener = ChangeListener<GameState?> { _, oldState, state ->
             if(state == null) {
@@ -278,14 +279,13 @@ class MississippiBoard: View() {
         else
             grid.add(node)
         calculatedBlockSize.listenImmediately {
-            //logger.trace("$node at $coordinates block size: $it")
             val size = it.toDouble()
             node.anchorpaneConstraints {
                 val state = gameState ?: return@anchorpaneConstraints
                 val bounds = state.board.visiblePart.bounds
                 leftAnchor = (coordinates.x / 2.0 - bounds.first.second) * size * .774
                 topAnchor = (coordinates.r - bounds.second.first) * size * .668
-                println("$node at $rightAnchor,$topAnchor within $bounds")
+                logger.trace { "$coordinates: $node at $leftAnchor,$topAnchor within $bounds" }
             }
         }
         return node
