@@ -5,12 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
-### 24.1.X - 2023-09-XX
-- Fix goal field display
-- Fix pixel imperfections
+### 24.1.X - 2023-10-XX
 - Highlight available Push targets with corresponding number key
 - Add speed indicator
 - Add player stats to screen corners
+
+### 24.1.2 Graphics Fixes - 2023-09-20
+- Display goal flag also on top of current
+- Fix missing pixels between current
 
 ### 24.1.1 Improve Board Layouting - 2023-09-15
 - properly cut out current section
