@@ -22,6 +22,7 @@ import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.GameModel
 import sc.plugin2024.*
+import sc.plugin2024.Field
 import sc.plugin2024.actions.Accelerate
 import sc.plugin2024.actions.Advance
 import sc.plugin2024.actions.Push
@@ -107,10 +108,9 @@ class MississippiBoard: View() {
             logger.trace("Available Pushes: {}", pushes)
             
             state.board.forEachField { cubeCoordinates, field ->
-                // TODO overlay current indicator and goal flag
                 (state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
                     createPiece("stream").also { it.rotate = dir.angle.toDouble() }
-                } ?: createPiece(field.toString().lowercase())).also { piece ->
+                } ?: createPiece((if(field == Field.GOAL) Field.WATER else field).toString().lowercase())).also { piece ->
                     if(field.isEmpty) {
                         piece.viewOrder++
                         val push = pushes.firstOrNull { state.currentShip.position + it.direction.vector == cubeCoordinates }
@@ -121,6 +121,9 @@ class MississippiBoard: View() {
                         }
                     }
                     addPiece(piece, cubeCoordinates)
+                }
+                if(field == Field.GOAL) {
+                    addPiece(createPiece(field.toString().lowercase()), cubeCoordinates)
                 }
             }
             state.ships.forEach { ship ->
@@ -222,15 +225,13 @@ class MississippiBoard: View() {
         val newState = state.clone()
         val ship = newState.currentShip
         val extraMovement = ship.maxAcc
-        val currentAdvance = humanMove.lastOrNull() is Advance && action is Advance && state.isCurrentShipOnCurrent()
+        val currentAdvance = humanMove.lastOrNull() is Advance && action is Advance && state.isCurrentShipOnCurrent() && state.board.doesFieldHaveCurrent(state.currentShip.position + state.currentShip.direction.vector * action.distance)
         if(currentAdvance)
             ship.movement++
         ship.movement += extraMovement
         action.perform(newState)?.let {
             alert(Alert.AlertType.ERROR, it.message)
         } ?: run {
-            if(currentAdvance && !newState.isCurrentShipOnCurrent())
-                ship.movement--
             ship.movement -= extraMovement
             humanMove.add(action)
             gameModel.gameState.set(newState)
