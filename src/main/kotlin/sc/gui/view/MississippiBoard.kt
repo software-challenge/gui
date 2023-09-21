@@ -8,6 +8,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Alert
 import javafx.scene.control.Label
+import javafx.scene.effect.Glow
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
@@ -115,8 +116,12 @@ class MississippiBoard: View() {
                         piece.viewOrder++
                         val push = pushes.firstOrNull { state.currentShip.position + it.direction.vector == cubeCoordinates }
                         if(push != null) {
-                            logger.debug("Registering '{}' for {}", push, piece)
-                            piece.addClass(AppStyle.gridHover) // TODO not yet working
+                            logger.debug("Registering Push '{}' for {}", push, piece)
+                            piece.effect = Glow(0.2)
+                            piece.onHover { hover ->
+                                piece.effect = Glow(if(hover) 0.5 else 0.2)
+                            }
+                            println("=== $piece, ${piece.children.joinToString()}")
                             piece.onLeftClick { addHumanAction(push) }
                         }
                     }
@@ -225,7 +230,9 @@ class MississippiBoard: View() {
         val newState = state.clone()
         val ship = newState.currentShip
         val extraMovement = ship.maxAcc
-        val currentAdvance = humanMove.lastOrNull() is Advance && action is Advance && state.isCurrentShipOnCurrent() && state.board.doesFieldHaveCurrent(state.currentShip.position + state.currentShip.direction.vector * action.distance)
+        // Continual Advance on current
+        val currentAdvance = humanMove.lastOrNull() is Advance && action is Advance &&
+                             state.isCurrentShipOnCurrent() && state.board.doesFieldHaveCurrent(state.currentShip.position + state.currentShip.direction.vector * action.distance)
         if(currentAdvance)
             ship.movement++
         ship.movement += extraMovement

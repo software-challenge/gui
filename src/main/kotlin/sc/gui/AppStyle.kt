@@ -142,13 +142,6 @@ class AppStyle: Stylesheet() {
             prefWidth = 100.percent
         }
         
-        // Game
-        gridHover {
-            backgroundColor += c("#222", 0.3)
-            and(hover) {
-                backgroundColor += c("#222", 0.5)
-            }
-        }
         Team.values().forEach { team ->
             ".${team.color}" {
                 val color = team.color

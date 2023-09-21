@@ -3,6 +3,7 @@ package sc.gui.penguins
 import javafx.geometry.Side
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundSize
+import sc.gui.AppStyle
 import sc.gui.AppStyle.Companion.background
 import tornadofx.*
 
@@ -17,6 +18,14 @@ class PenguinsStyle: Stylesheet() {
             backgroundImage += resources.url("/penguins/background.jpg").toURI()
             backgroundSize += BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)
             backgroundPosition += BackgroundPosition(Side.LEFT, .0, true, Side.TOP, -10.0, false)
+        }
+        
+        // Game
+        AppStyle.gridHover {
+            backgroundColor += c("#222", 0.3)
+            and(hover) {
+                backgroundColor += c("#222", 0.5)
+            }
         }
 
         arrayOf("fish", "ice").forEach {
