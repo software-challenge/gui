@@ -2,6 +2,7 @@ package sc.gui.view
 
 import javafx.beans.binding.StringBinding
 import javafx.geometry.Pos
+import javafx.scene.layout.Priority
 import javafx.scene.text.TextAlignment
 import sc.api.plugins.ITeam
 import sc.api.plugins.Team
@@ -66,7 +67,7 @@ class StatusView: View() {
         useMaxWidth = true
         alignment = Pos.CENTER
         label(playerLabel(Team.ONE))
-        region { useMaxWidth = true } // TODO
+        region { useMaxWidth = true; hgrow = Priority.ALWAYS  }
         vbox(alignment = Pos.CENTER) {
             addClass(AppStyle.statusLabel)
             label(StatusBinding(game)) {
@@ -75,7 +76,7 @@ class StatusView: View() {
             }
             label(ScoreBinding(game))
         }
-        region { useMaxWidth = true }
+        region { useMaxWidth = true; hgrow = Priority.ALWAYS }
         label(playerLabel(Team.TWO))
     }
     
