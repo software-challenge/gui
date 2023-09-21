@@ -4,6 +4,7 @@ import javafx.beans.binding.StringBinding
 import javafx.geometry.Pos
 import javafx.scene.text.TextAlignment
 import sc.api.plugins.ITeam
+import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.model.GameModel
 import sc.shared.GameResult
@@ -61,12 +62,29 @@ class ScoreBinding(private val game: GameModel): StringBinding() {
 class StatusView: View() {
     private val game: GameModel by inject()
     
-    override val root = vbox(alignment = Pos.CENTER) {
-        addClass(AppStyle.statusLabel)
-        label(StatusBinding(game)) {
-            textAlignment = TextAlignment.CENTER
-            isWrapText = true
+    override val root = hbox {
+        useMaxWidth = true
+        alignment = Pos.CENTER
+        label(playerLabel(Team.ONE))
+        region { useMaxWidth = true } // TODO
+        vbox(alignment = Pos.CENTER) {
+            addClass(AppStyle.statusLabel)
+            label(StatusBinding(game)) {
+                textAlignment = TextAlignment.CENTER
+                isWrapText = true
+            }
+            label(ScoreBinding(game))
         }
-        label(ScoreBinding(game))
+        region { useMaxWidth = true }
+        label(playerLabel(Team.TWO))
     }
+    
+    fun playerLabel(team: Team) =
+            game.gameState.stringBinding { state ->
+                state?.teamStats(team)?.takeUnless { it.isEmpty() }?.let { stats ->
+                    stats.joinToString("\n", "${game.playerNames[team.index]}\n") { stat ->
+                        "${stat.first}: ${stat.second}"
+                    }
+                }
+            }
 }
