@@ -6,16 +6,19 @@ See the [changelog of the backend](https://github.com/software-challenge/backend
 for details on our versioning scheme.
 
 ### 24.1.X - 2023-10-XX
-- Highlight available Push targets with corresponding number key
-- Add speed indicator
-- Add player stats to screen corners
-
-### 24.1.2 Graphics Fixes - 2023-09-20
-- Display goal flag also on top of current
+- Indicate ship speed through graphics
 - Fix missing pixels between current
 
+### 24.1.3 Edge Infos - 2023-09-21
+- Highlight available Push target fields
+- Add player stats to top screen corners
+- Bump JavaFX to 17.0.8 to fix crash on macOS
+
+### 24.1.2 Graphics Fixes - 2023-09-20
+- Display goal flag also on field with current
+
 ### 24.1.1 Improve Board Layouting - 2023-09-15
-- properly cut out current section
+- Properly cut out current section
 
 ### 24.1.0 Interface Accessibility - 2023-09-11
 - Full Mouse Control
