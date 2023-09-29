@@ -2,12 +2,14 @@ package sc.gui.controller
 
 import mu.KLogging
 import sc.gui.GameReadyEvent
-import sc.gui.events.TerminateGame
+import sc.gui.events.*
 import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.gui.model.ViewType
 import sc.gui.model.ViewType.*
-import sc.gui.view.*
+import sc.gui.view.GameCreationView
+import sc.gui.view.GameLoadingView
+import sc.gui.view.GameView
 import sc.util.toggle
 import tornadofx.*
 
@@ -52,7 +54,6 @@ class AppController: Controller() {
 
 val ViewType.view
     get() = when (this) {
-        START -> StartView::class
         GAME_CREATION -> GameCreationView::class
         GAME_LOADING -> GameLoadingView::class
         GAME -> GameView::class

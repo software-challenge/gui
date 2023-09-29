@@ -9,6 +9,7 @@ import sc.gui.controller.AppController
 import sc.gui.controller.CreateGame
 import sc.gui.controller.GameFlowController
 import sc.gui.events.*
+import sc.gui.guideMq
 import sc.gui.model.ViewType
 import sc.networking.clients.GameLoaderClient
 import sc.util.browse
@@ -71,11 +72,7 @@ class AppView: View("Software-Challenge Germany") {
             menu("Hilfe") {
                 viewOrder = -9.0
                 item("Bedienungsanleitung", "Shortcut+H").action {
-                    alert(Alert.AlertType.INFORMATION, "Bedienungsanleitung", """
-                        - Fahre über eine Figur, um ihre möglichen Züge zu sehen
-                        - Klicke eine Figur und dann das Zielfeld an, um sie zu bewegen
-                        - Durch ein erneutes Klicken auf die Figur kannst du sie wieder abwählen
-                    """.trimIndent(), title = "Hilfe")
+                    alert(Alert.AlertType.INFORMATION, "Bedienungsanleitung", guideMq, title = "Hilfe")
                 }
                 item("↗ Spielregeln", "Shortcut+S").action {
                     browseUrl("https://docs.software-challenge.de/spiele/aktuell/regeln")
@@ -99,7 +96,8 @@ class AppView: View("Software-Challenge Germany") {
         with(root) {
             prefWidth = 1100.0
             prefHeight = 700.0
-            center = AppStyle.background().apply { add(StartView::class) }
+            center = AppStyle.background().apply { add(GameCreationView::class) }
+            fire(CreateGame)
             // DEBUG Platform.runLater { scene.addEventHandler(EventType.ROOT) { logger.trace("EVENT: {}", it) } }
         }
 
@@ -108,8 +106,7 @@ class AppView: View("Software-Challenge Germany") {
         val sochaTitle = "Software-Challenge GUI $version"
         titleProperty.bind(controller.model.currentView.stringBinding {
             when(it) {
-                ViewType.START -> sochaTitle
-                ViewType.GAME_CREATION -> "Neues Spiel - $sochaTitle"
+                ViewType.GAME_CREATION -> sochaTitle
                 ViewType.GAME_LOADING -> "Starte Spiel $gameTitle - $sochaTitle"
                 ViewType.GAME -> "Spiele $gameTitle - $sochaTitle"
                 null -> throw NoWhenBranchMatchedException("Current view can't be null!")

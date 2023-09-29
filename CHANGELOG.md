@@ -8,6 +8,10 @@ for details on our versioning scheme.
 ### 24.1.X - 2023-10-XX
 - Indicate ship speed through graphics
 - Fix missing pixels between current
+- Fix double turn advances in replays
+
+### 24.1.4 Guide - 2023-09-29
+- Update instructions and merge into game creation screen
 
 ### 24.1.3 Edge Infos - 2023-09-21
 - Highlight available Push target fields

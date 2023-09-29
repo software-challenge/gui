@@ -5,10 +5,12 @@ import javafx.beans.value.ObservableValue
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.layout.Region
+import javafx.scene.text.TextAlignment
 import javafx.stage.FileChooser
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.StartGame
+import sc.gui.guideMq
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.model.TeamSettingsModel
@@ -25,6 +27,12 @@ class GameCreationView: View() {
         padding = Insets(AppStyle.spacing)
         center = form {
             alignment = Pos.CENTER
+            label("Willkommen bei der Software-Challenge!") {
+                addClass(AppStyle.heading)
+                isWrapText = true
+                textAlignment = TextAlignment.CENTER
+            }
+            label(guideMq)
             gridpane {
                 hgap = AppStyle.spacing
                 Team.values().forEach { team ->

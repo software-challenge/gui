@@ -7,7 +7,6 @@ import tornadofx.*
 import java.util.prefs.Preferences
 
 enum class ViewType {
-    START,
     GAME_CREATION,
     GAME_LOADING,
     GAME,
@@ -15,7 +14,7 @@ enum class ViewType {
 
 // TODO this shouldn't be global, only for GuiApp
 object AppModel: Component() {
-    val currentView = objectProperty(ViewType.START)
+    val currentView = objectProperty(ViewType.GAME_CREATION)
     
     val darkMode = configurableBooleanProperty("dark", true)
     val animate = configurableBooleanProperty("animate", true)
