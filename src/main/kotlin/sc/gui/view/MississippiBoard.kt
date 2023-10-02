@@ -122,7 +122,7 @@ class MississippiBoard: View() {
                             piece.onHover { hover ->
                                 piece.effect = Glow(if(hover) 0.5 else 0.2)
                             }
-                            println("=== $piece, ${piece.children.joinToString()}")
+                            piece.tooltip("Gegenspieler in Richtung ${push.direction} abdrängen (Taste ${push.direction.ordinal})")
                             piece.onLeftClick { addHumanAction(push) }
                         }
                     }
@@ -211,22 +211,45 @@ class MississippiBoard: View() {
                     val acc = (humanMove.firstOrNull() as? Accelerate)?.acc ?: 0
                     hbox {
                         if(ship.speed < 6 && acc > -1)
-                            button("+") { action { addHumanAction(Accelerate(1)) } }
+                            button("+") {
+                                tooltip("Beschleunigen (Accelerate 1)")
+                                action { addHumanAction(Accelerate(1)) }
+                            }
                         if(ship.speed > 1 && acc < 1)
-                            button("-") { action { addHumanAction(Accelerate(-1)) } }
+                            button("-") {
+                                tooltip("Bremsen (Accelerate -1)")
+                                action { addHumanAction(Accelerate(-1)) }
+                            }
                     }
                 }
-                if(ship.canTurn())
-                    button("↺ A") { action { addHumanAction(Turn(ship.direction - 1)) } }
-                if(ship.canAdvance())
-                    button("→ W") { action { addHumanAction(Advance(1)) } }
-                if(ship.canTurn())
-                    button("↻ D") { action { addHumanAction(Turn(ship.direction + 1)) } }
+                if(gameState?.mustPush != true) {
+                    if(ship.canTurn())
+                        button("↺ A") {
+                            tooltip("Gegen den Uhrzeigersinn drehen (Turn -1")
+                            action { addHumanAction(Turn(ship.direction - 1)) }
+                        }
+                    if(ship.canAdvance())
+                        button("→ W") {
+                            tooltip("Ein Feld vorwärts bewegen (Advance 1)")
+                            action { addHumanAction(Advance(1)) }
+                        }
+                    if(ship.canTurn())
+                        button("↻ D") {
+                            tooltip("Im Uhrzeigersinn drehen (Turn 1)")
+                            action { addHumanAction(Turn(ship.direction + 1)) }
+                        }
+                }
                 hbox {
                     if(!isHumanMoveIncomplete())
-                        button("✓ S") { action { confirmHumanMove() } }
+                        button("✓ S") {
+                            tooltip("Zug bestätigen")
+                            action { confirmHumanMove() }
+                        }
                     if(humanMove.isNotEmpty())
-                        button("╳ C") { action { cancelHumanMove() } }
+                        button("╳ C") {
+                            tooltip("Zug zurücksetzen")
+                            action { cancelHumanMove() }
+                        }
                 }
             }, ship.position)
         }
