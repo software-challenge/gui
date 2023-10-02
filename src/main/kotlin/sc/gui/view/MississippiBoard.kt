@@ -111,7 +111,8 @@ class MississippiBoard: View() {
             state.board.forEachField { cubeCoordinates, field ->
                 (state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
                     createPiece("stream").also { it.rotate = dir.angle.toDouble() }
-                } ?: createPiece((if(field == Field.GOAL) Field.WATER else field).toString().lowercase())).also { piece ->
+                } ?: createPiece((if(field == Field.GOAL) Field.WATER else field)
+                        .toString().lowercase())).also { piece ->
                     if(field.isEmpty) {
                         piece.viewOrder++
                         val push = pushes.firstOrNull { state.currentShip.position + it.direction.vector == cubeCoordinates }
@@ -206,16 +207,27 @@ class MississippiBoard: View() {
             addPiece(VBox().apply {
                 translateX = -(AppStyle.spacing * 5)
                 translateY = gridSize / 10
+                if(humanMove.all { it is Accelerate }) {
+                    val acc = (humanMove.firstOrNull() as? Accelerate)?.acc ?: 0
+                    hbox {
+                        if(ship.speed < 6 && acc > -1)
+                            button("+") { action { addHumanAction(Accelerate(1)) } }
+                        if(ship.speed > 1 && acc < 1)
+                            button("-") { action { addHumanAction(Accelerate(-1)) } }
+                    }
+                }
                 if(ship.canTurn())
                     button("↺ A") { action { addHumanAction(Turn(ship.direction - 1)) } }
                 if(ship.canAdvance())
                     button("→ W") { action { addHumanAction(Advance(1)) } }
                 if(ship.canTurn())
                     button("↻ D") { action { addHumanAction(Turn(ship.direction + 1)) } }
-                if(!isHumanMoveIncomplete())
-                    button("✓ S") { action { confirmHumanMove() } }
-                if(humanMove.isNotEmpty())
-                    button("╳ C") { action { cancelHumanMove() } }
+                hbox {
+                    if(!isHumanMoveIncomplete())
+                        button("✓ S") { action { confirmHumanMove() } }
+                    if(humanMove.isNotEmpty())
+                        button("╳ C") { action { cancelHumanMove() } }
+                }
             }, ship.position)
         }
     }
@@ -229,7 +241,7 @@ class MississippiBoard: View() {
         
         val newState = state.clone()
         val ship = newState.currentShip
-        val extraMovement = ship.maxAcc
+        val extraMovement = ship.maxAcc.takeUnless { humanMove.firstOrNull() is Accelerate } ?: 0
         // Continual Advance on current
         val currentAdvance = humanMove.lastOrNull() is Advance && action is Advance &&
                              state.isCurrentShipOnCurrent() && state.board.doesFieldHaveCurrent(state.currentShip.position + state.currentShip.direction.vector * action.distance)
@@ -240,7 +252,10 @@ class MississippiBoard: View() {
             alert(Alert.AlertType.ERROR, it.message)
         } ?: run {
             ship.movement -= extraMovement
-            humanMove.add(action)
+            if(action is Accelerate && humanMove.isNotEmpty())
+                humanMove[0] = humanMove[0] as Accelerate + action
+            else
+                humanMove.add(action)
             gameModel.gameState.set(newState)
         }
     }
@@ -251,7 +266,11 @@ class MississippiBoard: View() {
     }
     
     private fun isHumanMoveIncomplete() =
-            humanMove.none { it is Advance } || gameState?.let { state -> state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal || state.mustPush } ?: true
+            humanMove.none { it is Advance } || gameState?.let { state ->
+                state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal ||
+                humanMove.first() is Accelerate && state.currentShip.movement != 0 ||
+                state.mustPush
+            } ?: true
     
     private fun confirmHumanMove() {
         if(awaitingHumanMove() && isHumanMoveIncomplete()) {

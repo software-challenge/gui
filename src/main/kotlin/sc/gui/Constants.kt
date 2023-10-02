@@ -18,6 +18,7 @@ val guideMq = """
         - Das Label "S" an den Schiffen ist die aktuelle Geschwindigkeit
         - Das Label "M" am aktuellen Schiff sind die offenen Bewegungspunkte
           (Bei Bestätigung des Zuges wird aus diesen automatisch die nötige Beschleunigungsaktion berechnet)
+        - Optional kann man am Beginn des Zuges manuell über die Knöpfe + und - beschleunigen.
         - Bewegungen menschlicher Spieler können über die Knöpfe oder die korrespondierenden Buchstabentasten erfolgen
         - Mit der Taste "S" wird der aktuelle Zug abgeschickt, mit "C" zurückgesetzt
         - Kohle wird automatisch abgezogen anhand der Regeln

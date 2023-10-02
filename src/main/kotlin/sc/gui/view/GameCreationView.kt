@@ -26,6 +26,9 @@ class GameCreationView: View() {
     
     override val root = borderpane {
         padding = Insets(AppStyle.spacing)
+        top =  hbox(AppStyle.spacing, Pos.CENTER_RIGHT) {
+            button("Replay laden").action { selectReplay() }
+        }
         center = form {
             alignment = Pos.CENTER
             label("Willkommen bei der Software-Challenge!") {
@@ -55,9 +58,6 @@ class GameCreationView: View() {
                 }
             }
         }
-        top =  hbox(AppStyle.spacing, Pos.CENTER_RIGHT) {
-            button("Replay laden").action { selectReplay() }
-        }
         bottom = hbox(AppStyle.spacing, Pos.CENTER_RIGHT) {
             button("Erstellen") {
                 action {
@@ -65,7 +65,7 @@ class GameCreationView: View() {
                     fire(StartGame(playerSettingsModels.map { it.item }))
                 }
                 enableWhen(Bindings.and(playerSettingsModels[0].valid, playerSettingsModels[1].valid))
-            }
+            }.requestFocus()
         }
     }
 }
