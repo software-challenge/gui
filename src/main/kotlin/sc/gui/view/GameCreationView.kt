@@ -10,6 +10,7 @@ import javafx.stage.FileChooser
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.StartGame
+import sc.gui.controller.selectReplay
 import sc.gui.guideMq
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
@@ -53,6 +54,9 @@ class GameCreationView: View() {
                     constraintsForColumn(team.index).percentWidth = 50.0
                 }
             }
+        }
+        top =  hbox(AppStyle.spacing, Pos.CENTER_RIGHT) {
+            button("Replay laden").action { selectReplay() }
         }
         bottom = hbox(AppStyle.spacing, Pos.CENTER_RIGHT) {
             button("Erstellen") {

@@ -2,16 +2,15 @@ package sc.gui.view
 
 import javafx.application.Platform
 import javafx.scene.control.Alert
-import javafx.stage.FileChooser
 import mu.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.CreateGame
 import sc.gui.controller.GameFlowController
+import sc.gui.controller.selectReplay
 import sc.gui.events.*
 import sc.gui.guideMq
 import sc.gui.model.ViewType
-import sc.networking.clients.GameLoaderClient
 import sc.util.browse
 import sc.util.browseUrl
 import sc.util.listenImmediately
@@ -52,17 +51,9 @@ class AppView: View("Software-Challenge Germany") {
                 }
                 separator()
                 item("Replay laden", "Shortcut+R").action {
-                    chooseFile("Replay laden",
-                        arrayOf(FileChooser.ExtensionFilter("XML", "*.xml", "*.xml.gz")),
-                        File("replays").takeIf { it.exists() }
-                    ).forEach {
+                    selectReplay {
                         if(controller.model.currentView.get() == ViewType.GAME)
                             fire(TerminateGame())
-                        try {
-                            gameFlowController.loadReplay(GameLoaderClient(it))
-                        } catch(e: Exception) {
-                            warning("Replay laden fehlgeschlagen", "Das Replay $it konnte nicht geladen werden:\n" + e.stackTraceToString())
-                        }
                     }
                 }
                 item("Logs öffnen", "Shortcut+L").action {

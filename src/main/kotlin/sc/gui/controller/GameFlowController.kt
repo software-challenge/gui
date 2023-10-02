@@ -3,9 +3,11 @@ package sc.gui.controller
 import javafx.animation.Animation
 import javafx.animation.KeyFrame
 import javafx.animation.Timeline
+import javafx.stage.FileChooser
 import javafx.util.Duration
 import mu.KotlinLogging
 import sc.api.plugins.IGameState
+import sc.framework.HelperMethods
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.NewGameState
@@ -15,6 +17,21 @@ import sc.networking.clients.GameLoaderClient
 import sc.networking.clients.IGameController
 import tornadofx.*
 import java.io.IOException
+
+fun View.selectReplay(onConfirm: () -> Unit = {}) {
+    chooseFile("Replay laden",
+            arrayOf(FileChooser.ExtensionFilter("XML", "*.xml", "*.xml.gz")),
+            HelperMethods.replayFolder.takeIf { it.exists() },
+            mode = FileChooserMode.Single,
+    ).forEach {
+        onConfirm()
+        try {
+            find(GameFlowController::class).loadReplay(GameLoaderClient(it))
+        } catch(e: Exception) {
+            warning("Replay laden fehlgeschlagen", "Das Replay $it konnte nicht geladen werden:\n" + e.stackTraceToString())
+        }
+    }
+}
 
 class GameFlowController: Controller() {
     private val logger = KotlinLogging.logger {}
