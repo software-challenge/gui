@@ -335,7 +335,7 @@ class MississippiBoard: View() {
                 val bounds = state.board.visiblePart.bounds
                 leftAnchor = (coordinates.x / 2.0 - bounds.first.second) * size * .774
                 topAnchor = (coordinates.r - bounds.second.first) * size * .668
-                logger.trace { "$coordinates: $node at $leftAnchor,$topAnchor within $bounds" }
+                //logger.trace { "$coordinates: $node at $leftAnchor,$topAnchor within $bounds" }
             }
         }
         return node

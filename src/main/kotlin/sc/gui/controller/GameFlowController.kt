@@ -63,6 +63,7 @@ class GameFlowController: Controller() {
             }
         }
         subscribe<StepGame> { event ->
+            logger.debug { "Received $event" }
             val turn = gameModel.currentTurn.value + event.steps
             val state: IGameState? =
                     if(event.steps > 0)
