@@ -9,9 +9,13 @@ for details on our versioning scheme.
 - Indicate ship speed through graphics
 - Fix missing pixels between current
 
-### 24.1.4 Guidance - 2023-10
+### 24.1.5 Proper Guidance - 2023-10-03
+- Add tooltips to all buttons
+- Fix player statistics (used to display current player in both)
+- Fix regression: Turn skip buttons advancing by 2
+
+### 24.1.4 Guidance - 2023-10-02
 - Update instructions and merge into game creation screen
-- Fix regression: double turn advances in replays
 
 ### 24.1.3 Edge Infos - 2023-09-21
 - Highlight available Push target fields
