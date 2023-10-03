@@ -11,7 +11,6 @@ import sc.gui.AppStyle
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.events.*
-import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.gui.view.ControlView.GameControlState.*
 import sc.util.binding
@@ -52,6 +51,7 @@ class ControlView: View() {
                 val prev = button {
                     disableWhen(gameModel.currentTurn.isEqualTo(0))
                     text = "◀" //"⏮"
+                    tooltip("Vorheriger Zug (Shift -10, Strg zum Anfang)")
                     setOnMouseClicked {
                         if(it.modifierMultiplicator == 1)
                             return@setOnMouseClicked
@@ -87,6 +87,7 @@ class ControlView: View() {
                             }
                     )
                     text = "▶" //"⏭"
+                    tooltip("Nächster Zug (Shift +10, Strg zum Ende)")
                     setOnMouseClicked {
                         if(it.modifierMultiplicator == 1)
                             return@setOnMouseClicked
@@ -107,6 +108,7 @@ class ControlView: View() {
                         this.scaleX = 0.1
                     }
                     this.hboxConstraints { this.hGrow = Priority.NEVER }
+                    tooltip("Abspielgeschwindigkeit")
                 }
                 spinner(
                         min = 0.0,
@@ -117,10 +119,12 @@ class ControlView: View() {
                         property = gameModel.stepSpeed,
                         enableScroll = true,
                 ) {
+                    tooltip("Abspielgeschwindigkeit")
                     // TODO unfocus on normal character typed
                     prefWidth = AppStyle.fontSizeRegular.value * 6
                 }
-                checkbox("Animationen", AppModel.animate)
+                // TODO no animations for mq yet
+                //  checkbox("Animationen", AppModel.animate)
             }
     
     init {
