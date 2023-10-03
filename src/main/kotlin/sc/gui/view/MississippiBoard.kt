@@ -158,7 +158,7 @@ class MississippiBoard: View() {
             @Suppress("UNCHECKED_CAST")
             gameModel.gameState.addListener(stateListener as ChangeListener<in IGameState?>)
             stateListener.changed(null, null, gameModel.gameState.value)
-            gameModel.isHumanTurn.addListener { _ -> renderHumanControls() }
+            gameModel.isHumanTurn.addListener { _ -> Platform.runLater { renderHumanControls() } }
             
             root.scene.setOnKeyPressed { keyEvent ->
                 val state = gameState ?: return@setOnKeyPressed
