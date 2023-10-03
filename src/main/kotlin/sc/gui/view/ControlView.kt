@@ -53,6 +53,8 @@ class ControlView: View() {
                     disableWhen(gameModel.currentTurn.isEqualTo(0))
                     text = "◀" //"⏮"
                     setOnMouseClicked {
+                        if(it.modifierMultiplicator == 1)
+                            return@setOnMouseClicked
                         if(gameModel.atLatestTurn.value)
                             fire(PauseGame(true))
                         fire(StepGame(-1 * it.modifierMultiplicator))
@@ -62,6 +64,7 @@ class ControlView: View() {
                         if(gameModel.atLatestTurn.value)
                             fire(PauseGame(true))
                         fire(StepGame(-1))
+                        it.consume()
                     }
                 }
                 label {
@@ -85,12 +88,16 @@ class ControlView: View() {
                     )
                     text = "▶" //"⏭"
                     setOnMouseClicked {
+                        if(it.modifierMultiplicator == 1)
+                            return@setOnMouseClicked
                         fire(StepGame(it.modifierMultiplicator))
                         if(gameControlState.value == START) gameControlState.value = PAUSED
-                        //it.consume()
+                        it.consume()
                     }
                     setOnAction {
                         fire(StepGame(1))
+                        if(gameControlState.value == START) gameControlState.value = PAUSED
+                        it.consume()
                     }
                 }
                 group {
