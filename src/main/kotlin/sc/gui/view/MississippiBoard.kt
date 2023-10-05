@@ -43,11 +43,11 @@ class MississippiBoard: View() {
         get() = gameModel.gameState.value as? GameState
     
     private val viewHeight: Double
-        get() = (root.parent as Region).height.coerceAtMost(root.scene.height - AppStyle.fontSizeBig.value * 12)
+        get() = (root.parent as? Region ?: root).height.coerceAtMost(root.scene?.height?.minus(AppStyle.fontSizeBig.value * 12) ?: Double.MAX_VALUE)
     private val gridSize: Double
         get() = gameState?.board?.visiblePart?.rectangleSize?.let {
             minOf(
-                    root.scene.width / (it.x + 1),
+                    root.scene?.width?.div(it.x + 1) ?: 64.0,
                     viewHeight / (it.y + 2) * 1.1
             ) * 1.3
         } ?: 100.0
