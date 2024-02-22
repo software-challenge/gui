@@ -1,6 +1,10 @@
 package sc.gui
 
 import sc.server.network.NewClientListener
+import java.util.Locale
+import java.util.ResourceBundle
+
+val strings: ResourceBundle = ResourceBundle.getBundle("strings", Locale("de", "DE"))
 
 const val serverAddress = "localhost"
 
@@ -14,7 +18,7 @@ val guide = """
     """.trimIndent()
 
 val guideMq = """
-        Zur Bedienung von Mississippi Queen:
+        Bedienung von Mississippi Queen:
         - Das Label "S" an den Schiffen ist die aktuelle Geschwindigkeit
         - Das Label "M" am aktuellen Schiff sind die offenen Bewegungspunkte
           (Bei Bestätigung des Zuges wird aus diesen automatisch die nötige Beschleunigungsaktion berechnet)

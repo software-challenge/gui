@@ -8,6 +8,7 @@ import sc.api.plugins.ITeam
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.model.GameModel
+import sc.gui.strings
 import sc.shared.GameResult
 import sc.shared.ScoreCause
 import tornadofx.*
@@ -83,7 +84,7 @@ class StatusView: View() {
     fun playerLabel(team: Team) =
             game.gameState.stringBinding { state ->
                 state?.teamStats(team)?.takeUnless { it.isEmpty() }?.let { stats ->
-                    stats.joinToString("\n", "${game.playerNames[team.index]}\n") { stat ->
+                    stats.joinToString("\n", "${game.playerNames[team.index]} (${strings["color.${team.color}"]})\n") { stat ->
                         "${stat.first}: ${stat.second}"
                     }
                 }
