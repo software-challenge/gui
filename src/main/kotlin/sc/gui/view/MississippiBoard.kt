@@ -34,18 +34,24 @@ import tornadofx.*
 
 private val logger = KotlinLogging.logger { }
 
-private val Board.visiblePart
-    get() = segments.takeLast(5)
-
 class MississippiBoard: View() {
     private val gameModel: GameModel by inject()
     private val gameState: GameState?
         get() = gameModel.gameState.value as? GameState
     
+    private fun GameState.visibleBoard(): List<Segment> =
+            let { state ->
+                state.board.segments.slice(
+                        state.ships.map { state.board.segmentIndex(it.position) }.sorted()
+                                .let { IntRange((it.first() - 1).coerceAtLeast(0), state.board.segments.lastIndex) }
+                )
+            }
+    
     private val viewHeight: Double
-        get() = (root.parent as? Region ?: root).height.coerceAtMost(root.scene?.height?.minus(AppStyle.fontSizeBig.value * 12) ?: Double.MAX_VALUE)
+        get() = (root.parent as? Region ?: root).height.coerceAtMost(
+                root.scene?.height?.minus(AppStyle.fontSizeBig.value * 12) ?: Double.MAX_VALUE)
     private val gridSize: Double
-        get() = gameState?.board?.visiblePart?.rectangleSize?.let {
+        get() = gameState?.visibleBoard()?.rectangleSize?.let {
             minOf(
                     root.scene?.width?.div(it.x + 1) ?: 64.0,
                     viewHeight / (it.y + 2) * 1.1
@@ -141,13 +147,15 @@ class MississippiBoard: View() {
                 }
                 shipPiece.rotate = ship.direction.angle.toDouble()
                 addPiece(shipPiece, ship.position)
-                addPiece(Label("S${ship.speed}" +
-                               "\nM${ship.movement}"
-                                       .takeIf { state.currentTeam == ship.team && humanMove.isNotEmpty() }
-                                       .orEmpty()).apply {
-                    styleProperty().bind(fontSizeBinding)
-                    translateY = gridSize / 10
-                }, ship.position)
+                addPiece(
+                        Label("S${ship.speed}" +
+                              "\nM${ship.movement}"
+                                      .takeIf { state.currentTeam == ship.team && humanMove.isNotEmpty() }
+                                      .orEmpty()
+                        ).apply {
+                            styleProperty().bind(fontSizeBinding)
+                            translateY = gridSize / 10
+                        }, ship.position)
                 if(ship.team == state.currentTeam) {
                     currentShip = shipPiece
                     renderHumanControls()
@@ -332,7 +340,7 @@ class MississippiBoard: View() {
             val size = it.toDouble()
             node.anchorpaneConstraints {
                 val state = gameState ?: return@anchorpaneConstraints
-                val bounds = state.board.visiblePart.bounds
+                val bounds = state.visibleBoard().bounds
                 leftAnchor = (coordinates.x / 2.0 - bounds.first.second) * size * .774
                 topAnchor = (coordinates.r - bounds.second.first) * size * .668
                 //logger.trace { "$coordinates: $node at $leftAnchor,$topAnchor within $bounds" }
