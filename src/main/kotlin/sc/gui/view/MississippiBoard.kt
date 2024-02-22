@@ -146,6 +146,8 @@ class MississippiBoard: View() {
                     shipPiece.addChild("${shipName}_passenger_${(96 + it).toChar()}")
                 }
                 shipPiece.rotate = ship.direction.angle.toDouble()
+                if(state.currentTeam == ship.team)
+                    shipPiece.effect = Glow(0.3)
                 addPiece(shipPiece, ship.position)
                 addPiece(
                         Label("S${ship.speed}" +
