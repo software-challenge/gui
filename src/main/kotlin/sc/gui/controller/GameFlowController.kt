@@ -19,7 +19,8 @@ import tornadofx.*
 import java.io.IOException
 
 fun View.selectReplay(onConfirm: () -> Unit = {}) {
-    chooseFile("Replay laden",
+    chooseFile(
+            "Replay laden",
             arrayOf(FileChooser.ExtensionFilter("XML", "*.xml", "*.xml.gz")),
             HelperMethods.replayFolder.takeIf { it.exists() },
             mode = FileChooserMode.Single,
@@ -95,7 +96,17 @@ class GameFlowController: Controller() {
             controller = null
         }
         subscribe<NewGameState> { event ->
-            history.add(event.gameState)
+            val state = event.gameState
+            history.add(state)
+            logger.debug("New state: {}", state)
+            gameModel.run {
+                if(stepController || gameState.value == null || gameResult.value != null) {
+                    gameResult.set(null)
+                    gameState.set(state)
+                } else {
+                    updateAvailableTurns(state.turn)
+                }
+            }
         }
     }
     

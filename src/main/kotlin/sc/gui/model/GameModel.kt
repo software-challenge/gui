@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 import sc.api.plugins.IGameState
 import sc.api.plugins.Team
 import sc.gui.GameOverEvent
-import sc.gui.NewGameState
 import sc.gui.controller.CreateGame
 import sc.gui.controller.HumanMoveAction
 import sc.gui.controller.HumanMoveRequest
@@ -33,11 +32,16 @@ class GameModel: ViewModel() {
     
     val isHumanTurn = booleanProperty(false)
     
-    val availableTurns = intProperty(0).apply {
-        currentTurn.addListener { _, _, turn ->
-            set(max(turn.toInt(), get()))
-        }
+    val availableTurns =
+            intProperty(0).apply {
+                currentTurn.addListener { _, _, turn ->
+                    updateAvailableTurns(turn.toInt())
+                }
+            }
+    fun updateAvailableTurns(turn: Int) {
+        availableTurns.set(max(turn, availableTurns.get()))
     }
+    
     val atLatestTurn =
             arrayOf<ObservableValue<Number>>(currentTurn, availableTurns)
                     .booleanBinding { (cur, av) -> cur == av }
@@ -48,12 +52,6 @@ class GameModel: ViewModel() {
     val gameOver = gameResult.booleanBinding { it != null }
     
     init {
-        subscribe<NewGameState> { event ->
-            val state = event.gameState
-            gameResult.set(null)
-            logger.debug("New state: {}", state)
-            gameState.set(state)
-        }
         subscribe<HumanMoveRequest> {
             isHumanTurn.set(true)
         }

@@ -139,7 +139,7 @@ class ControlView: View() {
             }
         }
         gameModel.isHumanTurn.onChange {
-            if(it && gameControlState.value != PAUSED) {
+            if(it) {
                 gameControlState.value = PLAYING
                 gameControlState.value = null
             }
