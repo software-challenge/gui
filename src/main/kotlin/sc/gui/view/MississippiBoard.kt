@@ -8,12 +8,14 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Alert
 import javafx.scene.control.Label
+import javafx.scene.effect.DropShadow
 import javafx.scene.effect.Glow
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 import mu.KotlinLogging
 import sc.api.plugins.CubeCoordinates
@@ -150,11 +152,12 @@ class MississippiBoard: View() {
                     shipPiece.effect = Glow(0.4)
                 addPiece(shipPiece, ship.position)
                 addPiece(
-                        Label("⚙${if(state.currentTeam == ship.team && humanMove.isNotEmpty()) "${ship.movement}/" else "" }${ship.speed}"
-                        ).apply {
-                            styleProperty().bind(fontSizeBinding)
-                            translateY = gridSize / 10
-                        }, ship.position)
+                        Label("⚙${if(state.currentTeam == ship.team && humanMove.isNotEmpty()) "${ship.movement}/" else ""}${ship.speed}")
+                                .apply {
+                                    styleProperty().bind(fontSizeBinding)
+                                    this.effect = DropShadow(AppStyle.spacing, Color.BLACK) // TODO not working somehow
+                                    translateY = gridSize / 10
+                                }, ship.position)
                 if(ship.team == state.currentTeam) {
                     currentShip = shipPiece
                     renderHumanControls()
@@ -239,6 +242,7 @@ class MississippiBoard: View() {
                         button("→ W") {
                             tooltip("Ein Feld vorwärts bewegen (Advance 1)")
                             action { addHumanAction(Advance(1)) }
+                            runLater { this.requestFocus() }
                         }
                     if(ship.canTurn())
                         button("↻ D") {
