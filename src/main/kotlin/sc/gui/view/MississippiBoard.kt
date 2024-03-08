@@ -147,13 +147,10 @@ class MississippiBoard: View() {
                 }
                 shipPiece.rotate = ship.direction.angle.toDouble()
                 if(state.currentTeam == ship.team)
-                    shipPiece.effect = Glow(0.3)
+                    shipPiece.effect = Glow(0.4)
                 addPiece(shipPiece, ship.position)
                 addPiece(
-                        Label("S${ship.speed}" +
-                              "\nM${ship.movement}"
-                                      .takeIf { state.currentTeam == ship.team && humanMove.isNotEmpty() }
-                                      .orEmpty()
+                        Label("⚙${if(state.currentTeam == ship.team && humanMove.isNotEmpty()) "${ship.movement}/" else "" }${ship.speed}"
                         ).apply {
                             styleProperty().bind(fontSizeBinding)
                             translateY = gridSize / 10
