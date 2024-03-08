@@ -136,13 +136,14 @@ class ControlView: View() {
                 event.paused -> PAUSED
                 else -> PLAYING
             }
-            if(!event.paused && gameModel.isHumanTurn.value && gameModel.atLatestTurn.value)
-                gameControlState.value = null // No pausing when human move is imminent
         }
-        arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.gameOver).listen { (latestTurn, end) ->
+        arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.gameOver, gameModel.isHumanTurn).listen { (latestTurn, end, human) ->
             when {
                 latestTurn && end -> gameControlState.value = FINISHED
-                //latestTurn && gameModel.isHumanTurn.value -> gameControlState.value = null
+                latestTurn && human -> {
+                    gameControlState.value = PLAYING // To move on from "Start" text
+                    gameControlState.value = null // No pausing when human move is imminent
+                }
             }
         }
     }
