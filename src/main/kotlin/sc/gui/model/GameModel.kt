@@ -46,14 +46,15 @@ class GameModel: ViewModel() {
             arrayOf<ObservableValue<Number>>(currentTurn, availableTurns)
                     .booleanBinding { (cur, av) -> cur == av }
     
-    val gameStarted =
-            booleanBinding(availableTurns, isHumanTurn)
-            { value > 0 || isHumanTurn.value }
     val gameOver = gameResult.booleanBinding { it != null }
+    val gameStarted =
+            booleanBinding(availableTurns, isHumanTurn, gameOver)
+            { value > 0 || isHumanTurn.value || gameOver.value }
     
     init {
         subscribe<HumanMoveRequest> {
             isHumanTurn.set(true)
+            fire(PauseGame(false))
         }
         subscribe<HumanMoveAction> {
             isHumanTurn.set(false)

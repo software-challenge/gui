@@ -41,7 +41,7 @@ class ControlView: View() {
                     gameControlState.listenImmediately { controlState ->
                         logger.debug { "GameControlState $controlState" }
                         isDisable = controlState == null
-                        controlState?.let { text = it.text }
+                        controlState?.let { this.text = it.text }
                     }
                     action {
                         isDisable = true
@@ -134,18 +134,16 @@ class ControlView: View() {
         subscribe<GamePausedEvent> { event ->
             gameControlState.value = when {
                 event.paused -> PAUSED
-                gameModel.isHumanTurn.value -> null
                 else -> PLAYING
             }
-        }
-        gameModel.isHumanTurn.onChange {
-            if(it) {
-                gameControlState.value = PLAYING
-                gameControlState.value = null
-            }
+            if(!event.paused && gameModel.isHumanTurn.value && gameModel.atLatestTurn.value)
+                gameControlState.value = null // No pausing when human move is imminent
         }
         arrayOf<ObservableValue<Boolean>>(gameModel.atLatestTurn, gameModel.gameOver).listen { (latestTurn, end) ->
-            if(latestTurn && end) gameControlState.value = FINISHED
+            when {
+                latestTurn && end -> gameControlState.value = FINISHED
+                //latestTurn && gameModel.isHumanTurn.value -> gameControlState.value = null
+            }
         }
     }
     

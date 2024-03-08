@@ -37,6 +37,7 @@ class StatusBinding(private val game: GameModel): StringBinding() {
     override fun computeValue(): String =
             if(game.gameStarted.value && game.atLatestTurn.value)
                 game.gameResult.get()?.let { gameResult ->
+                    // FIXME Encoding issues
                     """
                     ${winner(gameResult)}
                     ${irregularities(gameResult).orEmpty()}
@@ -58,7 +59,7 @@ class ScoreBinding(private val game: GameModel): StringBinding() {
             if(game.gameStarted.value)
                 "Runde ${game.currentRound.get()} - " +
                 game.teamScores.value?.joinToString(" : ") { it?.first().toString() }
-            else "Drücke auf Start"
+            else "Drücke auf Start".takeUnless { game.gameOver.value && game.atLatestTurn.value }.orEmpty()
 }
 
 class StatusView: View() {
