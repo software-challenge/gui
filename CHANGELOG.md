@@ -5,9 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
-### 24.1.X - 2023-10-XX
+### 24.2.1 - 2024-05
 - Indicate ship speed through graphics
+
+### 24.2.0 - 2024-05-12
+- Standardised game result messages from backend
+- Better gameplay button focus
+- Better handling of game speed
+
+### 24.1.6 - 2024-02
 - Fix missing pixels between current
+- Expanded Interface Indicators
 
 ### 24.1.5 Proper Guidance - 2023-10-03
 - Add tooltips to all buttons
