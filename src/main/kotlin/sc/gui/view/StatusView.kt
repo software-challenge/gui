@@ -9,8 +9,7 @@ import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.model.GameModel
 import sc.gui.strings
-import sc.shared.GameResult
-import sc.shared.ScoreCause
+import sc.shared.WinCondition
 import tornadofx.*
 
 class StatusBinding(private val game: GameModel): StringBinding() {
@@ -18,30 +17,12 @@ class StatusBinding(private val game: GameModel): StringBinding() {
         bind(game.gameStarted, game.currentTeam, game.gameResult, game.playerNames, game.atLatestTurn)
     }
     
-    fun winner(gameResult: GameResult): String =
-            gameResult.winner?.let { "${it.displayName} hat gewonnen!" }
-            ?: "Unentschieden!"
-    
-    fun irregularities(gameResult: GameResult): String? =
-            gameResult.scores.values.firstNotNullOfOrNull { score ->
-                when(score.cause) {
-                    ScoreCause.LEFT -> "Grund: Vorzeitiges Verlassen des Spiels"
-                    ScoreCause.RULE_VIOLATION -> "Grund: Regelverletzung"
-                    ScoreCause.SOFT_TIMEOUT -> "Grund: Überschreitung des Zeitlimits"
-                    ScoreCause.HARD_TIMEOUT -> "Grund: Keine Antwort auf Zuganfrage"
-                    ScoreCause.UNKNOWN -> "Grund: Kommunikationsfehler"
-                    else -> null
-                }
-            }
-    
     override fun computeValue(): String =
             if(game.gameStarted.value && game.atLatestTurn.value)
                 game.gameResult.get()?.let { gameResult ->
-                    // FIXME Encoding issues
                     """
-                    ${winner(gameResult)}
-                    ${irregularities(gameResult).orEmpty()}
-                    ${gameResult.scores.values.joinToString("") { it.reason }}
+                    ${gameResult.win?.winner?.let { "${it.displayName} hat gewonnen!" } ?: "Unentschieden"}
+                    ${gameResult.win?.reason?.message.orEmpty()}
                     """.trimIndent().trim('\n')
                 } ?: "${game.currentTeam.value.displayName} ist dran"
             else game.playerNames.joinToString(" vs ")
