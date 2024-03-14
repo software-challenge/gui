@@ -8,6 +8,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Alert
 import javafx.scene.control.Label
+import javafx.scene.effect.ColorAdjust
 import javafx.scene.effect.DropShadow
 import javafx.scene.effect.Glow
 import javafx.scene.input.KeyCode
@@ -148,8 +149,10 @@ class MississippiBoard: View() {
                     shipPiece.addChild("${shipName}_passenger_${(96 + it).toChar()}")
                 }
                 shipPiece.rotate = ship.direction.angle.toDouble()
-                if(state.currentTeam == ship.team)
+                if(state.currentTeam == ship.team && !state.isOver)
                     shipPiece.effect = Glow(0.4)
+                if(ship.stuck)
+                    shipPiece.effect = ColorAdjust().apply { saturation = -0.8 } //SepiaTone(1.0)
                 addPiece(shipPiece, ship.position)
                 addPiece(
                         Label("⚙${if(state.currentTeam == ship.team && humanMove.isNotEmpty()) "${ship.movement}/" else ""}${ship.speed}")
