@@ -5,8 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
-### 24.2.2 - 2024-03
+
+### 24.2.3 - 2024-03
 - Indicate ship speed through graphics
+
+### 24.2.2 Detailed winner explanation and stuck ship highlighting - 2024-03-14
 
 ### 24.2.1 Backend: Fix incorrect winners - 2024-04-13
 
