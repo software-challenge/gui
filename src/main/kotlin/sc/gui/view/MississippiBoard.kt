@@ -118,10 +118,7 @@ class MississippiBoard: View() {
             logger.trace("Available Pushes: {}", pushes)
             
             state.board.forEachField { cubeCoordinates, field ->
-                (state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
-                    createPiece("stream").also { it.rotate = dir.angle.toDouble() }
-                } ?: createPiece((if(field == Field.GOAL) Field.WATER else field)
-                        .toString().lowercase())).also { piece ->
+                (createPiece((if(field == Field.GOAL) Field.WATER else field).toString().lowercase())).also { piece ->
                     if(field.isEmpty) {
                         piece.viewOrder++
                         val push = pushes.firstOrNull { state.currentShip.position + it.direction.vector == cubeCoordinates }
@@ -137,6 +134,9 @@ class MississippiBoard: View() {
                     }
                     addPiece(piece, cubeCoordinates)
                 }
+                state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
+                    addPiece(createPiece("stream").also { it.rotate = dir.angle.toDouble() }, cubeCoordinates)
+                }
                 if(field == Field.GOAL) {
                     addPiece(createPiece(field.toString().lowercase()), cubeCoordinates)
                 }
@@ -148,6 +148,19 @@ class MississippiBoard: View() {
                 (1..ship.passengers).forEach {
                     shipPiece.addChild("${shipName}_passenger_${(96 + it).toChar()}")
                 }
+                
+                var speed: String? = null
+                if(ship.speed > 3) {
+                    speed = "full"
+                } else if(ship.speed > 1) {
+                    speed = "half"
+                }
+                speed?.let {
+                    arrayOf("smoke", "waves").forEach {
+                        shipPiece.addChild("${it}_${speed}_speed")
+                    }
+                }
+                
                 shipPiece.rotate = ship.direction.angle.toDouble()
                 if(state.currentTeam == ship.team && !state.isOver)
                     shipPiece.effect = Glow(0.4)

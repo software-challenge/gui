@@ -44,13 +44,13 @@ class AppStyle: Stylesheet() {
         val gridLock by csspseudoclass()
         
         fun background() =
-                StackPane(
-                        Region().apply {
-                            hgrow = Priority.ALWAYS
-                            vgrow = Priority.ALWAYS
-                            addClass(AppStyle.background)
-                        }
-                )
+            StackPane(
+                Region().apply {
+                    hgrow = Priority.ALWAYS
+                    vgrow = Priority.ALWAYS
+                    addClass(AppStyle.background)
+                }
+            )
         
         init {
             arrayOf("Regular", "Bold", "Italic", "BoldItalic").forEach {
@@ -172,7 +172,8 @@ class AppStyle: Stylesheet() {
         
         (0 until 12).forEach {
             ".passenger${it % 6}${it / 6}" {
-                image = resources.url("/mq/fields/islands/passenger_island_${(97 + (it % 6)).toChar()}_${it / 6}.png").toURI()
+                image = resources.url("/mq/fields/islands/passenger_island_${(97 + (it % 6)).toChar()}_${it / 6}.png")
+                    .toURI()
             }
         }
         ".island" {
@@ -192,6 +193,14 @@ class AppStyle: Stylesheet() {
             "ab".forEach { ch ->
                 select(CssRule.c(it + "_passenger_$ch")) {
                     image = resources.url("/mq/boats/passengers/passenger_${ch}_$it.png").toURI()
+                }
+            }
+        }
+        arrayOf("half_speed", "full_speed").forEach { speed ->
+            arrayOf("smoke", "waves").forEach { asset ->
+                val full = asset + "_" + speed
+                select(CssRule.c(full)) {
+                    image = resources.url("/mq/boats/$full.png").toURI()
                 }
             }
         }
