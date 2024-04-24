@@ -142,24 +142,21 @@ class MississippiBoard: View() {
                 }
             }
             state.ships.forEach { ship ->
-                val shipName = "ship_${ship.team.name.lowercase()}"
-                val shipPiece = createPiece(shipName)
-                shipPiece.addChild("coal${ship.coal}")
-                (1..ship.passengers).forEach {
-                    shipPiece.addChild("${shipName}_passenger_${(96 + it).toChar()}")
-                }
-                
                 var speed: String? = null
                 if(ship.speed > 3) {
                     speed = "full"
                 } else if(ship.speed > 1) {
                     speed = "half"
                 }
-                speed?.let {
-                    arrayOf("smoke", "waves").forEach {
-                        shipPiece.addChild("${it}_${speed}_speed")
-                    }
+                val shipName = "ship_${ship.team.name.lowercase()}"
+                val shipPiece = createPiece(shipName)
+                
+                speed?.let { shipPiece.addChild("waves_${speed}_speed", 0) }
+                shipPiece.addChild("coal${ship.coal}")
+                (1..ship.passengers).forEach {
+                    shipPiece.addChild("${shipName}_passenger_${(96 + it).toChar()}")
                 }
+                speed?.let { shipPiece.addChild("smoke_${speed}_speed") }
                 
                 shipPiece.rotate = ship.direction.angle.toDouble()
                 if(state.currentTeam == ship.team && !state.isOver)
