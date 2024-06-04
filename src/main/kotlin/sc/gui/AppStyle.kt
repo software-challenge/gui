@@ -176,18 +176,21 @@ class AppStyle: Stylesheet() {
                     .toURI()
             }
         }
-        ".island" {
-            image = resources.url("/mq/fields/islands/empty_island_A.png").toURI()
-        }
         ".goal" {
             image = resources.url("/mq/fields/goal.png").toURI()
         }
-        ".water" {
-            image = resources.url("/mq/fields/water_textures/water_A.png").toURI()
-        }
-        ".stream" {
-            image = resources.url("/mq/fields/stream_A.png").toURI()
-        }
+        ".island1" { image = resources.url("/mq/fields/islands/empty_island_A.png").toURI() }
+        ".island2" { image = resources.url("/mq/fields/islands/empty_island_B.png").toURI() }
+        ".island3" { image = resources.url("/mq/fields/islands/empty_island_D.png").toURI() }
+        
+        ".water1" { image = resources.url("/mq/fields/water_textures/water_A.png").toURI() }
+        ".water2" { image = resources.url("/mq/fields/water_textures/water_B.png").toURI() }
+        ".water3" { image = resources.url("/mq/fields/water_textures/water_C.png").toURI() }
+        ".water4" { image = resources.url("/mq/fields/water_textures/water_D.png").toURI() }
+        
+        ".stream1" { image = resources.url("/mq/fields/stream_A.png").toURI() }
+        ".stream2" { image = resources.url("/mq/fields/stream_B.png").toURI() }
+        
         arrayOf("ship_one", "ship_two").forEach {
             select(CssRule.c(it)) { image = resources.url("/mq/boats/$it.png").toURI() }
             "ab".forEach { ch ->

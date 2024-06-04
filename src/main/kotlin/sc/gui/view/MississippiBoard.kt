@@ -34,6 +34,7 @@ import sc.plugin2024.actions.Turn
 import sc.plugin2024.util.PluginConstants
 import sc.util.listenImmediately
 import tornadofx.*
+import kotlin.random.Random
 
 private val logger = KotlinLogging.logger { }
 
@@ -118,7 +119,15 @@ class MississippiBoard: View() {
             logger.trace("Available Pushes: {}", pushes)
             
             state.board.forEachField { cubeCoordinates, field ->
-                (createPiece((if(field == Field.GOAL) Field.WATER else field).toString().lowercase())).also { piece ->
+                createPiece(
+                    (if(field == Field.GOAL) Field.WATER else field).let {
+                        it.toString().lowercase() + when(it) {
+                            Field.WATER -> Random.nextInt(1, 5)
+                            Field.ISLAND -> cubeCoordinates.hashCode().rem(3) + 1
+                            else -> ""
+                        }
+                    }
+                ).also { piece ->
                     if(field.isEmpty) {
                         piece.viewOrder++
                         val push = pushes.firstOrNull { state.currentShip.position + it.direction.vector == cubeCoordinates }
@@ -135,7 +144,10 @@ class MississippiBoard: View() {
                     addPiece(piece, cubeCoordinates)
                 }
                 state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
-                    addPiece(createPiece("stream").also { it.rotate = dir.angle.toDouble() }, cubeCoordinates)
+                    addPiece(
+                        createPiece("stream" + Random.nextInt(1, 3)).also { it.rotate = dir.angle.toDouble() },
+                        cubeCoordinates
+                    )
                 }
                 if(field == Field.GOAL) {
                     addPiece(createPiece(field.toString().lowercase()), cubeCoordinates)
