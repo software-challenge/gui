@@ -1,9 +1,13 @@
 package sc.gui.view
 
+import javafx.animation.Animation
+import javafx.animation.SequentialTransition
+import javafx.animation.Transition
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.value.ChangeListener
+import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Alert
@@ -18,6 +22,7 @@ import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
+import javafx.util.Duration
 import mu.KotlinLogging
 import sc.api.plugins.CubeCoordinates
 import sc.api.plugins.CubeDirection
@@ -34,6 +39,7 @@ import sc.plugin2024.actions.Turn
 import sc.plugin2024.util.PluginConstants
 import sc.util.listenImmediately
 import tornadofx.*
+import kotlin.math.absoluteValue
 import kotlin.random.Random
 
 private val logger = KotlinLogging.logger { }
@@ -44,21 +50,22 @@ class MississippiBoard: View() {
         get() = gameModel.gameState.value as? GameState
     
     private fun GameState.visibleBoard(): List<Segment> =
-            let { state ->
-                state.board.segments.slice(
-                        state.ships.map { state.board.segmentIndex(it.position) }.sorted()
-                                .let { IntRange((it.first() - 1).coerceAtLeast(0), state.board.segments.lastIndex) }
-                )
-            }
+        let { state ->
+            state.board.segments.slice(
+                state.ships.map { state.board.segmentIndex(it.position) }.sorted()
+                    .let { IntRange((it.first() - 1).coerceAtLeast(0), state.board.segments.lastIndex) }
+            )
+        }
     
     private val viewHeight: Double
         get() = (root.parent as? Region ?: root).height.coerceAtMost(
-                root.scene?.height?.minus(AppStyle.fontSizeBig.value * 12) ?: Double.MAX_VALUE)
+            root.scene?.height?.minus(AppStyle.fontSizeBig.value * 12) ?: Double.MAX_VALUE
+        )
     private val gridSize: Double
         get() = gameState?.visibleBoard()?.rectangleSize?.let {
             minOf(
-                    root.scene?.width?.div(it.x + 1) ?: 64.0,
-                    viewHeight / (it.y + 2) * 1.1
+                root.scene?.width?.div(it.x + 1) ?: 64.0,
+                viewHeight / (it.y + 2) * 1.1
             ) * 1.3
         } ?: 100.0
     
@@ -82,27 +89,49 @@ class MississippiBoard: View() {
     private val fontSizeBinding = calculatedBlockSize.stringBinding { "-fx-font-size: ${it?.toDouble()?.times(0.3)}" }
     
     private var originalState: GameState? = null
+    private var transition: Transition? = null
     private val humanMove = ArrayList<Action>()
-    private var currentShip: PieceImage? = null
     
     private fun Ship.canAdvance() =
-            coal + movement + freeAcc > 0 &&
-            // negative movement points are turned into acceleration
-            speed - movement < PluginConstants.MAX_SPEED
+        coal + movement + freeAcc > 0 &&
+        // negative movement points are turned into acceleration
+        speed - movement < PluginConstants.MAX_SPEED
+    
+    private fun nameSpeed(speed: Int): String? =
+        if(speed > 3) {
+            "full"
+        } else if(speed > 1) {
+            "half"
+        } else {
+            null
+        }
     
     init {
         Platform.runLater {
             calculatedBlockSize.bind(
-                    gameModel.gameState.doubleBinding(gameModel.gameResult, gameModel.atLatestTurn, grid.parentProperty(), root.widthProperty(), root.heightProperty(), grid.widthProperty(), grid.heightProperty()) { gridSize })
+                gameModel.gameState.doubleBinding(
+                    gameModel.gameResult,
+                    gameModel.atLatestTurn,
+                    grid.parentProperty(),
+                    root.widthProperty(),
+                    root.heightProperty(),
+                    grid.widthProperty(),
+                    grid.heightProperty()
+                ) { gridSize })
             grid.apply {
                 clipProperty().bind(
-                        Bindings.createObjectBinding({
-                            Rectangle(width - root.width, -gridSize, root.width, viewHeight)
-                        }, gameModel.gameState, widthProperty(), parentProperty(), root.widthProperty(), root.heightProperty())
+                    Bindings.createObjectBinding(
+                        { Rectangle(width - root.width, -gridSize, root.width, viewHeight) },
+                        gameModel.gameState,
+                        widthProperty(),
+                        parentProperty(),
+                        root.widthProperty(),
+                        root.heightProperty()
+                    )
                 )
             }
         }
-        val stateListener = ChangeListener<GameState?> { _, oldState, state ->
+        val stateListener = ChangeListener<GameState?> { _, oldState: GameState?, state ->
             if(state == null) {
                 return@ChangeListener
             }
@@ -123,14 +152,16 @@ class MississippiBoard: View() {
                     (if(field == Field.GOAL) Field.WATER else field).let {
                         it.toString().lowercase() + when(it) {
                             Field.WATER -> Random.nextInt(1, 5)
-                            Field.ISLAND -> cubeCoordinates.hashCode().rem(3) + 1
+                            Field.ISLAND -> cubeCoordinates.hashCode().mod(3) + 1
                             else -> ""
                         }
                     }
                 ).also { piece ->
                     if(field.isEmpty) {
                         piece.viewOrder++
-                        val push = pushes.firstOrNull { state.currentShip.position + it.direction.vector == cubeCoordinates }
+                        val push = pushes.firstOrNull {
+                            state.currentShip.position + it.direction.vector == cubeCoordinates
+                        }
                         if(push != null) {
                             logger.debug("Registering Push '{}' for {}", push, piece)
                             piece.effect = Glow(0.2)
@@ -153,40 +184,113 @@ class MississippiBoard: View() {
                     addPiece(createPiece(field.toString().lowercase()), cubeCoordinates)
                 }
             }
-            state.ships.forEach { ship ->
-                var speed: String? = null
-                if(ship.speed > 3) {
-                    speed = "full"
-                } else if(ship.speed > 1) {
-                    speed = "half"
-                }
+            
+            val animState = oldState?.clone()?.takeIf {
+                state.turn - 1 == it.turn && state.lastMove != null
+            }
+            
+            fun PieceImage.shipSpeedIndicator(speed: Int) {
+                this.children.removeIf { it.styleClass.any { it.startsWith("waves") } }
+                nameSpeed(speed)?.let { this.addChild("waves_${it}_speed", 0) }
+            }
+            
+            val pieces = (animState ?: state).ships.map { ship ->
                 val shipName = "ship_${ship.team.name.lowercase()}"
                 val shipPiece = createPiece(shipName)
                 
-                speed?.let { shipPiece.addChild("waves_${speed}_speed", 0) }
+                nameSpeed(state.getShip(ship.team).speed)?.let { shipPiece.addChild("smoke_${it}_speed") }
+                if(!ship.stuck) {
+                    shipPiece.shipSpeedIndicator(ship.speed)
+                }
+                
                 shipPiece.addChild("coal${ship.coal}")
                 (1..ship.passengers).forEach {
                     shipPiece.addChild("${shipName}_passenger_${(96 + it).toChar()}")
                 }
-                speed?.let { shipPiece.addChild("smoke_${speed}_speed") }
                 
                 shipPiece.rotate = ship.direction.angle.toDouble()
-                if(state.currentTeam == ship.team && !state.isOver)
-                    shipPiece.effect = Glow(0.4)
+                if((animState ?: state).currentTeam == ship.team && !state.isOver)
+                    shipPiece.glow()
                 if(ship.stuck)
                     shipPiece.effect = ColorAdjust().apply { saturation = -0.8 } //SepiaTone(1.0)
                 addPiece(shipPiece, ship.position)
-                addPiece(
+            }
+            
+            fun addLabels() {
+                state.ships.forEach { ship ->
+                    addPiece(
                         Label("⚙${if(state.currentTeam == ship.team && humanMove.isNotEmpty()) "${ship.movement}/" else ""}${ship.speed}")
-                                .apply {
-                                    styleProperty().bind(fontSizeBinding)
-                                    this.effect = DropShadow(AppStyle.spacing, Color.BLACK) // TODO not working somehow
-                                    translateY = gridSize / 10
-                                }, ship.position)
-                if(ship.team == state.currentTeam) {
-                    currentShip = shipPiece
-                    renderHumanControls()
+                            .apply {
+                                styleProperty().bind(fontSizeBinding)
+                                this.effect = DropShadow(AppStyle.spacing, Color.BLACK) // TODO not working somehow
+                                translateY = gridSize / 10
+                            }, ship.position
+                    )
                 }
+                renderHumanControls()
+            }
+            
+            if(animState != null) {
+                val ship = animState.getShip(animState.currentTeam)
+                val piece = pieces[animState.currentTeam.index]
+                
+                val factors = coordinateFactors()
+                val move = state.lastMove!!
+                
+                transition?.pause()
+                transition = SequentialTransition(
+                    *move.actions.mapNotNull { action ->
+                        when(action) {
+                            is Turn -> {
+                                piece.rotate(
+                                    Duration.seconds((ship.direction.turnCountTo(action.direction)).absoluteValue.toDouble()),
+                                    Double.NaN,
+                                    play = false
+                                ).apply {
+                                    byAngle = ship.direction.angleTo(action.direction).toDouble()
+                                    this.statusProperty().addListener { _ ->
+                                        if(this.status == Animation.Status.RUNNING) {
+                                            piece.shipSpeedIndicator(0)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            is Advance -> {
+                                val dist = action.distance
+                                val diff = ship.direction.vector * dist
+                                piece.move(
+                                    Duration.seconds(dist.toDouble()),
+                                    Point2D(Double.NaN, Double.NaN),
+                                    play = false
+                                ) {
+                                    byX = diff.x / 2.0 * factors.x
+                                    byY = diff.r * factors.y
+                                    this.statusProperty().addListener { _ ->
+                                        if(this.status == Animation.Status.RUNNING) {
+                                            piece.shipSpeedIndicator(6)
+                                        } else {
+                                            piece.shipSpeedIndicator(ship.speed)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // TODO Push
+                            else -> null
+                        }.also { action.perform(animState) }
+                    }.toTypedArray()
+                ).apply {
+                    setOnFinished {
+                        logger.debug { "Finished transition $it with elements ${children.joinToString()}" }
+                        addLabels()
+                        pieces[animState.currentTeam.index].effect = null
+                        pieces[state.currentTeam.index].glow()
+                    }
+                    play()
+                }
+            } else {
+                addLabels()
             }
         }
         Platform.runLater {
@@ -325,11 +429,11 @@ class MississippiBoard: View() {
     }
     
     private fun isHumanMoveIncomplete() =
-            humanMove.none { it is Advance } || gameState?.let { state ->
-                state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal ||
-                humanMove.first() is Accelerate && state.currentShip.movement != 0 ||
-                state.mustPush
-            } ?: true
+        humanMove.none { it is Advance } || gameState?.let { state ->
+            state.currentShip.movement > state.currentShip.freeAcc + state.currentShip.coal ||
+            humanMove.first() is Accelerate && state.currentShip.movement != 0 ||
+            state.mustPush
+        } ?: true
     
     private fun confirmHumanMove() {
         if(awaitingHumanMove() && isHumanMoveIncomplete()) {
@@ -346,10 +450,10 @@ class MississippiBoard: View() {
     }
     
     private fun createPiece(type: String): PieceImage =
-            PieceImage(calculatedBlockSize, type)
+        PieceImage(calculatedBlockSize, type)
     
     private fun awaitingHumanMove() =
-            gameModel.atLatestTurn.value && gameModel.isHumanTurn.value
+        gameModel.atLatestTurn.value && gameModel.isHumanTurn.value
     
     private fun humanMove(move: Move): Boolean {
         if(awaitingHumanMove()) {
@@ -365,18 +469,24 @@ class MississippiBoard: View() {
         else
             grid.add(node)
         calculatedBlockSize.listenImmediately {
-            val size = it.toDouble()
+            val size = coordinateFactors(it.toDouble())
             node.anchorpaneConstraints {
                 val state = gameState ?: return@anchorpaneConstraints
                 val bounds = state.visibleBoard().bounds
-                leftAnchor = (coordinates.x / 2.0 - bounds.first.second) * size * .774
-                topAnchor = (coordinates.r - bounds.second.first) * size * .668
+                leftAnchor = (coordinates.x / 2.0 - bounds.first.second) * size.x
+                topAnchor = (coordinates.r - bounds.second.first) * size.y
                 //logger.trace { "$coordinates: $node at $leftAnchor,$topAnchor within $bounds" }
             }
         }
         return node
     }
+    
+    fun coordinateFactors(size: Double = calculatedBlockSize.value) = Point2D(size * .774, size * .668)
 }
 
 private fun Node.setClass(className: String, add: Boolean = true) =
-        if(add) addClass(className) else removeClass(className)
+    if(add) addClass(className) else removeClass(className)
+
+private fun Node.glow() {
+    effect = Glow(.4)
+}
