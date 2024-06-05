@@ -8,12 +8,12 @@ import javafx.util.Duration
 import mu.KotlinLogging
 import sc.api.plugins.IGameState
 import sc.framework.HelperMethods
+import sc.framework.ReplayLoader
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.NewGameState
 import sc.gui.events.*
 import sc.gui.model.GameModel
-import sc.networking.clients.GameLoaderClient
 import sc.networking.clients.IGameController
 import tornadofx.*
 import java.io.IOException
@@ -27,7 +27,7 @@ fun View.selectReplay(onConfirm: () -> Unit = {}) {
     ).forEach {
         onConfirm()
         try {
-            find(GameFlowController::class).loadReplay(GameLoaderClient(it))
+            find(GameFlowController::class).loadReplay(ReplayLoader(it))
         } catch(e: Exception) {
             warning("Replay laden fehlgeschlagen", "Das Replay $it konnte nicht geladen werden:\n" + e.stackTraceToString())
         }
@@ -111,18 +111,19 @@ class GameFlowController: Controller() {
     }
     
     @Throws(ReplayLoaderException::class)
-    fun loadReplay(loader: GameLoaderClient) {
+    fun loadReplay(loader: ReplayLoader) {
         if(history.isNotEmpty())
             throw ReplayLoaderException("Trying to load replay into a running game")
-        history.addAll(loader.getHistory())
+        val result = loader.loadHistory()
+        history.addAll(result.first)
         logger.debug("Loaded {} states from {}", history.size, loader)
         if(history.isEmpty())
             throw ReplayLoaderException("Replay history from $loader is empty")
         fire(GameReadyEvent())
         gameModel.availableTurns.set(history.last().turn)
-        gameModel.gameResult.set(loader.result)
+        gameModel.gameResult.set(result.second)
         gameModel.playerNames.setAll(
-                loader.result?.scores?.keys
+                result.second?.scores?.keys
                         ?.sortedBy { it.team.index }
                         ?.map { it.displayName }.orEmpty())
         gameModel.gameState.set(history.first())
