@@ -89,8 +89,11 @@ class MississippiBoard: View() {
     private val fontSizeBinding = calculatedBlockSize.stringBinding { "-fx-font-size: ${it?.toDouble()?.times(0.3)}" }
     
     private var originalState: GameState? = null
-    private var transition: Transition? = null
     private val humanMove = ArrayList<Action>()
+    
+    private var transition: Transition? = null
+    private val animFactor
+        get() = 3 / gameModel.stepSpeed.value
     
     private fun Ship.canAdvance() =
         coal + movement + freeAcc > 0 &&
@@ -243,7 +246,7 @@ class MississippiBoard: View() {
                         when(action) {
                             is Turn -> {
                                 piece.rotate(
-                                    Duration.seconds((ship.direction.turnCountTo(action.direction)).absoluteValue.toDouble()),
+                                    Duration.seconds(animFactor * ship.direction.turnCountTo(action.direction).absoluteValue),
                                     Double.NaN,
                                     play = false
                                 ).apply {
@@ -260,7 +263,7 @@ class MississippiBoard: View() {
                                 val dist = action.distance
                                 val diff = ship.direction.vector * dist
                                 piece.move(
-                                    Duration.seconds(dist.toDouble()),
+                                    Duration.seconds(animFactor * dist),
                                     Point2D(Double.NaN, Double.NaN),
                                     play = false
                                 ) {
@@ -276,7 +279,20 @@ class MississippiBoard: View() {
                                 }
                             }
                             
-                            // TODO Push
+                            is Push -> {
+                                val diff = action.direction.vector
+                                val otherPiece = pieces[animState.otherTeam.index]
+                                otherPiece.move(
+                                    Duration.seconds(animFactor / 2),
+                                    Point2D(Double.NaN, Double.NaN),
+                                    play = false
+                                ) {
+                                    byX = diff.x / 2.0 * factors.x
+                                    byY = diff.r * factors.y
+                                    otherPiece.shipSpeedIndicator(0)
+                                }
+                            }
+                            
                             else -> null
                         }.also { action.perform(animState) }
                     }.toTypedArray()

@@ -40,7 +40,7 @@ class GameFlowController: Controller() {
     private val gameModel: GameModel by inject()
     /** Whether to request a new Move when stepping forward. */
     private var stepController = true
-    private val interval = Timeline(KeyFrame(Duration.seconds(gameModel.stepSpeed.value), {
+    private val interval = Timeline(KeyFrame(Duration.seconds(gameModel.stepSpeed.value * 3), {
         fire(StepGame(1))
     })).apply {
         cycleCount = Animation.INDEFINITE
