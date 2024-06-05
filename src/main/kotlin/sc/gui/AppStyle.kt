@@ -1,7 +1,10 @@
 package sc.gui
 
 import javafx.scene.effect.DropShadow
-import javafx.scene.layout.*
+import javafx.scene.layout.BorderStrokeStyle
+import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
+import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontPosture
@@ -107,6 +110,8 @@ class AppStyle: Stylesheet() {
         background {
             opacity = 0.8
             backgroundColor += colorBackground
+            //backgroundImage += resources.url("/background.jpg").toURI()
+            //backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
         }
         
         // Generic Components
@@ -165,10 +170,9 @@ class AppStyle: Stylesheet() {
     
     fun mqStyles() {
         background {
-            backgroundImage += resources.url("/background.jpg").toURI()
-            backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
+            opacity = 1.0
+            backgroundColor += c("#2a9b46")
         }
-        
         
         (0 until 12).forEach {
             ".passenger${it % 6}${it / 6}" {
@@ -176,9 +180,8 @@ class AppStyle: Stylesheet() {
                     .toURI()
             }
         }
-        ".goal" {
-            image = resources.url("/mq/fields/goal.png").toURI()
-        }
+        ".goal" { image = resources.url("/mq/fields/goal.png").toURI() }
+        
         ".island1" { image = resources.url("/mq/fields/islands/empty_island_A.png").toURI() }
         ".island2" { image = resources.url("/mq/fields/islands/empty_island_B.png").toURI() }
         ".island3" { image = resources.url("/mq/fields/islands/empty_island_D.png").toURI() }
@@ -190,6 +193,10 @@ class AppStyle: Stylesheet() {
         
         ".stream1" { image = resources.url("/mq/fields/stream_A.png").toURI() }
         ".stream2" { image = resources.url("/mq/fields/stream_B.png").toURI() }
+        
+        ".border" { image = resources.url("/mq/fields/background/border_vertical.png").toURI() }
+        ".border_inner" { image = resources.url("/mq/fields/background/border_inner_corner.png").toURI() }
+        ".border_outer" { image = resources.url("/mq/fields/background/border_outer_corner.png").toURI() }
         
         arrayOf("ship_one", "ship_two").forEach {
             select(CssRule.c(it)) { image = resources.url("/mq/boats/$it.png").toURI() }

@@ -150,7 +150,13 @@ class MississippiBoard: View() {
             state.currentShip.movement -= state.currentShip.maxAcc
             logger.trace("Available Pushes: {}", pushes)
             
+            val neighbors = hashMapOf<CubeCoordinates, ArrayList<CubeDirection>>()
             state.board.forEachField { cubeCoordinates, field ->
+                CubeDirection.values().forEach { dir ->
+                    val coord = cubeCoordinates + dir.vector
+                    if(state.board[coord] == null)
+                        neighbors.getOrPut(coord) { ArrayList() }.add(dir)
+                }
                 createPiece(
                     (if(field == Field.GOAL) Field.WATER else field).let {
                         it.toString().lowercase() + when(it) {
@@ -186,6 +192,38 @@ class MississippiBoard: View() {
                 if(field == Field.GOAL) {
                     addPiece(createPiece(field.toString().lowercase()), cubeCoordinates)
                 }
+            }
+            
+            val tip = state.board.segments.last().center + state.board.nextDirection.vector * 2
+            if(state.board[tip] != Field.GOAL) {
+                val excluded =
+                    CubeDirection.values().flatMap { listOf(tip + it.vector, tip + it.vector + (it + 1).vector) }
+                excluded.forEach { cubeCoordinates ->
+                    CubeDirection.values().forEach { dir ->
+                        val coord = cubeCoordinates + dir.vector
+                        if(state.board[coord] == null)
+                            neighbors[coord]?.add(dir)
+                    }
+                    neighbors.remove(cubeCoordinates)
+                }
+            }
+            
+            neighbors.forEach {
+                val dirs = it.value
+                addPiece(
+                    createPiece(
+                        when(dirs.size) {
+                            1 -> "border_inner"
+                            2 -> "border"
+                            3 -> "border_outer"
+                            else -> throw NoWhenBranchMatchedException()
+                        }
+                    ).apply {
+                        this.rotate =
+                            (dirs.single { dir -> dirs.all { dir.turnCountTo(it) >= 0 } } - (if(dirs.size == 1) 5 else 4)).angle.toDouble()
+                    },
+                    it.key
+                )
             }
             
             val animState = oldState?.clone()?.takeIf {
