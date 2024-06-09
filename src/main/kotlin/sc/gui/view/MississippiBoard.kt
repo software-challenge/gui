@@ -64,7 +64,7 @@ class MississippiBoard: View() {
     private val gridSize: Double
         get() = gameState?.visibleBoard()?.rectangleSize?.let {
             minOf(
-                root.scene?.width?.div(it.x + 1) ?: 64.0,
+                root.scene?.width?.div(it.x + 2) ?: 64.0,
                 viewHeight / (it.y + 2) * 1.1
             ) * 1.3
         } ?: 100.0
@@ -124,7 +124,7 @@ class MississippiBoard: View() {
             grid.apply {
                 clipProperty().bind(
                     Bindings.createObjectBinding(
-                        { Rectangle(width - root.width, -gridSize, root.width, viewHeight) },
+                        { Rectangle(width - root.width - gridSize / 3, -gridSize, root.width, viewHeight) },
                         gameModel.gameState,
                         widthProperty(),
                         parentProperty(),
@@ -527,9 +527,9 @@ class MississippiBoard: View() {
             node.anchorpaneConstraints {
                 val state = gameState ?: return@anchorpaneConstraints
                 val bounds = state.visibleBoard().bounds
-                leftAnchor = (coordinates.x / 2.0 - bounds.first.second) * size.x
+                leftAnchor = coordinates.x / 2.0 * size.x
                 topAnchor = (coordinates.r - bounds.second.first) * size.y
-                //logger.trace { "$coordinates: $node at $leftAnchor,$topAnchor within $bounds" }
+                logger.trace { "$coordinates: $node at ${leftAnchor?.toInt()},${topAnchor?.toInt()} within $bounds" }
             }
         }
         return node
