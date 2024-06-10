@@ -123,7 +123,7 @@ class MississippiBoard: View() {
             grid.apply {
                 clipProperty().bind(
                     Bindings.createObjectBinding(
-                        { Rectangle(width - root.width - gridSize / 3, -gridSize, root.width, viewHeight) },
+                        { Rectangle(0.0, -gridSize, root.width, viewHeight) },
                         gameModel.gameState,
                         widthProperty(),
                         parentProperty(),
@@ -198,15 +198,33 @@ class MississippiBoard: View() {
             
             val tip = state.board.segments.last().center + state.board.nextDirection.vector * 2
             if(state.board[tip] != Field.GOAL) {
-                val excluded =
-                    CubeDirection.values().flatMap { listOf(tip + it.vector, tip + it.vector + (it + 1).vector) }
-                excluded.forEach { cubeCoordinates ->
+                val fog = ArrayList<CubeCoordinates>()
+                Segment.empty(
+                    state.board.segments.last().center + state.board.nextDirection.vector * 4,
+                    state.board.nextDirection
+                ).forEachField { cubeCoordinates, _ -> fog.add(cubeCoordinates) }
+                fog.forEach { cubeCoordinates ->
                     CubeDirection.values().forEach { dir ->
                         val coord = cubeCoordinates + dir.vector
-                        if(state.board[coord] == null)
-                            neighbors[coord]?.add(dir)
+                        if(!fog.contains(coord) && state.board[coord] == null)
+                            neighbors.getOrPut(coord) { ArrayList() }.add(dir)
                     }
+                    addPiece(createPiece("fog"), cubeCoordinates)
                     neighbors.remove(cubeCoordinates)
+                }
+                
+                val excludeTip = state.board.segments.last().center + state.board.nextDirection.vector * 6
+                val excluded =
+                    CubeDirection.values()
+                        .flatMap { listOf(excludeTip + it.vector, excludeTip + it.vector + (it + 1).vector) }
+                excluded.forEach { exclude ->
+                    CubeDirection.values().forEach { dir ->
+                        val coord = exclude + dir.vector
+                        if(state.board[coord] == null) {
+                            neighbors[coord]?.add(dir)
+                        }
+                    }
+                    neighbors.remove(exclude)
                 }
             }
             
@@ -218,7 +236,10 @@ class MississippiBoard: View() {
                             1 -> "border_inner"
                             2 -> "border"
                             3 -> "border_outer"
-                            else -> throw NoWhenBranchMatchedException()
+                            else -> {
+                                logger.warn("Piece $it has wrong border directions: $dirs")
+                                ""
+                            }
                         }
                     ).apply {
                         this.rotate =
@@ -529,7 +550,7 @@ class MississippiBoard: View() {
             node.anchorpaneConstraints {
                 val state = gameState ?: return@anchorpaneConstraints
                 val bounds = state.visibleBoard().bounds
-                leftAnchor = coordinates.x / 2.0 * size.x
+                leftAnchor = (coordinates.x / 2.0 - bounds.first.first + 1) * size.x
                 topAnchor = (coordinates.r - bounds.second.first) * size.y
                 logger.trace { "$coordinates: $node at ${leftAnchor?.toInt()},${topAnchor?.toInt()} within $bounds" }
             }
