@@ -152,7 +152,7 @@ class BoardView: View() {
                                     brightness = 0.0
                                 } ?: ice.removeHover()
                             }
-                            Team.values().forEach { ice.children.first().effect = null }
+                            ice.children.first().effect = null
                         } else if(piece != null) {
                             if(ice.children.size > 1)
                                 removePiece(ice.children.last(), parent = ice)
