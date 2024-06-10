@@ -40,6 +40,7 @@ import sc.plugin2024.util.PluginConstants
 import sc.util.listenImmediately
 import tornadofx.*
 import kotlin.math.absoluteValue
+import kotlin.math.pow
 
 private val logger = KotlinLogging.logger { }
 
@@ -138,8 +139,12 @@ class MississippiBoard: View() {
                 return@ChangeListener
             }
             grid.children.clear()
+            var wasHumanMove = false
             if(state.turn != oldState?.turn) {
                 humanMove.clear()
+                if(originalState != oldState) {
+                    wasHumanMove = true
+                }
                 originalState = state
             }
             logger.trace("New state for board: ${state.longString()}")
@@ -249,15 +254,14 @@ class MississippiBoard: View() {
                 )
             }
             
+            // TODO issues when double move through overtaking
             val animState = oldState?.clone()?.takeIf {
-                state.turn - 1 == it.turn && state.lastMove != null
+                !wasHumanMove && state.turn - 1 == it.turn && state.lastMove != null
             }
-            
             fun PieceImage.shipSpeedIndicator(speed: Int) {
                 this.children.removeIf { it.styleClass.any { it.startsWith("waves") } }
                 nameSpeed(speed)?.let { this.addChild("waves_${it}_speed", 0) }
             }
-            
             val pieces = (animState ?: state).ships.map { ship ->
                 val shipName = "ship_${ship.team.name.lowercase()}"
                 val shipPiece = createPiece(shipName)
@@ -321,10 +325,11 @@ class MississippiBoard: View() {
                             }
                             
                             is Advance -> {
+                                // TODO collate sequential advances
                                 val dist = action.distance
                                 val diff = ship.direction.vector * dist
                                 piece.move(
-                                    Duration.seconds(animFactor * dist),
+                                    Duration.seconds(animFactor * dist.toDouble().pow(0.7)),
                                     Point2D(Double.NaN, Double.NaN),
                                     play = false
                                 ) {
@@ -359,7 +364,7 @@ class MississippiBoard: View() {
                     }.toTypedArray()
                 ).apply {
                     setOnFinished {
-                        logger.debug { "Finished transition $it with elements ${children.joinToString()}" }
+                        logger.debug { "Finished transition $it with elements ${children.joinToString()} for $move" }
                         addLabels()
                         pieces[animState.currentTeam.index].effect = null
                         pieces[state.currentTeam.index].glow()
@@ -550,7 +555,7 @@ class MississippiBoard: View() {
             node.anchorpaneConstraints {
                 val state = gameState ?: return@anchorpaneConstraints
                 val bounds = state.visibleBoard().bounds
-                leftAnchor = (coordinates.x / 2.0 - bounds.first.first + 1) * size.x
+                leftAnchor = (coordinates.x / 2.0 - bounds.first.first + .5) * size.x
                 topAnchor = (coordinates.r - bounds.second.first) * size.y
                 logger.trace { "$coordinates: $node at ${leftAnchor?.toInt()},${topAnchor?.toInt()} within $bounds" }
             }
