@@ -40,7 +40,6 @@ import sc.plugin2024.util.PluginConstants
 import sc.util.listenImmediately
 import tornadofx.*
 import kotlin.math.absoluteValue
-import kotlin.random.Random
 
 private val logger = KotlinLogging.logger { }
 
@@ -160,12 +159,12 @@ class MississippiBoard: View() {
                 createPiece(
                     (if(field == Field.GOAL) Field.WATER else field).let {
                         it.toString().lowercase() + when(it) {
-                            Field.WATER -> Random.nextInt(1, 5)
                             Field.ISLAND -> cubeCoordinates.hashCode().mod(3) + 1
                             else -> ""
                         }
                     }
                 ).also { piece ->
+                    piece.nextFrame()
                     if(field.isEmpty) {
                         piece.viewOrder++
                         val push = pushes.firstOrNull {
@@ -185,7 +184,10 @@ class MississippiBoard: View() {
                 }
                 state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
                     addPiece(
-                        createPiece("stream" + Random.nextInt(1, 3)).also { it.rotate = dir.angle.toDouble() },
+                        createPiece("stream").also { piece ->
+                            piece.rotate = dir.angle.toDouble()
+                            piece.nextFrame()
+                        },
                         cubeCoordinates
                     )
                 }

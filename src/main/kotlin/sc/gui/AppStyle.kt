@@ -186,13 +186,22 @@ class AppStyle: Stylesheet() {
         ".island2" { image = resources.url("/mq/fields/islands/empty_island_B.png").toURI() }
         ".island3" { image = resources.url("/mq/fields/islands/empty_island_D.png").toURI() }
         
-        ".water1" { image = resources.url("/mq/fields/water_textures/water_A.png").toURI() }
-        ".water2" { image = resources.url("/mq/fields/water_textures/water_B.png").toURI() }
-        ".water3" { image = resources.url("/mq/fields/water_textures/water_C.png").toURI() }
-        ".water4" { image = resources.url("/mq/fields/water_textures/water_D.png").toURI() }
-        
-        ".stream1" { image = resources.url("/mq/fields/stream_A.png").toURI() }
-        ".stream2" { image = resources.url("/mq/fields/stream_B.png").toURI() }
+        select(CssRule.c("water")) {
+            focusColor = colorBackground
+            (0..19).forEach { frame ->
+                and(CssRule.pc("idle$frame")) {
+                    image = resources.url("/mq/fields/water_textures/water_${(frame.div(3).mod(4) + 65).toChar()}.png").toURI()
+                }
+            }
+        }
+        select(CssRule.c("stream")) {
+            focusColor = colorBackground
+            (0..19).forEach { frame ->
+                and(CssRule.pc("idle$frame")) {
+                    image = resources.url("/mq/fields/stream_${(frame.div(2).mod(2) + 65).toChar()}.png").toURI()
+                }
+            }
+        }
         
         ".border" { image = resources.url("/mq/fields/background/border_vertical.png").toURI() }
         ".border_inner" { image = resources.url("/mq/fields/background/border_inner_corner.png").toURI() }
