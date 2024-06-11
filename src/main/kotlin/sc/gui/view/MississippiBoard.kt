@@ -560,7 +560,7 @@ class MississippiBoard: View() {
                 val state = gameState ?: return@anchorpaneConstraints
                 val bounds = state.visibleBoard().bounds
                 leftAnchor = (coordinates.x / 2.0 - bounds.first.first + .5) * size.x
-                topAnchor = (coordinates.r - bounds.second.first) * size.y
+                topAnchor = (coordinates.r - bounds.second.first - .5) * size.y
                 logger.trace { "$coordinates: $node at ${leftAnchor?.toInt()},${topAnchor?.toInt()} within $bounds" }
             }
         }
