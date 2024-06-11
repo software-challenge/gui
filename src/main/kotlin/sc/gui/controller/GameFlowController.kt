@@ -119,7 +119,7 @@ class GameFlowController: Controller() {
         logger.debug("Loaded {} states from {}", history.size, loader)
         if(history.isEmpty())
             throw ReplayLoaderException("Replay history from $loader is empty")
-        fire(GameReadyEvent())
+        
         gameModel.availableTurns.set(history.last().turn)
         gameModel.gameResult.set(result.second)
         gameModel.playerNames.setAll(
@@ -127,6 +127,8 @@ class GameFlowController: Controller() {
                         ?.sortedBy { it.team.index }
                         ?.map { it.displayName }.orEmpty())
         gameModel.gameState.set(history.first())
+        
+        fire(GameReadyEvent())
     }
 }
 
