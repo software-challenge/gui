@@ -191,7 +191,7 @@ class AppStyle: Stylesheet() {
             focusColor = colorBackground
             (0..19).forEach { frame ->
                 and(CssRule.pc("idle$frame")) {
-                    image = resources.url("/mq/fields/water_textures/water_${(frame.div(3).mod(4) + 65).toChar()}.png").toURI()
+                    image = resources.url("/mq/fields/water_textures/water_${(frame.div(5) + 65).toChar()}.png").toURI()
                 }
             }
         }
@@ -199,7 +199,7 @@ class AppStyle: Stylesheet() {
             focusColor = colorBackground
             (0..19).forEach { frame ->
                 and(CssRule.pc("idle$frame")) {
-                    image = resources.url("/mq/fields/stream_${(frame.div(2).mod(2) + 65).toChar()}.png").toURI()
+                    image = resources.url("/mq/fields/stream_${(frame.div(4).mod(2) + 65).toChar()}.png").toURI()
                 }
             }
         }
