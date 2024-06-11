@@ -94,6 +94,7 @@ class MississippiBoard: View() {
     private var transition: Transition? = null
     private val animFactor
         get() = 3 / gameModel.stepSpeed.value
+    private val contrastFactor = 0.5
     
     private fun Ship.canAdvance() =
         coal + movement + freeAcc > 0 &&
@@ -170,6 +171,8 @@ class MississippiBoard: View() {
                     }
                 ).also { piece ->
                     piece.nextFrame()
+                    if(state.board.segmentIndex(cubeCoordinates).mod(2) == 1)
+                        piece.effect = ColorAdjust(0.0, 0.0, -contrastFactor / 3, 0.0)
                     if(field.isEmpty) {
                         piece.viewOrder++
                         val push = pushes.firstOrNull {
@@ -177,24 +180,25 @@ class MississippiBoard: View() {
                         }
                         if(push != null) {
                             logger.debug("Registering Push '{}' for {}", push, piece)
-                            piece.effect = Glow(0.2)
+                            piece.glow(.4)
                             piece.onHover { hover ->
-                                piece.effect = Glow(if(hover) 0.5 else 0.2)
+                                // TODO hover not recognized when stream is on top
+                                piece.glow(if(hover) 1 else .4)
                             }
                             piece.tooltip("Gegenspieler in Richtung ${push.direction} abdrängen (Taste ${push.direction.ordinal})")
                             piece.onLeftClick { addHumanAction(push) }
                         }
                     }
+                    state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
+                        addPiece(
+                            createPiece("stream").also { piece ->
+                                piece.rotate = dir.angle.toDouble()
+                                piece.nextFrame()
+                            },
+                            cubeCoordinates
+                        )
+                    }
                     addPiece(piece, cubeCoordinates)
-                }
-                state.board.getFieldCurrentDirection(cubeCoordinates)?.let { dir ->
-                    addPiece(
-                        createPiece("stream").also { piece ->
-                            piece.rotate = dir.angle.toDouble()
-                            piece.nextFrame()
-                        },
-                        cubeCoordinates
-                    )
                 }
                 if(field == Field.GOAL) {
                     addPiece(createPiece(field.toString().lowercase()), cubeCoordinates)
@@ -278,7 +282,7 @@ class MississippiBoard: View() {
                 
                 shipPiece.rotate = ship.direction.angle.toDouble()
                 if((animState ?: state).currentTeam == ship.team && !state.isOver)
-                    shipPiece.glow()
+                    shipPiece.glow() // lower in history: if(gameModel.atLatestTurn.value == false) .5 else 1.0)
                 if(ship.stuck)
                     shipPiece.effect = ColorAdjust().apply { saturation = -0.8 } //SepiaTone(1.0)
                 addPiece(shipPiece, ship.position)
@@ -564,11 +568,12 @@ class MississippiBoard: View() {
     }
     
     fun coordinateFactors(size: Double = calculatedBlockSize.value) = Point2D(size * .774, size * .668)
+    
+    private fun Node.glow(factor: Number = 1) {
+        effect = Glow(contrastFactor * factor.toDouble())
+    }
 }
 
 private fun Node.setClass(className: String, add: Boolean = true) =
     if(add) addClass(className) else removeClass(className)
 
-private fun Node.glow() {
-    effect = Glow(.4)
-}
