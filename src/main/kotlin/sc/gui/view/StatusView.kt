@@ -9,7 +9,6 @@ import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.model.GameModel
 import sc.gui.strings
-import sc.shared.WinCondition
 import tornadofx.*
 
 class StatusBinding(private val game: GameModel): StringBinding() {
@@ -18,13 +17,13 @@ class StatusBinding(private val game: GameModel): StringBinding() {
     }
     
     override fun computeValue(): String =
-            if(game.gameStarted.value && game.atLatestTurn.value)
-                game.gameResult.get()?.let { gameResult ->
+            if(game.gameStarted.value && game.atLatestTurn.value || game.gameResult.value != null)
+                game.gameResult.takeIf { game.atLatestTurn.value }?.get()?.let { gameResult ->
                     """
                     ${gameResult.win?.winner?.let { "${it.displayName} hat gewonnen!" } ?: "Unentschieden"}
                     ${gameResult.win?.reason?.message.orEmpty()}
                     """.trimIndent().trim('\n')
-                } ?: "${game.currentTeam.value.displayName} ist dran"
+                } ?: "${game.currentTeam.value.displayName} als nächstes"
             else game.playerNames.joinToString(" vs ")
     
     val ITeam.displayName
@@ -33,13 +32,17 @@ class StatusBinding(private val game: GameModel): StringBinding() {
 
 class ScoreBinding(private val game: GameModel): StringBinding() {
     init {
-        bind(game.gameStarted, game.teamScores)
+        bind(game.gameStarted, game.gameState)
     }
     
     override fun computeValue(): String =
             if(game.gameStarted.value)
                 "Runde ${game.currentRound.get()} - " +
-                game.teamScores.value?.joinToString(" : ") { it?.first().toString() }
+                        game.gameState.value?.run {
+                            Team.values().joinToString(" : ") {
+                                getPointsForTeam(it).first().toString()
+                            }
+                        }
             else "Drücke auf Start".takeUnless { game.gameOver.value && game.atLatestTurn.value }.orEmpty()
 }
 

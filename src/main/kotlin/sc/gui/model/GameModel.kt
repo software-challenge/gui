@@ -26,9 +26,6 @@ class GameModel: ViewModel() {
     val currentTurn = integerBinding(gameState) { value?.turn ?: 0 }
     val currentRound = integerBinding(gameState) { value?.round ?: 0 }
     val currentTeam = nonNullObjectBinding(gameState) { value?.currentTeam ?: Team.ONE }
-    val teamScores = gameState.objectBinding { state ->
-        Team.values().map { state?.getPointsForTeam(it) }
-    }
     
     val isHumanTurn = booleanProperty(false)
     

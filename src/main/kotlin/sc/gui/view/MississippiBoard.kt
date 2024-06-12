@@ -27,6 +27,7 @@ import mu.KotlinLogging
 import sc.api.plugins.CubeCoordinates
 import sc.api.plugins.CubeDirection
 import sc.api.plugins.IGameState
+import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.GameModel
@@ -266,7 +267,8 @@ class MississippiBoard: View() {
                 this.children.removeIf { it.styleClass.any { it.startsWith("waves") } }
                 nameSpeed(speed)?.let { this.addChild("waves_${it}_speed", 0) }
             }
-            val pieces = (animState ?: state).ships.map { ship ->
+            val pieces = Team.values().map {
+                val ship = (animState ?: state).getShip(it)
                 val shipName = "ship_${ship.team.name.lowercase()}"
                 val shipPiece = createPiece(shipName)
                 
