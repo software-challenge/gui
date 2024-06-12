@@ -1,10 +1,8 @@
 package sc.gui
 
+import javafx.scene.effect.BlurType
 import javafx.scene.effect.DropShadow
-import javafx.scene.layout.BorderStrokeStyle
-import javafx.scene.layout.Priority
-import javafx.scene.layout.Region
-import javafx.scene.layout.StackPane
+import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontPosture
@@ -109,10 +107,8 @@ class AppStyle: Stylesheet() {
             accentColor = Color.MEDIUMPURPLE
         }
         background {
-            opacity = 0.8
+            opacity = 0.7
             backgroundColor += colorBackground
-            //backgroundImage += resources.url("/background.jpg").toURI()
-            //backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
         }
         
         // Generic Components
@@ -121,7 +117,10 @@ class AppStyle: Stylesheet() {
             borderRadius = backgroundRadius
         }
         label.theme { theme ->
-            effect = DropShadow(AppStyle.spacing, theme.base)
+            effect = DropShadow(formSpacing, theme.base).apply {
+                spread = 0.9
+                blurType = BlurType.TWO_PASS_BOX
+            }
         }
         label {
             and(plainLabel) {
@@ -171,8 +170,10 @@ class AppStyle: Stylesheet() {
     
     fun mqStyles() {
         background {
-            opacity = 1.0
+            opacity = 0.7
             backgroundColor += c("#2a9b46")
+            backgroundImage += resources.url("/mq/fields/background/background.png").toURI()
+            backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
         }
         
         (0 until 12).forEach {
