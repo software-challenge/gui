@@ -183,7 +183,7 @@ class AppStyle: Stylesheet() {
             }
         }
         ".goal" { image = resources.url("/mq/fields/goal.png").toURI() }
-        ".fog" { image = resources.url("/mq/fields/fog.png").toURI() }
+        ".fog" { image = resources.url("/mq/fields/background/fog_tile.png").toURI() }
         
         ".island1" { image = resources.url("/mq/fields/islands/empty_island_A.png").toURI() }
         ".island2" { image = resources.url("/mq/fields/islands/empty_island_B.png").toURI() }
