@@ -51,7 +51,7 @@ class ResizableImageView(sizeProperty: ObservableValue<Number>): ImageView() {
 
 /** Holds a potentially animated piece on a position on the board.
  * Can stack multiple images and will resize automatically. */
-class PieceImage(private val sizeProperty: ObservableDoubleValue, private val content: String): StackPane() {
+class PieceImage(private val sizeProperty: ObservableDoubleValue, val content: String): StackPane() {
     private val animateFn = ::animate
     
     init {

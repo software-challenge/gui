@@ -264,30 +264,34 @@ class MississippiBoard: View() {
             val animState = oldState?.clone()?.takeIf {
                 !wasHumanMove && state.turn - 1 == it.turn && state.lastMove != null
             }
+            
             fun PieceImage.shipBowWaveSpeed(speed: Int) {
                 this.children.removeIf { it.styleClass.any { it.startsWith("waves") } }
                 nameSpeed(speed)?.let { this.addChild("waves_${it}_speed", 0) }
             }
-            val pieces = Team.values().map {
-                val ship = (animState ?: state).getShip(it)
-                val shipName = "ship_${ship.team.name.lowercase()}"
+            fun PieceImage.addPassenger(shipName: String, passenger: Int) =
+                addChild("${shipName}_passenger_${(96 + passenger).toChar()}")
+            
+            val pieces = Team.values().map { team ->
+                val ship = (animState ?: state).getShip(team)
+                val shipName = "ship_${team.name.lowercase()}"
                 val shipPiece = createPiece(shipName)
                 
                 nameSpeed(state.getShip(ship.team).speed)
-                    ?.let { shipPiece.addChild("smoke_${it}_speed") }
+                    ?.let { speed -> shipPiece.addChild("smoke_${speed}_speed") }
                 if(!ship.stuck)
                     shipPiece.shipBowWaveSpeed(ship.speed)
                 
                 shipPiece.addChild("coal${ship.coal}")
-                (1..ship.passengers).forEach {
-                    shipPiece.addChild("${shipName}_passenger_${(96 + it).toChar()}")
+                (1..ship.passengers).forEach { passenger ->
+                    shipPiece.addPassenger(shipName, passenger)
                 }
                 
                 shipPiece.rotate = ship.direction.angle.toDouble()
                 if((animState ?: state).currentTeam == ship.team && !state.isOver)
                     shipPiece.glow() // lower in history: if(gameModel.atLatestTurn.value == false) .5 else 1.0)
                 if(ship.stuck)
-                    shipPiece.effect = ColorAdjust().apply { saturation = -0.8 } //SepiaTone(1.0)
+                    shipPiece.effect = ColorAdjust().apply { saturation = -0.8 } // SepiaTone(1.0)
                 addPiece(shipPiece, ship.position)
             }
             
@@ -375,6 +379,12 @@ class MississippiBoard: View() {
                         addLabels()
                         pieces[animState.currentTeam.index].effect = null
                         pieces[state.currentTeam.index].glow()
+                        Team.values().forEach { team ->
+                            val newPassengers = state.getShip(team).passengers
+                            if(animState.getShip(team).passengers < newPassengers) {
+                                pieces[team.index].addPassenger(pieces[team.index].content, newPassengers)
+                            }
+                        }
                     }
                     play()
                 }
@@ -435,7 +445,7 @@ class MississippiBoard: View() {
             addPiece(VBox().apply {
                 translateX = -gridSize / 2
                 translateY = gridSize / 10
-                styleProperty().bind(fontSizeFromBlockSize(.2))
+                styleProperty().bind(fontSizeFromBlockSize(.16))
                 if(humanMove.all { it is Accelerate }) {
                     val acc = (humanMove.firstOrNull() as? Accelerate)?.acc ?: 0
                     hbox {
