@@ -3,6 +3,7 @@ package sc.gui.view
 import javafx.application.Platform
 import javafx.beans.property.Property
 import javafx.beans.value.ObservableValue
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Priority
@@ -11,6 +12,7 @@ import sc.gui.AppStyle
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.events.*
+import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.gui.view.ControlView.GameControlState.*
 import sc.util.binding
@@ -107,13 +109,15 @@ class ControlView: View() {
                         this.scaleY = 0.1
                         this.scaleX = 0.1
                     }
-                    this.hboxConstraints { this.hGrow = Priority.NEVER }
+                    this.hboxConstraints {
+                        this.margin = Insets(AppStyle.spacing, 0.0, AppStyle.spacing, AppStyle.spacing)
+                        this.hGrow = Priority.NEVER
+                    }
                     tooltip("Abspielgeschwindigkeit")
                 }
                 spinner(
                         min = 0.0,
                         max = 99.0,
-                        initialValue = gameModel.stepSpeed.value,
                         amountToStepBy = 2.0,
                         editable = true,
                         property = gameModel.stepSpeed,
@@ -123,8 +127,7 @@ class ControlView: View() {
                     // TODO unfocus on normal character typed
                     prefWidth = AppStyle.fontSizeRegular.value * 6
                 }
-                // TODO no animations for mq yet
-                //  checkbox("Animationen", AppModel.animate)
+                checkbox("Animationen", AppModel.animate)
             }
     
     init {
