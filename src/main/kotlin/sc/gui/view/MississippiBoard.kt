@@ -87,7 +87,8 @@ class MississippiBoard: View() {
     }
     
     private val calculatedBlockSize = SimpleDoubleProperty(10.0)
-    private val fontSizeBinding = calculatedBlockSize.stringBinding { "-fx-font-size: ${it?.toDouble()?.times(0.3)}" }
+    private fun fontSizeFromBlockSize(factor: Double = .3) =
+        calculatedBlockSize.stringBinding { "-fx-font-size: ${it?.toDouble()?.times(factor)}" }
     
     private var originalState: GameState? = null
     private val humanMove = ArrayList<Action>()
@@ -263,7 +264,7 @@ class MississippiBoard: View() {
             val animState = oldState?.clone()?.takeIf {
                 !wasHumanMove && state.turn - 1 == it.turn && state.lastMove != null
             }
-            fun PieceImage.shipSpeedIndicator(speed: Int) {
+            fun PieceImage.shipBowWaveSpeed(speed: Int) {
                 this.children.removeIf { it.styleClass.any { it.startsWith("waves") } }
                 nameSpeed(speed)?.let { this.addChild("waves_${it}_speed", 0) }
             }
@@ -272,10 +273,10 @@ class MississippiBoard: View() {
                 val shipName = "ship_${ship.team.name.lowercase()}"
                 val shipPiece = createPiece(shipName)
                 
-                nameSpeed(state.getShip(ship.team).speed)?.let { shipPiece.addChild("smoke_${it}_speed") }
-                if(!ship.stuck) {
-                    shipPiece.shipSpeedIndicator(ship.speed)
-                }
+                nameSpeed(state.getShip(ship.team).speed)
+                    ?.let { shipPiece.addChild("smoke_${it}_speed") }
+                if(!ship.stuck)
+                    shipPiece.shipBowWaveSpeed(ship.speed)
                 
                 shipPiece.addChild("coal${ship.coal}")
                 (1..ship.passengers).forEach {
@@ -295,7 +296,7 @@ class MississippiBoard: View() {
                     addPiece(
                         Label("⚙${if(state.currentTeam == ship.team && humanMove.isNotEmpty()) "${ship.movement}/" else ""}${ship.speed}")
                             .apply {
-                                styleProperty().bind(fontSizeBinding)
+                                styleProperty().bind(fontSizeFromBlockSize())
                                 this.effect = DropShadow(AppStyle.spacing, Color.BLACK) // TODO not working somehow
                                 translateY = gridSize / 10
                             }, ship.position
@@ -324,7 +325,7 @@ class MississippiBoard: View() {
                                     byAngle = ship.direction.angleTo(action.direction).toDouble()
                                     this.statusProperty().addListener { _ ->
                                         if(this.status == Animation.Status.RUNNING) {
-                                            piece.shipSpeedIndicator(0)
+                                            piece.shipBowWaveSpeed(0)
                                         }
                                     }
                                 }
@@ -343,9 +344,9 @@ class MississippiBoard: View() {
                                     byY = diff.r * factors.y
                                     this.statusProperty().addListener { _ ->
                                         if(this.status == Animation.Status.RUNNING) {
-                                            piece.shipSpeedIndicator(6)
+                                            piece.shipBowWaveSpeed(6)
                                         } else {
-                                            piece.shipSpeedIndicator(ship.speed)
+                                            piece.shipBowWaveSpeed(ship.speed)
                                         }
                                     }
                                 }
@@ -361,7 +362,7 @@ class MississippiBoard: View() {
                                 ) {
                                     byX = diff.x / 2.0 * factors.x
                                     byY = diff.r * factors.y
-                                    otherPiece.shipSpeedIndicator(0)
+                                    otherPiece.shipBowWaveSpeed(0)
                                 }
                             }
                             
@@ -432,14 +433,15 @@ class MississippiBoard: View() {
         if(awaitingHumanMove()) {
             val ship = gameState?.currentShip ?: return
             addPiece(VBox().apply {
-                translateX = -(AppStyle.spacing * 5)
+                translateX = -gridSize / 2
                 translateY = gridSize / 10
+                styleProperty().bind(fontSizeFromBlockSize(.2))
                 if(humanMove.all { it is Accelerate }) {
                     val acc = (humanMove.firstOrNull() as? Accelerate)?.acc ?: 0
                     hbox {
                         if(ship.speed < 6 && acc > -1)
                             button("+") {
-                                tooltip("Beschleunigen (Accelerate 1)")
+                                tooltip("Beschleunigen (Accelerate +1)")
                                 action { addHumanAction(Accelerate(1)) }
                             }
                         if(ship.speed > 1 && acc < 1)
