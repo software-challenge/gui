@@ -208,8 +208,8 @@ class MississippiBoard: View() {
             }
             
             val tip = state.board.segments.last().center + state.board.nextDirection.vector * 2
+            val fog = ArrayList<CubeCoordinates>()
             if(state.board[tip] != Field.GOAL) {
-                val fog = ArrayList<CubeCoordinates>()
                 Segment.empty(
                     state.board.segments.last().center + state.board.nextDirection.vector * 4,
                     state.board.nextDirection
@@ -221,7 +221,6 @@ class MississippiBoard: View() {
                             neighbors.getOrPut(coord) { ArrayList() }.add(dir)
                     }
                     addPiece(createPiece("fog"), cubeCoordinates)
-                    neighbors.remove(cubeCoordinates)
                 }
                 
                 val excludeTip = state.board.segments.last().center + state.board.nextDirection.vector * 6
@@ -239,24 +238,30 @@ class MississippiBoard: View() {
                 }
             }
             
-            neighbors.forEach {
-                val dirs = it.value
+            neighbors.forEach { (coords, dirs) ->
                 addPiece(
                     createPiece(
+                        when {
+                            state.board.neighboringFields(coords).all { it == null } -> "fog_"
+                            fog.contains(coords) -> "fog_water_"
+                            else -> ""
+                        } +
                         when(dirs.size) {
                             1 -> "border_inner"
                             2 -> "border"
                             3 -> "border_outer"
                             else -> {
-                                logger.warn("Piece $it has wrong border directions: $dirs")
+                                logger.warn("Piece at $coords has wrong border directions: $dirs")
                                 ""
                             }
                         }
                     ).apply {
+                        if(fog.contains(coords))
+                            addChild("water", 0)
                         this.rotate =
                             (dirs.single { dir -> dirs.all { dir.turnCountTo(it) >= 0 } } - (if(dirs.size == 1) 5 else 4)).angle.toDouble()
                     },
-                    it.key
+                    coords
                 )
             }
             

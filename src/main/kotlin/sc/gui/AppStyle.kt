@@ -183,7 +183,6 @@ class AppStyle: Stylesheet() {
             }
         }
         ".goal" { image = resources.url("/mq/fields/goal.png").toURI() }
-        ".fog" { image = resources.url("/mq/fields/background/fog_tile.png").toURI() }
         
         ".island1" { image = resources.url("/mq/fields/islands/empty_island_A.png").toURI() }
         ".island2" { image = resources.url("/mq/fields/islands/empty_island_B.png").toURI() }
@@ -191,6 +190,7 @@ class AppStyle: Stylesheet() {
         
         select(CssRule.c("water")) {
             focusColor = colorBackground
+            image = resources.url("/mq/fields/water_textures/water_A.png").toURI()
             (0..19).forEach { frame ->
                 and(CssRule.pc("idle$frame")) {
                     image = resources.url("/mq/fields/water_textures/water_${(frame.div(5) + 65).toChar()}.png").toURI()
@@ -209,6 +209,13 @@ class AppStyle: Stylesheet() {
         ".border" { image = resources.url("/mq/fields/background/border_vertical.png").toURI() }
         ".border_inner" { image = resources.url("/mq/fields/background/border_inner_corner.png").toURI() }
         ".border_outer" { image = resources.url("/mq/fields/background/border_outer_corner.png").toURI() }
+        ".fog" { image = resources.url("/mq/fields/background/fog_tile.png").toURI() }
+        ".fog_border" { image = resources.url("/mq/fields/background/fog_border_beach_vertical.png").toURI() }
+        ".fog_border_inner" { image = resources.url("/mq/fields/background/fog_border_beach_inner_corner.png").toURI() }
+        ".fog_border_outer" { image = resources.url("/mq/fields/background/fog_border_beach_outer_corner.png").toURI() }
+        ".fog_water_border" { image = resources.url("/mq/fields/background/fog_border_vertical.png").toURI() }
+        ".fog_water_border_inner" { image = resources.url("/mq/fields/background/fog_border_inner_corner.png").toURI() }
+        ".fog_water_border_outer" { image = resources.url("/mq/fields/background/fog_border_outer_corner.png").toURI() }
         
         arrayOf("ship_one", "ship_two").forEach {
             select(CssRule.c(it)) { image = resources.url("/mq/boats/$it.png").toURI() }
