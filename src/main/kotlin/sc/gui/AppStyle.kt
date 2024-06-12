@@ -12,6 +12,7 @@ import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
 import org.slf4j.LoggerFactory
 import sc.api.plugins.Team
+import sc.gui.model.AppModel
 import tornadofx.*
 
 class AppStyle: Stylesheet() {
@@ -25,7 +26,7 @@ class AppStyle: Stylesheet() {
         
         const val pieceOpacity = 1.0
         
-        val fontSizeRegular = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt
+        val fontSizeRegular = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt * AppModel.scaling.value
         val fontSizeBig = fontSizeRegular * 1.2
         val fontSizeHeader = fontSizeBig * 1.5
         

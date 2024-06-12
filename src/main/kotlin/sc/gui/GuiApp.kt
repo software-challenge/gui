@@ -24,6 +24,7 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
     }
     
     override fun stop() {
+        AppModel.save()
         super.stop()
         server.stopServer()
         logger.debug("App stopped, ending program")
@@ -38,12 +39,7 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
     companion object: KLogging()
 }
 
-class GuiApp : ServerApp(AppView::class) {
-    override fun stop() {
-        AppModel.save()
-        super.stop()
-    }
-}
+class GuiApp : ServerApp(AppView::class)
 
 fun main(args: Array<String>) {
     logbackFromPWD()
