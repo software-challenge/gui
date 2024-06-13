@@ -6,6 +6,7 @@ import javafx.beans.value.ObservableValue
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.input.MouseEvent
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import mu.KotlinLogging
 import sc.gui.AppStyle
@@ -38,8 +39,11 @@ class ControlView: View() {
             hbox {
                 alignment = Pos.CENTER
                 spacing = AppStyle.formSpacing
+                val fontSize = parentProperty().doubleBinding {
+                    AppStyle.fontSizeRegular.value / (if(this.parent is HBox) 2 else 1)
+                }
                 button {
-                    prefWidth = AppStyle.fontSizeRegular.value * 15
+                    prefWidthProperty().bind(fontSize.multiply(13))
                     gameControlState.listenImmediately { controlState ->
                         logger.debug { "GameControlState $controlState" }
                         isDisable = controlState == null
@@ -71,7 +75,7 @@ class ControlView: View() {
                 }
                 label {
                     alignment = Pos.CENTER
-                    prefWidth = AppStyle.fontSizeRegular.value * 7
+                    prefWidthProperty().bind(fontSize.multiply(7))
                     textProperty().bind(
                             arrayOf<ObservableValue<Number>>(gameModel.currentTurn, gameModel.availableTurns)
                                     .binding { (cur, all) -> "Zug " + if(cur != all || gameModel.gameOver.value) "$cur/$all" else cur }
@@ -125,7 +129,7 @@ class ControlView: View() {
                 ) {
                     tooltip("Abspielgeschwindigkeit")
                     // TODO unfocus on normal character typed
-                    prefWidth = AppStyle.fontSizeRegular.value * 6
+                    prefWidthProperty().bind(fontSize.multiply(6))
                 }
                 checkbox("Animationen", AppModel.animate)
             }
