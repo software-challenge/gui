@@ -34,7 +34,7 @@ class AppController: Controller() {
         subscribe<TerminateGame> { if(it.close) changeViewTo(GAME_CREATION) }
     }
     
-    fun changeViewTo(newView: ViewType) {
+    private fun changeViewTo(newView: ViewType) {
         val current = model.currentView.get()
         logger.debug("Requested View change from ${current.name} -> $newView")
         if (current == newView) {

@@ -23,7 +23,7 @@ class StatusBinding(private val game: GameModel): StringBinding() {
                     ${gameResult.win?.winner?.let { "${it.displayName} hat gewonnen!" } ?: "Unentschieden"}
                     ${gameResult.win?.reason?.message.orEmpty()}
                     """.trimIndent().trim('\n')
-                } ?: "${game.currentTeam.value.displayName} als nächstes"
+                } ?: "${game.currentTeam.value.displayName} am Zug"
             else game.playerNames.joinToString(" vs ")
     
     val ITeam.displayName

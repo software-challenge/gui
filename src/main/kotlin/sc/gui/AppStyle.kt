@@ -16,7 +16,7 @@ import tornadofx.*
 class AppStyle: Stylesheet() {
     
     companion object {
-        private val logger = LoggerFactory.getLogger(LobbyManager::class.java)
+        private val logger = LoggerFactory.getLogger(this::class.java)
         
         private val resources = ResourceLookup(this)
         
