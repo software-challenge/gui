@@ -21,7 +21,7 @@ class StatusBinding(private val game: GameModel): StringBinding() {
                 game.gameResult.takeIf { game.atLatestTurn.value }?.get()?.let { gameResult ->
                     """
                     ${gameResult.win?.winner?.let { "${it.displayName} hat gewonnen!" } ?: "Unentschieden"}
-                    ${gameResult.win?.reason?.message.orEmpty()}
+                    ${gameResult.win?.reason?.message?.replace(" brig", " übrig").orEmpty()}
                     """.trimIndent().trim('\n')
                 } ?: "${game.currentTeam.value.displayName} am Zug"
             else game.playerNames.joinToString(" vs ")
@@ -70,7 +70,7 @@ class StatusView: View() {
             game.gameState.stringBinding { state ->
                 state?.teamStats(team)?.takeUnless { it.isEmpty() }?.let { stats ->
                     stats.joinToString("\n", "${game.playerNames[team.index]} (${strings["color.${team.color}"]})\n") { stat ->
-                        "${stat.first}: ${stat.second}"
+                        "${stat.label}: ${stat.icon?.let { if(stat.value > 0) it.repeat(stat.value) else "-" } ?: stat.value}"
                     }
                 }
             }
