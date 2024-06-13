@@ -6,7 +6,10 @@ import javafx.beans.property.ReadOnlyBooleanProperty
 import javafx.beans.property.ReadOnlyDoubleProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.scene.Node
 import mu.KotlinLogging
+import sc.gui.AppStyle
+import sc.util.listenImmediately
 import tornadofx.*
 import java.util.prefs.Preferences
 
@@ -25,7 +28,8 @@ object AppModel: Component() {
     val darkMode = configurableBooleanProperty("dark", true)
     val animate = configurableBooleanProperty("animate", true)
     val scaling = configurableNumberProperty("scaling", 1)
-    val decoratedWindow = configurableBooleanProperty("decoratedWindow", true) //System.getProperty("os.name").contains("mac"))
+    val decoratedWindow = configurableBooleanProperty("decoratedWindow", true)
+    //System.getProperty("os.name").contains("mac"))
     
     fun save() {
         logger.debug { "Saving Preferences" }
@@ -36,6 +40,23 @@ object AppModel: Component() {
             save(decoratedWindow)
         }
     }
+    
+    fun getTheme() =
+        if(darkMode.value)
+            AppStyle.Theme.DARK
+        else
+            AppStyle.Theme.LIGHT
+    
+    fun applyTheme(node: Node) =
+        darkMode.listenImmediately { value ->
+            if(value) {
+                node.removeClass(AppStyle.lightColorSchema)
+                node.addClass(AppStyle.darkColorSchema)
+            } else {
+                node.removeClass(AppStyle.darkColorSchema)
+                node.addClass(AppStyle.lightColorSchema)
+            }
+        }
 }
 
 fun Component.configurableNumberProperty(key: String, default: Number): DoubleProperty {

@@ -21,7 +21,6 @@ private val logger = KotlinLogging.logger {}
 
 class AppView: View("Software-Challenge Germany") {
     private val controller: AppController by inject()
-    private val gameFlowController: GameFlowController by inject()
     private val sochaIcon = resources.imageview("/icon.png")
 
     override val root = borderpane {
@@ -104,14 +103,6 @@ class AppView: View("Software-Challenge Germany") {
             }
         })
 
-        controller.model.darkMode.listenImmediately { value ->
-            if(value) {
-                root.removeClass(AppStyle.lightColorSchema)
-                root.addClass(AppStyle.darkColorSchema)
-            } else {
-                root.removeClass(AppStyle.darkColorSchema)
-                root.addClass(AppStyle.lightColorSchema)
-            }
-        }
+        controller.model.applyTheme(root)
     }
 }

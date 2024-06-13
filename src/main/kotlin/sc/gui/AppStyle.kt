@@ -63,14 +63,21 @@ class AppStyle: Stylesheet() {
     
     private fun themed(block: CssSelectionBlock.(theme: Theme) -> Unit) {
         lightColorSchema {
-            block(Theme(false, c("#CCC"), c("#DDD")))
+            block(Theme.LIGHT)
         }
         darkColorSchema {
-            block(Theme(true, c("#444"), c("#222")))
+            block(Theme.DARK)
         }
     }
     
-    data class Theme(val isDark: Boolean, val base: Color, val background: Color)
+    data class Theme(val isDark: Boolean, val base: Color, val background: Color) {
+        val textColor: Color
+            get() = background.invert()
+        companion object {
+            val LIGHT = Theme(false, c("#CCC"), c("#DDD"))
+            val DARK = Theme(true, c("#444"), c("#222"))
+        }
+    }
     
     private fun Selectable.theme(block: CssSelectionBlock.(theme: Theme) -> Unit) {
         val inner = this
@@ -94,9 +101,9 @@ class AppStyle: Stylesheet() {
             backgroundColor += it.base
         }
         themed {
-            textFill = it.background.invert()
+            textFill = it.textColor
             textField {
-                textFill = it.background.invert()
+                textFill = it.textColor
                 backgroundColor += it.background
             }
         }
