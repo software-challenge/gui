@@ -25,6 +25,7 @@ object AppModel: Component() {
     val darkMode = configurableBooleanProperty("dark", true)
     val animate = configurableBooleanProperty("animate", true)
     val scaling = configurableNumberProperty("scaling", 1)
+    val decoratedWindow = configurableBooleanProperty("decoratedWindow", false)
     
     fun save() {
         logger.debug { "Saving Preferences" }
@@ -32,6 +33,7 @@ object AppModel: Component() {
             save(darkMode)
             save(animate)
             save(scaling)
+            save(decoratedWindow)
         }
     }
 }
