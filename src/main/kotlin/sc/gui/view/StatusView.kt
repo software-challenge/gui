@@ -1,12 +1,15 @@
 package sc.gui.view
 
 import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import javafx.scene.text.TextAlignment
 import sc.api.plugins.ITeam
 import sc.api.plugins.Team
 import sc.gui.AppStyle
+import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.gui.strings
 import tornadofx.*
@@ -52,7 +55,9 @@ class StatusView: View() {
     override val root = hbox {
         useMaxWidth = true
         alignment = Pos.CENTER
-        label(playerLabel(Team.ONE))
+        label(playerLabel(Team.ONE)) {
+            textFillProperty().bind(SimpleObjectProperty(Color.valueOf(Team.ONE.color).interpolate(AppModel.getTheme().textColor, .4)))
+        }
         vbox(alignment = Pos.CENTER) {
             this.spacing = AppStyle.spacing
             runLater {
@@ -67,7 +72,26 @@ class StatusView: View() {
             }
             label(ScoreBinding(game))
         }
-        label(playerLabel(Team.TWO))
+        label(playerLabel(Team.TWO)).apply {
+            textFillProperty().bind(SimpleObjectProperty(Color.valueOf(Team.TWO.color).interpolate(AppModel.getTheme().textColor, .4)))
+        }
+        
+        //runLater {
+        //    scene.root.apply {
+        //        add(Label().apply {
+        //            textProperty().bind(playerLabel(Team.ONE))
+        //            stackpaneConstraints {
+        //                alignment = Pos.TOP_LEFT
+        //            }
+        //        })
+        //        add(Label().apply {
+        //            textProperty().bind(playerLabel(Team.TWO))
+        //            stackpaneConstraints {
+        //                alignment = Pos.TOP_RIGHT
+        //            }
+        //        })
+        //    }
+        //}
     }
     
     fun playerLabel(team: Team) =
