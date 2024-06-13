@@ -53,8 +53,13 @@ class StatusView: View() {
         useMaxWidth = true
         alignment = Pos.CENTER
         label(playerLabel(Team.ONE))
-        region { useMaxWidth = true; hgrow = Priority.ALWAYS  }
         vbox(alignment = Pos.CENTER) {
+            this.spacing = AppStyle.spacing
+            runLater {
+                prefWidthProperty().bind(scene.widthProperty().divide(2))
+                hgrow = Priority.ALWAYS
+                maxWidth = AppStyle.fontSizeRegular.value * 60
+            }
             addClass(AppStyle.statusLabel)
             label(StatusBinding(game)) {
                 textAlignment = TextAlignment.CENTER
@@ -62,7 +67,6 @@ class StatusView: View() {
             }
             label(ScoreBinding(game))
         }
-        region { useMaxWidth = true; hgrow = Priority.ALWAYS }
         label(playerLabel(Team.TWO))
     }
     
