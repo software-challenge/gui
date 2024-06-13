@@ -61,10 +61,11 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, val content: S
         viewOrder = 1.0
     }
     
+    val finishFrames = false // true for Penguins, false for MQ
     val frameCount = 20
     var frame = Random.nextInt(1, frameCount)
     fun animate() {
-        if((AppModel.animate.value || frame > 0) && !hasClass("inactive"))
+        if((AppModel.animate.value || finishFrames && frame > 0) && !hasClass("inactive"))
             frame = nextFrame()
     }
     
