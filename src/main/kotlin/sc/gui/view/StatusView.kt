@@ -58,7 +58,7 @@ class StatusView: View() {
         useMaxWidth = true
         alignment = Pos.CENTER
         label(playerLabel(Team.ONE)) {
-            textFillProperty().bind(SimpleObjectProperty(Color.valueOf(Team.ONE.color).interpolate(AppModel.getTheme().textColor, .4)))
+            textFillProperty().bind(AppModel.darkMode.objectBinding { Color.valueOf(Team.ONE.color).interpolate(AppModel.getTheme().textColor, .4) })
         }
         vbox(alignment = Pos.CENTER) {
             this.spacing = AppStyle.spacing
@@ -75,7 +75,7 @@ class StatusView: View() {
             label(ScoreBinding(game))
         }
         label(playerLabel(Team.TWO)).apply {
-            textFillProperty().bind(SimpleObjectProperty(Color.valueOf(Team.TWO.color).interpolate(AppModel.getTheme().textColor, .4)))
+            textFillProperty().bind(AppModel.darkMode.objectBinding { Color.valueOf(Team.TWO.color).interpolate(AppModel.getTheme().textColor, .4) })
         }
         
         //runLater {
