@@ -24,13 +24,13 @@ import sc.gui.model.GameModel
 import sc.plugin2023.Field
 import sc.plugin2023.GameState
 import sc.plugin2023.Move
-import sc.plugin2023.util.PluginConstants
+import sc.plugin2023.util.PenguinConstants.BOARD_SIZE
 import sc.util.listenImmediately
 import tornadofx.*
 
 private val logger = KotlinLogging.logger { }
 
-class BoardView: View() {
+class PenguinBoard: View() {
     private val gameModel: GameModel by inject()
     private val gameState: GameState?
         get() = gameModel.gameState.value as? GameState
@@ -39,7 +39,7 @@ class BoardView: View() {
     private val ice = HashMap<Coordinates, PieceImage>()
     
     private val size = doubleProperty(16.0)
-    private val boardSize = PluginConstants.BOARD_SIZE * 2
+    private val boardSize = BOARD_SIZE * 2
     private val gridSize
         get() = size.value / boardSize * 0.8
     private val calculatedBlockSize = size.doubleBinding { gridSize * 1.9 }
@@ -52,7 +52,7 @@ class BoardView: View() {
             val stateListener = ChangeListener<GameState?> { _, oldState, state ->
                 clearTargetHighlights()
                 if(state == null) {
-                    //children.remove(PluginConstants.BOARD_SIZE.toDouble().pow(2).toInt(), children.size)
+                    //children.remove(BOARD_SIZE.toDouble().pow(2).toInt(), children.size)
                     grid.children.clear()
                     pieces.clear()
                     ice.clear()
@@ -203,7 +203,7 @@ class BoardView: View() {
                             logger.error("Invalid State!")
                         }
                     }
-                    //image.viewOrder = PluginConstants.BOARD_SIZE - coordinates.y.toDouble()
+                    //image.viewOrder = BOARD_SIZE - coordinates.y.toDouble()
                 }
             }
             Platform.runLater {
@@ -293,7 +293,7 @@ class BoardView: View() {
             //logger.trace("$node at $coordinates block size: $it")
             node.anchorpaneConstraints {
                 leftAnchor = coordinates.x * gridSize
-                bottomAnchor = (PluginConstants.BOARD_SIZE - coordinates.y) * gridSize
+                bottomAnchor = (BOARD_SIZE - coordinates.y) * gridSize
             }
         }
         return node

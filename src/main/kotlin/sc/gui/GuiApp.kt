@@ -18,7 +18,7 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
         try {
             Class.forName("com.tangorabox.componentinspector.fx.FXComponentInspectorHandler")
                     .getDeclaredMethod("handleAll").invoke(null)
-            dumpStylesheets()
+            //dumpStylesheets()
         } catch(_: ClassNotFoundException) {
         }
     }

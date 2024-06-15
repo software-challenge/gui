@@ -6,8 +6,7 @@ See the [changelog of the backend](https://github.com/software-challenge/backend
 for details on our versioning scheme.
 
 
-### 24.2.X - 2024-03
-- Indicate ship speed through graphics
+## 2025 Game Hase und Igel
 
 ### 24.2.4 Game generation and ending corrections - 2024-03-21
 

@@ -25,6 +25,7 @@ class AppStyle: Stylesheet() {
         const val pieceOpacity = 1.0
         
         val fontSizeRegular = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt * AppModel.scaling.value
+        val fontSizeSmall = fontSizeRegular * 0.7
         val fontSizeBig = fontSizeRegular * 1.2
         val fontSizeHeader = fontSizeBig * 1.5
         
@@ -123,6 +124,9 @@ class AppStyle: Stylesheet() {
             backgroundRadius = multi((box(fontSizeRegular)))
             borderRadius = backgroundRadius
         }
+        ".small" {
+            fontSize = fontSizeSmall
+        }
         label.theme { theme ->
             effect = DropShadow(formSpacing, theme.base).apply {
                 spread = 0.9
@@ -171,8 +175,6 @@ class AppStyle: Stylesheet() {
             borderStyle += BorderStrokeStyle.DOTTED
             borderColor += box(if(it.isDark) colorBackground.brighter() else colorBackground.darker())
         }
-        
-        mqStyles()
     }
     
     fun mqStyles() {

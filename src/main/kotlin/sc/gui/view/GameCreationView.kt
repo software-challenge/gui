@@ -36,7 +36,7 @@ class GameCreationView: View() {
                 isWrapText = true
                 textAlignment = TextAlignment.CENTER
             }
-            label(guideMq)
+            // TODO label(guide)
             gridpane {
                 hgap = AppStyle.spacing
                 Team.values().forEach { team ->
@@ -93,7 +93,6 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
                                     )
                             )
                             if(selectedFile.isNotEmpty()) {
-                                println("Selected file $selectedFile")
                                 settings.executable.value = selectedFile.first()
                             }
                         }

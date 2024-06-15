@@ -6,6 +6,8 @@ includeBuild("backend") {
     dependencySubstitution {
         substitute(module("software-challenge:plugin"))
                 .with(project(":plugin"))
+        substitute(module("software-challenge:plugin2025"))
+                .with(project(":plugin2025"))
         substitute(module("software-challenge:server"))
                 .with(project(":server"))
     }
