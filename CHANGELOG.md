@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+## 25.0.2 Adjustments - 2024-06-19
+- update background and light/dark mode styling
+
 ## 25.0.1 Prototype - 2024-06-15
 
 ## 2025 Game Hase und Igel
@@ -69,7 +72,7 @@ for details on our versioning scheme.
 - Can view computer players playing (no human moves yet)
 - Preliminary Graphics
 
-## 2024 Game Mississippi Queen - 2023-08
+## 2024 Game Mississippi Queen
 
 ### [23.0.2](https://github.com/software-challenge/backend/commits/23.0.2) Pretty Penguins - 2022-08-21
 - Overhaul of the game display

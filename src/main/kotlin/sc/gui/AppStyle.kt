@@ -20,8 +20,6 @@ class AppStyle: Stylesheet() {
         
         private val resources = ResourceLookup(this)
         
-        private val colorBackground = c("#36d2ff")
-        
         const val pieceOpacity = 1.0
         
         val fontSizeRegular = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt * AppModel.scaling.value
@@ -76,7 +74,7 @@ class AppStyle: Stylesheet() {
             get() = background.invert()
         companion object {
             val LIGHT = Theme(false, c("#CCC"), c("#DDD"))
-            val DARK = Theme(true, c("#444"), c("#222"))
+            val DARK = Theme(true, c("#444"), c("#111"))
         }
     }
     
@@ -113,10 +111,6 @@ class AppStyle: Stylesheet() {
             fontFamily = "Raleway"
             fontSize = fontSizeRegular
             accentColor = Color.MEDIUMPURPLE
-        }
-        background {
-            opacity = 0.7
-            backgroundColor += colorBackground
         }
         
         // Generic Components
@@ -158,6 +152,20 @@ class AppStyle: Stylesheet() {
             prefWidth = 100.percent
         }
         
+        huiStyles()
+    }
+    
+    fun huiStyles() {
+        background {
+            opacity = 0.5
+            backgroundImage += resources.url("/hui/background.png").toURI()
+            backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
+        }
+    }
+    
+    fun ostseeschachStyles() {
+        val colorBackground = c("#36d2ff")
+        
         Team.values().forEach { team ->
             ".${team.color}" {
                 val color = team.color
@@ -174,6 +182,11 @@ class AppStyle: Stylesheet() {
         CssRule.c("grid").theme {
             borderStyle += BorderStrokeStyle.DOTTED
             borderColor += box(if(it.isDark) colorBackground.brighter() else colorBackground.darker())
+        }
+        
+        background {
+            opacity = 0.7
+            backgroundColor += colorBackground
         }
     }
     
@@ -198,7 +211,6 @@ class AppStyle: Stylesheet() {
         ".island3" { image = resources.url("/mq/fields/islands/empty_island_D.png").toURI() }
         
         select(CssRule.c("water")) {
-            focusColor = colorBackground
             image = resources.url("/mq/fields/water_textures/water_A.png").toURI()
             (0..19).forEach { frame ->
                 and(CssRule.pc("idle$frame")) {
@@ -207,7 +219,6 @@ class AppStyle: Stylesheet() {
             }
         }
         select(CssRule.c("stream")) {
-            focusColor = colorBackground
             (0..19).forEach { frame ->
                 and(CssRule.pc("idle$frame")) {
                     image = resources.url("/mq/fields/stream_${(frame.div(4).mod(2) + 65).toChar()}.png").toURI()
