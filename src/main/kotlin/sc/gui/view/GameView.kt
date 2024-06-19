@@ -19,6 +19,7 @@ class GameView: View() {
     override val root = borderpane {
         paddingAll = AppStyle.spacing
         top(StatusView::class)
+        // TODO allow selection? Move boards into plugins?
         center = ServiceLoader.load(GameBoard::class.java).findFirst().get().root
         bottom(ControlView::class)
     }

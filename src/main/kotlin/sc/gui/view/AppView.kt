@@ -12,7 +12,6 @@ import sc.gui.guideMq
 import sc.gui.model.ViewType
 import sc.util.browse
 import sc.util.browseUrl
-import sc.util.listenImmediately
 import tornadofx.*
 import java.io.File
 
@@ -90,7 +89,7 @@ class AppView: View("Software-Challenge Germany") {
             // DEBUG Platform.runLater { scene.addEventHandler(EventType.ROOT) { logger.trace("EVENT: {}", it) } }
         }
 
-        val gameTitle = "Hase und Igel"
+        val gameTitle = "Hase und Igel" // TODO generify properly
         val version = resources.text("/version.txt")
         val sochaTitle = "Software-Challenge GUI $version"
         titleProperty.bind(controller.model.currentView.stringBinding {

@@ -31,6 +31,7 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
     }
     
     init {
+        // TODO reloading stylesheets breaks "Zug" font color in ControlView
         reloadStylesheetsOnFocus()
         server.startServer()
         addStageIcon(resources.image("/icon.png"))
