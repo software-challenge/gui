@@ -6,7 +6,10 @@ See the [changelog of the backend](https://github.com/software-challenge/backend
 for details on our versioning scheme.
 
 ## 25.0.2 Adjustments - 2024-06-19
+- small UX improvements
+- display owned cards
 - update background and light/dark mode styling
+- update window title
 
 ## 25.0.1 Prototype - 2024-06-15
 
