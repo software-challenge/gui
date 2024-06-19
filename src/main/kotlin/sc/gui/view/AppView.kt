@@ -90,7 +90,7 @@ class AppView: View("Software-Challenge Germany") {
             // DEBUG Platform.runLater { scene.addEventHandler(EventType.ROOT) { logger.trace("EVENT: {}", it) } }
         }
 
-        val gameTitle = "Ostseeschach"
+        val gameTitle = "Hase und Igel"
         val version = resources.text("/version.txt")
         val sochaTitle = "Software-Challenge GUI $version"
         titleProperty.bind(controller.model.currentView.stringBinding {
