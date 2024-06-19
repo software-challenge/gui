@@ -1,8 +1,8 @@
 package sc.gui.view
 
 import javafx.beans.binding.StringBinding
-import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
+import javafx.scene.control.Label
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.TextAlignment
@@ -39,15 +39,17 @@ class ScoreBinding(private val game: GameModel): StringBinding() {
     }
     
     override fun computeValue(): String =
-            if(game.gameStarted.value)
-                "Runde ${game.currentRound.get()} - " +
-                       (game.gameState.value?.let {
-                "${it.teamStats(it.startTeam).firstOrNull()?.value} : ${it.teamStats(it.startTeam.opponent()).firstOrNull()?.value}"
+        if(game.gameStarted.value)
+            "Runde ${game.currentRound.get()} - " +
+            (game.gameState.value?.let {
+                "${it.teamStats(it.startTeam).firstOrNull()?.value} : ${
+                    it.teamStats(it.startTeam.opponent()).firstOrNull()?.value
+                }"
             } ?: game.gameState.value?.run {
-                            Team.values().joinToString(" : ") {
-                                getPointsForTeam(it).first().toString()
-                            }
-                        })
+                Team.values().joinToString(" : ") {
+                    getPointsForTeam(it).first().toString()
+                }
+            })
         else "Drücke auf Start".takeUnless { game.gameOver.value && game.atLatestTurn.value }.orEmpty()
 }
 
@@ -57,9 +59,7 @@ class StatusView: View() {
     override val root = hbox {
         useMaxWidth = true
         alignment = Pos.CENTER
-        label(playerLabel(Team.ONE)) {
-            textFillProperty().bind(AppModel.darkMode.objectBinding { Color.valueOf(Team.ONE.color).interpolate(AppModel.getTheme().textColor, .4) })
-        }
+        add(playerLabel(Team.ONE))
         vbox(alignment = Pos.CENTER) {
             this.spacing = AppStyle.spacing
             runLater {
@@ -74,9 +74,7 @@ class StatusView: View() {
             }
             label(ScoreBinding(game))
         }
-        label(playerLabel(Team.TWO)).apply {
-            textFillProperty().bind(AppModel.darkMode.objectBinding { Color.valueOf(Team.TWO.color).interpolate(AppModel.getTheme().textColor, .4) })
-        }
+        add(playerLabel(Team.TWO))
         
         //runLater {
         //    scene.root.apply {
@@ -97,14 +95,23 @@ class StatusView: View() {
     }
     
     fun playerLabel(team: Team) =
-        game.gameState.stringBinding { state ->
-            state?.teamStats(team)?.takeUnless { it.isEmpty() }?.let { stats ->
-                stats.joinToString(
-                    "\n",
-                    "${game.playerNames[team.index]} (${strings["color.${team.color}"]})\n"
-                ) { stat ->
-                    "${stat.label}: ${stat.icon?.let { if(stat.value > 0) it.repeat(stat.value) else "-" } ?: stat.value}"
-                }
-            }
+        Label().apply {
+            textProperty().bind(
+                game.gameState.stringBinding { state ->
+                    state?.teamStats(team)?.takeUnless { it.isEmpty() }?.let { stats ->
+                        stats.joinToString(
+                            "\n",
+                            "${game.playerNames[team.index]} (${strings["color.${team.color}"]})\n"
+                        ) { stat ->
+                            "${stat.label}: ${stat.icon?.let { if(stat.value > 0) it.repeat(stat.value) else "-" } ?: stat.value}"
+                        }
+                    }
+                })
+            textFillProperty().bind(AppModel.darkMode.objectBinding {
+                if(it == true)
+                    Color.hsb(Color.valueOf(team.color).hue, .4, 1.0)
+                else
+                    Color.hsb(Color.valueOf(team.color).hue, .8, .6)
+            })
         }
 }

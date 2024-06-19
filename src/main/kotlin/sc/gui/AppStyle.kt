@@ -74,7 +74,7 @@ class AppStyle: Stylesheet() {
             get() = background.invert()
         companion object {
             val LIGHT = Theme(false, c("#CCC"), c("#DDD"))
-            val DARK = Theme(true, c("#444"), c("#111"))
+            val DARK = Theme(true, c("#222"), c("#111"))
         }
     }
     
