@@ -6,9 +6,7 @@ import javafx.scene.control.Button
 import javafx.scene.effect.ColorAdjust
 import javafx.scene.effect.Glow
 import javafx.scene.input.KeyEvent
-import javafx.scene.layout.GridPane
-import javafx.scene.layout.HBox
-import javafx.scene.layout.Region
+import javafx.scene.layout.*
 import sc.gui.AppStyle
 import sc.plugin2025.*
 import sc.plugin2025.util.HuIConstants
@@ -18,13 +16,20 @@ private const val BOARDSIZE = 9
 
 class HuIBoard: GameBoard<GameState>() {
     val grid = GridPane()
+    val cards = Array(2) { VBox() }
+    
+    private val graphicSize = squareSize.doubleBinding { it?.toDouble()?.div(BOARDSIZE + 4 /* cards on the sides */) ?: 10.0 }
     
     override val root = HBox().apply {
         this.alignment = Pos.CENTER
-        this.children.add(grid)
+        this.children.addAll(cards)
+        cards.forEachIndexed { index, card ->
+            card.alignment = if(index == 0) Pos.CENTER_LEFT else Pos.CENTER_RIGHT
+            card.hgrow = Priority.SOMETIMES
+            card.prefWidthProperty().bind(graphicSize.multiply(3))
+        }
+        this.children.add(1, grid)
     }
-    
-    private val graphicSize = squareSize.doubleBinding { it?.toDouble()?.div(BOARDSIZE) ?: 10.0 }
     
     private val emptyRegion = Region()
     private val fields: Array<Node> = Array(HuIConstants.NUM_FIELDS) { emptyRegion }
@@ -34,25 +39,33 @@ class HuIBoard: GameBoard<GameState>() {
         if(state == null)
             return
         state.board.fields.withIndex().forEach { (index, field) ->
-            fields[index] = putOnPosition(field.name, index)
+            fields[index] = putOnPosition(createImage(field.name), index)
         }
-        state.players.forEach {
-            putOnPosition(it.team.color, it.position, 0.8).apply {
-                if(it.team == state.currentTeam)
+        state.players.forEach { player ->
+            putOnPosition(createImage(player.team.color, 0.8), player.position).apply {
+                if(player.team == state.currentTeam)
                     effect = Glow(.3)
+            }
+            cards[player.team.index].apply {
+                clear()
+                children.addAll(player.getCards().map { createImage("hasenjoker_" + when(it) {
+                    Card.FALL_BACK -> "backward"
+                    Card.HURRY_AHEAD -> "forward"
+                    Card.EAT_SALAD -> "salad"
+                    Card.SWAP_CARROTS -> "tausch"
+                }) })
             }
         }
     }
     
-    private fun putOnPosition(node: Node, position: Int) =
+    private fun <T: Node> putOnPosition(node: T, position: Int): T {
         grid.add(node, position % BOARDSIZE, position / BOARDSIZE)
+        return node
+    }
     
-    private fun putOnPosition(graphic: String, position: Int, scale: Double? = null): Node =
+    private fun createImage(graphic: String, scale: Double? = null) =
         ResizableImageView(scale?.let { graphicSize.multiply(scale) } ?: graphicSize)
-            .also { view ->
-                view.image = resources.image("/hui/${graphic.lowercase()}.png")
-                putOnPosition(view, position)
-            }
+            .also { it.image = resources.image("/hui/${graphic.lowercase()}.png") }
     
     override fun renderHumanControls(state: GameState) {
         if(state.mustEatSalad()) {
