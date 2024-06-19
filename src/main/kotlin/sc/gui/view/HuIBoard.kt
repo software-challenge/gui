@@ -4,6 +4,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.effect.ColorAdjust
+import javafx.scene.effect.Glow
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.HBox
@@ -36,18 +37,22 @@ class HuIBoard: GameBoard<GameState>() {
             fields[index] = putOnPosition(field.name, index)
         }
         state.players.forEach {
-            putOnPosition(it.team.color, it.position)
+            putOnPosition(it.team.color, it.position, 0.8).apply {
+                if(it.team == state.currentTeam)
+                    effect = Glow(.3)
+            }
         }
     }
     
     private fun putOnPosition(node: Node, position: Int) =
         grid.add(node, position % BOARDSIZE, position / BOARDSIZE)
     
-    private fun putOnPosition(graphic: String, position: Int): Node =
-        ResizableImageView(graphicSize).also { view ->
-            view.image = resources.image("/hui/${graphic.lowercase()}.png")
-            putOnPosition(view, position)
-        }
+    private fun putOnPosition(graphic: String, position: Int, scale: Double? = null): Node =
+        ResizableImageView(scale?.let { graphicSize.multiply(scale) } ?: graphicSize)
+            .also { view ->
+                view.image = resources.image("/hui/${graphic.lowercase()}.png")
+                putOnPosition(view, position)
+            }
     
     override fun renderHumanControls(state: GameState) {
         if(state.mustEatSalad()) {
