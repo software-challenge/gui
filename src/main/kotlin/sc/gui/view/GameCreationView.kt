@@ -11,7 +11,6 @@ import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.StartGame
 import sc.gui.controller.selectReplay
-import sc.gui.guideMq
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.model.TeamSettingsModel
@@ -65,7 +64,10 @@ class GameCreationView: View() {
                     fire(StartGame(playerSettingsModels.map { it.item }))
                 }
                 enableWhen(Bindings.and(playerSettingsModels[0].valid, playerSettingsModels[1].valid))
-            }.requestFocus()
+                runLater {
+                    requestFocus()
+                }
+            }
         }
     }
 }
