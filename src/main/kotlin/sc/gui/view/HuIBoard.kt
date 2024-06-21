@@ -18,9 +18,14 @@ class HuIBoard: GameBoard<GameState>() {
     val grid = GridPane()
     val cards = Array(2) { VBox() }
     
-    private val graphicSize = squareSize.doubleBinding { it?.toDouble()?.div(BOARDSIZE + 4 /* cards on the sides */) ?: 10.0 }
+    private val graphicSize = squareSize.doubleBinding {
+        minOf(
+            root.width.div(BOARDSIZE + 4 /* cards on the sides */),
+            viewHeight / BOARDSIZE
+        )
+    }
     
-    override val root = HBox().apply {
+    override val root: Region = HBox().apply {
         this.alignment = Pos.CENTER
         this.children.addAll(cards)
         cards.forEachIndexed { index, card ->
