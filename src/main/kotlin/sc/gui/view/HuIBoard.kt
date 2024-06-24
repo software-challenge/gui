@@ -3,6 +3,7 @@ package sc.gui.view
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
+import javafx.scene.control.Label
 import javafx.scene.effect.ColorAdjust
 import javafx.scene.effect.Glow
 import javafx.scene.input.KeyEvent
@@ -45,6 +46,8 @@ class HuIBoard: GameBoard<GameState>() {
             return
         state.board.fields.withIndex().forEach { (index, field) ->
             fields[index] = putOnPosition(createImage(field.name), index)
+            if(index != 0)
+                putOnPosition(Label(index.toString()), index)
         }
         state.players.forEach { player ->
             putOnPosition(createImage(player.team.color, 0.8), player.position).apply {
