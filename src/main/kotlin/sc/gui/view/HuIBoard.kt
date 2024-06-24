@@ -7,6 +7,8 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.effect.ColorAdjust
 import javafx.scene.effect.Glow
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.*
 import sc.gui.AppStyle
@@ -57,12 +59,7 @@ class HuIBoard: GameBoard<GameState>() {
             }
             cards[player.team.index].apply {
                 clear()
-                children.addAll(player.getCards().map { createImage("hasenjoker_" + when(it) {
-                    Card.FALL_BACK -> "backward"
-                    Card.HURRY_AHEAD -> "forward"
-                    Card.EAT_SALAD -> "salad"
-                    Card.SWAP_CARROTS -> "tausch"
-                }) })
+                children.addAll(player.getCards().map { createImage(it.graphicName()) })
             }
         }
     }
@@ -74,7 +71,7 @@ class HuIBoard: GameBoard<GameState>() {
     
     private fun createImage(graphic: String, scale: Double? = null) =
         ResizableImageView(scale?.let { graphicSize.multiply(scale) } ?: graphicSize)
-            .also { it.image = resources.image("/hui/${graphic.lowercase()}.png") }
+            .also { it.image = resources.image(huiGraphic(graphic)) }
     
     override fun renderHumanControls(state: GameState) {
         if(state.mustEatSalad()) {
@@ -84,7 +81,7 @@ class HuIBoard: GameBoard<GameState>() {
         
         state.possibleExchangeCarrotMoves().forEach { car ->
             putOnPosition(
-                Button("${if(car.amount > 0) "+" else ""}${car.amount}").apply {
+                Button(carrotCostString(car.amount)).apply {
                     translateYProperty().bind(graphicSize.doubleBinding {
                         -car.amount * (it?.toDouble()?.div(20) ?: 3.0)
                     })
@@ -105,7 +102,7 @@ class HuIBoard: GameBoard<GameState>() {
                     if(fallBack != targetPos)
                         return@forEachIndexed
                     node.onClickMove(FallBack)
-                    carrotCost("+${distance * -10}", targetPos)
+                    carrotCost(distance * -10, targetPos)
                 }
                 
                 else -> {
@@ -113,7 +110,23 @@ class HuIBoard: GameBoard<GameState>() {
                         return@forEachIndexed
                     state.possibleCardMoves(distance)?.forEachIndexed { index, advance ->
                         putOnPosition(
-                            Button(advance.getCards().joinToString("\nthen ")).apply {
+                            Button(
+                                advance.getCards().joinToString(" dann\n") { it.label }, HBox().apply {
+                                    advance.getCards().map {
+                                        add(
+                                            ImageView(
+                                                Image(
+                                                    resources.stream(huiGraphic(it.graphicName())),
+                                                    AppStyle.fontSizeRegular.value,
+                                                    AppStyle.fontSizeRegular.value,
+                                                    true,
+                                                    true
+                                                )
+                                            )
+                                        )
+                                    }
+                                }
+                            ).apply {
                                 addClass("small")
                                 translateYProperty().bind(
                                     graphicSize.doubleBinding {
@@ -127,27 +140,40 @@ class HuIBoard: GameBoard<GameState>() {
                             targetPos
                         )
                     } ?: node.onClickMove(Advance(distance))
-                    carrotCost("${GameRuleLogic.calculateCarrots(distance)}", targetPos)
+                    carrotCost(-GameRuleLogic.calculateCarrots(distance), targetPos)
                 }
             }
         }
     }
     
-    fun carrotCost(value: String, position: Int) {
-        putOnPosition(Label("▾ $value").apply {
+    private fun Node.onClickMove(move: Move) {
+        effect = ColorAdjust(0.0, 0.0, -0.5, 0.0)
+        onLeftClick { sendHumanMove(move) }
+    }
+    
+    private fun carrotCost(value: Int, position: Int) =
+        putOnPosition(Label(carrotCostString(value)).apply {
             gridpaneConstraints {
                 this.hAlignment = HPos.CENTER
             }
         }, position)
-    }
-    
-    fun Node.onClickMove(move: Move) {
-        effect = ColorAdjust(0.0, 0.0, -0.5, 0.0)
-        onLeftClick { sendHumanMove(move) }
-    }
     
     override fun handleKeyPress(state: GameState, keyEvent: KeyEvent): Boolean {
         return false
     }
     
 }
+
+private fun huiGraphic(graphic: String) =
+    "/hui/${graphic.lowercase()}.png"
+
+private fun carrotCostString(value: Int) =
+    "▾ ${if(value > 0) "+" else ""}${value}"
+
+private fun Card.graphicName() =
+    "hasenjoker_" + when(this) {
+        Card.FALL_BACK -> "backward"
+        Card.HURRY_AHEAD -> "forward"
+        Card.EAT_SALAD -> "salad"
+        Card.SWAP_CARROTS -> "tausch"
+    }
