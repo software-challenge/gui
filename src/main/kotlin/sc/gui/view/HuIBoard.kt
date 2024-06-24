@@ -1,5 +1,6 @@
 package sc.gui.view
 
+import javafx.geometry.HPos
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
@@ -93,21 +94,22 @@ class HuIBoard: GameBoard<GameState>() {
             )
         }
         
-        val pos = state.currentPlayer.position
+        val currentPos = state.currentPlayer.position
         val maxAdvance = GameRuleLogic.calculateMoveableFields(state.currentPlayer.carrots)
         val fallBack = state.nextFallBack()
         
-        fields.forEachIndexed { fieldPos, node ->
-            val distance = fieldPos - pos
+        fields.forEachIndexed { targetPos, node ->
+            val distance = targetPos - currentPos
             when {
                 distance <= 0 -> {
-                    if(fallBack != fieldPos)
+                    if(fallBack != targetPos)
                         return@forEachIndexed
                     node.onClickMove(FallBack)
+                    carrotCost("+${distance * -10}", targetPos)
                 }
                 
                 else -> {
-                    if(pos + maxAdvance < fieldPos || state.checkAdvance(distance) != null)
+                    if(currentPos + maxAdvance < targetPos || state.checkAdvance(distance) != null)
                         return@forEachIndexed
                     state.possibleCardMoves(distance)?.forEachIndexed { index, advance ->
                         putOnPosition(
@@ -122,12 +124,21 @@ class HuIBoard: GameBoard<GameState>() {
                                 //translateYProperty().bind(graphicSize.doubleBinding { -car.value * (it?.toDouble()?.div(10) ?: 3.0) })
                                 onLeftClick { sendHumanMove(advance) }
                             },
-                            fieldPos
+                            targetPos
                         )
                     } ?: node.onClickMove(Advance(distance))
+                    carrotCost("${GameRuleLogic.calculateCarrots(distance)}", targetPos)
                 }
             }
         }
+    }
+    
+    fun carrotCost(value: String, position: Int) {
+        putOnPosition(Label("▾ $value").apply {
+            gridpaneConstraints {
+                this.hAlignment = HPos.CENTER
+            }
+        }, position)
     }
     
     fun Node.onClickMove(move: Move) {
