@@ -19,7 +19,11 @@ import tornadofx.*
 private const val BOARDSIZE = 9
 
 class HuIBoard: GameBoard<GameState>() {
-    val grid = GridPane()
+    val grid = GridPane().apply {
+        hgap = AppStyle.formSpacing
+        vgap = AppStyle.formSpacing
+        
+    }
     val cards = Array(2) { VBox() }
     
     private val graphicSize = squareSize.doubleBinding {
@@ -35,7 +39,9 @@ class HuIBoard: GameBoard<GameState>() {
         cards.forEachIndexed { index, card ->
             card.alignment = if(index == 0) Pos.CENTER_LEFT else Pos.CENTER_RIGHT
             card.hgrow = Priority.SOMETIMES
-            card.prefWidthProperty().bind(graphicSize.multiply(3))
+            runLater {
+                card.prefWidthProperty().bind(graphicSize.multiply(2))
+            }
         }
         this.children.add(1, grid)
     }
@@ -59,7 +65,7 @@ class HuIBoard: GameBoard<GameState>() {
             }
             cards[player.team.index].apply {
                 clear()
-                children.addAll(player.getCards().map { createImage(it.graphicName()) })
+                children.addAll(player.getCards().map { createImage(it.graphicName(), 1.6) })
             }
         }
     }
