@@ -65,8 +65,10 @@ class ClientController: Controller() {
         var count = 0
         while(possibleMoves.hasNext() && count < 64) {
             val next = possibleMoves.next()
+            @Suppress("UNCHECKED_CAST")
             val newState = (state as TwoPlayerGameState<IMove>).performMove(next)
-            val points = @Suppress("UNCHECKED_CAST") newState.getPointsForTeamExtended(state.currentTeam).sum()
+            val points = newState.getPointsForTeamExtended(state.currentTeam).sum() -
+                         newState.getPointsForTeamExtended(state.otherTeam).sum()
             if(points >= bestValue) {
                 if(points > bestValue)
                     best.clear()
