@@ -169,32 +169,36 @@ class HuIBoard: GameBoard<GameState>() {
                 else -> {
                     if(currentPos + maxAdvance < targetPos || state.checkAdvance(distance) != null)
                         return@forEachIndexed
-                    state.possibleCardMoves(distance)?.forEachIndexed { index, advance ->
+                    var cardCount = 0
+                    state.possibleCardMoves(distance)?.forEach { advance ->
+                        val cards = advance.getCards()
                         putOnPosition(
                             Button(
-                                advance.getCards().joinToString(" dann\n") { it.label }, HBox().apply {
-                                    advance.getCards().map {
-                                        add(
-                                            ImageView(
-                                                Image(
-                                                    resources.stream(huiGraphic(it.graphicName())),
-                                                    AppStyle.fontSizeRegular.value,
-                                                    AppStyle.fontSizeRegular.value,
-                                                    true,
-                                                    true
-                                                )
+                                cards.joinToString(" dann\n") { it.label },
+                                HBox().apply {
+                                    cards.map {
+                                        imageview(
+                                            Image(
+                                                resources.stream(huiGraphic(it.graphicName())),
+                                                AppStyle.fontSizeRegular.value,
+                                                AppStyle.fontSizeRegular.value,
+                                                true,
+                                                true
                                             )
                                         )
                                     }
                                 }
                             ).apply {
                                 addClass("small")
+                                val myCount = cardCount
                                 translateYProperty().bind(
                                     graphicSize.doubleBinding {
-                                        AppStyle.fontSizeRegular.value * index * advance.getCards().size * 2 -
+                                        logger.trace { "Placing $this at $myCount" }
+                                        AppStyle.fontSizeRegular.value * myCount -
                                         (it?.toDouble() ?: 10.0) / 3
                                     }
                                 )
+                                cardCount += cards.size + 1
                                 //translateYProperty().bind(graphicSize.doubleBinding { -car.value * (it?.toDouble()?.div(10) ?: 3.0) })
                                 onLeftClick { sendHumanMove(advance) }
                             },
@@ -208,7 +212,7 @@ class HuIBoard: GameBoard<GameState>() {
     }
     
     private fun Node.onClickMove(move: Move) {
-        effect = ColorAdjust(0.0, 0.0, -0.5, 0.0)
+        effect = ColorAdjust(0.0, 0.0, -0.3, 0.0)
         onLeftClick { sendHumanMove(move) }
     }
     
