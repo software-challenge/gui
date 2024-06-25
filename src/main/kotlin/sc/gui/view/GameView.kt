@@ -50,6 +50,11 @@ abstract class GameBoard<GameState: IGameState>: View(), ChangeListener<IGameSta
             .coerceAtMost(root.scene?.height?.minus(AppStyle.fontSizeBig.value * 12) ?: Double.MAX_VALUE)
     protected val squareSize = doubleProperty(16.0)
     
+    /** Shorter animations when game speed is higher.
+     * Animations should be finished within 2 times this value. */
+    protected val animFactor
+        get() = 3 / gameModel.stepSpeed.value
+    
     init {
         Platform.runLater {
             squareSize.bind(Bindings.min(root.widthProperty(), root.heightProperty().doubleBinding { viewHeight }))

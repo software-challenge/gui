@@ -24,7 +24,6 @@ import javafx.scene.shape.Rectangle
 import javafx.util.Duration
 import sc.api.plugins.CubeCoordinates
 import sc.api.plugins.CubeDirection
-import sc.api.plugins.IGameState
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.plugin2024.*
@@ -81,8 +80,6 @@ class MississippiBoard: GameBoard<GameState>() {
     private val humanMove = ArrayList<Action>()
     
     private var transition: Transition? = null
-    private val animFactor
-        get() = 3 / gameModel.stepSpeed.value
     private val contrastFactor = 0.5
     
     private fun Ship.canAdvance() =

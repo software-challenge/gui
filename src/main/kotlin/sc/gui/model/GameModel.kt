@@ -21,6 +21,7 @@ class GameModel: ViewModel() {
     val gameState = objectProperty<IGameState?>(null)
     val gameResult = objectProperty<GameResult>()
     
+    /** One step happens every 15 / x seconds. Defaults to 5. */
     val stepSpeed = objectProperty(5.0)
     
     val currentTurn = integerBinding(gameState) { value?.turn ?: 0 }
