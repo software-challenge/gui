@@ -9,13 +9,13 @@
     <threshold>5</threshold>
 
     <layout class="ch.qos.logback.classic.PatternLayout">
-      <Pattern>%d{HH:mm:ss} %-5level %36logger{36} - %msg%n</Pattern>
+      <Pattern>%magenta(%d{HH:mm:ss.SSS}) %highlight(%-5level %32([%.-30thread]) %36logger{36}) - %msg%n</Pattern>
     </layout>
   </appender>
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <layout>
-      <pattern>%d{HH:mm:ss} %-5level %36logger{36} - %msg%n</pattern>
+      <pattern>%magenta(%6relative) %highlight(%-5level %23([%.-21thread]) %34logger{34}) - %msg%n</pattern>
     </layout>
   </appender>
 

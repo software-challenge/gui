@@ -2,6 +2,7 @@ readme
 git
 gradle
 ci
+logs
 
 ui
 view
