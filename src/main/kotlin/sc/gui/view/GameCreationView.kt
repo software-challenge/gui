@@ -64,8 +64,10 @@ class GameCreationView: View() {
                     fire(StartGame(playerSettingsModels.map { it.item }))
                 }
                 enableWhen(Bindings.and(playerSettingsModels[0].valid, playerSettingsModels[1].valid))
-                runLater {
-                    requestFocus()
+                whenDocked {
+                    runLater {
+                        requestFocus()
+                    }
                 }
             }
         }
