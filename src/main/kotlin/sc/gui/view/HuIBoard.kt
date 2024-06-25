@@ -1,6 +1,8 @@
 package sc.gui.view
 
+import javafx.animation.KeyFrame
 import javafx.geometry.HPos
+import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
@@ -8,9 +10,10 @@ import javafx.scene.control.Label
 import javafx.scene.effect.ColorAdjust
 import javafx.scene.effect.Glow
 import javafx.scene.image.Image
-import javafx.scene.image.ImageView
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.*
+import javafx.util.Duration
+import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.plugin2025.*
 import sc.plugin2025.util.HuIConstants
@@ -48,29 +51,81 @@ class HuIBoard: GameBoard<GameState>() {
     
     private val emptyRegion = Region()
     private val fields: Array<Node> = Array(HuIConstants.NUM_FIELDS) { emptyRegion }
+    private val players = Team.values().map { createImage(it.color, 0.8) }
+    private val toClear = ArrayList<Node>()
     
     override fun onNewState(oldState: GameState?, state: GameState?) {
-        grid.clear()
+        if(oldState?.board != state?.board) {
+            grid.clear()
+            (state ?: return).board.fields.withIndex().forEach { (index, field) ->
+                fields[index] = putOnPosition(createImage(field.name), index, false)
+                if(index != 0)
+                    putOnPosition(Label(index.toString()), index, false)
+            }
+        } else {
+            toClear.forEach {
+                grid.children.remove(it)
+            }
+            toClear.clear()
+            fields.forEach {
+                it.onMouseClicked = null
+                it.effect = null
+            }
+        }
+        
         if(state == null)
             return
-        state.board.fields.withIndex().forEach { (index, field) ->
-            fields[index] = putOnPosition(createImage(field.name), index)
-            if(index != 0)
-                putOnPosition(Label(index.toString()), index)
+        
+        val animState = oldState?.takeIf {
+            state.turn - 1 == it.turn && state.lastMove is Advance
         }
-        state.players.forEach { player ->
-            putOnPosition(createImage(player.team.color, 0.8), player.position).apply {
-                if(player.team == state.currentTeam)
-                    effect = Glow(.3)
+        Team.values().forEach { team ->
+            putOnPosition(players[team.index], (animState ?: state).getHare(team).position)
+        }
+        
+        val activeTeam = (animState ?: state).currentTeam
+        val piece = players[activeTeam.index]
+        piece.effect = Glow(.3)
+        fun movePiece() {
+            val finalPos = state.getHare(activeTeam).position
+            val coords = Point2D(piece.layoutX, piece.layoutY)
+            piece.isVisible = false
+            putOnPosition(piece, finalPos)
+            root.layout()
+            piece.move(Duration.seconds(animFactor), coords - Point2D(piece.layoutX, piece.layoutY), reversed = true)
+            piece.isVisible = true
+            piece.effect = null
+        }
+        players[state.currentTeam.index].effect = Glow(.3)
+        animState?.let { st ->
+            val pos = st.currentPlayer.position
+            timeline(play = true) {
+                val dist = (state.lastMove as Advance).distance
+                var frame = 0
+                keyFrames.add(
+                    KeyFrame(Duration.seconds(animFactor), {
+                        logger.trace { "Animating $piece to $frame" }
+                        if(frame < dist)
+                            putOnPosition(piece, pos + ++frame)
+                    })
+                )
+                rate = dist.toDouble()
+                cycleCount = (dist * 1.3).toInt() + 1
+                setOnFinished { movePiece() }
             }
-            cards[player.team.index].apply {
-                clear()
-                children.addAll(player.getCards().map { createImage(it.graphicName(), 1.6) })
-            }
+        } ?: movePiece()
+        
+        cards[activeTeam.index].apply {
+            clear()
+            children.addAll(state.getHare(activeTeam).getCards().map { createImage(it.graphicName(), 1.6) })
         }
     }
     
-    private fun <T: Node> putOnPosition(node: T, position: Int): T {
+    private fun <T: Node> putOnPosition(node: T, position: Int, clear: Boolean = true): T {
+        if(clear) {
+            grid.children.remove(node)
+            toClear.add(node)
+        }
         grid.add(node, position % BOARDSIZE, position / BOARDSIZE)
         return node
     }
