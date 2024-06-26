@@ -13,7 +13,6 @@ import javafx.scene.control.Alert
 import javafx.scene.control.Label
 import javafx.scene.effect.ColorAdjust
 import javafx.scene.effect.DropShadow
-import javafx.scene.effect.Glow
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.AnchorPane
@@ -80,7 +79,6 @@ class MississippiBoard: GameBoard<GameState>() {
     private val humanMove = ArrayList<Action>()
     
     private var transition: Transition? = null
-    private val contrastFactor = 0.5
     
     private fun Ship.canAdvance() =
         coal + movement + freeAcc > 0 &&
@@ -556,8 +554,4 @@ class MississippiBoard: GameBoard<GameState>() {
     }
     
     fun coordinateFactors(size: Double = calculatedBlockSize.value) = Point2D(size * .774, size * .668)
-    
-    private fun Node.glow(factor: Number = 1) {
-        effect = Glow(contrastFactor * factor.toDouble())
-    }
 }

@@ -4,8 +4,11 @@ import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
+import javafx.scene.Node
+import javafx.scene.effect.Glow
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Region
+import javafx.util.Duration
 import mu.KotlinLogging
 import sc.api.plugins.IGameState
 import sc.api.plugins.IMove
@@ -54,6 +57,27 @@ abstract class GameBoard<GameState: IGameState>: View(), ChangeListener<IGameSta
      * Animations should be finished within 2 times this value. */
     protected val animFactor
         get() = 3 / gameModel.stepSpeed.value
+    
+    protected val contrastFactor = 0.5
+    protected fun Node.glow(factor: Number = 1) {
+        val glow: Glow = effect.let {
+            it as? Glow ?: Glow().also { effect = it }
+        }
+        timeline {
+            keyframe(Duration.ZERO) {
+                keyvalue(
+                    glow.levelProperty(),
+                    glow.level
+                )
+            }
+            keyframe(Duration.seconds(animFactor / 2)) {
+                keyvalue(
+                    glow.levelProperty(),
+                    contrastFactor * factor.toDouble()
+                )
+            }
+        }
+    }
     
     init {
         Platform.runLater {

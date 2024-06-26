@@ -1,6 +1,7 @@
 package sc.gui.view
 
 import javafx.animation.KeyFrame
+import javafx.animation.Timeline
 import javafx.geometry.HPos
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
@@ -8,7 +9,6 @@ import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.effect.ColorAdjust
-import javafx.scene.effect.Glow
 import javafx.scene.image.Image
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.*
@@ -51,7 +51,13 @@ class HuIBoard: GameBoard<GameState>() {
     
     private val emptyRegion = Region()
     private val fields: Array<Node> = Array(HuIConstants.NUM_FIELDS) { emptyRegion }
-    private val players = Team.values().map { createImage(it.color, 0.8) }
+    private var timeline: Timeline? = null
+    private val playerEffects = Team.values().map { ColorAdjust() }
+    private val players = Team.values().map {
+        createImage(it.color, 0.8).apply {
+            effect = playerEffects[it.index]
+        }
+    }
     private val toClear = ArrayList<Node>()
     
     override fun onNewState(oldState: GameState?, state: GameState?) {
@@ -73,7 +79,7 @@ class HuIBoard: GameBoard<GameState>() {
             }
         }
         
-        if(state == null)
+        if(state == null || oldState == state)
             return
         
         val animState = oldState?.takeIf {
@@ -83,9 +89,29 @@ class HuIBoard: GameBoard<GameState>() {
             putOnPosition(players[team.index], (animState ?: state).getHare(team).position)
         }
         
+        fun highlightPiece(team: Team) {
+            timeline {
+                keyframe(Duration.ZERO) {
+                    playerEffects.forEach {
+                        keyvalue(it.brightnessProperty(), it.brightness)
+                    }
+                }
+                keyframe(Duration.seconds(animFactor / 2)) {
+                    keyvalue(
+                        playerEffects[team.opponent().index].brightnessProperty(),
+                        0.0
+                    )
+                    keyvalue(
+                        playerEffects[team.index].brightnessProperty(),
+                        contrastFactor / 2
+                    )
+                }
+            }
+        }
+        
         val activeTeam = (animState ?: state).currentTeam
         val piece = players[activeTeam.index]
-        piece.effect = Glow(.3)
+        highlightPiece(activeTeam)
         fun movePiece() {
             val finalPos = state.getHare(activeTeam).position
             val coords = Point2D(piece.layoutX, piece.layoutY)
@@ -95,26 +121,32 @@ class HuIBoard: GameBoard<GameState>() {
             piece.move(Duration.seconds(animFactor), Point2D.ZERO) {
                 fromX = coords.x - piece.layoutX
                 fromY = coords.y - piece.layoutY
+                setOnFinished {
+                    if(state == gameState)
+                        highlightPiece(state.currentTeam)
+                }
             }
             piece.isVisible = true
-            piece.effect = null
         }
-        players[state.currentTeam.index].effect = Glow(.3)
         animState?.let { st ->
             val pos = st.currentPlayer.position
-            timeline(play = true) {
-                val dist = (state.lastMove as Advance).distance
-                var frame = 0
-                keyFrames.add(
-                    KeyFrame(Duration.seconds(animFactor), {
-                        logger.trace { "Animating $piece to $frame" }
-                        if(frame < dist)
-                            putOnPosition(piece, pos + ++frame)
-                    })
-                )
-                rate = dist.toDouble()
-                cycleCount = (dist * 1.3).toInt() + 1
-                setOnFinished { movePiece() }
+            runLater {
+                timeline?.stop()
+                timeline = timeline(play = true) {
+                    val dist = (state.lastMove as Advance).distance
+                    var frame = 0
+                    keyFrames.add(
+                        KeyFrame(Duration.seconds(animFactor),
+                            {
+                                logger.trace { "Animating $piece to $frame" }
+                                if(frame < dist)
+                                    putOnPosition(piece, pos + ++frame)
+                            })
+                    )
+                    rate = dist.toDouble()
+                    cycleCount = (dist * 1.3).toInt() + 1
+                    setOnFinished { movePiece() }
+                }
             }
         } ?: movePiece()
         
@@ -214,7 +246,7 @@ class HuIBoard: GameBoard<GameState>() {
     }
     
     private fun Node.onClickMove(move: Move) {
-        effect = ColorAdjust(0.0, 0.0, -0.3, 0.0)
+        effect = ColorAdjust().apply { brightness = -contrastFactor / 2 }
         onLeftClick { sendHumanMove(move) }
     }
     
