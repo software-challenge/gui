@@ -77,7 +77,7 @@ class HuIBoard: GameBoard<GameState>() {
             return
         
         val animState = oldState?.takeIf {
-            state.turn - 1 == it.turn && state.lastMove is Advance
+            state.turn in arrayOf(it.turn + 1, it.turn + 2) && state.lastMove is Advance
         }
         Team.values().forEach { team ->
             putOnPosition(players[team.index], (animState ?: state).getHare(team).position)
