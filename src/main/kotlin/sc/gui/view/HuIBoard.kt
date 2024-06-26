@@ -92,7 +92,10 @@ class HuIBoard: GameBoard<GameState>() {
             piece.isVisible = false
             putOnPosition(piece, finalPos)
             root.layout()
-            piece.move(Duration.seconds(animFactor), coords - Point2D(piece.layoutX, piece.layoutY), reversed = true)
+            piece.move(Duration.seconds(animFactor), Point2D.ZERO) {
+                fromX = coords.x - piece.layoutX
+                fromY = coords.y - piece.layoutY
+            }
             piece.isVisible = true
             piece.effect = null
         }
@@ -199,7 +202,6 @@ class HuIBoard: GameBoard<GameState>() {
                                     }
                                 )
                                 cardCount += cards.size + 1
-                                //translateYProperty().bind(graphicSize.doubleBinding { -car.value * (it?.toDouble()?.div(10) ?: 3.0) })
                                 onLeftClick { sendHumanMove(advance) }
                             },
                             targetPos
