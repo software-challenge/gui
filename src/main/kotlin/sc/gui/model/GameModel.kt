@@ -51,7 +51,9 @@ class GameModel: ViewModel() {
     
     init {
         subscribe<HumanMoveRequest> {
-            isHumanTurn.set(true)
+            runLater {
+                isHumanTurn.set(true)
+            }
             fire(PauseGame(false))
         }
         subscribe<HumanMoveAction> {
