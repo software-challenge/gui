@@ -25,7 +25,6 @@ class GameModel: ViewModel() {
     val stepSpeed = objectProperty(5.0)
     
     val currentTurn = integerBinding(gameState) { value?.turn ?: 0 }
-    val currentRound = integerBinding(gameState) { value?.round ?: 0 }
     val currentTeam = nonNullObjectBinding(gameState) { value?.currentTeam ?: Team.ONE }
     
     val isHumanTurn = booleanProperty(false)
