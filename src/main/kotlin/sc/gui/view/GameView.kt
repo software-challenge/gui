@@ -38,7 +38,9 @@ abstract class GameBoard<GameState: IGameState>: View(), ChangeListener<IGameSta
     
     protected val awaitingHumanMove =
         gameModel.isHumanTurn.booleanBinding(gameModel.atLatestTurn) {
-            gameModel.atLatestTurn.value && gameModel.isHumanTurn.value
+            (gameModel.atLatestTurn.value && gameModel.isHumanTurn.value).also {
+                logger.trace { "Awaiting Human Turn: $it"}
+            }
         }
     
     override fun changed(observable: ObservableValue<out IGameState>?, oldValue: IGameState?, newValue: IGameState?) {

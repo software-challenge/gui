@@ -40,7 +40,8 @@ class GameFlowController: Controller() {
     private val gameModel: GameModel by inject()
     /** Whether to request a new Move when stepping forward. */
     private var stepController = true
-    private val interval = Timeline(KeyFrame(Duration.seconds(gameModel.stepSpeed.value * 3), {
+    private val stepInterval = Timeline(KeyFrame(Duration.seconds(gameModel.stepSpeed.value * 3), {
+        logger.trace { "Firing Stepgame" }
         fire(StepGame(1))
     })).apply {
         cycleCount = Animation.INDEFINITE
@@ -58,9 +59,9 @@ class GameFlowController: Controller() {
                 stepController = false
             } ?: fire(GamePausedEvent(event.pause))
             if(event.pause) {
-                interval.pause()
+                stepInterval.pause()
             } else {
-                interval.play()
+                stepInterval.play()
             }
         }
         subscribe<StepGame> { event ->
@@ -70,12 +71,12 @@ class GameFlowController: Controller() {
                     if(event.steps > 0)
                         history.firstOrNull { it.turn >= turn } ?: run {
                             if(stepController) {
-                                // At latest available turn
+                                logger.trace { "Requesting next turn" }
                                 controller?.step()
                                 history.lastOrNull()
                             } else {
-                                // First Step after PauseGame Event
-                                interval.pause()
+                                logger.trace { "Pausing Stepping" }
+                                stepInterval.pause()
                                 stepController = true
                                 null
                             }
@@ -90,7 +91,7 @@ class GameFlowController: Controller() {
                 controller = null
         }
         subscribe<TerminateGame> {
-            interval.pause()
+            stepInterval.pause()
             history.clear()
             controller?.cancel()
             controller = null

@@ -13,8 +13,10 @@ fun browseUrl(url: String) {
     //URI(url).openDesktop(Desktop.Action.BROWSE, Desktop::browse)
 }
 
-fun browse(file: File) =
-        file.openDesktop(Desktop.Action.BROWSE_FILE_DIR, Desktop::browseFileDirectory)
+fun browse(file: File) {
+    logger.trace { "Browsing $file" }
+    file.openDesktop(Desktop.Action.BROWSE_FILE_DIR, Desktop::browseFileDirectory)
+}
 
 fun <T> T.openDesktop(action: Desktop.Action, open: Desktop.(T) -> Unit) {
     val desktop = Desktop.getDesktop()
