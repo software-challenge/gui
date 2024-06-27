@@ -4,6 +4,7 @@ gradle
 ci
 logs
 
+util
 ui
 view
 style

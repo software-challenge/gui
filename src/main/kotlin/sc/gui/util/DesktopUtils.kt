@@ -26,9 +26,9 @@ fun <T> T.openDesktop(action: Desktop.Action, open: Desktop.(T) -> Unit) {
     } else {
         logger.debug("Opening {} with xdg-open", this)
         try {
-            Runtime.getRuntime().exec("xdg-open", arrayOf(this.toString()))
+            ProcessBuilder("xdg-open", this.toString()).start()
         } catch(ex: IOException) {
-            ex.printStackTrace()
+            logger.warn("Failed to open {}", this, ex)
         }
     }
 }
