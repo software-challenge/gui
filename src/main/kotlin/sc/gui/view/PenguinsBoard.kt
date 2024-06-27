@@ -21,11 +21,11 @@ import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.GameModel
+import sc.gui.util.listenImmediately
 import sc.plugin2023.Field
 import sc.plugin2023.GameState
 import sc.plugin2023.Move
 import sc.plugin2023.util.PenguinConstants.BOARD_SIZE
-import sc.util.listenImmediately
 import tornadofx.*
 
 private val logger = KotlinLogging.logger { }

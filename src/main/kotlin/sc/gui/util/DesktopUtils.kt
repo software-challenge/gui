@@ -1,4 +1,4 @@
-package sc.util
+package sc.gui.util
 
 import mu.KotlinLogging
 import tornadofx.*

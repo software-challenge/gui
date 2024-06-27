@@ -7,10 +7,10 @@ import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.gui.model.ViewType
 import sc.gui.model.ViewType.*
+import sc.gui.util.toggle
 import sc.gui.view.GameCreationView
 import sc.gui.view.GameLoadingView
 import sc.gui.view.GameView
-import sc.util.toggle
 import tornadofx.*
 
 object NavigateBackEvent: FXEvent()

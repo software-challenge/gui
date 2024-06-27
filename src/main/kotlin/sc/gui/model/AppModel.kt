@@ -1,15 +1,10 @@
 package sc.gui.model
 
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.DoubleProperty
-import javafx.beans.property.ReadOnlyBooleanProperty
-import javafx.beans.property.ReadOnlyDoubleProperty
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.*
 import javafx.scene.Node
 import mu.KotlinLogging
 import sc.gui.AppStyle
-import sc.util.listenImmediately
+import sc.gui.util.listenImmediately
 import tornadofx.*
 import java.util.prefs.Preferences
 

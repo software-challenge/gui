@@ -10,7 +10,7 @@ import javafx.scene.layout.StackPane
 import javafx.util.Duration
 import mu.KotlinLogging
 import sc.gui.model.AppModel
-import sc.util.listenImmediately
+import sc.gui.util.listenImmediately
 import tornadofx.*
 import java.lang.ref.WeakReference
 import kotlin.random.Random

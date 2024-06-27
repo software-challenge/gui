@@ -15,11 +15,11 @@ import sc.gui.GameReadyEvent
 import sc.gui.events.*
 import sc.gui.model.AppModel
 import sc.gui.model.GameModel
+import sc.gui.util.binding
+import sc.gui.util.booleanBinding
+import sc.gui.util.listen
+import sc.gui.util.listenImmediately
 import sc.gui.view.ControlView.GameControlState.*
-import sc.util.binding
-import sc.util.booleanBinding
-import sc.util.listen
-import sc.util.listenImmediately
 import tornadofx.*
 
 class ControlView: View() {

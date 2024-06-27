@@ -1,8 +1,9 @@
-package sc.util
+package sc.gui.util
 
 import ch.qos.logback.core.FileAppender
 import java.io.File
 
+/** Rotates files and automatically cleans up old ones. */
 class TidyFileAppender<E>: FileAppender<E>() {
     /** Defaults to the parent dir of the current logfile. */
     var directory: String? = null

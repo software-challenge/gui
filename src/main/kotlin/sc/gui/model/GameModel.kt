@@ -11,8 +11,8 @@ import sc.gui.controller.CreateGame
 import sc.gui.controller.HumanMoveAction
 import sc.gui.controller.HumanMoveRequest
 import sc.gui.events.*
+import sc.gui.util.booleanBinding
 import sc.shared.GameResult
-import sc.util.booleanBinding
 import tornadofx.*
 import kotlin.math.max
 

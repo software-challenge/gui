@@ -3,7 +3,7 @@
   <timestamp key="time" datePattern="MM-dd'T'HHmmss"/>
 
   <appender name="FILE"
-            class="sc.util.TidyFileAppender">
+            class="sc.gui.util.TidyFileAppender">
     <file>${LOG_DIRECTORY:-log}/game-server_${time}.log</file>
     <maxHistory>20</maxHistory>
     <threshold>5</threshold>

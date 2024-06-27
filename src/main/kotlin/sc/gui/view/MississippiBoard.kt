@@ -25,6 +25,7 @@ import sc.api.plugins.CubeCoordinates
 import sc.api.plugins.CubeDirection
 import sc.api.plugins.Team
 import sc.gui.AppStyle
+import sc.gui.util.listenImmediately
 import sc.plugin2024.*
 import sc.plugin2024.Field
 import sc.plugin2024.actions.Accelerate
@@ -32,7 +33,6 @@ import sc.plugin2024.actions.Advance
 import sc.plugin2024.actions.Push
 import sc.plugin2024.actions.Turn
 import sc.plugin2024.util.MQConstants
-import sc.util.listenImmediately
 import tornadofx.*
 import kotlin.math.absoluteValue
 import kotlin.math.pow
