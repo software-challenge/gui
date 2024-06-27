@@ -118,15 +118,15 @@ class HuIBoard: GameBoard<GameState>() {
             piece.isVisible = false
             putOnPosition(piece, finalPos)
             root.layout()
+            piece.translateX = coords.x - piece.layoutX
+            piece.translateY = coords.y - piece.layoutY
+            piece.isVisible = true
             piece.move(Duration.seconds(animFactor), Point2D.ZERO) {
-                fromX = coords.x - piece.layoutX
-                fromY = coords.y - piece.layoutY
                 setOnFinished {
                     if(state == gameState)
                         highlightPiece(state.currentTeam)
                 }
             }
-            piece.isVisible = true
         }
         animState?.let { st ->
             val pos = st.currentPlayer.position
