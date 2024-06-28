@@ -95,7 +95,7 @@ tasks {
     
     shadowJar {
         destinationDirectory.set(buildDir)
-        archiveClassifier.set(OperatingSystem.current().familyName)
+        archiveClassifier.set("${OperatingSystem.current().familyName.replace(" ", "")}-${System.getProperty("os.arch")}")
         manifest {
             attributes(
                     "Add-Opens" to arrayOf(
