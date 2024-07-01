@@ -5,7 +5,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-latest-large]
+        # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+        os: [ubuntu-latest, windows-latest, macos-latest]
         jdk: [11]
     steps:
     - uses: actions/checkout@v4
@@ -13,38 +14,71 @@ jobs:
         submodules: true
         fetch-depth: 9
     - name: Set up JDK ${{ matrix.jdk }}
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
         java-version: ${{ matrix.jdk }}
     - name: Cache Gradle packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.gradle/caches
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-        restore-keys: ${{ runner.os }}-gradle
+        key: ${{ matrix.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
+        restore-keys: ${{ matrix.os }}-gradle
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Execute tests
       run: ./gradlew check
     - name: Assemble fat jar
       run: ./gradlew shadowJar
-    - name: Upload jars as artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload jar as artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: software-challenge-gui-${{ github.sha }}-jars
+        name: software-challenge-gui-${{ github.sha }}-${{ matrix.os }}
+        path: build/*.jar
+  build-arm:
+    runs-on: ${{ matrix.os }}
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      matrix:
+        os: [macos-latest-large]
+        jdk: [11]
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+        fetch-depth: 2
+    - name: Set up JDK ${{ matrix.jdk }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: ${{ matrix.jdk }}
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.gradle/caches
+        key: ${{ matrix.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
+        restore-keys: ${{ matrix.os }}-gradle
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Assemble fat jar
+      run: ./gradlew shadowJar
+    - name: Upload jar as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: software-challenge-gui-${{ github.sha }}-${{ matrix.os }}
         path: build/*.jar
   release:
-    needs: build
+    needs: [build, build-arm]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4 # https://github.com/actions/download-artifact
       with:
-        name: software-challenge-gui-${{ github.sha }}-jars
+        pattern: software-challenge-gui-${{ github.sha }}-*
         path: build
+        merge-multiple: true
     - name: Release ${{ github.ref }}
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v1 # https://github.com/softprops/action-gh-release
       with:
         files: build/*.jar
       env:
