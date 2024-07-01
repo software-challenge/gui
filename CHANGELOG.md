@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+## 25.0.5 Tie Loose Ends - 2024-07-01
+- Fix small animation flash
+- End game with turn 60
+- Fix log opening on Linux
+- Update CI Pipeline
+
 ## 25.0.4 Smoothen Animations - 2024-06-26
 - Smoother animation of player figures
 - Fix erratic game start issues human vs human
