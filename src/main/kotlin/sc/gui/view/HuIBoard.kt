@@ -74,7 +74,11 @@ class HuIBoard: GameBoard<GameState>() {
                     false
                 )
                 if(index != 0)
-                    putOnPosition(Label(index.toString()), index, false)
+                    putOnPosition(
+                        Label(index.toString()).apply { isMouseTransparent = true },
+                        index,
+                        false
+                    )
             }
         } else {
             toClear.forEach {
@@ -263,6 +267,7 @@ class HuIBoard: GameBoard<GameState>() {
             gridpaneConstraints {
                 this.hAlignment = HPos.CENTER
             }
+            isMouseTransparent = true
         }, position)
     
     override fun handleKeyPress(state: GameState, keyEvent: KeyEvent): Boolean {
