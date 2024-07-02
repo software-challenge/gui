@@ -95,7 +95,8 @@ class HuIBoard: GameBoard<GameState>() {
             return
         
         val animState = oldState?.takeIf {
-            state.turn in arrayOf(it.turn + 1, it.turn + 2) && state.lastMove is Advance
+            state.turn in arrayOf(it.turn + 1, it.turn + 2) &&
+                state.lastMove is Advance
         }
         Team.values().forEach { team ->
             putOnPosition(players[team.index], (animState ?: state).getHare(team).position)
@@ -258,7 +259,7 @@ class HuIBoard: GameBoard<GameState>() {
     }
     
     private fun Node.onClickMove(move: Move) {
-        effect = ColorAdjust().apply { brightness = -contrastFactor / 2 }
+        effect = ColorAdjust().apply { brightness = contrastFactor * -0.6 }
         onLeftClick { sendHumanMove(move) }
     }
     
