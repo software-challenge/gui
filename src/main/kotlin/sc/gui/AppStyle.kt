@@ -158,7 +158,7 @@ class AppStyle: Stylesheet() {
     fun huiStyles() {
         background {
             opacity = 0.5
-            backgroundImage += resources.url("/hui/background.png").toURI()
+            backgroundImage += resources.url("/hui/background_very_simple.png").toURI()
             backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
         }
     }

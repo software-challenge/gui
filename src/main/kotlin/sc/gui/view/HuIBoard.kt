@@ -16,6 +16,7 @@ import javafx.util.Duration
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.plugin2025.*
+import sc.plugin2025.Field
 import sc.plugin2025.util.HuIConstants
 import tornadofx.*
 
@@ -54,7 +55,7 @@ class HuIBoard: GameBoard<GameState>() {
     private var timeline: Timeline? = null
     private val playerEffects = Team.values().map { ColorAdjust() }
     private val players = Team.values().map {
-        createImage(it.color, 0.8).apply {
+        createImage("player_" + it.color, 0.8).apply {
             effect = playerEffects[it.index]
         }
     }
@@ -64,7 +65,14 @@ class HuIBoard: GameBoard<GameState>() {
         if(oldState?.board != state?.board) {
             grid.clear()
             (state ?: return).board.fields.withIndex().forEach { (index, field) ->
-                fields[index] = putOnPosition(createImage(field.name), index, false)
+                logger.trace { "Adding Field $field" }
+                fields[index] = putOnPosition(
+                    createImage((if(field in arrayOf(Field.START, Field.GOAL)) "" else "field_") + field.name).apply {
+                        isPickOnBounds = true
+                    },
+                    index,
+                    false
+                )
                 if(index != 0)
                     putOnPosition(Label(index.toString()), index, false)
             }
@@ -270,9 +278,4 @@ private fun carrotCostString(value: Int) =
     "▾ ${if(value > 0) "+" else ""}${value}"
 
 private fun Card.graphicName() =
-    "hasenjoker_" + when(this) {
-        Card.FALL_BACK -> "backward"
-        Card.HURRY_AHEAD -> "forward"
-        Card.EAT_SALAD -> "salad"
-        Card.SWAP_CARROTS -> "tausch"
-    }
+    "card_" + this.name.replace("_", "")
