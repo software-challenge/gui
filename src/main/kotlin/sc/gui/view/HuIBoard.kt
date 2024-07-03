@@ -67,7 +67,7 @@ class HuIBoard: GameBoard<GameState>() {
             (state ?: return).board.fields.withIndex().forEach { (index, field) ->
                 logger.trace { "Adding Field $field" }
                 fields[index] = putOnPosition(
-                    createImage((if(field in arrayOf(Field.START, Field.GOAL)) "" else "field_") + field.name).apply {
+                    createImage(("field_") + field.name).apply {
                         isPickOnBounds = true
                     },
                     index,
