@@ -95,8 +95,7 @@ class HuIBoard: GameBoard<GameState>() {
             return
         
         val animState = oldState?.takeIf {
-            state.turn in arrayOf(it.turn + 1, it.turn + 2) &&
-                state.lastMove is Advance
+            state.succeedsState(it) && state.lastMove is Advance
         }
         Team.values().forEach { team ->
             putOnPosition(players[team.index], (animState ?: state).getHare(team).position)
@@ -134,10 +133,39 @@ class HuIBoard: GameBoard<GameState>() {
             piece.translateX = coords.x - piece.layoutX
             piece.translateY = coords.y - piece.layoutY
             piece.isVisible = true
-            piece.move(Duration.seconds(animFactor), Point2D.ZERO) {
-                setOnFinished {
-                    if(state == gameState)
-                        highlightPiece(state.currentTeam)
+            parallelTransition {
+                this.children.add(piece.move(
+                    Duration.seconds(animFactor),
+                    destination = Point2D.ZERO,
+                    play = false,
+                ) {
+                    setOnFinished {
+                        if(state == gameState)
+                            highlightPiece(state.currentTeam)
+                    }
+                })
+                oldState?.takeIf { state.succeedsState(it) }?.let { old ->
+                    state.players.forEach { player ->
+                        var carrotDiff = player.carrots - old.getHare(player.team).carrots
+                        val m = state.lastMove
+                        if(m is Advance && player.team == old.currentTeam)
+                            carrotDiff += m.cost
+                        if(carrotDiff != 0) {
+                            val label = carrotCost(carrotDiff, player.position)
+                            this.children.addAll(
+                                label.move(
+                                    Duration.seconds(animFactor),
+                                    Point2D(0.0, graphicSize.value * -.6),
+                                    play = false,
+                                ),
+                                label.fade(
+                                    Duration.seconds(animFactor * 2),
+                                    0.0,
+                                    play = false,
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
