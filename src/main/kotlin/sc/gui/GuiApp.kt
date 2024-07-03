@@ -18,7 +18,9 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
         try {
             Class.forName("com.tangorabox.componentinspector.fx.FXComponentInspectorHandler")
                     .getDeclaredMethod("handleAll").invoke(null)
-            //dumpStylesheets()
+            dumpStylesheets()
+            // reloading stylesheets breaks "Zug" font color in ControlView
+            // reloadStylesheetsOnFocus()
         } catch(_: ClassNotFoundException) {
         }
     }
@@ -31,8 +33,6 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
     }
     
     init {
-        // TODO reloading stylesheets breaks "Zug" font color in ControlView
-        reloadStylesheetsOnFocus()
         server.startServer()
         addStageIcon(resources.image("/icon.png"))
     }
