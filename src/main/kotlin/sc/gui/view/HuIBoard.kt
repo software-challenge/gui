@@ -228,9 +228,19 @@ class HuIBoard: GameBoard<GameState>() {
                     var cardCount = 0
                     state.possibleCardMoves(distance)?.forEach { advance ->
                         val cards = advance.getCards()
+                        var suffix = ""
+                        if(state.board.getField(targetPos) == Field.MARKET ||
+                           cards.getOrNull(cards.lastIndex - 1)?.let {
+                               val clone = state.clonePlayer()
+                               it.play(clone)
+                               clone.currentField == Field.MARKET
+                           } == true
+                        ) {
+                            suffix = " kaufen"
+                        }
                         putOnPosition(
                             Button(
-                                cards.joinToString(" dann\n") { it.label },
+                                cards.joinToString(" dann\n") { it.label } + suffix,
                                 HBox().apply {
                                     cards.map {
                                         imageview(
