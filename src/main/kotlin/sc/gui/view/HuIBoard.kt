@@ -184,7 +184,15 @@ class HuIBoard: GameBoard<GameState>() {
     
     override fun renderHumanControls(state: GameState) {
         if(state.mustEatSalad()) {
-            fields[state.currentPlayer.position].onClickMove(EatSalad)
+            val pos = state.currentPlayer.position
+            fields[pos].onClickMove(EatSalad)
+            putOnPosition(
+                Button("Salat fressen").apply {
+                    addClass("small")
+                    onLeftClick { sendHumanMove(EatSalad) }
+                },
+                pos
+            )
             return
         }
         
