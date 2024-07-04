@@ -29,6 +29,7 @@ class AppStyle: Stylesheet() {
         
         val spacing = fontSizeRegular.value
         val formSpacing = spacing / 2
+        val miniSpacing = formSpacing / 4
         
         // CLASSES
         val background by cssclass()

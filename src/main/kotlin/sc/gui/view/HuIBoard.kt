@@ -3,15 +3,17 @@ package sc.gui.view
 import javafx.animation.KeyFrame
 import javafx.animation.Timeline
 import javafx.geometry.HPos
+import javafx.geometry.Orientation
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
+import javafx.scene.control.Tooltip
 import javafx.scene.effect.ColorAdjust
-import javafx.scene.image.Image
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.*
+import javafx.scene.shape.Rectangle
 import javafx.util.Duration
 import sc.api.plugins.Team
 import sc.gui.AppStyle
@@ -253,8 +255,20 @@ class HuIBoard: GameBoard<GameState>() {
                 else -> {
                     if(currentPos + maxAdvance < targetPos || state.checkAdvance(distance) != null)
                         return@forEachIndexed
-                    var cardCount = 0
-                    state.possibleCardMoves(distance)?.forEach { advance ->
+                    val flow = FlowPane(Orientation.HORIZONTAL).apply {
+                        maxWidthProperty().bind(graphicSize)
+                        clip = Rectangle().apply {
+                            widthProperty().bind(graphicSize)
+                            heightProperty().bind(graphicSize)
+                        }
+                        hgap = AppStyle.miniSpacing
+                        vgap = AppStyle.miniSpacing
+                    }
+                    var totalCards = 0
+                    state.possibleCardMoves(distance)?.also {
+                        putOnPosition(flow, targetPos)
+                        totalCards = it.sumOf { it.getCards().size }
+                    }?.forEach { advance ->
                         val cards = advance.getCards()
                         var suffix = ""
                         if(state.board.getField(targetPos) == Field.MARKET ||
@@ -266,37 +280,22 @@ class HuIBoard: GameBoard<GameState>() {
                         ) {
                             suffix = " kaufen"
                         }
-                        putOnPosition(
-                            Button(
-                                cards.joinToString(" dann\n") { it.label } + suffix,
-                                HBox().apply {
-                                    cards.map {
-                                        imageview(
-                                            Image(
-                                                resources.stream(huiGraphic(it.graphicName())),
-                                                AppStyle.fontSizeRegular.value,
-                                                AppStyle.fontSizeRegular.value,
-                                                true,
-                                                true
-                                            )
-                                        )
-                                    }
+                        flow.add(Button().apply {
+                            paddingAll = AppStyle.miniSpacing
+                            hbox {
+                                cards.map {
+                                    add(ResizableImageView(graphicSize.multiply(.6 / totalCards + if(suffix.isEmpty()) .15 else .1)).apply {
+                                        image = resources.image(huiGraphic(it.graphicName()))
+                                    })
                                 }
-                            ).apply {
-                                addClass("small")
-                                val myCount = cardCount
-                                translateYProperty().bind(
-                                    graphicSize.doubleBinding {
-                                        logger.trace { "Placing $this at $myCount" }
-                                        AppStyle.fontSizeRegular.value * myCount -
-                                        (it?.toDouble() ?: 10.0) / 3
-                                    }
-                                )
-                                cardCount += cards.size + 1
-                                onLeftClick { sendHumanMove(advance) }
-                            },
-                            targetPos
-                        )
+                                if(suffix.isNotEmpty())
+                                    children.add(children.size - 1, Label("+").hboxConstraints {
+                                        alignment = Pos.CENTER
+                                    })
+                            }
+                            tooltip = Tooltip(cards.joinToString(" dann ") { it.label } + suffix)
+                            onLeftClick { sendHumanMove(advance) }
+                        })
                     } ?: node.onClickMove(Advance(distance))
                     carrotCost(-GameRuleLogic.calculateCarrots(distance), targetPos)
                 }
