@@ -6,6 +6,7 @@ import javafx.geometry.HPos
 import javafx.geometry.Orientation
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
+import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
@@ -13,7 +14,6 @@ import javafx.scene.control.Tooltip
 import javafx.scene.effect.ColorAdjust
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.*
-import javafx.scene.shape.Rectangle
 import javafx.util.Duration
 import sc.api.plugins.Team
 import sc.gui.AppStyle
@@ -256,17 +256,14 @@ class HuIBoard: GameBoard<GameState>() {
                     if(currentPos + maxAdvance < targetPos || state.checkAdvance(distance) != null)
                         return@forEachIndexed
                     val flow = FlowPane(Orientation.HORIZONTAL).apply {
-                        maxWidthProperty().bind(graphicSize)
-                        clip = Rectangle().apply {
-                            widthProperty().bind(graphicSize)
-                            heightProperty().bind(graphicSize)
-                        }
-                        hgap = AppStyle.miniSpacing
-                        vgap = AppStyle.miniSpacing
+                        this.prefWidthProperty().bind(graphicSize)
+                        this.maxWidthProperty().bind(graphicSize)
+                        this.hgap = AppStyle.miniSpacing
+                        this.vgap = AppStyle.miniSpacing
                     }
                     var totalCards = 0
                     state.possibleCardMoves(distance)?.also {
-                        putOnPosition(flow, targetPos)
+                        putOnPosition(Group(Group(flow).apply { this.isManaged = false }), targetPos)
                         totalCards = it.sumOf { it.getCards().size }
                     }?.forEach { advance ->
                         val cards = advance.getCards()
