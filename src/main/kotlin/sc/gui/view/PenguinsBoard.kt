@@ -243,12 +243,10 @@ class PenguinBoard: View() {
     }
     
     private fun Node.removeHover() {
-        //removeClass(AppStyle.gridHover, AppStyle.gridLock)
         effect = null
     }
     
     private fun Node.addHover(lock: Boolean = false, team: Team? = null): Node {
-        //addClass(if(lock) AppStyle.gridLock else AppStyle.gridHover)
         effect =
                 if(team == null) Glow(if(lock) 0.7 else 0.4)
                 else ColorAdjust(team.colorAdjust, -0.6, 0.0, 0.0)

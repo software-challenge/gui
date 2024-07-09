@@ -42,9 +42,6 @@ class AppStyle: Stylesheet() {
         val statusLabel by cssclass()
         val plainLabel by cssclass()
         
-        val gridHover by csspseudoclass()
-        val gridLock by csspseudoclass()
-        
         fun background() =
             StackPane(
                 Region().apply {
@@ -164,33 +161,6 @@ class AppStyle: Stylesheet() {
         }
     }
     
-    fun ostseeschachStyles() {
-        val colorBackground = c("#36d2ff")
-        
-        Team.values().forEach { team ->
-            ".${team.color}" {
-                val color = team.color
-                backgroundColor += c(color, 0.6).desaturate()
-                and(gridHover) {
-                    backgroundColor += c(color, 0.6)
-                }
-                and(gridLock) {
-                    backgroundColor += c(color, 0.8)
-                }
-            }
-        }
-        
-        CssRule.c("grid").theme {
-            borderStyle += BorderStrokeStyle.DOTTED
-            borderColor += box(if(it.isDark) colorBackground.brighter() else colorBackground.darker())
-        }
-        
-        background {
-            opacity = 0.7
-            backgroundColor += colorBackground
-        }
-    }
-    
     fun mqStyles() {
         background {
             opacity = 0.7
@@ -258,4 +228,35 @@ class AppStyle: Stylesheet() {
             select(CssRule.c("coal$it")) { image = resources.url("/mq/boats/coal/coal_$it.png").toURI() }
         }
     }
+    
+    val gridHover by csspseudoclass()
+    val gridLock by csspseudoclass()
+    
+    fun ostseeschachStyles() {
+        val colorBackground = c("#36d2ff")
+        
+        Team.values().forEach { team ->
+            ".${team.color}" {
+                val color = team.color
+                backgroundColor += c(color, 0.6).desaturate()
+                and(gridHover) {
+                    backgroundColor += c(color, 0.6)
+                }
+                and(gridLock) {
+                    backgroundColor += c(color, 0.8)
+                }
+            }
+        }
+        
+        CssRule.c("grid").theme {
+            borderStyle += BorderStrokeStyle.DOTTED
+            borderColor += box(if(it.isDark) colorBackground.brighter() else colorBackground.darker())
+        }
+        
+        background {
+            opacity = 0.7
+            backgroundColor += colorBackground
+        }
+    }
+    
 }

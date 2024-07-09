@@ -13,7 +13,6 @@ import sc.gui.AppStyle
 import sc.gui.GamePausedEvent
 import sc.gui.GameReadyEvent
 import sc.gui.events.*
-import sc.gui.model.AppModel
 import sc.gui.model.GameModel
 import sc.gui.util.binding
 import sc.gui.util.booleanBinding
@@ -131,7 +130,7 @@ class ControlView: View() {
                     // TODO unfocus on normal character typed
                     prefWidthProperty().bind(fontSize.multiply(6))
                 }
-                checkbox("Animationen", AppModel.animate)
+                // TODO depend on game: checkbox("Animationen", AppModel.animate)
             }
     
     init {
