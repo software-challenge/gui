@@ -2,7 +2,6 @@ package sc.gui.view
 
 import javafx.animation.KeyFrame
 import javafx.animation.Timeline
-import javafx.geometry.HPos
 import javafx.geometry.Orientation
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
@@ -17,25 +16,21 @@ import javafx.scene.layout.*
 import javafx.util.Duration
 import sc.api.plugins.Team
 import sc.gui.AppStyle
+import sc.gui.util.listenImmediately
 import sc.plugin2025.*
 import sc.plugin2025.Field
 import sc.plugin2025.util.HuIConstants
 import tornadofx.*
-
-private const val BOARDSIZE = 9
+import kotlin.math.*
 
 class HuIBoard: GameBoard<GameState>() {
-    val grid = GridPane().apply {
-        hgap = AppStyle.formSpacing
-        vgap = AppStyle.formSpacing
-        
-    }
+    val grid = AnchorPane()
     val cards = Array(2) { VBox() }
     
     private val graphicSize = squareSize.doubleBinding {
         minOf(
-            root.width.div(BOARDSIZE + 4 /* cards on the sides */),
-            viewHeight / BOARDSIZE
+            root.width.div(12 + 4 /* cards on the sides */),
+            viewHeight / 12
         )
     }
     
@@ -59,6 +54,7 @@ class HuIBoard: GameBoard<GameState>() {
     private val players = Team.values().map {
         createImage("player_" + it.color, 0.8).apply {
             effect = playerEffects[it.index]
+            isMouseTransparent = true
         }
     }
     private val toClear = ArrayList<Node>()
@@ -76,11 +72,13 @@ class HuIBoard: GameBoard<GameState>() {
                     false
                 )
                 if(index != 0)
-                    putOnPosition(
-                        Label(index.toString()).apply { isMouseTransparent = true },
-                        index,
-                        false
-                    )
+                    runLater { // So the labels are in front of the fields
+                        putOnPosition(
+                            Label(index.toString()).apply { isMouseTransparent = true },
+                            index,
+                            false
+                        )
+                    }
             }
         } else {
             toClear.forEach {
@@ -157,7 +155,7 @@ class HuIBoard: GameBoard<GameState>() {
                             this.children.addAll(
                                 label.move(
                                     Duration.seconds(animFactor),
-                                    Point2D(0.0, graphicSize.value * -.6),
+                                    Point2D(0.0, graphicSize.value * -1.0),
                                     play = false,
                                 ),
                                 label.fade(
@@ -195,16 +193,50 @@ class HuIBoard: GameBoard<GameState>() {
         
         cards[activeTeam.index].apply {
             clear()
-            children.addAll(state.getHare(activeTeam).getCards().map { createImage(it.graphicName(), 1.6) })
+            children.addAll(state.getHare(activeTeam).getCards().map { createImage(it.graphicName(), 1.5) })
         }
     }
+    
+    private var spiralFactor = 0.0
+    /** Translated from https://stackoverflow.com/questions/78472829/equidistant-points-along-an-archimedean-spiral-with-fixed-gap-between-points-and*/
+    private fun spiral(radius: Double, numCycles: Double, nPoints: Int): DoubleArray {
+        val dr = radius / numCycles
+        val thetaMax = 2 * PI * numCycles
+        val a = radius / thetaMax
+        spiralFactor = radius / (2 * PI * numCycles.toInt())
+        val sMax = (a / 2) * (thetaMax * sqrt(1 + thetaMax.pow(2)) + ln(thetaMax + sqrt(1 + thetaMax.pow(2))))
+        val s = DoubleArray(nPoints) { dr / 2 + it * (sMax - dr / 2) / nPoints }
+        
+        val theta = DoubleArray(nPoints)
+        for(i in s.indices) {
+            var t = 0.0
+            var told = t + 1
+            while(abs(t - told) > 1.0e-10) {
+                told = t
+                t = sqrt((-1 + sqrt(1 + 4 * (2 * s[i] / a - ln(t + sqrt(1 + t.pow(2)))).pow(2))) / 2)
+            }
+            theta[i] = t
+        }
+        return theta
+    }
+    
+    val spiralRadius = 5.0
+    val archimedeanSpiral = spiral(spiralRadius, 3.65, HuIConstants.NUM_FIELDS).reversed()
     
     private fun <T: Node> putOnPosition(node: T, position: Int, clear: Boolean = true): T {
         if(clear) {
             grid.children.remove(node)
             toClear.add(node)
         }
-        grid.add(node, position % BOARDSIZE, position / BOARDSIZE)
+        grid.add(node)
+        val pos = archimedeanSpiral[position]
+        graphicSize.listenImmediately { value ->
+            val adjustedValue = value.toDouble()
+            node.anchorpaneConstraints {
+                leftAnchor = adjustedValue * (spiralFactor * pos * cos(pos) + spiralRadius)
+                bottomAnchor = adjustedValue * (spiralFactor * pos * sin(pos) + spiralRadius)
+            }
+        }
         return node
     }
     
@@ -218,6 +250,7 @@ class HuIBoard: GameBoard<GameState>() {
             fields[pos].onClickMove(EatSalad)
             putOnPosition(
                 Button("Salat fressen").apply {
+                    translateYProperty().bind(graphicSize.divide(-2))
                     addClass("small")
                     onLeftClick { sendHumanMove(EatSalad) }
                 },
@@ -229,9 +262,8 @@ class HuIBoard: GameBoard<GameState>() {
         state.possibleExchangeCarrotMoves().forEach { car ->
             putOnPosition(
                 Button(carrotCostString(car.amount)).apply {
-                    translateYProperty().bind(graphicSize.doubleBinding {
-                        -car.amount * (it?.toDouble()?.div(20) ?: 3.0)
-                    })
+                    translateX = AppStyle.spacing
+                    translateYProperty().bind(graphicSize.multiply(-car.amount / 20.0 - .2))
                     onLeftClick { sendHumanMove(car) }
                 },
                 state.currentPlayer.position
@@ -256,14 +288,19 @@ class HuIBoard: GameBoard<GameState>() {
                     if(currentPos + maxAdvance < targetPos || state.checkAdvance(distance) != null)
                         return@forEachIndexed
                     val flow = FlowPane(Orientation.HORIZONTAL).apply {
-                        this.prefWidthProperty().bind(graphicSize)
-                        this.maxWidthProperty().bind(graphicSize)
-                        this.hgap = AppStyle.miniSpacing
-                        this.vgap = AppStyle.miniSpacing
+                        maxWidthProperty().bind(graphicSize)
+                        hgap = AppStyle.miniSpacing
+                        vgap = AppStyle.miniSpacing
                     }
                     var totalCards = 0
                     state.possibleCardMoves(distance)?.also {
-                        putOnPosition(Group(Group(flow).apply { this.isManaged = false }), targetPos)
+                        putOnPosition(
+                            Group(Group(flow).apply { isManaged = false }).apply {
+                                translateX = AppStyle.spacing
+                                translateY = -AppStyle.formSpacing
+                            },
+                            targetPos
+                        )
                         totalCards = it.sumOf { it.getCards().size }
                     }?.forEach { advance ->
                         val cards = advance.getCards()
@@ -307,9 +344,7 @@ class HuIBoard: GameBoard<GameState>() {
     
     private fun carrotCost(value: Int, position: Int) =
         putOnPosition(Label(carrotCostString(value)).apply {
-            gridpaneConstraints {
-                this.hAlignment = HPos.CENTER
-            }
+            translateY = -.8 * graphicSize.value
             isMouseTransparent = true
         }, position)
     
