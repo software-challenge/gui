@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+## 25.0.6 Board Redesign - 2024-07-09
+- make some move interactions more intuitive
+- arrange the board as archimedean spiral
+- more animations
+
 ## 25.0.5 Tie Loose Ends - 2024-07-01
 - Fix small animation flash
 - End game with turn 60
