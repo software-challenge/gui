@@ -3,6 +3,7 @@ package sc.gui
 import javafx.stage.Stage
 import mu.KLogging
 import sc.gui.controller.ServerController
+import sc.gui.events.*
 import sc.gui.model.AppModel
 import sc.gui.view.AppView
 import sc.server.Configuration
@@ -26,10 +27,11 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
     }
     
     override fun stop() {
+        fire(TerminateGame())
         AppModel.save()
         super.stop()
         server.stopServer()
-        logger.debug("App stopped, ending program")
+        logger.info("App stopped, Terminating")
     }
     
     init {
