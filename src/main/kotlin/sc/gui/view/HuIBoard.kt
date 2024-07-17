@@ -294,6 +294,7 @@ class HuIBoard: GameBoard<GameState>() {
                     }
                     var totalCards = 0
                     state.possibleCardMoves(distance)?.also {
+                        node.darken()
                         putOnPosition(
                             Group(Group(flow).apply { isManaged = false }).apply {
                                 translateX = AppStyle.spacing
@@ -338,8 +339,12 @@ class HuIBoard: GameBoard<GameState>() {
     }
     
     private fun Node.onClickMove(move: Move) {
-        effect = ColorAdjust().apply { brightness = contrastFactor * -0.6 }
+        darken()
         onLeftClick { sendHumanMove(move) }
+    }
+    
+    private fun Node.darken() {
+        effect = ColorAdjust().apply { brightness = contrastFactor * -0.6 }
     }
     
     private fun carrotCost(value: Int, position: Int) =
