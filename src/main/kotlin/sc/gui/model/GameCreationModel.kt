@@ -6,13 +6,14 @@ import java.io.File
 
 enum class PlayerType(val description: String) {
     HUMAN("Mensch"),
-    COMPUTER_EXAMPLE("Beispiel-Computerspieler"),
+    COMPUTER_SIMPLE("Zufalls-Computerspieler"),
+    COMPUTER_ADVANCED("Fortgeschrittener Computerspieler"),
     COMPUTER("Eigener Computerspieler, von GUI gestartet"),
     EXTERNAL("Eigener Computerspieler, manuell gestartet");
     override fun toString() = description
     companion object {
         /** Helper to disable human player until ready. */
-        fun allowedValues() = values() //.takeLast(3)
+        fun allowedValues() = entries //.takeLast(3)
     }
 }
 

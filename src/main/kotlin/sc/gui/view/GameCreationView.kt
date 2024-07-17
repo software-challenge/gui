@@ -19,7 +19,7 @@ import java.io.File
 
 class GameCreationView: View() {
     private val playerSettingsModels =
-            arrayOf(TeamSettings("Spieler 1", PlayerType.COMPUTER_EXAMPLE),
+            arrayOf(TeamSettings("Spieler 1", PlayerType.COMPUTER_SIMPLE),
                     TeamSettings("Spieler 2", PlayerType.allowedValues().first()))
                     .map { TeamSettingsModel(it) }
     
@@ -84,6 +84,7 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
     
     private fun updatePlayerType() {
         // TODO: work with proper binding of property
+        root.bottom = label("")
         when(settings.type.value as PlayerType) {
             PlayerType.COMPUTER -> {
                 root.center = hbox(AppStyle.spacing) {
@@ -109,16 +110,16 @@ class PlayerFileSelectFragment(private val team: Team, private val settings: Tea
                 }
             }
             PlayerType.EXTERNAL -> {
-                root.center = label("Spieler muss nach Erstellung des Spiels separat gestartet werden")
-                root.bottom = label("")
+                root.center = label("Spieler nach Erstellung des Spiels separat starten")
             }
-            PlayerType.COMPUTER_EXAMPLE -> {
-                root.center = label("Ein einfacher, interner Computerspieler")
-                root.bottom = label()
+            PlayerType.COMPUTER_SIMPLE -> {
+                root.center = label("Ein einfacher, eingebauter Computerspieler")
+            }
+            PlayerType.COMPUTER_ADVANCED -> {
+                root.center = label("Ein forgeschrittener, eingebauter Computerspieler")
             }
             PlayerType.HUMAN -> {
                 root.center = label("Ein von Hand gesteuerter Spieler")
-                root.bottom = label()
             }
         }
         (root.center as Region).paddingTop = AppStyle.formSpacing
