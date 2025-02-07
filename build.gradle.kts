@@ -10,7 +10,7 @@ plugins {
     }
     
     application
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "1.9.25"
     id("org.openjfx.javafxplugin") version "0.0.14"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     
@@ -74,7 +74,7 @@ tasks {
         }
     }
     withType<KotlinCompile> {
-        dependsOn(backend.task(":server:deploy"))
+        dependsOn(backend.task(":server:bundle"))
         kotlinOptions {
             jvmTarget = minJavaVersion.toString()
             freeCompilerArgs = listOf("-Xjvm-default=all")
