@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+## 25.1.0 Add Advanced Player - 2025-02-13
+- add advanced player option
+- save replay on exit
+
 ## 25.0.6 Board Redesign - 2024-07-09
 - make some move interactions more intuitive
 - arrange the board as archimedean spiral
