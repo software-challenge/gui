@@ -153,15 +153,15 @@ class HuIBoard: GameBoard<GameState>() {
                         if(m is Advance && player.team == old.currentTeam)
                             carrotDiff += m.cost
                         if(carrotDiff != 0) {
-                            val label = carrotCost(carrotDiff, player.position)
+                            val carrotPopup = carrotCost(carrotDiff, player.position)
                             this.children.addAll(
-                                label.move(
+                                carrotPopup.move(
                                     Duration.seconds(animFactor),
-                                    Point2D(0.0, graphicSize.value * -1.0),
+                                    Point2D(0.0, graphicSize.value * -1.3),
                                     play = false,
                                 ),
-                                label.fade(
-                                    Duration.seconds(animFactor * 2),
+                                carrotPopup.fade(
+                                    Duration.seconds(animFactor * 4),
                                     0.0,
                                     play = false,
                                 )
