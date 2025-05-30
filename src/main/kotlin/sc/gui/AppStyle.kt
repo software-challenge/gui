@@ -22,7 +22,8 @@ class AppStyle: Stylesheet() {
         
         const val pieceOpacity = 1.0
         
-        val fontSizeRegular = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt * AppModel.scaling.value
+        val fontSizeUnscaled = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt
+        val fontSizeRegular = fontSizeUnscaled * AppModel.scaling.value
         val fontSizeSmall = fontSizeRegular * 0.7
         val fontSizeBig = fontSizeRegular * 1.2
         val fontSizeHeader = fontSizeBig * 1.5

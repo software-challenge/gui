@@ -61,7 +61,7 @@ class StatusView: View() {
         alignment = Pos.CENTER
         add(playerLabel(Team.ONE))
         vbox(alignment = Pos.CENTER) {
-            this.spacing = AppStyle.spacing
+            this.spacing = AppStyle.fontSizeUnscaled.value
             runLater {
                 prefWidthProperty().bind(scene.widthProperty().divide(2))
                 hgrow = Priority.ALWAYS

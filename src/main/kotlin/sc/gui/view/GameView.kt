@@ -52,7 +52,7 @@ abstract class GameBoard<GameState: IGameState>: View(), ChangeListener<IGameSta
     abstract override val root: Region
     protected val viewHeight: Double
         get() = (root.parent as? Region ?: root).height
-            .coerceAtMost(root.scene?.height?.minus(AppStyle.fontSizeBig.value * 12) ?: Double.MAX_VALUE)
+            .coerceAtMost(root.scene?.height?.minus(AppStyle.fontSizeBig.value * 4 + AppStyle.fontSizeUnscaled.value * 10) ?: Double.MAX_VALUE)
     protected val squareSize = doubleProperty(16.0)
     
     /** Shorter animations when game speed is higher.
