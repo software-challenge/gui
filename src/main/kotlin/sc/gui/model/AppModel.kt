@@ -23,8 +23,7 @@ object AppModel: Component() {
     val darkMode = configurableBooleanProperty("dark", true)
     val animate = configurableBooleanProperty("animate", true)
     val scaling = configurableNumberProperty("scaling", 1)
-    val decoratedWindow = configurableBooleanProperty("decoratedWindow", true)
-    //System.getProperty("os.name").contains("mac"))
+    val decoratedWindow = configurableBooleanProperty("decoratedWindow", true) //System.getProperty("os.name").contains("mac"))
     
     fun save() {
         logger.debug { "Saving Preferences" }

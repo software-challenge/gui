@@ -71,7 +71,7 @@ class AppStyle: Stylesheet() {
         val textColor: Color
             get() = background.invert()
         companion object {
-            val LIGHT = Theme(false, c("#CCC"), c("#DDD"))
+            val LIGHT = Theme(false, c("#CCC"), c("#FFF"))
             val DARK = Theme(true, c("#222"), c("#111"))
         }
     }
@@ -120,7 +120,7 @@ class AppStyle: Stylesheet() {
             fontSize = fontSizeSmall
         }
         label.theme { theme ->
-            effect = DropShadow(formSpacing, theme.base).apply {
+            effect = DropShadow(formSpacing, theme.background).apply {
                 spread = 0.9
                 blurType = BlurType.TWO_PASS_BOX
             }
@@ -150,7 +150,8 @@ class AppStyle: Stylesheet() {
             prefWidth = 100.percent
         }
         
-        huiStyles()
+        // FINALS
+        //huiStyles()
     }
     
     fun huiStyles() {

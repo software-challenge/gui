@@ -230,11 +230,11 @@ class HuIBoard: GameBoard<GameState>() {
         }
         grid.add(node)
         val pos = archimedeanSpiral[position]
-        graphicSize.listenImmediately { value ->
-            val adjustedValue = value.toDouble()
+        graphicSize.listenImmediately { size ->
+            val size = size.toDouble()
             node.anchorpaneConstraints {
-                leftAnchor = adjustedValue * (spiralFactor * pos * cos(pos) + spiralRadius)
-                bottomAnchor = adjustedValue * (spiralFactor * pos * sin(pos) + spiralRadius)
+                leftAnchor = size * (spiralFactor * pos * cos(pos) + spiralRadius) * 1.2
+                bottomAnchor = size * (spiralFactor * pos * sin(pos) + spiralRadius)
             }
         }
         return node
