@@ -52,7 +52,7 @@ class HuIBoard: GameBoard<GameState>() {
     private var timeline: Timeline? = null
     private val playerEffects = Team.values().map { ColorAdjust() }
     private val players = Team.values().map {
-        createImage("player_" + it.color, 0.8).apply {
+        createImage("player_" + it.color, 1.3).apply {
             effect = playerEffects[it.index]
             isMouseTransparent = true
         }
@@ -130,13 +130,15 @@ class HuIBoard: GameBoard<GameState>() {
             piece.isVisible = false
             putOnPosition(piece, finalPos)
             root.layout()
-            piece.translateX = coords.x - piece.layoutX
-            piece.translateY = coords.y - piece.layoutY
+            
+            val offset = Point2D(AppStyle.spacing * (activeTeam.index - 1), AppStyle.spacing * activeTeam.index)
+            piece.translateX = coords.x - piece.layoutX + offset.x
+            piece.translateY = coords.y - piece.layoutY + offset.y
             piece.isVisible = true
             parallelTransition {
                 this.children.add(piece.move(
                     Duration.seconds(animFactor),
-                    destination = Point2D.ZERO,
+                    destination = offset,
                     play = false,
                 ) {
                     setOnFinished {
