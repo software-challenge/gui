@@ -57,15 +57,25 @@ class HuIBoard: GameBoard<GameState>() {
             isMouseTransparent = true
         }
     }
+    /** Nodes to clear between moves. */
     private val toClear = ArrayList<Node>()
     
     override fun onNewState(oldState: GameState?, state: GameState?) {
         if(oldState?.board != state?.board) {
+            // Clear grid on new game
             grid.clear()
+            
+            // These are spacers that prevent curious shifting of the gameboard
+            // from player movement protruding view boundaries
+            putOnPosition(createImage("player_red", 1.6).apply {
+                opacity = 0.0; isMouseTransparent = true }, 20, false)
+            putOnPosition(createImage("player_red", 1.6).apply {
+                opacity = 0.0; isMouseTransparent = true }, 12, false)
+            
             (state ?: return).board.fields.withIndex().forEach { (index, field) ->
                 logger.trace { "Adding Field $field" }
                 fields[index] = putOnPosition(
-                    createImage(("field_") + field.name).apply {
+                    createImage("field_" + field.name).apply {
                         isPickOnBounds = true
                     },
                     index,
