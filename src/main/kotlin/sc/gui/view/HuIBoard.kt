@@ -264,6 +264,11 @@ class HuIBoard: GameBoard<GameState>() {
         state.possibleExchangeCarrotMoves().forEach { car ->
             putOnPosition(
                 Button(carrotCostString(car.amount)).apply {
+                    fixHoverInsets()
+                    if(logger.isTraceEnabled)
+                        hoverProperty().listenImmediately {
+                            logger.trace { "$this: $padding on hover $it" }
+                        }
                     translateX = AppStyle.spacing
                     translateYProperty().bind(graphicSize.multiply(-car.amount / 20.0 - .2))
                     onLeftClick { sendHumanMove(car) }
