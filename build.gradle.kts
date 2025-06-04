@@ -11,7 +11,7 @@ plugins {
     
     application
     kotlin("jvm") version "1.9.25"
-    id("org.openjfx.javafxplugin") version "0.0.14"
+    id("org.openjfx.javafxplugin") version "0.1.0"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     
     id("com.github.ben-manes.versions") version "0.47.0"
@@ -86,7 +86,7 @@ tasks {
     }
     
     javafx {
-        version = "17.0.8"
+        version = "17.0.15"
         val mods = mutableListOf("javafx.base", "javafx.controls", "javafx.fxml")
         if(debug)
             mods.addAll(listOf("javafx.swing"))
