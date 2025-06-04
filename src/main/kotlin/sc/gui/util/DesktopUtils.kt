@@ -1,6 +1,6 @@
 package sc.gui.util
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import tornadofx.*
 import java.awt.Desktop
 import java.io.File

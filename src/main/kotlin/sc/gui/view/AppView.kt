@@ -1,7 +1,7 @@
 package sc.gui.view
 
 import javafx.application.Platform
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.CreateGame

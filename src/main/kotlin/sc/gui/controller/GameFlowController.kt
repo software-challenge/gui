@@ -5,7 +5,7 @@ import javafx.animation.KeyFrame
 import javafx.animation.Timeline
 import javafx.stage.FileChooser
 import javafx.util.Duration
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.api.plugins.IGameState
 import sc.framework.HelperMethods
 import sc.framework.ReplayLoader

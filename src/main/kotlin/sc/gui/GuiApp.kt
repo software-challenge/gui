@@ -1,7 +1,7 @@
 package sc.gui
 
 import javafx.stage.Stage
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KLogging
 import sc.gui.controller.ServerController
 import sc.gui.events.*
 import sc.gui.model.AppModel

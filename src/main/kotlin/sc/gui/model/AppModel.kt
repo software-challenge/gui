@@ -2,7 +2,7 @@ package sc.gui.model
 
 import javafx.beans.property.*
 import javafx.scene.Node
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.gui.AppStyle
 import sc.gui.util.listenImmediately
 import tornadofx.*

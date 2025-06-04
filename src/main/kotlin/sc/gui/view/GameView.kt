@@ -9,7 +9,7 @@ import javafx.scene.effect.Glow
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Region
 import javafx.util.Duration
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.api.plugins.IGameState
 import sc.api.plugins.IMove
 import sc.gui.AppStyle

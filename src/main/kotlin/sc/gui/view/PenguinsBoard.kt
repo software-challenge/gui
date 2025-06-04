@@ -14,7 +14,7 @@ import javafx.scene.layout.FlowPane
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Region
 import javafx.scene.transform.Rotate
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.api.plugins.Coordinates
 import sc.api.plugins.IGameState
 import sc.api.plugins.Team

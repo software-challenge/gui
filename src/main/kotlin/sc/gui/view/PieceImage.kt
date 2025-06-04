@@ -8,7 +8,7 @@ import javafx.geometry.Pos
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.util.Duration
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.gui.model.AppModel
 import sc.gui.util.listenImmediately
 import tornadofx.*
