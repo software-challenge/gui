@@ -41,15 +41,11 @@ class ScoreBinding(private val game: GameModel): StringBinding() {
     override fun computeValue(): String =
         if(game.gameStarted.value)
             "Runde ${(game.currentTurn.get() + 1) / 2} - " +
-            (game.gameState.value?.let {
-                "${it.teamStats(it.startTeam).firstOrNull()?.value} : ${
-                    it.teamStats(it.startTeam.opponent()).firstOrNull()?.value
-                }"
-            } ?: game.gameState.value?.run {
-                Team.values().joinToString(" : ") {
+            game.gameState.value?.run {
+                Team.values().sortedBy { it != startTeam }.joinToString(" : ") {
                     getPointsForTeam(it).first().toString()
                 }
-            })
+            }
         else "Drücke auf Start".takeUnless { game.gameOver.value && game.atLatestTurn.value }.orEmpty()
 }
 
@@ -103,7 +99,7 @@ class StatusView: View() {
                             "\n",
                             "${game.playerNames[team.index]} (${strings["color.${team.color}"]})\n"
                         ) { stat ->
-                            "${stat.label}: ${stat.icon?.let { if(stat.value > 0) it.repeat(stat.value) else "-" } ?: stat.value}"
+                            "${stat.label} ${stat.icon?.let { if(stat.value > 0) it.repeat(stat.value) else "-" } ?: stat.value}"
                         }
                     }
                 })
