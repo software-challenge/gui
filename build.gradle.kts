@@ -87,9 +87,9 @@ tasks {
     
     javafx {
         version = "17.0.15"
-        val mods = mutableListOf("javafx.base", "javafx.controls", "javafx.fxml")
-        if(debug)
-            mods.addAll(listOf("javafx.swing"))
+        val mods = mutableListOf("javafx.base", "javafx.controls", "javafx.fxml",
+                                 "javafx.web", "javafx.media", "javafx.swing") // included because of tornadofx already
+        // if(debug) mods.addAll(listOf("javafx.swing"))
         modules = mods
     }
     
