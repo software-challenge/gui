@@ -31,7 +31,7 @@ class GameCreationView: View() {
         center = form {
             alignment = Pos.CENTER
             label("Willkommen bei der Software-Challenge!") {
-                addClass(AppStyle.heading)
+                addClass(AppStyle.big)
                 isWrapText = true
                 textAlignment = TextAlignment.CENTER
             }

@@ -84,7 +84,10 @@ class HuIBoard: GameBoard<GameState>() {
                 if(index != 0)
                     runLater { // So the labels are in front of the fields
                         putOnPosition(
-                            Label(index.toString()).apply { isMouseTransparent = true },
+                            Label(index.toString()).apply {
+                                addClass("small")
+                                isMouseTransparent = true
+                            },
                             index,
                             false
                         )

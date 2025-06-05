@@ -14,7 +14,7 @@ class GameLoadingView: View() {
         vbox {
             alignment = Pos.TOP_CENTER
             label {
-                addClass(AppStyle.heading)
+                addClass(AppStyle.big)
                 text = "Das Spiel startet..."
             }
             label {

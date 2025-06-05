@@ -24,9 +24,9 @@ class AppStyle: Stylesheet() {
         
         val fontSizeUnscaled = Font.getDefault().also { logger.debug("System Font: $it") }.size.pt
         val fontSizeRegular = fontSizeUnscaled * AppModel.scaling.value
-        val fontSizeSmall = fontSizeRegular * 0.7
-        val fontSizeBig = fontSizeRegular * 1.2
-        val fontSizeHeader = fontSizeBig * 1.5
+        val fontSizeSmall = fontSizeRegular * 0.6
+        val fontSizeBig = fontSizeRegular * 1.5
+        val fontSizeHeader = fontSizeBig * 2.0
         
         val spacing = fontSizeRegular.value
         val formSpacing = spacing / 2
@@ -39,6 +39,7 @@ class AppStyle: Stylesheet() {
         val lightColorSchema by cssclass()
         val darkColorSchema by cssclass()
         
+        val big by cssclass()
         val heading by cssclass()
         val statusLabel by cssclass()
         val plainLabel by cssclass()
@@ -130,6 +131,11 @@ class AppStyle: Stylesheet() {
             and(plainLabel) {
                 "-fx-effect".force("null")
             }
+        }
+        big {
+            fontSize = fontSizeBig
+            textAlignment = TextAlignment.CENTER
+            fontWeight = FontWeight.BOLD
         }
         heading {
             fontSize = fontSizeHeader
