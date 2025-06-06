@@ -144,9 +144,14 @@ class HuIBoard: GameBoard<GameState>() {
             putOnPosition(piece, finalPos)
             root.layout()
             
-            val offset = Point2D(AppStyle.spacing * (activeTeam.index - 1), AppStyle.spacing * activeTeam.index)
-            piece.translateX = coords.x - piece.layoutX + offset.x
-            piece.translateY = coords.y - piece.layoutY + offset.y
+            val offset =
+                if(state.players.first().position == state.players.last().position) {
+                    Point2D(AppStyle.fontSizeSmall.value * (activeTeam.index - 1), AppStyle.fontSizeSmall.value * activeTeam.index)
+                } else {
+                    Point2D.ZERO
+                }
+            piece.translateX = coords.x - piece.layoutX + piece.translateX
+            piece.translateY = coords.y - piece.layoutY + piece.translateY
             piece.isVisible = true
             parallelTransition {
                 this.children.add(piece.move(
