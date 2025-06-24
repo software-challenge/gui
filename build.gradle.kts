@@ -55,8 +55,9 @@ dependencies {
     implementation("io.github.oshai", "kotlin-logging-jvm", "6.0.9")
     
     implementation("software-challenge", "server")
-    implementation("software-challenge", "plugin")
+    implementation("software-challenge", "plugin2024")
     implementation("software-challenge", "plugin2025")
+    implementation("software-challenge", "plugin")
     
     if(debug)
         implementation("com.tangorabox", "component-inspector-fx", "1.1.0")
