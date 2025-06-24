@@ -1,4 +1,4 @@
-package sc.gui.penguins
+package sc.gui.view.game
 
 import javafx.geometry.Side
 import javafx.scene.layout.BackgroundPosition

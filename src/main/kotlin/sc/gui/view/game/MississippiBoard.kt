@@ -1,4 +1,4 @@
-package sc.gui.view
+package sc.gui.view.game
 
 import javafx.animation.Animation
 import javafx.animation.SequentialTransition
@@ -26,6 +26,8 @@ import sc.api.plugins.CubeDirection
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.util.listenImmediately
+import sc.gui.view.GameBoard
+import sc.gui.view.PieceImage
 import sc.plugin2024.*
 import sc.plugin2024.Field
 import sc.plugin2024.actions.Accelerate

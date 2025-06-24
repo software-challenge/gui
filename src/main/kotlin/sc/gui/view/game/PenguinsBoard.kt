@@ -1,4 +1,4 @@
-package sc.gui.view
+package sc.gui.view.game
 
 import javafx.animation.KeyFrame
 import javafx.application.Platform
@@ -22,6 +22,10 @@ import sc.gui.AppStyle
 import sc.gui.controller.HumanMoveAction
 import sc.gui.model.GameModel
 import sc.gui.util.listenImmediately
+import sc.gui.view.PieceImage
+import sc.gui.view.ResizableImageView
+import sc.gui.view.animationDuration
+import sc.gui.view.transitionDuration
 import sc.plugin2023.Field
 import sc.plugin2023.GameState
 import sc.plugin2023.Move

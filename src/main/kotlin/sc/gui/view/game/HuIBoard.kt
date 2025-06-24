@@ -1,4 +1,4 @@
-package sc.gui.view
+package sc.gui.view.game
 
 import javafx.animation.KeyFrame
 import javafx.animation.Timeline
@@ -17,6 +17,9 @@ import javafx.util.Duration
 import sc.api.plugins.Team
 import sc.gui.AppStyle
 import sc.gui.util.listenImmediately
+import sc.gui.view.GameBoard
+import sc.gui.view.ResizableImageView
+import sc.gui.view.fixHoverInsets
 import sc.plugin2025.*
 import sc.plugin2025.Field
 import sc.plugin2025.util.HuIConstants
