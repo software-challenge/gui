@@ -31,7 +31,7 @@ class GameCreationView: View() {
         center = form {
             alignment = Pos.CENTER
             label("Willkommen bei der Software-Challenge!") {
-                addClass(AppStyle.big)
+                addClass(AppStyle.heading)
                 isWrapText = true
                 textAlignment = TextAlignment.CENTER
             }
@@ -42,6 +42,7 @@ class GameCreationView: View() {
                     val settings = playerSettingsModels[team.index]
                     fieldset(if(team == Team.ONE) "Erster Spieler" else "Zweiter Spieler") {
                         alignment = Pos.TOP_CENTER
+                        paddingTop = AppStyle.spacing
                         spacing = AppStyle.formSpacing
                         textfield(settings.name) {
                             promptText = "Name des Spielers ${team.index + 1}"
