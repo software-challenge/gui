@@ -1,10 +1,9 @@
 package sc.gui
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.application.Platform
-import org.slf4j.LoggerFactory
 import sc.api.plugins.IGamePlugin
 import sc.api.plugins.IGameState
-import sc.framework.plugins.AbstractGame
 import sc.gui.controller.GameFlowController
 import sc.gui.controller.Player
 import sc.gui.controller.client.ClientInterface
@@ -93,11 +92,13 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
     }
     
     fun startNewGame(players: List<Player>, paused: Boolean) {
-        logger.debug("Starting new game (paused: {}, players: {})", paused, players)
+        val gameId = IGamePlugin.loadPlugin().id
+        logger.trace { "Available game plugins: " + IGamePlugin.loadPlugins().asSequence().sortedByDescending { it.id }.map { it.id }.joinToString(", ") }
+        logger.debug { "Starting new game of $gameId (paused: $paused, players: $players)" }
         pendingPlayers.addAll(players.map { it.client })
         
         client.prepareGame(PrepareGameRequest(
-                IGamePlugin.loadPluginId(),
+            gameId,
                 players.map {
                     SlotDescriptor(it.name,
                             it.client.type != PlayerType.HUMAN,
@@ -107,6 +108,6 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
     }
     
     companion object {
-        private val logger = LoggerFactory.getLogger(LobbyManager::class.java)
+        private val logger = KotlinLogging.logger {}
     }
 }
