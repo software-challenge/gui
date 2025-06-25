@@ -1,5 +1,6 @@
 package sc.gui.view.game
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.animation.KeyFrame
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
@@ -14,7 +15,6 @@ import javafx.scene.layout.FlowPane
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Region
 import javafx.scene.transform.Rotate
-import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.api.plugins.Coordinates
 import sc.api.plugins.IGameState
 import sc.api.plugins.Team
@@ -29,7 +29,7 @@ import sc.gui.view.transitionDuration
 import sc.plugin2023.Field
 import sc.plugin2023.GameState
 import sc.plugin2023.Move
-import sc.plugin2023.util.PenguinConstants.BOARD_SIZE
+import sc.plugin2023.util.PenguinConstants
 import tornadofx.*
 
 private val logger = KotlinLogging.logger { }
@@ -43,7 +43,7 @@ class PenguinBoard: View() {
     private val ice = HashMap<Coordinates, PieceImage>()
     
     private val size = doubleProperty(16.0)
-    private val boardSize = BOARD_SIZE * 2
+    private val boardSize = PenguinConstants.BOARD_SIZE * 2
     private val gridSize
         get() = size.value / boardSize * 0.8
     private val calculatedBlockSize = size.doubleBinding { gridSize * 1.9 }
@@ -295,7 +295,7 @@ class PenguinBoard: View() {
             //logger.trace("$node at $coordinates block size: $it")
             node.anchorpaneConstraints {
                 leftAnchor = coordinates.x * gridSize
-                bottomAnchor = (BOARD_SIZE - coordinates.y) * gridSize
+                bottomAnchor = (PenguinConstants.BOARD_SIZE - coordinates.y) * gridSize
             }
         }
         return node

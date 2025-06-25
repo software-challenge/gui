@@ -1,5 +1,6 @@
 package sc.gui
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.scene.effect.BlurType
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.*
@@ -8,7 +9,6 @@ import javafx.scene.text.Font
 import javafx.scene.text.FontPosture
 import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
-import org.slf4j.LoggerFactory
 import sc.api.plugins.Team
 import sc.gui.model.AppModel
 import tornadofx.*
@@ -16,7 +16,7 @@ import tornadofx.*
 class AppStyle: Stylesheet() {
     
     companion object {
-        private val logger = LoggerFactory.getLogger(this::class.java)
+        private val logger = KotlinLogging.logger {  }
         
         private val resources = ResourceLookup(this)
         

@@ -52,7 +52,7 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT") { exclude("org.jetbrains.kotlin", "kotlin-reflect") }
     implementation("ch.qos.logback", "logback-classic", "1.5.18")
-    implementation("io.github.oshai", "kotlin-logging-jvm", "6.0.9")
+    implementation("io.github.oshai", "kotlin-logging-jvm", "6.0.9") // TODO version 7 with kotlin 2
     
     implementation("software-challenge", "server")
     implementation("software-challenge", "plugin2024")

@@ -1,5 +1,6 @@
 package sc.gui.view
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ChangeListener
@@ -9,7 +10,6 @@ import javafx.scene.effect.Glow
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Region
 import javafx.util.Duration
-import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.api.plugins.IGameState
 import sc.api.plugins.IMove
 import sc.gui.AppStyle
@@ -53,6 +53,7 @@ abstract class GameBoard<GameState: IGameState>: View(), ChangeListener<IGameSta
     protected val viewHeight: Double
         get() = (root.parent as? Region ?: root).height
             .coerceAtMost(root.scene?.height?.minus(AppStyle.fontSizeBig.value * 4 + AppStyle.fontSizeUnscaled.value * 10) ?: Double.MAX_VALUE)
+    /** Length of the smaller side of the window. */
     protected val squareSize = doubleProperty(16.0)
     
     /** Shorter animations when game speed is higher.
