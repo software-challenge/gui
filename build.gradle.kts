@@ -120,6 +120,7 @@ tasks {
                 ).joinToString(" ")
             )
         }
+        mergeServiceFiles()
     }
     
     run.configure {
