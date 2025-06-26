@@ -22,7 +22,7 @@ val backend = gradle.includedBuilds.last()
 
 val versionFromBackend by lazy {
     val versions = Properties().apply { load(backend.projectDir.resolve("gradle.properties").inputStream()) }
-    val suffix = property("socha.version.suffix").toString().takeUnless { it.isBlank() }?.let { "-$it" }.orEmpty()
+    val suffix = versions["socha.version.suffix"].toString().takeUnless { it.isBlank() }?.let { "-$it" }.orEmpty()
     arrayOf("year", "minor", "patch").map { versions["socha.version.$it"].toString().toInt() }.joinToString(".") + suffix
 }
 
@@ -124,7 +124,7 @@ tasks {
     }
     
     run.configure {
-        workingDir(buildDir.resolve("tmp"))
+        workingDir(buildDir.resolve("run"))
         doFirst {
             workingDir.mkdirs()
         }
