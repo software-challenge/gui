@@ -7,6 +7,7 @@ log/
 # Ignore local gradle config
 gradle.properties
 
+SOCHA_BACKEND_DEPLOY_KEY*
 *.svg
 *spriter*/
 **/keyframes/*

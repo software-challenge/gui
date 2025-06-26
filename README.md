@@ -1,14 +1,16 @@
-# <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></a> Grafischer Spieleserver der Software-Challenge Germany ![.github/workflows/gradle.yml](https://github.com/software-challenge/gui/workflows/.github/workflows/gradle.yml/badge.svg)
+## <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></a> Grafischer Spieleserver der Software-Challenge Germany ![.github/workflows/gradle.yml](https://github.com/software-challenge/gui/workflows/.github/workflows/gradle.yml/badge.svg)
 
-Dies ist die Grafische Oberfläche für die Software-Challenge Germany.
-Nutzerdokumentation findet sich in https://docs.software-challenge.de/server.html
+Dies ist die Grafische Oberfläche für die Software-Challenge Germany,
+seit Saison 2020/21 in Kotlin TornadoFX aufbauend auf JavaFX.
+
+Nutzerdokumentation: https://docs.software-challenge.de/server.html
 
 > Hinweis: Wenn als erster Parameter des Programms eine Zahl mitgegeben wird,
 wird der Server auf diesem Port Verbindungen von Spielern erwarten.
 
-# Für Entwickler
+## Für Entwickler
 
-## Erste Schritte
+### Erste Schritte
 
 - zuerst das Projekt lokal mit Submodulen klonen:
   ```sh
@@ -17,7 +19,7 @@ wird der Server auf diesem Port Verbindungen von Spielern erwarten.
 - mindestens Java 11 wird benötigt (ggf. `org.gradle.java.home=/path/to/jdk` in `gradle.properties` setzen)
 - `./gradlew run` ausführen
 
-## Kollaboration
+### Kollaboration
 
 Unsere Commit-Messages folgen dem Muster `type(scope): summary`
 (siehe [Karma Runner Konvention](http://karma-runner.github.io/6.2/dev/git-commit-msg.html)),
