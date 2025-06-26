@@ -1,12 +1,14 @@
 package sc.gui.view
 
-import javafx.application.Platform
 import io.github.oshai.kotlinlogging.KotlinLogging
+import javafx.application.Platform
+import javafx.scene.control.Alert
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.CreateGame
 import sc.gui.controller.selectReplay
 import sc.gui.events.*
+import sc.gui.guide
 import sc.gui.model.ViewType
 import sc.gui.util.browse
 import sc.gui.util.browseUrl
@@ -58,10 +60,12 @@ class AppView: View("Software-Challenge Germany") {
             }
             menu("Hilfe") {
                 viewOrder = -9.0
-                /* TODO Current Guide
-                item("Bedienungsanleitung", "Shortcut+H").action {
-                    alert(Alert.AlertType.INFORMATION, "Bedienungsanleitung", guideMq, title = "Hilfe")
-                }*/
+                item("Bedienhilfe", "Shortcut+H").action {
+                    alert(Alert.AlertType.INFORMATION,
+                        header = "Bedienhilfe",
+                        content = guide,
+                        title = "Hilfe")
+                }
                 item("↗ Spielregeln", "Shortcut+S").action {
                     browseUrl("https://docs.software-challenge.de/spiele/aktuell/regeln")
                 }
