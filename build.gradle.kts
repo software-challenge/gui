@@ -22,13 +22,14 @@ val backend = gradle.includedBuilds.last()
 
 val versionFromBackend by lazy {
     val versions = Properties().apply { load(backend.projectDir.resolve("gradle.properties").inputStream()) }
-    arrayOf("year", "minor", "patch").map { versions["socha.version.$it"].toString().toInt() }.joinToString(".")
+    val suffix = property("socha.version.suffix").toString().takeUnless { it.isBlank() }?.let { "-$it" }.orEmpty()
+    arrayOf("year", "minor", "patch").map { versions["socha.version.$it"].toString().toInt() }.joinToString(".") + suffix
 }
 
 group = "sc.gui"
 version = try {
     Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags"))
-            .inputStream.reader().readText().trim().ifEmpty { null }
+        .inputStream.reader().readText().trim().ifEmpty { null }
 } catch(e: java.io.IOException) {
     println(e)
 } ?: "${versionFromBackend}-${System.getenv("GITHUB_SHA")?.takeUnless { it.isEmpty() } ?: "custom"}"
@@ -88,25 +89,35 @@ tasks {
     
     javafx {
         version = "17.0.15"
-        val mods = mutableListOf("javafx.base", "javafx.controls", "javafx.fxml",
-                                 "javafx.web", "javafx.media", "javafx.swing") // included because of tornadofx already
+        val mods = mutableListOf(
+            "javafx.base", "javafx.controls", "javafx.fxml",
+            "javafx.web", "javafx.media", "javafx.swing"
+        ) // included because of tornadofx already
         // if(debug) mods.addAll(listOf("javafx.swing"))
         modules = mods
     }
     
     shadowJar {
         destinationDirectory.set(buildDir)
-        archiveClassifier.set("${OperatingSystem.current().familyName.replace(" ", "")}-${System.getProperty("os.arch")}")
+        archiveClassifier.set(
+            "${
+                OperatingSystem.current().familyName.replace(
+                    " ",
+                    ""
+                )
+            }-${System.getProperty("os.arch")}"
+        )
         manifest {
             attributes(
-                    "Add-Opens" to arrayOf(
-                            "javafx.controls/javafx.scene.control.skin",
-                            "javafx.controls/javafx.scene.control",
-                            "javafx.graphics/javafx.scene",
-                            // For accessing InputMap used in RangeSliderBehavior
-                            "javafx.controls/com.sun.javafx.scene.control.inputmap",
-                            // Expose list internals for xstream conversion: https://github.com/x-stream/xstream/issues/253
-                            "java.base/java.util").joinToString(" ")
+                "Add-Opens" to arrayOf(
+                    "javafx.controls/javafx.scene.control.skin",
+                    "javafx.controls/javafx.scene.control",
+                    "javafx.graphics/javafx.scene",
+                    // For accessing InputMap used in RangeSliderBehavior
+                    "javafx.controls/com.sun.javafx.scene.control.inputmap",
+                    // Expose list internals for xstream conversion: https://github.com/x-stream/xstream/issues/253
+                    "java.base/java.util"
+                ).joinToString(" ")
             )
         }
     }
