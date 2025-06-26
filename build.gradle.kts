@@ -120,7 +120,7 @@ tasks {
                 ).joinToString(" ")
             )
         }
-        mergeServiceFiles()
+        mergeServiceFiles() // This requires downgrading to JDK 11 to function properly!
     }
     
     run.configure {
