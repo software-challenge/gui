@@ -11,11 +11,19 @@ plugins {
     
     application
     kotlin("jvm") version "1.9.25"
+    id("idea")
     id("org.openjfx.javafxplugin") version "0.1.0"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     
     id("com.github.ben-manes.versions") version "0.47.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.18"
+}
+
+idea {
+    module {
+        isDownloadSources = true
+        isDownloadJavadoc = true
+    }
 }
 
 val backend = gradle.includedBuilds.last()
