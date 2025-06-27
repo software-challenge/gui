@@ -26,6 +26,7 @@ class PiranhasBoard: GameBoard<GameState>() {
         add(grid)
     }
     
+    var selected: Coordinates? = null
     val hovers = ArrayList<Node>()
     
     override fun onNewState(oldState: GameState?, state: GameState?) {
@@ -34,21 +35,40 @@ class PiranhasBoard: GameBoard<GameState>() {
             state.board.forEach { (pos: Coordinates, field: FieldState) ->
                 val piece = PieceImage(gridSize,
                     field.team?.let { team -> "${team}_${field.size}" } ?: field.name.lowercase())
-                if(field.team != null)
+                grid.add(piece, pos.x, pos.y)
+                if(field.team == null)
+                    return@forEach
+                piece.onHover {
+                    if(selected == null) {
+                        grid.children.removeAll(hovers)
+                        hovers.clear()
+                        addHovers(state, pos, field)
+                    }
+                }
                 piece.onLeftClick {
                     grid.children.removeAll(hovers)
                     hovers.clear()
-                    GameRuleLogic.possibleMovesFor(state.board, pos).forEach { move ->
-                        val target = GameRuleLogic.targetField(state.board, move)
-                        val hover = PieceImage(gridSize, "${field.team}_${field.size}")
-                        hover.onLeftClick { sendHumanMove(move) }
-                        hover.effect = ColorAdjust().apply { saturation = -0.5 }
-                        hovers.add(hover)
-                        grid.add(hover, target.x, target.y)
+                    if(selected == pos) {
+                        selected = null
+                        return@onLeftClick
                     }
+                    selected = pos
+                    addHovers(state, pos, field)
                 }
-                grid.add(piece, pos.x, pos.y)
             }
+        }
+    }
+    
+    fun addHovers(state: GameState, pos: Coordinates, field: FieldState) {
+        val board = state.board
+        GameRuleLogic.possibleMovesFor(board, pos).forEach { move ->
+            val target = GameRuleLogic.targetField(board, move)
+            val hover = PieceImage(gridSize, "${field.team}_${field.size}")
+            hover.effect = ColorAdjust().apply { saturation = -0.5 }
+            hovers.add(hover)
+            grid.add(hover, target.x, target.y)
+            if(field.team == state.currentTeam)
+                hover.onLeftClick { sendHumanMove(move) }
         }
     }
     
