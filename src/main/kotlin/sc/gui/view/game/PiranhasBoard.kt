@@ -36,9 +36,12 @@ class PiranhasBoard: GameBoard<GameState>() {
                     field.team?.let { team -> "${team}_${field.size}" } ?: field.name.lowercase())
                 if(field.team != null)
                 piece.onLeftClick {
+                    grid.children.removeAll(hovers)
+                    hovers.clear()
                     GameRuleLogic.possibleMovesFor(state.board, pos).forEach { move ->
                         val target = GameRuleLogic.targetField(state.board, move)
                         val hover = PieceImage(gridSize, "${field.team}_${field.size}")
+                        hover.onLeftClick { sendHumanMove(move) }
                         hover.effect = ColorAdjust().apply { saturation = -0.5 }
                         hovers.add(hover)
                         grid.add(hover, target.x, target.y)
