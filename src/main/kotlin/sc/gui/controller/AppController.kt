@@ -1,6 +1,6 @@
 package sc.gui.controller
 
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.gui.GameReadyEvent
 import sc.gui.events.*
 import sc.gui.model.AppModel
@@ -49,7 +49,9 @@ class AppController: Controller() {
         model.darkMode.toggle()
     }
     
-    companion object: KLogging()
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
 }
 
 val ViewType.view

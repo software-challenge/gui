@@ -1,7 +1,7 @@
 package sc.gui
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.stage.Stage
-import io.github.oshai.kotlinlogging.KLogging
 import sc.gui.controller.ServerController
 import sc.gui.events.*
 import sc.gui.model.AppModel
@@ -39,7 +39,9 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
         addStageIcon(resources.image("/icon.png"))
     }
     
-    companion object: KLogging()
+    companion object {
+        val logger = KotlinLogging.logger {}
+    }
 }
 
 class GuiApp : ServerApp(AppView::class)
