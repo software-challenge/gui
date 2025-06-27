@@ -66,7 +66,7 @@ class PenguinBoard: View() {
                 rotate = state.startTeam.index * 180.0
                 rotationAxis = Rotate.Y_AXIS
                 // TODO finish pending movements
-                logger.trace("New state for board: ${state.longString()}")
+                logger.trace { "New state for board: ${state.longString()}" }
                 
                 val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reversed()).maxByOrNull {
                     it.first?.turn ?: -1
@@ -207,7 +207,7 @@ class PenguinBoard: View() {
                                 event.consume()
                             }
                         } else {
-                            logger.error("Invalid State!")
+                            logger.error { "Invalid State!" }
                         }
                     }
                     //image.viewOrder = BOARD_SIZE - coordinates.y.toDouble()
@@ -285,13 +285,13 @@ class PenguinBoard: View() {
     
     private fun humanMove(move: Move) {
         if(gameModel.atLatestTurn.value && gameModel.isHumanTurn.value) {
-            fire(HumanMoveAction(move.also { logger.debug("Human Move: $it") }))
+            fire(HumanMoveAction(move.also { logger.debug { "Human Move: $it" } }))
         }
     }
     
     private fun <T: Region> addPiece(node: T, coordinates: Coordinates): T {
         if(grid.children.contains(node))
-            logger.warn("Attempting to add duplicate grid child at $coordinates: $node")
+            logger.warn { "Attempting to add duplicate grid child at $coordinates: $node" }
         else
             grid.add(node)
         size.listenImmediately {

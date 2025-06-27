@@ -39,7 +39,7 @@ abstract class GameBoard<GameState: IGameState>: View(), ChangeListener<IGameSta
     protected val awaitingHumanMove =
         gameModel.isHumanTurn.booleanBinding(gameModel.atLatestTurn) {
             (gameModel.atLatestTurn.value && gameModel.isHumanTurn.value).also {
-                logger.trace { "Awaiting Human Turn: $it"}
+                logger.trace { "Awaiting Human Turn: $it" }
             }
         }
     
@@ -116,7 +116,9 @@ abstract class GameBoard<GameState: IGameState>: View(), ChangeListener<IGameSta
     
     protected fun sendHumanMove(move: IMove): Boolean {
         if(awaitingHumanMove.value) {
-            fire(HumanMoveAction(move.also { logger.debug("Human Move: {}", it) }))
+            fire(HumanMoveAction(move.also {
+                logger.debug { "Human Move: $it" }
+            }))
             return true
         }
         return false

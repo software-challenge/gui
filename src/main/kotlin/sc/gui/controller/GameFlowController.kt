@@ -99,7 +99,7 @@ class GameFlowController: Controller() {
         subscribe<NewGameState> { event ->
             val state = event.gameState
             history.add(state)
-            logger.debug("New state: {}", state)
+            logger.debug { "New state: $state" }
             gameModel.run {
                 if(stepController || gameState.value == null || gameResult.value != null) {
                     gameResult.set(null)
@@ -117,7 +117,7 @@ class GameFlowController: Controller() {
             throw ReplayLoaderException("Trying to load replay into a running game")
         val result = loader.loadHistory()
         history.addAll(result.first)
-        logger.debug("Loaded {} states from {}", history.size, loader)
+        logger.debug { "Loaded ${history.size} states from $loader" }
         if(history.isEmpty())
             throw ReplayLoaderException("Replay history from $loader is empty")
         

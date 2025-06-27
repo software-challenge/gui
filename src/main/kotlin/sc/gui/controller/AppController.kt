@@ -36,9 +36,9 @@ class AppController: Controller() {
     
     private fun changeViewTo(newView: ViewType) {
         val current = model.currentView.get()
-        logger.debug("Requested View change from ${current.name} -> $newView")
+        logger.debug { "Requested View change from ${current.name} -> $newView" }
         if (current == newView) {
-            logger.warn("Noop view change request!")
+            logger.warn { "Noop view change request!" }
             return
         }
         find(current.view).replaceWith(newView.view)

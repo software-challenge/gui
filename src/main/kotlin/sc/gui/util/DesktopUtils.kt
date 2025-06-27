@@ -21,14 +21,14 @@ fun browse(file: File) {
 fun <T> T.openDesktop(action: Desktop.Action, open: Desktop.(T) -> Unit) {
     val desktop = Desktop.getDesktop()
     if(desktop.isSupported(action)) {
-        logger.debug("Opening {} on {}", this, desktop)
+        logger.debug { "Opening $this on $desktop" }
         open(desktop, this)
     } else {
-        logger.debug("Opening {} with xdg-open", this)
+        logger.debug { "Opening $this with xdg-open" }
         try {
             ProcessBuilder("xdg-open", this.toString()).start()
         } catch(ex: IOException) {
-            logger.warn("Failed to open {}", this, ex)
+            logger.warn(ex) { "Failed to open $this" }
         }
     }
 }

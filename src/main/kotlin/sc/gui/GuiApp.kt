@@ -31,7 +31,7 @@ open class ServerApp(primaryView: KClass<out UIComponent>) : App(primaryView, Ap
         AppModel.save()
         super.stop()
         server.stopServer()
-        logger.info("App stopped, Terminating")
+        logger.info { "App stopped, Terminating" }
     }
     
     init {

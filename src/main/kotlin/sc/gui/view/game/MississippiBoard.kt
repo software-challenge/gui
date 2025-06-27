@@ -136,12 +136,12 @@ class MississippiBoard: GameBoard<GameState>() {
             }
             originalState = state
         }
-        logger.trace("New state for board: ${state.longString()}")
+        logger.trace { "New state for board: ${state.longString()}" }
         
         state.currentShip.movement += state.currentShip.maxAcc
         val pushes = state.getPossiblePushs()
         state.currentShip.movement -= state.currentShip.maxAcc
-        logger.trace("Available Pushes: {}", pushes)
+        logger.trace { "Available Pushes: $pushes"}
         
         val neighbors = hashMapOf<CubeCoordinates, ArrayList<CubeDirection>>()
         state.board.forEachField { cubeCoordinates, field ->
@@ -167,7 +167,7 @@ class MississippiBoard: GameBoard<GameState>() {
                         state.currentShip.position + it.direction.vector == cubeCoordinates
                     }
                     if(push != null) {
-                        logger.debug("Registering Push '{}' for {}", push, piece)
+                        logger.debug { "Registering Push '$push' for $piece" }
                         piece.glow(.4)
                         piece.onHover { hover ->
                             // TODO hover not recognized when stream is on top
@@ -237,7 +237,7 @@ class MississippiBoard: GameBoard<GameState>() {
                         2 -> "border"
                         3 -> "border_outer"
                         else -> {
-                            logger.warn("Piece at $coords has wrong border directions: $dirs")
+                            logger.warn { "Piece at $coords has wrong border directions: $dirs" }
                             ""
                         }
                     }
@@ -417,7 +417,7 @@ class MississippiBoard: GameBoard<GameState>() {
             }
         }
         
-        logger.debug("Adding Human Action from keypress {}", action)
+        logger.debug { "Adding Human Action from keypress $action" }
         if(action != null) {
             addHumanAction(action)
             return true
@@ -539,7 +539,7 @@ class MississippiBoard: GameBoard<GameState>() {
     
     private fun <T: Node> addPiece(node: T, coordinates: CubeCoordinates): T {
         if(grid.children.contains(node))
-            logger.warn("Attempting to add duplicate grid child at $coordinates: $node")
+            logger.warn { "Attempting to add duplicate grid child at $coordinates: $node" }
         else
             grid.add(node)
         calculatedBlockSize.listenImmediately {

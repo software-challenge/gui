@@ -39,7 +39,7 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
     private val client: AdminClient = try {
         LobbyClient(host, port).authenticate(Configuration.get(Configuration.PASSWORD_KEY), this)
     } catch (e: ConnectException) {
-        logger.error("Could not connect to server: " + e.message)
+        logger.error(e) { "Could not connect to server: " + e.message }
         exitProcess(1)
     }
     
@@ -53,7 +53,7 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
                         player.joinGameRoom(packet.roomId)
                     } else {
                         if (reservationIndex >= packet.reservations.size) {
-                            logger.warn("More players than reservations, left with {}", pendingPlayers)
+                            logger.warn { "More players than reservations, left with $pendingPlayers" }
                             return@removeAll false
                         }
                         player.joinGameWithReservation(packet.reservations[reservationIndex++])
@@ -62,7 +62,7 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
                 }
             }
             is ErrorPacket -> {
-                logger.error("$packet")
+                logger.error { "$packet" }
                 // if (packet.originalRequest !is CancelRequest)
                 Platform.runLater {
                     error("Fehler in der Kommunikation mit dem Server", packet.toString()).setOnCloseRequest {
@@ -81,11 +81,11 @@ class LobbyManager(host: String, port: Int): Controller(), Consumer<ResponsePack
         gameFlowController.controller = client.control(roomId)
         subscribe<NewGameState>(1) { fire(GameReadyEvent()) }
         client.observe(roomId) { msg ->
-            logger.trace("New RoomMessage in {}: {}", roomId, msg)
-            when (msg) {
+            logger.trace { "New RoomMessage in $roomId: $msg" }
+            when(msg) {
                 is MementoMessage -> fire(NewGameState(msg.state))
                 is GameResult -> if(gameFlowController.controller != null) fire(GameOverEvent(msg))
-                is ErrorMessage -> logger.warn("Error in $roomId: $msg")
+                is ErrorMessage -> logger.warn { "Error in $roomId: $msg" }
                 is GamePaused -> fire(GamePausedEvent(msg.paused))
             }
         }
