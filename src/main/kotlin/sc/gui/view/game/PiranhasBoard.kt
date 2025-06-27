@@ -19,11 +19,14 @@ class PiranhasBoard: GameBoard<GameState>() {
     private val gridSize
         get() = squareSize.div(PiranhaConstants.BOARD_LENGTH)
     
-    val grid: GridPane = GridPane()
+    val grid: GridPane = GridPane().addClass("grid")
     
     override val root = hbox {
         this.alignment = Pos.CENTER
-        add(grid)
+        vbox {
+            this.alignment = Pos.CENTER
+            add(grid)
+        }
     }
     
     var selected: Coordinates? = null
@@ -31,6 +34,12 @@ class PiranhasBoard: GameBoard<GameState>() {
     
     override fun onNewState(oldState: GameState?, state: GameState?) {
         grid.children.clear()
+        
+        (0 until PiranhaConstants.BOARD_LENGTH).forEach { y ->
+            grid.add(PieceImage(gridSize, "squid").apply { opacity = 0.0 }, 0, y)
+            grid.add(PieceImage(gridSize, "squid").apply { opacity = 0.0 }, y, 0)
+        }
+        
         state?.let { state ->
             state.board.forEach { (pos: Coordinates, field: FieldState) ->
                 val piece = PieceImage(gridSize,

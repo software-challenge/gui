@@ -178,6 +178,13 @@ class AppStyle: Stylesheet() {
         }
         
         ".squid" { image = resources.url("/piranhas/squid.png").toURI() }
+        ".grid" {
+            //backgroundColor += c("#AAAA")
+            backgroundImage += resources.url("/piranhas/grid-crop.png").toURI()
+            backgroundSize += BackgroundSize(1.0, 1.0, true, true, false, false)
+            backgroundRepeat += BackgroundRepeat.SPACE to BackgroundRepeat.NO_REPEAT
+            padding = CssBox(8.pt, 8.pt, 5.pt, 5.pt)
+        }
     }
     
     fun huiStyles() {
