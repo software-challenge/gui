@@ -62,10 +62,12 @@ class PenguinBoard: View() {
                     ice.clear()
                     return@ChangeListener
                 }
+                
                 rotate = state.startTeam.index * 180.0
                 rotationAxis = Rotate.Y_AXIS
                 // TODO finish pending movements
                 logger.trace("New state for board: ${state.longString()}")
+                
                 val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reversed()).maxByOrNull {
                     it.first?.turn ?: -1
                 }!!.second
@@ -108,6 +110,7 @@ class PenguinBoard: View() {
                         }
                     }
                 }
+                
                 state.board.forEach<Coordinates, Field> { (coordinates, field) ->
                     if(field.isEmpty) {
                         removePiece(pieces.remove(coordinates))
