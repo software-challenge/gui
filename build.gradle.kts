@@ -84,7 +84,6 @@ tasks {
         }
     }
     withType<KotlinCompile> {
-        dependsOn(backend.task(":server:bundle"))
         kotlinOptions {
             jvmTarget = minJavaVersion.toString()
             freeCompilerArgs = listOf("-Xjvm-default=all")
