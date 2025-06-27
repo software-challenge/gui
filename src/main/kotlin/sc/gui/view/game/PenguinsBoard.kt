@@ -68,9 +68,10 @@ class PenguinBoard: View() {
                 // TODO finish pending movements
                 logger.trace { "New state for board: ${state.longString()}" }
                 
-                val lastMove = arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reversed()).maxByOrNull {
-                    it.first?.turn ?: -1
-                }!!.second
+                val lastMove =
+                    arrayOf(state to state.lastMove, oldState to oldState?.lastMove?.reversed()).maxByOrNull {
+                        it.first?.turn ?: -1
+                    }!!.second
                 // TODO tornadofx: nested CSS, Color.derive with defaults, configProperty, CSS important, selectClass/Pseudo
                 // TODO sounds for figure movements
                 lastMove?.let { move ->
@@ -80,15 +81,19 @@ class PenguinBoard: View() {
                         parallelTransition {
                             var cur = -1
                             val moveType =
-                                    if((oldState?.board?.getOrEmpty(move.to)?.fish ?: 0) > 1) "consume"
-                                    else "move"
+                                if((oldState?.board?.getOrEmpty(move.to)?.fish ?: 0) > 1) "consume"
+                                else "move"
                             timeline {
                                 cycleCount = 8
                                 this += KeyFrame(animationDuration, {
                                     cur = piece.nextFrame(moveType, cur, randomize = false)
                                 })
                             }.apply { setOnFinished { piece.nextFrame(moveType, cur, remove = true) } }
-                            children += piece.move(transitionDuration - animationDuration.multiply(2.0), Point2D(move.delta!!.dx * gridSize, move.delta!!.dy * gridSize), play = false) {
+                            children += piece.move(
+                                transitionDuration - animationDuration.multiply(2.0),
+                                Point2D(move.delta!!.dx * gridSize, move.delta!!.dy * gridSize),
+                                play = false
+                            ) {
                                 delay = animationDuration.multiply(1.0)
                                 setOnFinished {
                                     piece.translateX = 0.0
@@ -168,11 +173,13 @@ class PenguinBoard: View() {
                                 addPiece(createPiece("penguin"), coordinates)
                             }
                             penguin.scaleX = -(piece.index.xor(state.startTeam.index) * 2 - 1.0)
-                            penguin.fade(transitionDuration, AppStyle.pieceOpacity * when {
-                                piece != state.currentTeam -> 0.7
-                                gameModel.atLatestTurn.value && gameState?.isOver == false -> 1.0
-                                else -> 0.9
-                            })
+                            penguin.fade(
+                                transitionDuration, AppStyle.pieceOpacity * when {
+                                    piece != state.currentTeam -> 0.7
+                                    gameModel.atLatestTurn.value && gameState?.isOver == false -> 1.0
+                                    else -> 0.9
+                                }
+                            )
                             penguin.nextFrame()
                             penguin.setClass("inactive", piece != state.currentTeam)
                             
@@ -186,12 +193,20 @@ class PenguinBoard: View() {
                             }
                             penguin.onLeftClick {
                                 lockedHighlight =
-                                        if(coordinates == lockedHighlight || !isSelectable(coordinates)) {
-                                            pieces[coordinates]?.let { highlight(it, false, coordinates) }
-                                            null
-                                        } else {
-                                            coordinates.also { pieces[coordinates]?.let { highlight(it, true, coordinates) } }
+                                    if(coordinates == lockedHighlight || !isSelectable(coordinates)) {
+                                        pieces[coordinates]?.let { highlight(it, false, coordinates) }
+                                        null
+                                    } else {
+                                        coordinates.also {
+                                            pieces[coordinates]?.let {
+                                                highlight(
+                                                    it,
+                                                    true,
+                                                    coordinates
+                                                )
+                                            }
                                         }
+                                    }
                                 logger.trace { "Clicked $coordinates (lock at $lockedHighlight, current $currentHighlight)" }
                             }
                             penguin.setOnMouseExited { event ->

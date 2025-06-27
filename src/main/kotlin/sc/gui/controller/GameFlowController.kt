@@ -1,11 +1,11 @@
 package sc.gui.controller
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.animation.Animation
 import javafx.animation.KeyFrame
 import javafx.animation.Timeline
 import javafx.stage.FileChooser
 import javafx.util.Duration
-import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.api.plugins.IGameState
 import sc.framework.HelperMethods
 import sc.framework.ReplayLoader
@@ -124,9 +124,10 @@ class GameFlowController: Controller() {
         gameModel.availableTurns.set(history.last().turn)
         gameModel.gameResult.set(result.second)
         gameModel.playerNames.setAll(
-                result.second?.scores?.keys
-                        ?.sortedBy { it.team.index }
-                        ?.map { it.displayName }.orEmpty())
+            result.second?.scores?.keys
+                ?.sortedBy { it.team.index }
+                ?.map { it.displayName }.orEmpty()
+        )
         gameModel.gameState.set(history.first())
         
         fire(GameReadyEvent())
