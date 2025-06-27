@@ -1,5 +1,6 @@
 package sc.gui.view.game
 
+import javafx.geometry.Pos
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.GridPane
 import sc.api.plugins.Coordinates
@@ -15,14 +16,19 @@ class PiranhasBoard: GameBoard<GameState>() {
     private val gridSize
         get() = squareSize.div(PiranhaConstants.BOARD_LENGTH)
     
-    override val root: GridPane = GridPane()
+    val grid: GridPane = GridPane()
+    
+    override val root = hbox {
+        this.alignment = Pos.CENTER
+        add(grid)
+    }
     
     override fun onNewState(oldState: GameState?, state: GameState?) {
-        root.children.clear()
+        grid.children.clear()
         state?.let { state ->
             state.board.forEach { (pos: Coordinates, field: FieldState) ->
                 val piece = PieceImage(gridSize, field.team?.let { team -> "${team}_${field.size}" } ?: field.name.lowercase())
-                root.add(piece, pos.x, pos.y)
+                grid.add(piece, pos.x, pos.y)
             }
         }
     }
