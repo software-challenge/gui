@@ -3,6 +3,7 @@ package sc.gui.view
 import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.application.Platform
 import javafx.scene.control.Alert
+import sc.api.plugins.IGamePlugin
 import sc.gui.AppStyle
 import sc.gui.controller.AppController
 import sc.gui.controller.CreateGame
@@ -93,7 +94,7 @@ class AppView: View("Software-Challenge Germany") {
             // DEBUG Platform.runLater { scene.addEventHandler(EventType.ROOT) { logger.trace("EVENT: {}", it) } }
         }
         
-        val gameTitle = "Hase und Igel" // TODO generify properly
+        val gameTitle = IGamePlugin.loadPlugin().name
         val version = resources.text("/version.txt")
         val sochaTitle = "Software-Challenge GUI $version"
         titleProperty.bind(controller.model.currentView.stringBinding {
@@ -102,7 +103,7 @@ class AppView: View("Software-Challenge Germany") {
                 ViewType.GAME_LOADING -> "Spiel Startet - $sochaTitle"
                 ViewType.GAME -> "Spiele $gameTitle - $sochaTitle"
                 null -> throw NoWhenBranchMatchedException("Current view can't be null!")
-            }
+            }.also { logger.debug { "New window title: $it" } }
         })
         
         controller.model.applyTheme(root)
