@@ -52,6 +52,7 @@ class PiranhasBoard: GameBoard<GameState>() {
     }
     
     override fun onNewState(oldState: GameState?, state: GameState?) {
+        selected = grid
         logger.debug { "New State: $state" }
         grid.children.clear()
         hovers.clear()
