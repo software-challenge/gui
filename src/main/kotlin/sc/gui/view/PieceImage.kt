@@ -1,6 +1,5 @@
 package sc.gui.view
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.animation.Animation
 import javafx.animation.KeyFrame
 import javafx.beans.value.ObservableDoubleValue
@@ -14,8 +13,6 @@ import sc.gui.util.listenImmediately
 import tornadofx.*
 import java.lang.ref.WeakReference
 import kotlin.random.Random
-
-private val logger = KotlinLogging.logger { }
 
 val animationDuration = Duration.seconds(0.1)
 val transitionDuration = animationDuration.multiply(8.0)
@@ -46,7 +43,7 @@ class ResizableImageView(sizeProperty: ObservableValue<Number>): ImageView() {
     override fun isResizable(): Boolean = true
     
     override fun toString(): String =
-            "${styleClass.joinToString(".")}@${Integer.toHexString(hashCode())}${pseudoClassStates.joinToString("") { ":$it" }}"
+        "${styleClass.joinToString(".")}@${Integer.toHexString(hashCode())}${pseudoClassStates.joinToString("") { ":$it" }}"
 }
 
 /** Holds a potentially animated piece on a position on the board.
@@ -70,14 +67,19 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, val content: S
             frame = nextFrame()
     }
     
-    fun nextFrame(prefix: String = "idle", oldFrame: Int = frame, randomize: Boolean = true, remove: Boolean = false): Int {
+    fun nextFrame(
+        prefix: String = "idle",
+        oldFrame: Int = frame,
+        randomize: Boolean = true,
+        remove: Boolean = false,
+    ): Int {
         val img = children.lastOrNull()
         img?.removePseudoClass("$prefix$oldFrame")
         return if(!remove)
             (oldFrame.inc() + if(randomize) Random.nextInt(1, 5).div(5) else 0)
-                    .mod(frameCount).also { newFrame ->
-                        img?.addPseudoClass("$prefix$newFrame")
-                    }
+                .mod(frameCount).also { newFrame ->
+                    img?.addPseudoClass("$prefix$newFrame")
+                }
         else -1
     }
     
@@ -93,9 +95,9 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, val content: S
     }
     
     override fun toString(): String =
-            "$content@${Integer.toHexString(hashCode())}" +
-            pseudoClassStates.joinToString("") { ":$it" } +
-            children
+        "$content@${Integer.toHexString(hashCode())}" +
+        pseudoClassStates.joinToString("") { ":$it" } +
+        children
     
 }
 
