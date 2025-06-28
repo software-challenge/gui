@@ -5,27 +5,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
-## 25.1.0 Add Advanced Player - 2025-02-13
+## 26.0 Basic Piranhas Game - 2026-06
+
+## 2026 Game Piranhas
+
+### 25.1.0 Add Advanced Player - 2025-02-13
 - add advanced player option
 - save replay on exit
 
-## 25.0.6 Board Redesign - 2024-07-09
+### 25.0.6 Board Redesign - 2024-07-09
 - make some move interactions more intuitive
 - arrange the board as archimedean spiral
 - more animations
 
-## 25.0.5 Tie Loose Ends - 2024-07-01
+### 25.0.5 Tie Loose Ends - 2024-07-01
 - Fix small animation flash
 - End game with turn 60
 - Fix log opening on Linux
 - Update CI Pipeline
 
-## 25.0.4 Smoothen Animations - 2024-06-26
+### 25.0.4 Smoothen Animations - 2024-06-26
 - Smoother animation of player figures
 - Fix erratic game start issues human vs human
 - Game Finish rule fixes in backend
 
-## 25.0.3 UI Polish - 2024-06-25
+### 25.0.3 UI Polish - 2024-06-25
 - label fields
 - show carrot costs and gains with icon
 - improve card move buttons
@@ -33,13 +37,13 @@ for details on our versioning scheme.
 - make example player a little smarter
 - animate moves
 
-## 25.0.2 Adjustments - 2024-06-19
+### 25.0.2 Adjustments - 2024-06-19
 - small UX improvements
 - display owned cards
 - update background and light/dark mode styling
 - update window title
 
-## 25.0.1 Prototype - 2024-06-15
+### 25.0.1 Prototype - 2024-06-15
 
 ## 2025 Game Hase und Igel
 
