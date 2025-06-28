@@ -1,6 +1,7 @@
 package sc.gui.view.game
 
 import javafx.application.Platform
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.effect.ColorAdjust
@@ -8,6 +9,7 @@ import javafx.scene.effect.Glow
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.GridPane
 import sc.api.plugins.Coordinates
+import sc.gui.util.listenImmediately
 import sc.gui.view.GameBoard
 import sc.gui.view.PieceImage
 import sc.plugin2026.FieldState
@@ -21,7 +23,16 @@ class PiranhasBoard: GameBoard<GameState>() {
     private val gridSize
         get() = squareSize.div(PiranhaConstants.BOARD_LENGTH)
     
-    val grid: GridPane = GridPane().addClass("grid")
+    val grid: GridPane = GridPane().addClass("grid").apply {
+        squareSize.listenImmediately { size ->
+            padding = Insets(
+                size.toDouble() / 80,
+                size.toDouble() / 80,
+                size.toDouble() / 300,
+                size.toDouble() / 200,
+            )
+        }
+    }
     
     override val root = hbox {
         this.alignment = Pos.CENTER
