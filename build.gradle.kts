@@ -131,6 +131,7 @@ tasks {
     }
     
     run.configure {
+        dependsOn(backend.task(":server:makeRunnable"))
         workingDir(buildDir.resolve("run"))
         doFirst {
             workingDir.mkdirs()
