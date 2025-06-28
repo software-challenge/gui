@@ -105,15 +105,19 @@ abstract class GameBoard<GameState: IGameState>: View(), ChangeListener<IGameSta
         }
     }
     
+    /** For keyboard based controls - accessibility! */
     protected abstract fun handleKeyPress(state: GameState, keyEvent: KeyEvent): Boolean
     
+    /** Show human controls if it is a human move. */
     protected fun checkHumanControls() {
         if(awaitingHumanMove.value)
             renderHumanControls(gameState ?: return)
     }
     
+    /** Called when a human player needs to make a move to render needed UI elements. */
     protected abstract fun renderHumanControls(state: GameState)
     
+    /** Send move if it is humans turn. */
     protected fun sendHumanMove(move: IMove): Boolean {
         if(awaitingHumanMove.value) {
             fire(HumanMoveAction(move.also {
