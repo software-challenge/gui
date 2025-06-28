@@ -73,11 +73,16 @@ class PiranhasBoard: GameBoard<GameState>() {
         GameRuleLogic.possibleMovesFor(board, pos).forEach { move ->
             val target = GameRuleLogic.targetField(board, move)
             val hover = PieceImage(gridSize, "${field.team}_${field.size}")
-            hover.effect = ColorAdjust().apply { saturation = -0.5 }
+            
+            val current = field.team == state.currentTeam
+            hover.effect = ColorAdjust().apply {
+                saturation = if(current && awaitingHumanMove.value) -0.4 else -0.9
+            }
+            if(current)
+                hover.onLeftClick { sendHumanMove(move) }
+            
             hovers.add(hover)
             grid.add(hover, target.x, target.y)
-            if(field.team == state.currentTeam)
-                hover.onLeftClick { sendHumanMove(move) }
         }
     }
     
