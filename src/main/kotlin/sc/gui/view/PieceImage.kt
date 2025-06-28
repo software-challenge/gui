@@ -1,5 +1,6 @@
 package sc.gui.view
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.animation.Animation
 import javafx.animation.KeyFrame
 import javafx.beans.value.ObservableDoubleValue
@@ -8,7 +9,6 @@ import javafx.geometry.Pos
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.util.Duration
-import io.github.oshai.kotlinlogging.KotlinLogging
 import sc.gui.model.AppModel
 import sc.gui.util.listenImmediately
 import tornadofx.*
@@ -57,7 +57,8 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, val content: S
     init {
         alignment = Pos.BOTTOM_CENTER
         addChild(content)
-        animationFunctions.add(WeakReference(animateFn))
+        // FIXME this creates race conditions
+        //animationFunctions.add(WeakReference(animateFn))
         viewOrder = 1.0
     }
     
@@ -95,5 +96,6 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, val content: S
             "$content@${Integer.toHexString(hashCode())}" +
             pseudoClassStates.joinToString("") { ":$it" } +
             children
+    
 }
 
