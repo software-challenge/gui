@@ -45,6 +45,12 @@ class PiranhasBoard: GameBoard<GameState>() {
     var selected: Node? = null
     val hovers = ArrayList<Node>()
     
+    fun clearHovers() {
+        logger.trace { "Clearing hovers: $hovers" }
+        grid.children.removeAll(hovers)
+        hovers.clear()
+    }
+    
     override fun onNewState(oldState: GameState?, state: GameState?) {
         logger.debug { "New State: $state" }
         grid.children.clear()
@@ -64,10 +70,15 @@ class PiranhasBoard: GameBoard<GameState>() {
                 grid.add(piece, pos.x, pos.y)
                 if(field.team == null)
                     return@forEach
-                piece.onHover {
+                piece.hoverProperty().addListener { _, _, hover ->
                     if(selected == null) {
-                        Platform.runLater {
-                            addHovers(state, pos, field)
+                        if(hover) {
+                            Platform.runLater {
+                                addHovers(state, pos, field)
+                            }
+                        } else {
+                            if(field.team != state.currentTeam || !awaitingHumanMove.value)
+                                clearHovers()
                         }
                     }
                 }
@@ -76,8 +87,7 @@ class PiranhasBoard: GameBoard<GameState>() {
                         logger.debug { "Clicked own fish on $pos" }
                         selected?.effect = null
                         if(selected == piece) {
-                            grid.children.removeAll(hovers)
-                            hovers.clear()
+                            clearHovers()
                             selected = null
                             return@onLeftClick
                         }
@@ -92,8 +102,7 @@ class PiranhasBoard: GameBoard<GameState>() {
     
     fun addHovers(state: GameState, pos: Coordinates, field: FieldState) {
         logger.trace { "Clearing hovers and adding for $pos in turn ${state.turn}" }
-        grid.children.removeAll(hovers)
-        hovers.clear()
+        clearHovers()
         
         val board = state.board
         GameRuleLogic.possibleMovesFor(board, pos).forEach { move ->
