@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+## 26.0.3 Piranhas Bugfixed - 2026-07-01
+Major bugs should be gone,
+only replays are untested
+
 ## 26.0 Basic Piranhas Game - 2026-06
 
 ## 2026 Game Piranhas
