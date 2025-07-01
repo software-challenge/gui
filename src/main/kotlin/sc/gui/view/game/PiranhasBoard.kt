@@ -51,6 +51,10 @@ class PiranhasBoard: GameBoard<GameState>() {
         hovers.clear()
     }
     
+    fun addToGrid(child: Node, coordinates: Coordinates) {
+        grid.add(child, coordinates.x, PiranhaConstants.BOARD_LENGTH - 1 - coordinates.y)
+    }
+    
     override fun onNewState(oldState: GameState?, state: GameState?) {
         selected = grid
         logger.debug { "New State: $state" }
@@ -68,7 +72,7 @@ class PiranhasBoard: GameBoard<GameState>() {
                 val piece = PieceImage(
                     gridSize,
                     field.team?.let { team -> "${team}_${field.size}" } ?: field.name.lowercase())
-                grid.add(piece, pos.x, pos.y)
+                addToGrid(piece, pos)
                 if(field.team == null)
                     return@forEach
                 piece.hoverProperty().addListener { _, _, hover ->
@@ -118,7 +122,7 @@ class PiranhasBoard: GameBoard<GameState>() {
                 hover.onLeftClick { sendHumanMove(move) }
             
             hovers.add(hover)
-            grid.add(hover, target.x, target.y)
+            addToGrid(hover, target)
         }
     }
     
