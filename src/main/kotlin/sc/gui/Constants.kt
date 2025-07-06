@@ -4,6 +4,10 @@ import sc.server.network.NewClientListener
 import java.util.Locale
 import java.util.ResourceBundle
 
+// TODO automatically determine via ServiceLoader prop
+val humanEnabled = true
+val replaysEnabled = false
+
 val strings: ResourceBundle = ResourceBundle.getBundle("strings", Locale("de", "DE"))
 
 const val serverAddress = "localhost"

@@ -11,6 +11,7 @@ import sc.gui.controller.selectReplay
 import sc.gui.events.*
 import sc.gui.guide
 import sc.gui.model.ViewType
+import sc.gui.replaysEnabled
 import sc.gui.util.browse
 import sc.gui.util.browseUrl
 import tornadofx.*
@@ -49,12 +50,13 @@ class AppView: View("Software-Challenge Germany") {
                     controller.toggleDarkmode()
                 }
                 separator()
-                item("Replay laden", "Shortcut+R").action {
-                    selectReplay {
-                        if(controller.model.currentView.get() == ViewType.GAME)
-                            fire(TerminateGame())
+                if(replaysEnabled)
+                    item("Replay laden", "Shortcut+R").action {
+                        selectReplay {
+                            if(controller.model.currentView.get() == ViewType.GAME)
+                                fire(TerminateGame())
+                        }
                     }
-                }
                 item("Logs öffnen", "Shortcut+L").action {
                     browse(File("log").absoluteFile)
                 }

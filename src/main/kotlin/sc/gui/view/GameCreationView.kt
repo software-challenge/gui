@@ -14,6 +14,7 @@ import sc.gui.controller.selectReplay
 import sc.gui.model.PlayerType
 import sc.gui.model.TeamSettings
 import sc.gui.model.TeamSettingsModel
+import sc.gui.replaysEnabled
 import tornadofx.*
 import java.io.File
 
@@ -25,9 +26,10 @@ class GameCreationView: View() {
     
     override val root = borderpane {
         padding = Insets(AppStyle.spacing)
-        top =  hbox(AppStyle.spacing, Pos.CENTER_RIGHT) {
-            button("Replay laden").action { selectReplay() }
-        }
+        if(replaysEnabled)
+            top = hbox(AppStyle.spacing, Pos.CENTER_RIGHT) {
+                button("Replay laden").action { selectReplay() }
+            }
         center = form {
             alignment = Pos.CENTER
             label("Willkommen bei der Software-Challenge!") {

@@ -1,6 +1,7 @@
 package sc.gui.model
 
 import javafx.beans.property.Property
+import sc.gui.humanEnabled
 import tornadofx.*
 import java.io.File
 
@@ -13,7 +14,7 @@ enum class PlayerType(val description: String) {
     override fun toString() = description
     companion object {
         /** Helper to disable human player until ready. */
-        fun allowedValues() = entries//.takeLast(4) // TODO automatically determine via ServiceLoader prop
+        fun allowedValues() = if(humanEnabled) entries else entries.takeLast(4)
     }
 }
 
