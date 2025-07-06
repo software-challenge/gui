@@ -2,6 +2,7 @@ package sc.gui.view.game
 
 import javafx.application.Platform
 import javafx.geometry.Insets
+import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.effect.ColorAdjust
@@ -12,6 +13,7 @@ import sc.api.plugins.Coordinates
 import sc.gui.util.listenImmediately
 import sc.gui.view.GameBoard
 import sc.gui.view.PieceImage
+import sc.gui.view.transitionDuration
 import sc.plugin2026.FieldState
 import sc.plugin2026.GameState
 import sc.plugin2026.util.GameRuleLogic
@@ -62,17 +64,35 @@ class PiranhasBoard: GameBoard<GameState>() {
         hovers.clear()
         selected = null
         
+        // this ensures proper sizing of the board
         (0 until PiranhaConstants.BOARD_LENGTH).forEach { y ->
             grid.add(PieceImage(gridSize, "squid").apply { opacity = 0.0 }, 0, y)
             grid.add(PieceImage(gridSize, "squid").apply { opacity = 0.0 }, y, 0)
         }
         
         state?.let { state ->
+            val move = state.lastMove?.let { move ->
+                if(oldState?.turn?.minus(state.turn) == -1) {
+                    move.from to GameRuleLogic.targetCoordinates(oldState.board, move)
+                } else {
+                    null
+                }
+            }
             state.board.forEach { (pos: Coordinates, field: FieldState) ->
                 val piece = PieceImage(
                     gridSize,
                     field.team?.let { team -> "${team}_${field.size}" } ?: field.name.lowercase())
+                
                 addToGrid(piece, pos)
+                if(pos == move?.second) {
+                    val offset = move.first - move.second
+                    logger.debug { "Animating piece $piece (${piece.translateX}|${piece.translateY}) along $move from $offset" }
+                    piece.effect = Glow(0.2)
+                    piece.translateX = offset.dx * gridSize.value
+                    piece.translateY = - offset.dy * gridSize.value
+                    piece.move(transitionDuration, Point2D.ZERO)
+                }
+                
                 if(field.team == null)
                     return@forEach
                 piece.hoverProperty().addListener { _, _, hover ->
@@ -111,7 +131,7 @@ class PiranhasBoard: GameBoard<GameState>() {
         
         val board = state.board
         GameRuleLogic.possibleMovesFor(board, pos).forEach { move ->
-            val target = GameRuleLogic.targetField(board, move)
+            val target = GameRuleLogic.targetCoordinates(board, move)
             val hover = PieceImage(gridSize, "${field.team}_${field.size}")
             
             val current = field.team == state.currentTeam
