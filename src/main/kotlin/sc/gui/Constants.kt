@@ -6,7 +6,7 @@ import java.util.ResourceBundle
 
 // TODO automatically determine via ServiceLoader prop
 val humanEnabled = true
-val replaysEnabled = false
+val replaysEnabled = true
 
 val strings: ResourceBundle = ResourceBundle.getBundle("strings", Locale("de", "DE"))
 
