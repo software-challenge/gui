@@ -50,7 +50,9 @@ application {
 repositories {
     mavenCentral()
     maven("https://maven.wso2.org/nexus/content/groups/wso2-public/")
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
+    // TornadoFX
+    // maven("https://oss.sonatype.org/content/repositories/snapshots")
+    maven("https://jitpack.io")
 }
 
 val debug = project.hasProperty("debug")
@@ -59,7 +61,12 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     
     implementation(kotlin("reflect"))
-    implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT") { exclude("org.jetbrains.kotlin", "kotlin-reflect") }
+
+    // implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT") { exclude("org.jetbrains.kotlin", "kotlin-reflect") }
+    // implementation("com.github.software-challenge.tornadofx2", "tornadofx2", "2.0.0")
+    // implementation("com.github.edvin", "tornadofx2", "master-SNAPSHOT")
+    implementation("com.github.edvin", "tornadofx2", "21e933fd41")
+
     implementation("ch.qos.logback", "logback-classic", "1.5.18")
     implementation("io.github.oshai", "kotlin-logging-jvm", "6.0.9") // TODO version 7 with kotlin 2
     

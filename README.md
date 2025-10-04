@@ -16,7 +16,8 @@ wird der Server auf diesem Port Verbindungen von Spielern erwarten.
   ```sh
   git clone https://github.com/software-challenge/gui.git --recurse-submodules --shallow-submodules
   ```
-- mindestens Java 11 wird benötigt (ggf. `org.gradle.java.home=/path/to/jdk` in `gradle.properties` setzen)
+- mindestens Java 11 wird benötigt 
+  (ggf. `org.gradle.java.home=/path/to/jdk` in `gradle.properties` setzen)
 - `./gradlew run` ausführen
 
 ### Kollaboration
@@ -40,3 +41,14 @@ wobei der Titel des Pull Requests der Commit-Message entsprechen sollte.
 
 Detaillierte Informationen zu unserem Kollaborations-Stil
 findet ihr in der [Kull Konvention](https://kull.jfischer.org).
+
+### Java-Versionen und Abhängigkeiten
+
+Aktuell können die Backend-docs nur mit JDK 8 gebaut werden,
+dieses Projekt braucht jedoch für [tornadofx](https://github.com/edvin/tornadofx2)
+mindestens Java 11.
+Daher müssen die Releases separat gebaut werden.
+
+Tornadofx wird leider seit einigen Jahren nicht mehr entwickelt.
+Wir schauen gerade wie es da weitergeht.
+Eventuell ein eigener Fork.
