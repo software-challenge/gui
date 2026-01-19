@@ -65,7 +65,8 @@ dependencies {
     // implementation("no.tornado", "tornadofx", "2.0.0-SNAPSHOT") { exclude("org.jetbrains.kotlin", "kotlin-reflect") }
     // implementation("com.github.software-challenge.tornadofx2", "tornadofx2", "2.0.0")
     // implementation("com.github.edvin", "tornadofx2", "master-SNAPSHOT")
-    implementation("com.github.edvin", "tornadofx2", "21e933fd41")
+    // implementation("com.github.edvin", "tornadofx2", "21e933fd41")
+    implementation(files("./gradle/tornadofx2-21e933fd41.jar"))
 
     implementation("ch.qos.logback", "logback-classic", "1.5.18")
     implementation("io.github.oshai", "kotlin-logging-jvm", "6.0.9") // TODO version 7 with kotlin 2
