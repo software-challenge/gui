@@ -14,7 +14,7 @@ wird der Server auf diesem Port Verbindungen von Spielern erwarten.
 
 - zuerst das Projekt lokal mit Submodulen klonen:
   ```sh
-  git clone https://github.com/software-challenge/gui.git --recurse-submodules --shallow-submodules
+  git clone git@github.com:software-challenge/gui.git --recurse-submodules --shallow-submodules
   ```
 - mindestens Java 11 wird benötigt 
   (ggf. `org.gradle.java.home=/path/to/jdk` in `gradle.properties` setzen)
