@@ -1,22 +1,23 @@
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.process.ExecOperations
 import java.util.Properties
 
-val minJavaVersion = JavaVersion.VERSION_11
+val minJavaVersion = JavaVersion.VERSION_17
 plugins {
-    val minJavaVersion = JavaVersion.VERSION_11 // Declared twice because plugins block has its own scope
+    val minJavaVersion = JavaVersion.VERSION_17 // Declared twice because plugins block has its own scope
     require(JavaVersion.current() >= minJavaVersion) {
         "Building requires at least JDK $minJavaVersion - please look into the README"
     }
     
     application
-    kotlin("jvm") version "1.9.25"
+    kotlin("jvm") version "2.3.0"
     id("idea")
     id("org.openjfx.javafxplugin") version "0.1.0"
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.gradleup.shadow") version "9.3.1"
     
-    id("com.github.ben-manes.versions") version "0.47.0"
-    id("se.patrikerdes.use-latest-versions") version "0.2.18"
+    id("com.github.ben-manes.versions") version "0.53.0"
+    id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
 
 idea {
@@ -44,7 +45,7 @@ version = try {
 println("Current version: $version (Java version: ${JavaVersion.current()})")
 
 application {
-    mainClassName = "sc.gui.GuiAppKt" // needs shadow-update which needs gradle update to 7.0
+    mainClass.set("sc.gui.GuiAppKt") // needs shadow-update which needs gradle update to 7.0
 }
 
 repositories {
@@ -92,14 +93,14 @@ tasks {
         }
     }
     withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = minJavaVersion.toString()
-            freeCompilerArgs = listOf("-Xjvm-default=all")
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(minJavaVersion.toString()))
+            freeCompilerArgs.addAll("-Xjvm-default=all")
         }
     }
     
     withType<Jar> {
-        manifest.attributes["Main-Class"] = application.mainClassName
+        manifest.attributes["Main-Class"] = application.mainClass.get()
     }
     
     javafx {
@@ -113,7 +114,7 @@ tasks {
     }
     
     shadowJar {
-        destinationDirectory.set(buildDir)
+        destinationDirectory.set(layout.buildDirectory.asFile.get())
         archiveClassifier.set(
             "${
                 OperatingSystem.current().familyName.replace(
@@ -140,24 +141,28 @@ tasks {
     
     run.configure {
         dependsOn(backend.task(":server:makeRunnable"))
-        workingDir(buildDir.resolve("run"))
+        workingDir(layout.buildDirectory.asFile.get().resolve("run"))
         doFirst {
             workingDir.mkdirs()
         }
         args = System.getProperty("args", "").split(" ")
     }
     
-    val release by creating {
+    val release by registering {
         dependsOn(clean, check)
         group = "distribution"
         description = "Create and push a tagged commit matching the backend version"
         doLast {
             val desc = project.properties["m"]?.toString()
                        ?: throw InvalidUserDataException("Das Argument -Pm=\"Beschreibung dieser Version\" wird benötigt")
-            exec { commandLine("git", "add", "CHANGELOG.md") }
-            exec { commandLine("git", "commit", "-m", "release: v$versionFromBackend") }
-            exec { commandLine("git", "tag", versionFromBackend, "-m", desc) }
-            exec { commandLine("git", "push", "--follow-tags", "--recurse-submodules=on-demand") }
+            val processHelper: (Array<String>) -> Unit = { args ->
+                val process = ProcessBuilder(*args).start()
+                process.waitFor()
+            }
+            processHelper(arrayOf("git", "add", "CHANGELOG.md"))
+            processHelper(arrayOf("git", "commit", "-m", "release: v$versionFromBackend"))
+            processHelper(arrayOf("git", "tag", versionFromBackend, "-m", desc))
+            processHelper(arrayOf("git", "push", "--follow-tags", "--recurse-submodules=on-demand"))
         }
     }
 }
