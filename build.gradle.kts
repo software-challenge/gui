@@ -56,6 +56,7 @@ repositories {
     maven("https://jitpack.io")
 }
 
+// ./gradlew run -Pdebug for debug tools and logging
 val debug = project.hasProperty("debug")
 
 dependencies {
@@ -78,8 +79,10 @@ dependencies {
     implementation("software-challenge", "plugin2025")
     implementation("software-challenge", "plugin2026")
     
-    if(debug)
+    if(debug) {
+        // hold Ctrl to view component hierarchy and bounds
         implementation("com.tangorabox", "component-inspector-fx", "1.1.0")
+    }
 }
 
 tasks {
@@ -109,7 +112,8 @@ tasks {
         val mods = mutableListOf(
             "javafx.base", "javafx.controls", "javafx.fxml",
             "javafx.web", "javafx.media", "javafx.swing"
-        ) // included because of tornadofx already
+        )
+        // included because of tornadofx already
         // if(debug) mods.addAll(listOf("javafx.swing"))
         modules = mods
     }
