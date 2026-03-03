@@ -99,7 +99,7 @@ tasks {
     withType<KotlinCompile> {
         compilerOptions {
             jvmTarget.set(JvmTarget.fromTarget(minJavaVersion.toString()))
-            freeCompilerArgs.addAll("-Xjvm-default=all")
+            //freeCompilerArgs.addAll("-jvm-default=all")
         }
     }
     

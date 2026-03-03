@@ -29,13 +29,13 @@ class AppView: View("Software-Challenge Germany") {
             // TODO help menus keep disappearing and is offset
             menu(graphic = sochaIcon) {
                 item("Beenden", "Shortcut+Q").action {
-                    logger.debug("Quitting!")
+                    logger.debug { "Quitting!" }
                     Platform.exit()
                 }
                 item("Neues Spiel", "Shortcut+N") {
                     enableWhen(controller.model.currentView.isNotEqualTo(ViewType.GAME_CREATION))
                     action {
-                        logger.debug("New Game!")
+                        logger.debug { "New Game!" }
                         if(controller.model.currentView.get() == ViewType.GAME) {
                             confirm(
                                 header = "Neues Spiel anfangen",

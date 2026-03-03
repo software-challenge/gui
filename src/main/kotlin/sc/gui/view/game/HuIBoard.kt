@@ -286,7 +286,7 @@ class HuIBoard: GameBoard<GameState>() {
             putOnPosition(
                 Button(carrotCostString(car.amount)).apply {
                     fixHoverInsets()
-                    if(logger.isTraceEnabled)
+                    if(logger.isTraceEnabled())
                         hoverProperty().listenImmediately {
                             logger.trace { "$this: $padding on hover $it" }
                         }
