@@ -3,9 +3,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
 
-val minJavaVersion = JavaVersion.VERSION_17
+val minJavaVersion = JavaVersion.VERSION_11
+val targetJavaVersion = JavaVersion.current() // minJavaVersion can be set for compatibility
 plugins {
-    val minJavaVersion = JavaVersion.VERSION_17 // Declared twice because plugins block has its own scope
+    val minJavaVersion = JavaVersion.VERSION_11 // Declared twice because plugins block has its own scope
     require(JavaVersion.current() >= minJavaVersion) {
         "Building requires at least JDK $minJavaVersion - please look into the README"
     }
@@ -14,7 +15,7 @@ plugins {
     kotlin("jvm") version "2.3.0"
     id("idea")
     id("org.openjfx.javafxplugin") version "0.1.0"
-    id("com.gradleup.shadow") version "9.3.2"
+    id("com.gradleup.shadow") version "9.1.0"
     
     id("com.github.ben-manes.versions") version "0.53.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.19"
@@ -87,7 +88,7 @@ dependencies {
 
 tasks {
     compileJava {
-        options.release.set(minJavaVersion.majorVersion.toInt())
+        options.release.set(targetJavaVersion.majorVersion.toInt())
     }
     processResources {
         if(!debug)
@@ -98,7 +99,7 @@ tasks {
     }
     withType<KotlinCompile> {
         compilerOptions {
-            jvmTarget.set(JvmTarget.fromTarget(minJavaVersion.toString()))
+            jvmTarget.set(JvmTarget.fromTarget(targetJavaVersion.toString()))
             //freeCompilerArgs.addAll("-jvm-default=all")
         }
     }

@@ -7,7 +7,7 @@ jobs:
       matrix:
         # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
         os: [ubuntu-latest, windows-latest, macos-latest]
-        jdk: [17, 24]
+        jdk: [11, 17, 21]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -55,7 +55,7 @@ jobs:
     - name: Upload jar as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: software-challenge-gui-${{ github.sha }}-${{ matrix.os }}
+        name: software-challenge-gui-${{ github.sha }}-j${{ matrix.jdk }}-${{ matrix.os }}
         path: build/*.jar
   release:
     needs: [build, build-arm]
@@ -64,7 +64,7 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4 # https://github.com/actions/download-artifact
       with:
-        pattern: software-challenge-gui-${{ github.sha }}-*
+        pattern: software-challenge-gui-${{ github.sha }}-j11-*
         path: build
         merge-multiple: true
     - name: Release ${{ github.ref }}
