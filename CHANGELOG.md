@@ -5,13 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
-## 26.0.4 Piranhas Animated! - 2026-07-06
+### 26.1.0 Stable Release - 2026-04-02
+- Pin TornadoFX library version for consistent builds
+- Integrate Rule Fixes from Backend
 
-## 26.0.3 Piranhas Bugfixed - 2026-07-01
-Major bugs should be gone,
-only replays are untested
+### 26.0.5 Replays and advanced player fixes – 2025-07-07
+- Fix replays handling and advanced player behavior
+- Internal logging and refactors for the 2026 season
 
-## 26.0 Basic Piranhas Game - 2026-06
+### 26.0.4 Piranhas Animate Moves – 2025-07-06
+
+### 26.0.3 Piranhas Grid Fixes – 2025-07-01
+- Fix grid display issues in the Piranhas board
+- Improve hover behavior
 
 ## 2026 Game Piranhas
 
