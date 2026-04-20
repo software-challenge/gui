@@ -36,7 +36,7 @@ val versionFromBackend by lazy {
     arrayOf("year", "minor", "patch").map { versions["socha.version.$it"].toString().toInt() }.joinToString(".") + suffix
 }
 
-group = "sc.gui"
+group = "software-challenge"
 version = try {
     Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags"))
         .inputStream.reader().readText().trim().ifEmpty { null }
