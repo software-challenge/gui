@@ -75,6 +75,7 @@ dependencies {
     implementation("software-challenge", "plugin2024")
     implementation("software-challenge", "plugin2025")
     implementation("software-challenge", "plugin")
+    implementation("software-challenge", "plugin2099")
     
     if(debug)
         implementation("com.tangorabox", "component-inspector-fx", "1.1.0")

@@ -157,7 +157,7 @@ class AppStyle: Stylesheet() {
             prefWidth = 100.percent
         }
         
-        piranhasStyles()
+        tictactoeStyles()
     }
     
     fun piranhasStyles() {
@@ -287,6 +287,23 @@ class AppStyle: Stylesheet() {
         background {
             opacity = 0.7
             backgroundColor += colorBackground
+        }
+    }
+    
+    fun tictactoeStyles() {
+        background {
+            opacity = 0.7
+            backgroundColor += c("#09B051")
+            backgroundImage += resources.url("/tictactoe/fluss.png").toURI()
+            backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
+        }
+        
+        ".red" { image = resources.url("/tictactoe/kreuz.png").toURI() }
+        ".blue" { image = resources.url("/tictactoe/kreis.png").toURI() }
+        
+        ".grid" {
+            backgroundImage += resources.url("/tictactoe/grid.png").toURI()
+            backgroundSize += BackgroundSize(1.0, 1.0, true, true, false, false)
         }
     }
     

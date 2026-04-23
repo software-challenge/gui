@@ -12,5 +12,7 @@ includeBuild("backend") {
                 .with(project(":plugin2026"))
         substitute(module("software-challenge:server"))
                 .with(project(":server"))
+        substitute(module("software-challenge:plugin2099"))
+            .with(project(":plugin2099"))
     }
 }
