@@ -157,7 +157,31 @@ class AppStyle: Stylesheet() {
             prefWidth = 100.percent
         }
         
-        piranhasStyles()
+        connect4Styles()
+    }
+    
+    fun connect4Styles() {
+        background {
+            opacity = 0.7
+            backgroundColor += c("#88DAF7")
+            backgroundImage += resources.url("/piranhas/water_b.png").toURI()
+            backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
+        }
+        
+        (1..3).forEach { size ->
+            Team.entries.forEach { team ->
+                ".${team}_${size}" {
+                    image = resources.url("/piranhas/${team.color}_${(96 + size).toChar()}.png")
+                        .toURI()
+                }
+            }
+        }
+        
+        ".squid" { image = resources.url("/piranhas/squid.png").toURI() }
+        ".grid" {
+            backgroundImage += resources.url("/piranhas/grid-crop.png").toURI()
+            backgroundSize += BackgroundSize(1.0, 1.0, true, true, false, false)
+        }
     }
     
     fun piranhasStyles() {

@@ -79,6 +79,7 @@ dependencies {
     implementation("software-challenge", "plugin2024")
     implementation("software-challenge", "plugin2025")
     implementation("software-challenge", "plugin2026")
+    implementation("software-challenge", "plugin2098")
     
     if(debug) {
         // hold Ctrl to view component hierarchy and bounds
