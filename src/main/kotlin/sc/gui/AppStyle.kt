@@ -11,6 +11,7 @@ import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
 import sc.api.plugins.Team
 import sc.gui.model.AppModel
+import sc.plugin2098.util.Connect4Constants
 import tornadofx.*
 
 class AppStyle: Stylesheet() {
@@ -177,10 +178,12 @@ class AppStyle: Stylesheet() {
             }
         }
         
-        ".squid" { image = resources.url("/piranhas/squid.png").toURI() }
+        ".chip-r" { image = resources.url("/connect4/chip-rot.png").toURI() }
+        ".chip-y" { image = resources.url("/connect4/chip-gelb.png").toURI() }
+        ".cell" { image = resources.url("/connect4/cell-debug.png").toURI() }
         ".grid" {
-            backgroundImage += resources.url("/piranhas/grid-crop.png").toURI()
-            backgroundSize += BackgroundSize(1.0, 1.0, true, true, false, false)
+            backgroundImage += resources.url("/connect4/board.png").toURI()
+            backgroundSize += BackgroundSize(1.0, 0.1, true, true, false, false)
         }
     }
     
