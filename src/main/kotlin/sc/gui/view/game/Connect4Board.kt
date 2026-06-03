@@ -90,7 +90,6 @@ class Connect4Board: GameBoard<GameState>() {
     }
     
     override fun handleKeyPress(state: GameState, keyEvent: KeyEvent): Boolean {
-        println(keyEvent.text)
         
         var x = keyEvent.text.toIntOrNull() ?: return false
         x -= 1
