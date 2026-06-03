@@ -66,16 +66,18 @@ class Connect4Board: GameBoard<GameState>() {
 
         // this ensures proper sizing of the board
         (0 until Connect4Constants.BOARD_WIDTH).forEach { y ->
-  
-            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, y, 0)
+            //grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, y, 0)
+            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.0 }, y, 0)
         }
         
         (0 until Connect4Constants.BOARD_HEIGHT).forEach { y ->
-            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, 0, y)
-
+            //grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, 0, y)
+            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.0 }, 0, y)
         }
-//
-//        state?.let { state ->
+        //grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, Connect4Constants.BOARD_WIDTH - 1, Connect4Constants.BOARD_HEIGHT - 1)
+
+        
+        state?.let { state ->
 //            val move = state.lastMove?.let { move ->
 //                if(oldState?.turn?.minus(state.turn) == -1) {
 //                    move.from to GameRuleLogic.targetCoordinates(oldState.board, move)
@@ -83,72 +85,23 @@ class Connect4Board: GameBoard<GameState>() {
 //                    null
 //                }
 //            }
-//            state.board.forEach { (pos: Coordinates, field: FieldState) ->
+            state.board.forEach { (pos: Coordinates, field: FieldState) ->
 //                val piece = PieceImage(
 //                    gridSize,
 //                    field.team?.let { team -> "${team}_${field.size}" } ?: field.name.lowercase())
-//
-//                addToGrid(piece, pos)
-//                if(pos == move?.second) {
-//                    val offset = move.first - move.second
-//                    logger.debug { "Animating piece $piece (${piece.translateX}|${piece.translateY}) along $move from $offset" }
-//                    piece.effect = Glow(0.2)
-//                    piece.translateX = offset.dx * gridSize.value
-//                    piece.translateY = - offset.dy * gridSize.value
-//                    piece.move(transitionDuration, Point2D.ZERO)
-//                }
-//
-//                if(field.team == null)
-//                    return@forEach
-//                piece.hoverProperty().addListener { _, _, hover ->
-//                    if(selected == null) {
-//                        if(hover) {
-//                            Platform.runLater {
-//                                addHovers(state, pos, field)
-//                            }
-//                        } else {
-//                            if(field.team != state.currentTeam || !awaitingHumanMove.value)
-//                                clearHovers()
-//                        }
-//                    }
-//                }
-//                piece.onLeftClick {
-//                    if(field.team == state.currentTeam && awaitingHumanMove.value) {
-//                        logger.debug { "Clicked own fish on $pos" }
-//                        selected?.effect = null
-//                        if(selected == piece) {
-//                            clearHovers()
-//                            selected = null
-//                            return@onLeftClick
-//                        }
-//                        selected = piece
-//                        piece.effect = Glow(0.6)
-//                        addHovers(state, pos, field)
-//                    }
-//                }
-//            }
-//        }
-    }
-    
-    fun addHovers(state: GameState, pos: Coordinates, field: FieldState) {
-//        logger.trace { "Clearing hovers and adding for $pos in turn ${state.turn}" }
-//        clearHovers()
-//
-//        val board = state.board
-//        GameRuleLogic.possibleMovesFor(board, pos).forEach { move ->
-//            val target = GameRuleLogic.targetCoordinates(board, move)
-//            val hover = PieceImage(gridSize, "${field.team}_${field.size}")
-//
-//            val current = field.team == state.currentTeam
-//            hover.effect = ColorAdjust().apply {
-//                saturation = if(current && awaitingHumanMove.value) -0.4 else -0.9
-//            }
-//            if(current)
-//                hover.onLeftClick { sendHumanMove(move) }
-//
-//            hovers.add(hover)
-//            addToGrid(hover, target)
-//        }
+                
+                println(field.team ?: field.name)
+                
+                if(field.team == null) {
+                    return@forEach
+                }
+                
+                println("${field.team!!.name}_chip".lowercase())
+                
+                val piece = PieceImage(gridSize, field.team.let { team -> "${team}-chip".lowercase() })
+                addToGrid(piece, pos)
+            }
+        }
     }
     
     override fun handleKeyPress(state: GameState, keyEvent: KeyEvent): Boolean {
@@ -156,7 +109,18 @@ class Connect4Board: GameBoard<GameState>() {
     }
     
     override fun renderHumanControls(state: GameState) {
-        // not needed for piranhas, handled abovene
+        state.getSensibleMoves().forEach { move ->
+            
+            val piece = PieceImage(gridSize, "${state.currentTeam}-chip".lowercase())
+            
+            piece.opacity = 0.7
+            
+            piece.onLeftClick {
+                sendHumanMove(move)
+            }
+            
+            addToGrid(piece, move.position)
+        }
     }
     
 }

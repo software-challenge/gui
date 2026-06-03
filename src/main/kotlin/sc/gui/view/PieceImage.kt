@@ -84,7 +84,6 @@ class PieceImage(private val sizeProperty: ObservableDoubleValue, val content: S
     }
     
     fun addChild(graphic: String, index: Int? = null) {
-        //logger.trace { "$this: Adding $graphic" }
         children.add(index ?: children.size, ResizableImageView(sizeProperty).apply {
             addClass(graphic)
             if(graphic == "penguin")

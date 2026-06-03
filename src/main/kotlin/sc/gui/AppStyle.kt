@@ -178,12 +178,12 @@ class AppStyle: Stylesheet() {
             }
         }
         
-        ".chip-r" { image = resources.url("/connect4/chip-rot.png").toURI() }
-        ".chip-y" { image = resources.url("/connect4/chip-gelb.png").toURI() }
+        ".one-chip" { image = resources.url("/connect4/chip-rot.png").toURI() }
+        ".two-chip" { image = resources.url("/connect4/chip-gelb.png").toURI() }
         ".cell" { image = resources.url("/connect4/cell-debug.png").toURI() }
         ".grid" {
             backgroundImage += resources.url("/connect4/board.png").toURI()
-            backgroundSize += BackgroundSize(1.0, 0.1, true, true, false, false)
+            backgroundSize += BackgroundSize(1.0, 1.0, true, true, false, false)
         }
     }
     
