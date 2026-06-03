@@ -78,25 +78,10 @@ class Connect4Board: GameBoard<GameState>() {
 
         
         state?.let { state ->
-//            val move = state.lastMove?.let { move ->
-//                if(oldState?.turn?.minus(state.turn) == -1) {
-//                    move.from to GameRuleLogic.targetCoordinates(oldState.board, move)
-//                } else {
-//                    null
-//                }
-//            }
             state.board.forEach { (pos: Coordinates, field: FieldState) ->
-//                val piece = PieceImage(
-//                    gridSize,
-//                    field.team?.let { team -> "${team}_${field.size}" } ?: field.name.lowercase())
-                
-                println(field.team ?: field.name)
-                
                 if(field.team == null) {
                     return@forEach
                 }
-                
-                println("${field.team!!.name}_chip".lowercase())
                 
                 val piece = PieceImage(gridSize, field.team.let { team -> "${team}-chip".lowercase() })
                 addToGrid(piece, pos)
@@ -105,6 +90,18 @@ class Connect4Board: GameBoard<GameState>() {
     }
     
     override fun handleKeyPress(state: GameState, keyEvent: KeyEvent): Boolean {
+        println(keyEvent.text)
+        
+        var x = keyEvent.text.toIntOrNull() ?: return false
+        x -= 1
+        
+        state.getSensibleMoves().forEach { move ->
+            if(move.position.x == x) {
+                sendHumanMove(move)
+                return true
+            }
+        }
+        
         return false
     }
     
