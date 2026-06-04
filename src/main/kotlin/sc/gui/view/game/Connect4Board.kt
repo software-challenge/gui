@@ -47,12 +47,6 @@ class Connect4Board: GameBoard<GameState>() {
     var selected: Node? = null
     val hovers = ArrayList<Node>()
     
-    fun clearHovers() {
-        logger.trace { "Clearing hovers: $hovers" }
-        grid.children.removeAll(hovers)
-        hovers.clear()
-    }
-    
     fun addToGrid(child: Node, coordinates: Coordinates) {
         grid.add(child, coordinates.x, Connect4Constants.BOARD_WIDTH - 1 - coordinates.y)
     }
