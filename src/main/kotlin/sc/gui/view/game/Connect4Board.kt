@@ -1,6 +1,7 @@
 package sc.gui.view.game
 
 import javafx.application.Platform
+import javafx.beans.binding.DoubleBinding
 import javafx.geometry.Insets
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
@@ -37,7 +38,7 @@ class Connect4Board: GameBoard<GameState>() {
     }
     
     override val root = hbox {
-        this.alignment = Pos.CENTER
+        this.alignment = Pos.BOTTOM_CENTER
         vbox {
             this.alignment = Pos.CENTER
             add(grid)
@@ -54,7 +55,7 @@ class Connect4Board: GameBoard<GameState>() {
     }
     
     fun addToGrid(child: Node, coordinates: Coordinates) {
-        grid.add(child, coordinates.x, Connect4Constants.BOARD_WIDTH - 1 - coordinates.y)
+        grid.add(child, coordinates.x, Connect4Constants.BOARD_HEIGHT - 1 - coordinates.y)
     }
     
     override fun onNewState(oldState: GameState?, state: GameState?) {
@@ -63,7 +64,7 @@ class Connect4Board: GameBoard<GameState>() {
         grid.children.clear()
         hovers.clear()
         selected = null
-
+        
         // this ensures proper sizing of the board
         (0 until Connect4Constants.BOARD_WIDTH).forEach { y ->
             //grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, y, 0)
@@ -82,7 +83,6 @@ class Connect4Board: GameBoard<GameState>() {
                 if(field.team == null) {
                     return@forEach
                 }
-                
                 val piece = PieceImage(gridSize, field.team.let { team -> "${team}-chip".lowercase() })
                 addToGrid(piece, pos)
             }
