@@ -11,6 +11,7 @@ import sc.gui.view.PieceImage
 import sc.plugin2098.FieldState
 import sc.plugin2098.GameState
 import sc.plugin2098.util.Connect4Constants
+import sc.plugin2098.util.GameRuleLogic
 import tornadofx.*
 
 class Connect4Board: GameBoard<GameState>() {
@@ -52,11 +53,29 @@ class Connect4Board: GameBoard<GameState>() {
         }
         
         state?.let { state ->
+         
+            var winningCoords: List<Coordinates> = ArrayList()
+            
+            state.isOver?.let { isOver ->
+                if(isOver && state.lastMove != null) {
+                    winningCoords = GameRuleLogic.get4Connected(state.board, state.otherTeam, state.lastMove!!.position)
+                    println(winningCoords.size)
+                }
+            }
+         
             state.board.forEach { (pos: Coordinates, field: FieldState) ->
                 if(field.team == null) {
                     return@forEach
                 }
-                val piece = PieceImage(gridSize, field.team.let { team -> "${team}-chip".lowercase() })
+                val piece: PieceImage
+                
+                if(winningCoords.contains(pos)) {
+                    piece = PieceImage(gridSize, field.team.let { team -> "${team}-chip-winning".lowercase() })
+                    piece.effect = Glow(1.0)
+                } else {
+                    piece = PieceImage(gridSize, field.team.let { team -> "${team}-chip".lowercase() })
+                }
+                
                 addToGrid(piece, pos)
             }
         }

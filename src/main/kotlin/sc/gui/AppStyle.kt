@@ -180,6 +180,8 @@ class AppStyle: Stylesheet() {
         
         ".one-chip" { image = resources.url("/connect4/chip-rot.png").toURI() }
         ".two-chip" { image = resources.url("/connect4/chip-gelb.png").toURI() }
+        ".one-chip-winning" { image = resources.url("/connect4/chip-rot-winning.png").toURI() }
+        ".two-chip-winning" { image = resources.url("/connect4/chip-gelb-winning.png").toURI() }
         ".cell" { image = resources.url("/connect4/cell-debug.png").toURI() }
         ".grid" {
             backgroundImage += resources.url("/connect4/board.png").toURI()
