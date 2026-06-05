@@ -2,6 +2,7 @@ package sc.gui.view.game
 
 import javafx.geometry.Pos
 import javafx.scene.Node
+import javafx.scene.effect.Glow
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.GridPane
 import sc.api.plugins.Coordinates
@@ -81,7 +82,8 @@ class Connect4Board: GameBoard<GameState>() {
             
             val piece = PieceImage(gridSize, "${state.currentTeam}-chip".lowercase())
             
-            piece.opacity = 0.7
+            piece.opacity = 0.5
+            //piece.effect = Glow(1.0)
             
             piece.onLeftClick {
                 sendHumanMove(move)
