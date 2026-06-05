@@ -26,16 +26,7 @@ class Connect4Board: GameBoard<GameState>() {
     private val gridSize
         get() = squareSize.div(Connect4Constants.BOARD_WIDTH) // "Length of the smaller side of the window."
     
-    val grid: GridPane = GridPane().addClass("grid").apply {
-        squareSize.listenImmediately { size ->
-            padding = Insets(
-                size.toDouble() / 80,
-                size.toDouble() / 80,
-                size.toDouble() / 300,
-                size.toDouble() / 200,
-            )
-        }
-    }
+    val grid: GridPane = GridPane().addClass("grid")
     
     override val root = hbox {
         this.alignment = Pos.BOTTOM_CENTER
@@ -62,12 +53,12 @@ class Connect4Board: GameBoard<GameState>() {
         // this ensures proper sizing of the board
         (0 until Connect4Constants.BOARD_WIDTH).forEach { y ->
             //grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, y, 0)
-            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.0 }, y, 0)
+            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, y, 0)
         }
         
         (0 until Connect4Constants.BOARD_HEIGHT).forEach { y ->
             //grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, 0, y)
-            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.0 }, 0, y)
+            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, 0, y)
         }
         //grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, Connect4Constants.BOARD_WIDTH - 1, Connect4Constants.BOARD_HEIGHT - 1)
 
