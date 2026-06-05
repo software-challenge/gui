@@ -1,23 +1,14 @@
 package sc.gui.view.game
 
-import javafx.application.Platform
-import javafx.beans.binding.DoubleBinding
-import javafx.geometry.Insets
-import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.effect.ColorAdjust
-import javafx.scene.effect.Glow
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.GridPane
 import sc.api.plugins.Coordinates
-import sc.gui.util.listenImmediately
 import sc.gui.view.GameBoard
 import sc.gui.view.PieceImage
-import sc.gui.view.transitionDuration
 import sc.plugin2098.FieldState
 import sc.plugin2098.GameState
-import sc.plugin2098.util.GameRuleLogic
 import sc.plugin2098.util.Connect4Constants
 import tornadofx.*
 
@@ -52,16 +43,12 @@ class Connect4Board: GameBoard<GameState>() {
         
         // this ensures proper sizing of the board
         (0 until Connect4Constants.BOARD_WIDTH).forEach { y ->
-            //grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, y, 0)
-            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, y, 0)
+            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.0 }, y, 0)
         }
         
         (0 until Connect4Constants.BOARD_HEIGHT).forEach { y ->
-            //grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, 0, y)
-            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, 0, y)
+            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.0 }, 0, y)
         }
-        //grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.5 }, Connect4Constants.BOARD_WIDTH - 1, Connect4Constants.BOARD_HEIGHT - 1)
-
         
         state?.let { state ->
             state.board.forEach { (pos: Coordinates, field: FieldState) ->
@@ -103,5 +90,4 @@ class Connect4Board: GameBoard<GameState>() {
             addToGrid(piece, move.position)
         }
     }
-    
 }
