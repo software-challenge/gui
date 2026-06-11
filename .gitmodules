@@ -1,6 +1,7 @@
 [submodule "backend"]
 	path = backend
-	url = https://github.com/software-challenge/backend
+	url = https://github.com/NichtNil5/backend.git
+	branch = plugin/tictactoe
 	shallow = true
 [submodule ".idea"]
 	path = .idea
