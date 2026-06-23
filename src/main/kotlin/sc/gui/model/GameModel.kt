@@ -27,6 +27,10 @@ class GameModel: ViewModel() {
     val currentTurn = integerBinding(gameState) { value?.turn ?: 0 }
     val currentTeam = nonNullObjectBinding(gameState) { value?.currentTeam ?: Team.ONE }
     
+    fun getCurrentRound(): Int {
+        return 1 + currentTurn.get() / 4
+    }
+    
     val isHumanTurn = booleanProperty(false)
     
     val availableTurns =

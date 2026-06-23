@@ -38,6 +38,8 @@ val versionFromBackend by lazy {
 
 group = "software-challenge"
 version = try {
+    // This uses the version from "git describe --tags" as the version.
+    // If it does not exist of the command fails, it falls back to the backend version.
     Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags"))
         .inputStream.reader().readText().trim().ifEmpty { null }
 } catch(e: java.io.IOException) {
@@ -79,6 +81,7 @@ dependencies {
     implementation("software-challenge", "plugin2024")
     implementation("software-challenge", "plugin2025")
     implementation("software-challenge", "plugin2026")
+    implementation("software-challenge", "plugin2027")
     
     if(debug) {
         // hold Ctrl to view component hierarchy and bounds

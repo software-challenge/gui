@@ -10,6 +10,7 @@ import sc.gui.controller.CreateGame
 import sc.gui.controller.selectReplay
 import sc.gui.events.*
 import sc.gui.guide
+import sc.gui.guideBlokus
 import sc.gui.model.ViewType
 import sc.gui.replaysEnabled
 import sc.gui.util.browse
@@ -66,7 +67,7 @@ class AppView: View("Software-Challenge Germany") {
                 item("Bedienhilfe", "Shortcut+H").action {
                     alert(Alert.AlertType.INFORMATION,
                         header = "Bedienhilfe",
-                        content = guide,
+                        content = guideBlokus,
                         title = "Hilfe")
                 }
                 item("↗ Spielregeln", "Shortcut+S").action {

@@ -40,7 +40,7 @@ class ScoreBinding(private val game: GameModel): StringBinding() {
     
     override fun computeValue(): String =
         if(game.gameStarted.value)
-            "Runde ${(game.currentTurn.get() + 1) / 2} - " +
+            "Runde ${game.getCurrentRound()} - " +
             game.gameState.value?.run {
                 Team.values().sortedBy { it != startTeam }.joinToString(" : ") {
                     getPointsForTeam(it).first().toString()
@@ -97,7 +97,7 @@ class StatusView: View() {
                     state?.teamStats(team)?.takeUnless { it.isEmpty() }?.let { stats ->
                         stats.joinToString(
                             "\n",
-                            "${game.playerNames[team.index]} (${strings["color.${team.color}"]})\n"
+                            "${game.playerNames[team.index]} (${strings["color.${team.color}"]})\n" // FIXME change based on color
                         ) { stat ->
                             "${stat.label} ${stat.icon?.let { if(stat.value > 0) it.repeat(stat.value) else "-" } ?: stat.value}"
                         }
