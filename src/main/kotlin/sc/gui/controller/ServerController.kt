@@ -1,7 +1,7 @@
 package sc.gui.controller
 
 import ch.qos.logback.classic.LoggerContext
-import ch.qos.logback.core.util.StatusPrinter
+import ch.qos.logback.core.util.StatusPrinter2
 import org.slf4j.LoggerFactory
 import sc.server.Configuration
 import sc.server.Lobby
@@ -13,7 +13,7 @@ class ServerController : Controller() {
     fun startServer() {
         // output logback diagnostics to see if a logback.xml config was found
         val lc = LoggerFactory.getILoggerFactory() as LoggerContext
-        StatusPrinter.print(lc)
+        StatusPrinter2().print(lc)
 
         Configuration.loadServerProperties()
         Configuration.set(Configuration.SAVE_REPLAY, true)

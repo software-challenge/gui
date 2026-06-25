@@ -55,7 +55,7 @@ class ControlView: View() {
                 }
             }
             val prev = button {
-                if(logger.isTraceEnabled)
+                if(logger.isTraceEnabled())
                     hoverProperty().listenImmediately {
                         logger.trace { "$this: $padding on hover $it" }
                     }
@@ -86,7 +86,7 @@ class ControlView: View() {
                 )
             }
             button {
-                if(logger.isTraceEnabled)
+                if(logger.isTraceEnabled())
                     hoverProperty().listenImmediately {
                         logger.trace { "$this: $padding on hover $it" }
                     }

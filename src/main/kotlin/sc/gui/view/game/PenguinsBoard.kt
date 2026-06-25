@@ -53,7 +53,7 @@ class PenguinBoard: View() {
         size.bind(Bindings.min(widthProperty(), heightProperty().multiply(1.6)))
         anchorpane {
             this.paddingAll = AppStyle.spacing
-            val stateListener = ChangeListener<GameState?> { _, oldState, state ->
+            val stateListener = ChangeListener<GameState?> { _, oldState: GameState?, state ->
                 clearTargetHighlights()
                 if(state == null) {
                     //children.remove(BOARD_SIZE.toDouble().pow(2).toInt(), children.size)

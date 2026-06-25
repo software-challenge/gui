@@ -1,7 +1,7 @@
 ## <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></a> Grafischer Spieleserver der Software-Challenge Germany ![.github/workflows/gradle.yml](https://github.com/software-challenge/gui/workflows/.github/workflows/gradle.yml/badge.svg)
 
 Dies ist die Grafische Oberfläche für die Software-Challenge Germany,
-seit Saison 2020/21 in Kotlin TornadoFX aufbauend auf JavaFX.
+seit Saison 2020/21 in Kotlin TornadoFX, aufbauend auf JavaFX.
 
 Nutzerdokumentation: https://docs.software-challenge.de/server.html
 
@@ -23,7 +23,7 @@ wird der Server auf diesem Port Verbindungen von Spielern erwarten.
 ### Kollaboration
 
 Unsere Commit-Messages folgen dem Muster `type(scope): summary`
-(siehe [Karma Runner Konvention](http://karma-runner.github.io/6.2/dev/git-commit-msg.html)),
+(siehe [Karma Runner Konvention](http://karma-runner.github.io/6.4/dev/git-commit-msg.html)),
 wobei die gängigen Scopes in [.dev/scopes.txt](.dev/scopes.txt) definiert werden.
 Nach dem Klonen mit git sollte dazu der hook aktiviert werden:
 
@@ -31,7 +31,7 @@ Nach dem Klonen mit git sollte dazu der hook aktiviert werden:
 
 Um bei den Branches die Übersicht zu behalten,
 sollten diese ebenfalls nach der Konvention benannt werden,
-z. B. könnte ein Branch mit einem Release-Fix für Gradle `chore/gradle/release-fix` heißen
+z. B. könnte ein Branch mit einem Release-Fix für Gradle `build/gradle/release-fix` heißen
 und ein Branch, der ein neues Login-Feature zur GUI hinzufügt, `feat/gui-login`.
 
 Wenn die einzelnen Commits eines Pull Requests eigenständig funktionieren,
@@ -41,14 +41,3 @@ wobei der Titel des Pull Requests der Commit-Message entsprechen sollte.
 
 Detaillierte Informationen zu unserem Kollaborations-Stil
 findet ihr in der [Kull Konvention](https://kull.jfischer.org).
-
-### Java-Versionen und Abhängigkeiten
-
-Aktuell können die Backend-docs nur mit JDK 8 gebaut werden,
-dieses Projekt braucht jedoch für [tornadofx](https://github.com/edvin/tornadofx2)
-mindestens Java 11.
-Daher müssen die Releases separat gebaut werden.
-
-Tornadofx wird leider seit einigen Jahren nicht mehr entwickelt.
-Wir schauen gerade wie es da weitergeht.
-Eventuell ein eigener Fork.
