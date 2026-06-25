@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+
+## 2026 Game Blokus
+
 ### 26.1.0 Stable Release - 2026-04-02
 - Pin TornadoFX library version for consistent builds
 - Integrate Rule Fixes from Backend
