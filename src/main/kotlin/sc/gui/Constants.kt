@@ -26,7 +26,7 @@ val guideBlokus = """
         - A: Drehe Polymino gegen den Uhrzeigersinn
         - D: Drehe Polymino im Uhrzeigersinn
         - Scroll: Drehe Polymino im Uhrzeigersinn
-        - Strl, Rechtsklick: Spiegele Polymino
+        - Strg, Rechtsklick: Spiegele Polymino
         - Linksklick: Polymino setzen
         - Nicht setzbare Steine sind ausgegraut
         - Ein leuchtender Stein zeigt an, dass er an der Stelle gesetzt werden kann
