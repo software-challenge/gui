@@ -21,6 +21,20 @@ val guide = """
         - Durch ein erneutes Klicken auf die Figur kannst du sie wieder abwählen
     """.trimIndent()
 
+val guideBlokus = """
+        Bedienung von Blokus:
+        - A: Drehe Polymino gegen den Uhrzeigersinn
+        - D: Drehe Polymino im Uhrzeigersinn
+        - Scroll: Drehe Polymino im Uhrzeigersinn
+        - Strl, Rechtsklick: Spiegele Polymino
+        - Linksklick: Polymino setzen
+        - Nicht setzbare Steine sind ausgegraut
+        - Ein leuchtender Stein zeigt an, dass er an der Stelle gesetzt werden kann
+        - Ein schwarzer Stein zeigt an, dass ein Feld blockiert ist, auf dem der Stein liegen würde
+        - Ein blasser Stein zeigt an, dass der Zug nicht möglich ist
+        Viel Spaß!
+    """.trimIndent()
+
 val guideMq = """
         Bedienung von Mississippi Queen:
         - Das Label "S" an den Schiffen ist die aktuelle Geschwindigkeit

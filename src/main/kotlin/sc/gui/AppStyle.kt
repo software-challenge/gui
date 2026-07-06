@@ -44,6 +44,35 @@ class AppStyle: Stylesheet() {
         val statusLabel by cssclass()
         val plainLabel by cssclass()
         
+        // Blokus
+        private val red = c("#AA0100")
+        private val placeableRed = c("#FB0A12")
+        private val blue = c("#005784")
+        private val placeableBlue = c("#31A2F2")
+        private val green = c("#2B7200")
+        private val placeableGreen = c("#55E601")
+        private val yellow = c("#9E8900")
+        private val placeableYellow = c("#FEDE06")
+        
+        private val rounding = multi(box(8.percent))
+        val undeployedPiece by cssclass()
+        val fieldUnplaceable by cssclass()
+        val pieceUnselectable by cssclass()
+        val hoverColor by cssclass()
+        
+        val colorRED by cssclass()
+        val placeableRED by cssclass()
+        val borderRED by cssclass()
+        val colorBLUE by cssclass()
+        val placeableBLUE by cssclass()
+        val borderBLUE by cssclass()
+        val colorGREEN by cssclass()
+        val placeableGREEN by cssclass()
+        val borderGREEN by cssclass()
+        val colorYELLOW by cssclass()
+        val placeableYELLOW by cssclass()
+        val borderYELLOW by cssclass()
+        
         fun background() =
             StackPane(
                 Region().apply {
@@ -157,7 +186,101 @@ class AppStyle: Stylesheet() {
             prefWidth = 100.percent
         }
         
-        piranhasStyles()
+        blokusStyles()
+    }
+    
+    fun blokusStyles() {
+        background {
+            opacity = 0.7
+            backgroundColor += c("#EEEEEE")
+            // TODO do we need this?
+            //            backgroundImage += resources.url("/piranhas/water_b.png").toURI()
+            //            backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
+        }
+        val blokusPieces = listOf(
+            "mono", "domino",
+            "trio_i", "trio_l",
+            "tetro_i", "tetro_l", "tetro_o", "tetro_t", "tetro_z",
+            "pento_i", "pento_l", "pento_p", "pento_r", "pento_s", "pento_t", "pento_u", "pento_v", "pento_w", "pento_x", "pento_y", "pento_z"
+        )
+        (sc.plugin2027.Color.entries).forEach { playerColor ->
+            // All pieces from the blokus resources
+            blokusPieces.forEach { piece ->
+                ".${playerColor.toEnString()}_$piece" {
+                    image = resources.url("/blokus/${playerColor.toEnString()}/$piece.png").toURI()
+                }
+            }
+        }
+        listOf("red", "blue", "yellow", "green", "empty").forEach { color ->
+            run {
+                ".$color" {
+                    image = resources.url("/blokus/single/$color.png").toURI()
+                }
+            }
+        }
+        undeployedPiece {
+            borderRadius = rounding
+            backgroundRadius = rounding
+            borderWidth = multi(box(2.px))
+            and(hover) {
+                Color.DARKGRAY
+            }
+        }
+        fieldUnplaceable {
+            backgroundColor += Color.BLACK
+        }
+        pieceUnselectable {
+            opacity = 0.3
+        }
+        
+        colorRED {
+            backgroundColor += red
+        }
+        placeableRED {
+            backgroundColor += placeableRed
+        }
+        borderRED {
+            borderColor += box(red)
+        }
+        
+        colorBLUE {
+            backgroundColor += blue
+        }
+        placeableBLUE {
+            backgroundColor += placeableBlue
+        }
+        borderBLUE {
+            borderColor += box(blue)
+        }
+        
+        colorGREEN {
+            backgroundColor += green
+        }
+        placeableGREEN {
+            backgroundColor += placeableGreen
+        }
+        borderGREEN {
+            borderColor += box(green)
+        }
+        
+        colorYELLOW {
+            backgroundColor += yellow
+        }
+        placeableYELLOW {
+            backgroundColor += placeableYellow
+        }
+        borderYELLOW {
+            borderColor += box(yellow)
+        }
+        hoverColor {
+            backgroundColor += Color.BLACK
+            borderStyle += BorderStrokeStyle.SOLID
+            borderWidth += box(4.px)
+        }
+        ".grid" {
+            backgroundImage += resources.url("/blokus/grid.png").toURI()
+            backgroundSize += BackgroundSize(1.0, 1.0, true, true, false, false)
+        }
     }
     
     fun piranhasStyles() {
@@ -266,7 +389,7 @@ class AppStyle: Stylesheet() {
     fun ostseeschachStyles() {
         val colorBackground = c("#36d2ff")
         
-        Team.values().forEach { team ->
+        Team.entries.forEach { team ->
             ".${team.color}" {
                 val color = team.color
                 backgroundColor += c(color, 0.6).desaturate()

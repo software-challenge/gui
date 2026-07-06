@@ -36,7 +36,7 @@ fun View.selectReplay(onConfirm: () -> Unit = {}) {
 
 class GameFlowController: Controller() {
     private val logger = KotlinLogging.logger {}
-    
+
     private val gameModel: GameModel by inject()
     /** Whether to request a new Move when stepping forward. */
     private var stepController = true
@@ -47,16 +47,16 @@ class GameFlowController: Controller() {
         cycleCount = Animation.INDEFINITE
         rateProperty().bind(gameModel.stepSpeed)
     }
-    
+
     private val history = ArrayList<IGameState>()
     /** Used to control running Game - is null for completed Game/Replay. */
     var controller: IGameController? = null
-    
+
     init {
         subscribe<PauseGame> { event ->
             controller?.let {
                 it.pause(event.pause)
-                stepController = false
+                stepController = !event.pause
             } ?: fire(GamePausedEvent(event.pause))
             if(event.pause) {
                 stepInterval.pause()
@@ -110,7 +110,7 @@ class GameFlowController: Controller() {
             }
         }
     }
-    
+
     @Throws(ReplayLoaderException::class)
     fun loadReplay(loader: ReplayLoader) {
         if(history.isNotEmpty())
@@ -120,7 +120,7 @@ class GameFlowController: Controller() {
         logger.debug { "Loaded ${history.size} states from $loader" }
         if(history.isEmpty())
             throw ReplayLoaderException("Replay history from $loader is empty")
-        
+
         gameModel.availableTurns.set(history.last().turn)
         gameModel.gameResult.set(result.second)
         gameModel.playerNames.setAll(
@@ -129,7 +129,7 @@ class GameFlowController: Controller() {
                 ?.map { it.displayName }.orEmpty()
         )
         gameModel.gameState.set(history.first())
-        
+
         fire(GameReadyEvent())
     }
 }
