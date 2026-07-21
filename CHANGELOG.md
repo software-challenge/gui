@@ -6,7 +6,7 @@ See the [changelog of the backend](https://github.com/software-challenge/backend
 for details on our versioning scheme.
 
 
-## 2026 Game Blokus
+## 2027 Game Blokus
 
 ### 26.1.0 Stable Release - 2026-04-02
 - Pin TornadoFX library version for consistent builds
