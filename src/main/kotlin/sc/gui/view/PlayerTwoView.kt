@@ -6,6 +6,7 @@ import javafx.geometry.Pos
 import sc.api.plugins.Team
 import sc.gui.controller.BlokusController
 import sc.gui.model.GameModel
+import sc.gui.view.game.SkipMoveButton
 import sc.plugin2027.Color
 import tornadofx.*
 
@@ -29,6 +30,7 @@ class PlayerTwoView(gameController: BlokusController, gridSize: DoubleBinding): 
             gameController.validPieces.getValue(Color.GREEN),
             gridSize
         ))
+        add(SkipMoveButton(gameController, gridSize, Team.TWO))
         // Run this later since scene is not ready yet
         runLater {
             this.padding = Insets(0.0, 0.0, 0.0, 0.0)
