@@ -7,6 +7,7 @@ import javafx.beans.property.Property
 import javafx.beans.value.ObservableValue
 import org.slf4j.LoggerFactory
 import sc.api.plugins.Coordinates
+import sc.api.plugins.IMove
 import sc.api.plugins.Team
 import sc.gui.GameOverEvent
 import sc.gui.GameReadyEvent
@@ -253,6 +254,12 @@ class BlokusController : Controller() {
     
     fun scroll(deltaY: Double) {
         currentPiece.get().scroll(deltaY)
+    }
+
+    fun sendHumanMove(move: IMove) {
+        fire(HumanMoveAction(move.also {
+            logger.debug("Human Move: {}", it)
+        }))
     }
     
     companion object {
