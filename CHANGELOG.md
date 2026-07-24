@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0),
 See the [changelog of the backend](https://github.com/software-challenge/backend/blob/main/CHANGELOG.md)
 for details on our versioning scheme.
 
+### 27.0.5 Advanced Player update - 2026-07-24
+
+### 27.0.5 High Res GUI - 2026-07-21
 
 ## 2027 Game Blokus
 
