@@ -28,8 +28,9 @@ jobs:
     - name: Upload jar as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: software-challenge-gui-${{ github.sha }}-${{ matrix.os }}
+        name: software-challenge-gui-${{ github.sha }}-jdk${{ matrix.jdk }}-${{ matrix.os }}
         path: build/*.jar
+
   build-arm:
     runs-on: ${{ matrix.os }}
     if: startsWith(github.ref, 'refs/tags/')
@@ -55,7 +56,7 @@ jobs:
     - name: Upload jar as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: software-challenge-gui-${{ github.sha }}-j${{ matrix.jdk }}-${{ matrix.os }}
+        name: software-challenge-gui-${{ github.sha }}-jdk${{ matrix.jdk }}-${{ matrix.os }}
         path: build/*.jar
   release:
     needs: [build, build-arm]
@@ -64,7 +65,7 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4 # https://github.com/actions/download-artifact
       with:
-        pattern: software-challenge-gui-${{ github.sha }}-*
+        pattern: software-challenge-gui-${{ github.sha }}-jdk11-*
         path: build
         merge-multiple: true
     - name: Release ${{ github.ref }}
