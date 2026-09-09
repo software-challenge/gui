@@ -41,7 +41,7 @@ val Color.borderStyle
     }
 
 class BlokusBoard: GameBoard<GameState>() {
-    private val gameController: BlokusController by inject()
+    val gameController: BlokusController by inject()
     val controller: BlokusBoardController by inject()
     
     private val undeployedPieces = EnumMap(
@@ -56,11 +56,11 @@ class BlokusBoard: GameBoard<GameState>() {
     
     private val leftPane = vbox {
         alignment = Pos.TOP_LEFT
-        replaceChildren(*undeployedPieces.filterKeys { it.team == Team.ONE }.values.toTypedArray())
+        add(PlayerOneView(gameController, gridSize))
     }
     private val rightPane = vbox {
         alignment = Pos.TOP_RIGHT
-        replaceChildren(*undeployedPieces.filterKeys { it.team == Team.TWO }.values.toTypedArray())
+        add(PlayerTwoView(gameController, gridSize))
     }
     
     /**
@@ -78,7 +78,8 @@ class BlokusBoard: GameBoard<GameState>() {
      */
     val grid: GridPane = GridPane().addClass("grid").apply {
         squareSize.listenImmediately { size ->
-            val cellSize = (size.toDouble() / Constants.BOARD_LENGTH).toInt().toDouble()
+            // +2 is the magic number that makes everything fit.
+            val cellSize = (size.toDouble() / (Constants.BOARD_LENGTH + 2)).toInt().toDouble()
             columnConstraints.clear()
             rowConstraints.clear()
             repeat(Constants.BOARD_LENGTH) {
