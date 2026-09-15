@@ -163,8 +163,8 @@ class AppStyle: Stylesheet() {
     
     fun connect4Styles() {
         background {
-            opacity = 0.7
-            backgroundColor += c("#88DAF7")
+            opacity = 1.0
+            backgroundColor += c("#8affff")
             backgroundImage += resources.url("/piranhas/water_b.png").toURI()
             backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
         }

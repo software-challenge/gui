@@ -71,7 +71,7 @@ class Connect4Board: GameBoard<GameState>() {
                 
                 if(winningCoords.contains(pos)) {
                     piece = PieceImage(gridSize, field.team.let { team -> "${team}-chip-winning".lowercase() })
-                    piece.effect = Glow(1.0)
+                    piece.effect = Glow(0.5)
                 } else {
                     piece = PieceImage(gridSize, field.team.let { team -> "${team}-chip".lowercase() })
                 }
