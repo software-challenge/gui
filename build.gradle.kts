@@ -1,6 +1,7 @@
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.kotlin.dsl.support.serviceOf
 import java.util.Properties
 
 val minJavaVersion = JavaVersion.VERSION_11
@@ -38,6 +39,8 @@ val versionFromBackend by lazy {
 
 group = "software-challenge"
 version = try {
+    // This uses the version from "git describe --tags" as the version.
+    // If it does not exist of the command fails, it falls back to the backend version.
     Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags"))
         .inputStream.reader().readText().trim().ifEmpty { null }
 } catch(e: java.io.IOException) {
@@ -79,6 +82,7 @@ dependencies {
     implementation("software-challenge", "plugin2024")
     implementation("software-challenge", "plugin2025")
     implementation("software-challenge", "plugin2026")
+    implementation("software-challenge", "plugin2027")
     implementation("software-challenge", "plugin2098")
     
     if(debug) {
@@ -159,14 +163,18 @@ tasks {
         dependsOn(clean, check)
         group = "distribution"
         description = "Create and push a tagged commit matching the backend version"
+        // Captured at configuration time so doLast never touches Task.project (config-cache safe)
+        val descProperty = providers.gradleProperty("m")
+        val releaseVersion = versionFromBackend
+        val execOps = serviceOf<ExecOperations>()
         doLast {
-            val desc = project.properties["m"]?.toString()
+            val desc = descProperty.orNull
                        ?: throw InvalidUserDataException("Das Argument -Pm=\"Beschreibung dieser Version\" wird benötigt")
-            
-            providers.exec { commandLine("git", "add", "CHANGELOG.md") }
-            providers.exec { commandLine("git", "commit", "-m", "release: v$versionFromBackend") }
-            providers.exec { commandLine("git", "tag", versionFromBackend, "-m", desc) }
-            providers.exec { commandLine("git", "push", "--follow-tags", "--recurse-submodules=on-demand") }
+
+            execOps.exec { commandLine("git", "add", "CHANGELOG.md") }
+            execOps.exec { commandLine("git", "commit", "-m", "release: v$releaseVersion") }
+            execOps.exec { commandLine("git", "tag", releaseVersion, "-m", desc) }
+            execOps.exec { commandLine("git", "push", "--follow-tags", "--recurse-submodules=on-demand") }
         }
     }
 }

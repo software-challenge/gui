@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture
 import kotlin.random.Random
 
 data class StartGame(val settings: List<TeamSettings>): FXEvent()
-class HumanMoveRequest: FXEvent()
+class HumanMoveRequest(val gameState: IGameState): FXEvent()
 /** Human making a move.
  * @param move the move */
 data class HumanMoveAction(val move: IMove): FXEvent()
@@ -54,7 +54,7 @@ class ClientController: Controller() {
         subscribe<HumanMoveAction>(1) {
             future.complete(it.move)
         }
-        fire(HumanMoveRequest())
+        fire(HumanMoveRequest(state))
         return future
     }
     

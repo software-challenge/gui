@@ -136,7 +136,7 @@ class ControlView: View() {
                 min = 0.0,
                 max = 99.0,
                 amountToStepBy = 2.0,
-                editable = true,
+                editable = false,
                 property = gameModel.stepSpeed,
                 enableScroll = true,
             ) {
