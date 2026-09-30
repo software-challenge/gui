@@ -1,0 +1,114 @@
+package sc.gui.view.game
+
+import javafx.geometry.Pos
+import javafx.scene.Node
+import javafx.scene.effect.Glow
+import javafx.scene.input.KeyEvent
+import javafx.scene.layout.GridPane
+import sc.api.plugins.Coordinates
+import sc.gui.view.GameBoard
+import sc.gui.view.PieceImage
+import sc.plugin2098.FieldState
+import sc.plugin2098.GameState
+import sc.plugin2098.util.Connect4Constants
+import sc.plugin2098.util.GameRuleLogic
+import tornadofx.*
+
+class Connect4Board: GameBoard<GameState>() {
+    
+    private val gridSize
+        get() = squareSize.div(Connect4Constants.BOARD_WIDTH) // "Length of the smaller side of the window."
+    
+    val grid: GridPane = GridPane().addClass("grid")
+    
+    override val root = hbox {
+        this.alignment = Pos.BOTTOM_CENTER
+        vbox {
+            this.alignment = Pos.CENTER
+            add(grid)
+        }
+    }
+    
+    var selected: Node? = null
+    val hovers = ArrayList<Node>()
+    
+    fun addToGrid(child: Node, coordinates: Coordinates) {
+        grid.add(child, coordinates.x, Connect4Constants.BOARD_HEIGHT - 1 - coordinates.y)
+    }
+    
+    override fun onNewState(oldState: GameState?, state: GameState?) {
+        selected = grid
+        logger.debug { "New State: $state" }
+        grid.children.clear()
+        hovers.clear()
+        selected = null
+        
+        // this ensures proper sizing of the board
+        (0 until Connect4Constants.BOARD_WIDTH).forEach { y ->
+            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.0 }, y, 0)
+        }
+        
+        (0 until Connect4Constants.BOARD_HEIGHT).forEach { y ->
+            grid.add(PieceImage(gridSize, "cell").apply { opacity = 0.0 }, 0, y)
+        }
+        
+        state?.let { state ->
+         
+            var winningCoords: List<Coordinates> = ArrayList()
+            
+            state.isOver?.let { isOver ->
+                if(isOver && state.lastMove != null) {
+                    winningCoords = GameRuleLogic.get4Connected(state.board, state.otherTeam, state.lastMove!!.position)
+                    println(winningCoords.size)
+                }
+            }
+         
+            state.board.forEach { (pos: Coordinates, field: FieldState) ->
+                if(field.team == null) {
+                    return@forEach
+                }
+                val piece: PieceImage
+                
+                if(winningCoords.contains(pos)) {
+                    piece = PieceImage(gridSize, field.team.let { team -> "${team}-chip-winning".lowercase() })
+                    piece.effect = Glow(0.5)
+                } else {
+                    piece = PieceImage(gridSize, field.team.let { team -> "${team}-chip".lowercase() })
+                }
+                
+                addToGrid(piece, pos)
+            }
+        }
+    }
+    
+    override fun handleKeyPress(state: GameState, keyEvent: KeyEvent): Boolean {
+        
+        var x = keyEvent.text.toIntOrNull() ?: return false
+        x -= 1
+        
+        state.getSensibleMoves().forEach { move ->
+            if(move.position.x == x) {
+                sendHumanMove(move)
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    override fun renderHumanControls(state: GameState) {
+        state.getSensibleMoves().forEach { move ->
+            
+            val piece = PieceImage(gridSize, "${state.currentTeam}-chip".lowercase())
+            
+            piece.opacity = 0.5
+            //piece.effect = Glow(1.0)
+            
+            piece.onLeftClick {
+                sendHumanMove(move)
+            }
+            
+            addToGrid(piece, move.position)
+        }
+    }
+}

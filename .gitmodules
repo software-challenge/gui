@@ -2,6 +2,7 @@
 	path = backend
 	url = https://github.com/software-challenge/backend
 	shallow = true
+	branch = plugin/4-gewinnt
 [submodule ".idea"]
 	path = .idea
 	url = https://github.com/software-challenge/idea-config

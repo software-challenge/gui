@@ -11,6 +11,7 @@ import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
 import sc.api.plugins.Team
 import sc.gui.model.AppModel
+import sc.plugin2098.util.Connect4Constants
 import tornadofx.*
 
 class AppStyle: Stylesheet() {
@@ -186,7 +187,35 @@ class AppStyle: Stylesheet() {
             prefWidth = 100.percent
         }
         
-        blokusStyles()
+        connect4Styles()
+    }
+    
+    fun connect4Styles() {
+        background {
+            opacity = 1.0
+            backgroundColor += c("#8affff")
+            backgroundImage += resources.url("/piranhas/water_b.png").toURI()
+            backgroundRepeat += BackgroundRepeat.REPEAT to BackgroundRepeat.REPEAT
+        }
+        
+        (1..3).forEach { size ->
+            Team.entries.forEach { team ->
+                ".${team}_${size}" {
+                    image = resources.url("/piranhas/${team.color}_${(96 + size).toChar()}.png")
+                        .toURI()
+                }
+            }
+        }
+        
+        ".one-chip" { image = resources.url("/connect4/chip-rot.png").toURI() }
+        ".two-chip" { image = resources.url("/connect4/chip-gelb.png").toURI() }
+        ".one-chip-winning" { image = resources.url("/connect4/chip-rot-winning.png").toURI() }
+        ".two-chip-winning" { image = resources.url("/connect4/chip-gelb-winning.png").toURI() }
+        ".cell" { image = resources.url("/connect4/cell-debug.png").toURI() }
+        ".grid" {
+            backgroundImage += resources.url("/connect4/board.png").toURI()
+            backgroundSize += BackgroundSize(1.0, 1.0, true, true, false, false)
+        }
     }
     
     fun blokusStyles() {
