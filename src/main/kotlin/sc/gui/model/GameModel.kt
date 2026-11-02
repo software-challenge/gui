@@ -53,8 +53,10 @@ class GameModel: ViewModel() {
             { value > 0 || isHumanTurn.value || gameOver.value }
     
     init {
-        subscribe<HumanMoveRequest> {
+        subscribe<HumanMoveRequest> { event ->
             runLater {
+                // Display the requested state before enabling human controls.
+                gameState.set(event.gameState)
                 isHumanTurn.set(true)
             }
             fire(PauseGame(false))
